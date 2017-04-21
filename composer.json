@@ -1,0 +1,25 @@
+{
+  "name": "locphp/xcs",
+  "description": "PHP Web Framework",
+  "keywords": ["framework","php", "xcs"],
+  "homepage": "https://github.com/locphp/xcs",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "ktang",
+      "email": "hellophp@qq.com",
+      "homepage": "https://github.com/locphp"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "monolog/monolog": "^1.17"
+  },
+  "suggest": {
+    "monolog/monolog": "Allows more advanced logging of the application flow"
+  },
+  "autoload": {
+    "psr-4": {"Xcs\\": "src"},
+    "files": ["src/constant.php", "src/common.php", "src/utils.php"]
+  }
+}
