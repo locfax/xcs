@@ -46,7 +46,7 @@ class App {
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
-
+        self::rootnamespace('\\', PSROOT);
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
             if (error_reporting() & $errno) {
                 throw new \ErrorException($error, $errno, $errno, $file, $line);
@@ -136,7 +136,7 @@ class App {
             return true;
         } while (false);
         //控制器加载失败
-        if (App::isAjax(true)) {
+        if (self::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
                 'errmsg' => "The controller '" . $controllerName . '\' is not exists!',
@@ -253,6 +253,27 @@ class App {
             $_GET[$req[$i]] = $req[$i + 1];
             $i++;
         }
+    }
+
+    /**
+     * @param $namespace
+     * @param $path
+     */
+    public static function rootnamespace($namespace, $path) {
+        $namespace = trim($namespace, '\\');
+        $path = rtrim($path, '/');
+        $loader = function ($classname) use ($namespace, $path) {
+            if ($namespace && stripos($classname, $namespace) !== 0) {
+                return;
+            }
+            $file = trim(substr($classname, strlen($namespace)), '\\');
+            $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
+            if (!is_file($file)) {
+                throw new Exception\Exception($file . '不存在');
+            }
+            require $file;
+        };
+        spl_autoload_register($loader);
     }
 
     /**

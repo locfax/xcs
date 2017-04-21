@@ -86,7 +86,7 @@ function gpc_val($val, $runfunc, $emptyrun) {
         $funcs = explode('|', $runfunc);
         foreach ($funcs as $run) {
             if ('xss' == $run) {
-                $val = \helper\Xss::getInstance()->clean($val);
+                $val = \Xcs\Helper\Xss::getInstance()->clean($val);
             } else {
                 $val = $run($val);
             }
@@ -94,7 +94,7 @@ function gpc_val($val, $runfunc, $emptyrun) {
         return $val;
     }
     if ('xss' == $runfunc) {
-        return \helper\Xss::getInstance()->clean($val);
+        return \Xcs\Helper\Xss::getInstance()->clean($val);
     }
     if ($runfunc) {
         return $runfunc($val);
@@ -104,7 +104,7 @@ function gpc_val($val, $runfunc, $emptyrun) {
 
 //keypath  path1/path2/path3
 function getini($key) {
-    $_CFG = App::mergeVars('cfg');
+    $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
     switch (count($k)) {
         case 1:
@@ -133,19 +133,19 @@ function modeldata($cachekey, $reset = false) {
         return false;
     }
     if (!$reset) {
-        $data = \Context::cache('get', $cachekey);
+        $data = \Xcs\Context::cache('get', $cachekey);
         if (is_null($data)) {
-            $dataclass = '\\model\\data\\' . $cachekey;
+            $dataclass = '\\Model\\Data\\' . $cachekey;
             $data = $dataclass::getInstance()->getdata();
-            \Context::cache('set', $cachekey, output_json($data));
+            \Xcs\Context::cache('set', $cachekey, output_json($data));
         } else {
             $data = json_decode($data, true);
         }
         return $data;
     } else {//重置缓存
-        $dataclass = '\\model\\data\\' . $cachekey;
+        $dataclass = '\\Model\\Data\\' . $cachekey;
         $data = $dataclass::getInstance()->getdata();
-        \Context::cache('set', $cachekey, output_json($data));
+        \Xcs\Context::cache('set', $cachekey, output_json($data));
     }
 }
 
@@ -156,7 +156,7 @@ function loadcache($cachename, $reset = false) {
     }
     $data = sysdata($cachename, $reset);
     if ('settings' === $cachename && $data) {
-        App::mergeVars('cfg', array('settings' => json_decode($data, true)));
+        \Xcs\App::mergeVars('cfg', array('settings' => json_decode($data, true)));
         return true;
     }
     return json_decode($data, true);
@@ -175,7 +175,7 @@ function sysdata($cachename, $reset = false) {
         $lost = $cachename; //强制设置为没取到
         $data = '[]';
     } else {
-        $data = \Context::cache('get', 'sys_' . $cachename);
+        $data = \Xcs\Context::cache('get', 'sys_' . $cachename);
         if (!$data) {
             $lost = $cachename;  //未取到数据
         }
@@ -183,7 +183,7 @@ function sysdata($cachename, $reset = false) {
     if (is_null($lost)) {
         return $data; //取到全部数据 则返回
     }
-    return \model\cache\SysData::lost($lost, $reset);
+    return \Model\Cache\SysData::lost($lost, $reset);
 }
 
 /**
@@ -195,7 +195,7 @@ function sysdata($cachename, $reset = false) {
  */
 function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file) {
     $tpldir = getini('data/tpldir');
-    if(is_file($tpldir . $subtpl)) {
+    if (is_file($tpldir . $subtpl)) {
         $tpltime = filemtime($tpldir . $subtpl);
     } else {
         $tpltime = 0;
@@ -203,7 +203,8 @@ function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file) {
     if ($tpltime < intval($cachetime)) {
         return;
     }
-    \base\Template::getInstance()->parse(getini('data/_view'), $tpldir, $maintpl, $cachefile, $file);
+    $template = new \Xcs\Template();
+    $template->parse(getini('data/_view'), $tpldir, $maintpl, $cachefile, $file);
 }
 
 /**
@@ -231,7 +232,7 @@ function template($file, $gettplfile = false) {
 function url($udi) {
     //$_path = getini('site/path');
     $_udis = explode('/', $udi);
-    $url = '?' . App::_dCTL . '=' . $_udis[0] . '&' . App::_dACT . '=' . $_udis[1];
+    $url = '?' . \Xcs\App::_dCTL . '=' . $_udis[0] . '&' . \Xcs\App::_dACT . '=' . $_udis[1];
     for ($i = 2; $i < count($_udis); $i++) {
         $url .= '&' . $_udis[$i] . '=' . $_udis[$i + 1];
         $i++;
