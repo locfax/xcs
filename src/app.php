@@ -1,5 +1,7 @@
 <?php
 
+namespace Xcs;
+
 class App {
 
     const _dCTL = 'c';
@@ -8,39 +10,6 @@ class App {
     const _actionPrefix = 'act_';
 
     static $routes = null;
-
-    /**
-     * @param $class
-     * @throws Exception
-     */
-    public static function autoLoader($class) {
-        //var_dump($class);
-        $class = trim($class, '\\');
-        if (in_array($class, array('Hook', 'Rbac', 'Context', 'User', 'Cacher'))) {
-            $_class = 'base/' . strtolower($class) . '.class';
-            $filename = BASEPATH . $_class . '.php';
-        } else {
-            $aclass = explode('\\', $class);
-            if (in_array($aclass[0], array('base', 'db', 'cache', 'helper', 'event', 'traits'))) {
-                //source目录里  vendor使用getVendor  loadVendor加载
-                $_class = strtolower(implode('/', $aclass)) . '.class';
-                $filename = BASEPATH . $_class . '.php';
-            } else {
-                //app目录里的 自定义类
-                if ($aclass[0] == 'vendor') {
-                    $_class = strtolower(implode('/', $aclass));
-                    $filename = APPPATH . $_class . '.php';
-                } else {
-                    $_class = strtolower(implode('/', $aclass)) . '.class';
-                    $filename = APPPATH . $_class . '.php';
-                }
-            }
-        }
-        if (!is_file($filename)) {
-            throw new \event\Exception($filename);
-        }
-        require $filename;
-    }
 
     /**
      * @param array $preload
@@ -67,19 +36,17 @@ class App {
         $preloadfile = DATAPATH . 'preload/runtime_' . APPKEY . '_files.php';
         if (!is_file($preloadfile) || $refresh) {
             $dfiles = array(
-                APPPATH . 'config/base.inc.php', //全局配置
-                APPPATH . 'config/' . APPKEY . '.dsn.php', //数据库配置
-                APPPATH . 'config/' . APPKEY . '.inc.php', //应用配置
-                BASEPATH . 'common.php', //通用函数
-                BASEPATH . 'utils.php', //功能函数
-                BASEPATH . 'dblink.php', //DB
-                BASEPATH . 'controller.php', //控制器
+                PSROOT . '/config/base.inc.php', //全局配置
+                PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
+                PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
+                BASEPATH . 'common.php',
+                BASEPATH . 'utils.php'
             );
             $files = array_merge($dfiles, $preload);
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
-        spl_autoload_register('self::autoLoader');
+
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
             if (error_reporting() & $errno) {
                 throw new \ErrorException($error, $errno, $errno, $file, $line);
@@ -116,7 +83,6 @@ class App {
     /**
      * @param string $uri
      * @return bool
-     * @throws Exception
      */
     public static function dispatching($uri) {
         if (defined('ROUTE') && ROUTE) {
@@ -128,7 +94,7 @@ class App {
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $_controllerName);
         $actionName = preg_replace('/[^a-z0-9_]+/i', '', $_actionName);
         if (defined('AUTH') && AUTH) {
-            $ret = \Rbac::check($controllerName, $actionName, AUTH);
+            $ret = Rbac::check($controllerName, $actionName, AUTH);
             if (!$ret) {
                 $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
                 return self::errACL($args);
@@ -144,7 +110,7 @@ class App {
      * @param $controllerName
      * @param $actionName
      * @return bool
-     * @throws Exception
+     * @throws Exception\Exception
      */
     public static function executeAction($controllerName, $actionName) {
         $controllerName = ucfirst($controllerName);
@@ -162,9 +128,9 @@ class App {
             try {
                 call_user_func(array($controller, $actionMethod));
             } catch (\Exception $exception) { //普通异常
-                throw new \event\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             } catch (\Throwable $exception) { //PHP7
-                throw new \event\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             }
             $controller = null;
             return true;
@@ -258,7 +224,7 @@ class App {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
         if (!self::$routes) {
-            self::$routes = \Context::config('route');
+            self::$routes = Context::config('route');
         }
         foreach (self::$routes as $key => $val) {
             $key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);

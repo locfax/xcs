@@ -1,5 +1,7 @@
 <?php
 
+namespace Xcs;
+
 class Controller {
 
     //用户信息
@@ -28,7 +30,7 @@ class Controller {
 
     public function __call($name, $arguments) {
         //动作不存在
-        if (\App::isAjax(true)) {
+        if (App::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
                 'errmsg' => 'Action ' . $name . '不存在!',
@@ -73,12 +75,12 @@ class Controller {
         if ($this->login_user) {
             return $this->login_user;
         }
-        $this->login_user = \User::getUser();
+        $this->login_user = User::getUser();
         return $this->login_user;
     }
 
     final function checkacl($controllerName, $actionName, $auth = AUTH) {
-        return \Rbac::check($controllerName, $actionName, $auth);
+        return Rbac::check($controllerName, $actionName, $auth);
     }
 
 }

@@ -20,6 +20,6 @@
   },
   "autoload": {
     "psr-4": {"Xcs\\": "src"},
-    "files": ["src/constant.php", "src/common.php", "src/utils.php"]
+    "files": ["src/constant.php"]
   }
 }

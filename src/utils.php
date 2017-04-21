@@ -295,7 +295,7 @@ EOT;
         } else {
             header("Location: {$url}");
         }
-        return;
+        return null;
     }
 
     $out = '';

@@ -1,5 +1,7 @@
 <?php
 
+namespace Xcs;
+
 class Restful extends Controller {
 
     // 当前请求类型

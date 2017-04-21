@@ -1,9 +1,9 @@
 <?php
 
-define('BASEPATH', PSROOT . '/source/'); //框架路径
+define('BASEPATH', PSROOT . '/vendor/locphp/xcs/src/');
 define('APPPATH', PSROOT . '/app/'); //app controller应用路径
 define('DATAPATH', PSROOT . '/gdata/'); //全局数据路径
-define('LIBPATH', APPPATH . 'library/'); //module路径
+define('LIBPATH', PSROOT . '/library/'); //module路径
 
 define('SITEHOST', filter_input(INPUT_SERVER, 'HTTP_HOST')); //网站主机
 $scriptname = filter_input(INPUT_SERVER, 'SCRIPT_NAME');
