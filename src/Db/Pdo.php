@@ -458,7 +458,7 @@ class Pdo {
         if ($this->_config['rundev']) {
             $this->close();
             $message = mb_convert_encoding($message, 'utf-8', 'gbk');
-            throw new \Xcs\Exception\Exception($message, intval($code));
+            throw new \Exception($message, intval($code));
         }
         return false;
     }

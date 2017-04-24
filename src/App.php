@@ -127,9 +127,9 @@ class App {
             }
             try {
                 call_user_func(array($controller, $actionMethod));
-            } catch (\Exception $exception) { //普通异常
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
-            } catch (\Throwable $exception) { //PHP7
+            } catch (\ErrorException $exception) { //普通异常
+                throw new \Exception($exception->getMessage(), $exception->getCode());
+            } catch (\Exception $exception) {
                 throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             }
             $controller = null;
