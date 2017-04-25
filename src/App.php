@@ -46,7 +46,7 @@ class App {
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
-        self::rootnamespace('\\', PSROOT);
+        self::rootNamespace('\\', PSROOT);
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
             if (error_reporting() & $errno) {
                 throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
@@ -130,9 +130,9 @@ class App {
             } catch (Exception\ErrorException $exception) { //系统错误
                 $hexception = new Exception\Exception($exception->getMessage(), $exception->getCode());
                 $hexception->systemError($exception);
-            } catch (Exception\DbException $exception) { //普通异常
+            } catch (Exception\DbException $exception) { //db异常
                 throw new Exception\Exception($exception->getMessage(), $exception->getCode());
-            } catch (\Exception $exception) {
+            } catch (\Exception $exception) { //普通异常
                 throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             }
             $controller = null;
@@ -236,7 +236,7 @@ class App {
                     $val = preg_replace('#' . $key . '#', $val, $uri);
                 }
                 $req = explode('/', $val);
-                self::set_request($req);
+                self::setRequest($req);
                 break;
             }
         }
@@ -245,7 +245,7 @@ class App {
     /**
      * @param $req
      */
-    private static function set_request($req) {
+    private static function setRequest($req) {
         $_GET[self::_dCTL] = array_shift($req);
         $_GET[self::_dACT] = array_shift($req);
         $parmnum = count($req);
@@ -262,7 +262,7 @@ class App {
      * @param $namespace
      * @param $path
      */
-    public static function rootnamespace($namespace, $path) {
+    public static function rootNamespace($namespace, $path) {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
         $loader = function ($classname) use ($namespace, $path) {
