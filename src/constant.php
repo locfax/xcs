@@ -1,6 +1,6 @@
 <?php
 
-define('BASEPATH', PSROOT . '/vendor/locphp/xcs/src/');
+define('BASEPATH', dirname(__FILE__));
 define('APPPATH', PSROOT . '/app/'); //app controller应用路径
 define('DATAPATH', PSROOT . '/gdata/'); //全局数据路径
 define('LIBPATH', PSROOT . '/library/'); //module路径
