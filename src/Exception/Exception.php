@@ -4,29 +4,16 @@ namespace Xcs\Exception;
 
 class Exception extends \Exception {
 
-    public function __construct($message, $code = 0) {
+    public function __construct($message = '', $code = 0) {
         parent::__construct($message, $code);
-        $this->exceptionError($this);
+        $this->exceptionError($this, 'Exception');
         set_exception_handler(function () {
-        });
+        }); //不用自带的显示异常
     }
 
-    /*
-   public static function systemError($message = "", $show = true, $save = false, $halt = false) {
-
-       $showTrace = $this->debugBacktrace();
-       if ($save) {
-           $messageSave = '<b>' . $message . '</b>';
-           $this->writeErrorLog($messageSave);
-       }
-       if ($show) {
-           $this->showError('Error', $message, $showTrace);
-       }
-       if ($halt) {
-           exit;
-       }
-   }
-   */
+    public function systemError($exception) {
+        $this->exceptionError($exception, 'SystemError');
+    }
 
     /**
      * 代码执行过程回溯信息
@@ -76,9 +63,10 @@ class Exception extends \Exception {
      *
      * @static
      * @access public
+     * @param $type
      * @param mixed $exception
      */
-    public function exceptionError($exception) {
+    public function exceptionError($exception, $type = 'Exception') {
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
         krsort($trace);
@@ -117,7 +105,7 @@ class Exception extends \Exception {
             }
             $phpMsg[] = array('file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']);
         }
-        $this->showError('Exception', $errorMsg, $phpMsg);
+        $this->showError($type, $errorMsg, $phpMsg);
     }
 
     public function writeErrorLog($message) {

@@ -49,7 +49,7 @@ class App {
         self::rootnamespace('\\', PSROOT);
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
             if (error_reporting() & $errno) {
-                throw new \ErrorException($error, $errno, $errno, $file, $line);
+                throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
             }
             return true;
         });
@@ -127,8 +127,11 @@ class App {
             }
             try {
                 call_user_func(array($controller, $actionMethod));
-            } catch (\ErrorException $exception) { //普通异常
-                throw new \Exception($exception->getMessage(), $exception->getCode());
+            } catch (Exception\ErrorException $exception) { //系统错误
+                $hexception = new Exception\Exception($exception->getMessage(), $exception->getCode());
+                $hexception->systemError($exception);
+            } catch (Exception\DbException $exception) { //普通异常
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             } catch (\Exception $exception) {
                 throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             }
