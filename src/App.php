@@ -43,7 +43,14 @@ class App {
                 BASEPATH . 'utils.php'
             );
             $files = array_merge($dfiles, $preload);
-            $preloadfile = self::makeRunFile($files, $preloadfile);
+            if(defined('ERRD') && ERRD) {
+                foreach ($files as $file){
+                    include $file;
+                }
+                return true;
+            } else {
+                $preloadfile = self::makeRunFile($files, $preloadfile);
+            }
         }
         $preloadfile && require $preloadfile;
         self::rootNamespace('\\', PSROOT);
@@ -128,15 +135,27 @@ class App {
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            try {
-                call_user_func(array($controller, $actionMethod));
-            } catch (Exception\ErrorException $exception) { //系统错误
-                $hexception = new Exception\Exception($exception->getMessage(), $exception->getCode());
-                $hexception->systemError($exception);
-            } catch (Exception\DbException $exception) { //db异常
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
-            } catch (\Exception $exception) { //普通异常
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+            if(defined('ERRD') && ERRD) {
+                try {
+                    call_user_func(array($controller, $actionMethod));
+                } catch (Exception\ErrorException $exception) { //系统错误
+                    $hexception = new Exception\Exception($exception->getMessage(), $exception->getCode());
+                    $hexception->systemError($exception);
+                } catch (Exception\DbException $exception) { //db异常
+                    throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                } catch (\Exception $exception) { //普通异常
+                    throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                }
+            } else{
+                try {
+                    call_user_func(array($controller, $actionMethod));
+                } catch (Exception\ErrorException $exception) { //系统错误
+                    //静默
+                } catch (Exception\DbException $exception) { //db异常
+                    //静默
+                } catch (\Exception $exception) { //普通异常
+                    //静默
+                }
             }
             $controller = null;
             return true;
