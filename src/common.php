@@ -227,15 +227,17 @@ function template($file, $gettplfile = false) {
 
 /**
  * @param $udi
+ * @param $param
  * @return string
  */
-function url($udi) {
-    //$_path = getini('site/path');
-    $_udis = explode('/', $udi);
-    $url = '?' . \Xcs\App::_dCTL . '=' . $_udis[0] . '&' . \Xcs\App::_dACT . '=' . $_udis[1];
-    for ($i = 2; $i < count($_udis); $i++) {
-        $url .= '&' . $_udis[$i] . '=' . $_udis[$i + 1];
-        $i++;
+function url($udi, $param = array()) {
+    $_udi = explode('/', $udi);
+    $url = '?' . \Xcs\App::_dCTL . '=' . $_udi[0] . '&' . \Xcs\App::_dACT . '=' . $_udi[1];
+
+    if (!empty($param)) {
+        foreach ($param as $key => $val) {
+            $url .= '&' . $key . '=' . $val;
+        }
     }
     return SITEPATH . $url;
 }

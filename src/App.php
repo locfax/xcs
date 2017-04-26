@@ -66,15 +66,18 @@ class App {
             $data = php_strip_whitespace($filename);
             $content .= str_replace(array('<?php', '?>', '<php_', '_php>'), array('', '', '<?php', '?>'), $data);
         }
+        $filedir = dirname($runfile);
+        if (!is_dir($filedir)) {
+            mkdir($filedir, FILE_WRITE_MODE);
+        }
         if (!is_file($runfile)) {
             file_exists($runfile) && unlink($runfile); //可能是异常文件 删除
             touch($runfile) && chmod($runfile, 0777); //生成全读写空文件
         } elseif (!is_writable($runfile)) {
-            chmod($runfile, 0777); //全读写
+            chmod($runfile, FILE_WRITE_MODE); //全读写
         }
         $ret = file_put_contents($runfile, '<?php ' . $content, LOCK_EX);
         if ($ret) {
-            //chmod($runfile, 0644); //全只读
             return $runfile;
         }
         return false;

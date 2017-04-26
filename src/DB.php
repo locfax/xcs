@@ -19,7 +19,7 @@ class DB {
             $dbo = self::$used_dbo[$dsnkey];
             $dbo->connect($_dsn);
         } else {
-            $classname = '\\Xcs\\Db\\' . ucfirst($_dsn['driver']);
+            $classname = '\\Xcs\\Database\\' . ucfirst($_dsn['driver']);
             $dbo = new $classname;
             $dbo->connect($_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
@@ -29,7 +29,7 @@ class DB {
 
     /**
      * @param string $dsnid
-     * @return \Xcs\Db\Pdo|mixed
+     * @return \Xcs\Database\Pdo|mixed
      */
     public static function dbm($dsnid = 'portal') {
         $_dsn = Context::dsn($dsnid);
@@ -38,7 +38,7 @@ class DB {
             $dbo = self::$used_dbo[$dsnkey];
             $dbo->connect($_dsn);
         } else {
-            $dbo = new \Xcs\Db\Pdo();
+            $dbo = new \Xcs\Database\Pdo();
             $dbo->connect($_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
         }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Xcs\Db;
+namespace Xcs\Database;
 
 class Pdo {
 

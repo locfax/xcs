@@ -56,12 +56,12 @@ class Locker extends Singleton{
         if ('file' == getini('cache/cacher')) {
             return self::dblock($cmd, $name, $ttl);
         }
-        return \Context::cache($cmd, 'process_' . $name, time(), $ttl);
+        return \Xcs\Context::cache($cmd, 'process_' . $name, time(), $ttl);
     }
 
     private static function dblock($cmd, $name, $ttl = 0) {
         $ret = '';
-        $db = \Db::dbo(self::dsn);
+        $db = \Xcs\DB::dbo(self::dsn);
         switch ($cmd) {
             case 'set':
                 $ret = $db->replace('common_process', array('processid' => $name, 'expiry' => time() + $ttl));
