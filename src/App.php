@@ -28,11 +28,39 @@ class App {
         self::dispatching($uri);
     }
 
+    public static function runFile($preload, $refresh = false) {
+        if (defined('ERRD') && ERRD) {
+            //测试模式
+            $dfiles = array(
+                PSROOT . '/config/base.inc.php', //全局配置
+                PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
+                PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
+                BASEPATH . 'common.php',
+                BASEPATH . 'utils.php'
+            );
+            $files = array_merge($dfiles, $preload);
+            foreach ($files as $file) {
+                include $file;
+            }
+            self::rootNamespace('\\', PSROOT);
+            set_error_handler(function ($errno, $error, $file = null, $line = null) {
+                if (error_reporting() & $errno) {
+                    throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
+                }
+                return true;
+            });
+        } else {
+            //正式模式
+            self::_runFile($preload, $refresh);
+        }
+    }
+
     /**
      * @param $preload
      * @param bool $refresh
+     * @return bool
      */
-    public static function runFile($preload, $refresh = false) {
+    public static function _runFile($preload, $refresh = false) {
         $preloadfile = DATAPATH . 'preload/runtime_' . APPKEY . '_files.php';
         if (!is_file($preloadfile) || $refresh) {
             $dfiles = array(
@@ -43,14 +71,7 @@ class App {
                 BASEPATH . 'utils.php'
             );
             $files = array_merge($dfiles, $preload);
-            if(defined('ERRD') && ERRD) {
-                foreach ($files as $file){
-                    include $file;
-                }
-                return true;
-            } else {
-                $preloadfile = self::makeRunFile($files, $preloadfile);
-            }
+            $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
         self::rootNamespace('\\', PSROOT);
@@ -98,7 +119,6 @@ class App {
         if (defined('ROUTE') && ROUTE) {
             self::router($uri);
         }
-        //execute method
         $_controllerName = getgpc('g.' . self::_dCTL, getini('site/defaultController'), 'strtolower');
         $_actionName = getgpc('g.' . self::_dACT, getini('site/defaultAction'), 'strtolower');
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $_controllerName);
@@ -135,7 +155,7 @@ class App {
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            if(defined('ERRD') && ERRD) {
+            if (defined('ERRD') && ERRD) {
                 try {
                     call_user_func(array($controller, $actionMethod));
                 } catch (Exception\ErrorException $exception) { //系统错误
@@ -146,7 +166,7 @@ class App {
                 } catch (\Exception $exception) { //普通异常
                     throw new Exception\Exception($exception->getMessage(), $exception->getCode());
                 }
-            } else{
+            } else {
                 try {
                     call_user_func(array($controller, $actionMethod));
                 } catch (Exception\ErrorException $exception) { //系统错误
