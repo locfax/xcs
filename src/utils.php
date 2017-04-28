@@ -412,7 +412,7 @@ function dpost($table = false, $stop = false) {
         $str .= "\n)";
         dump($str);
     } else {
-        $tablecols = include getini('data/_fields') . 'to_' . $table . '.php';
+        $tablecols = include getini('data/_fields') . $table . '.php';
         $str = "\$post = array(\n";
         foreach ($tablecols as $col => $arr) {
             $str .= "'" . $col . "'=> \$" . $k . ",\n";

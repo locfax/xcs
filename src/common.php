@@ -122,33 +122,6 @@ function getini($key) {
     }
 }
 
-/**
- * 有模型的缓存  model/data/*.php
- * @param $cachekey
- * @param bool $reset
- * @return bool|mixed|string
- */
-function modeldata($cachekey, $reset = false) {
-    if (!$cachekey) {
-        return false;
-    }
-    if (!$reset) {
-        $data = \Xcs\Context::cache('get', $cachekey);
-        if (is_null($data)) {
-            $dataclass = '\\Model\\Data\\' . $cachekey;
-            $data = $dataclass::getInstance()->getdata();
-            \Xcs\Context::cache('set', $cachekey, output_json($data));
-        } else {
-            $data = json_decode($data, true);
-        }
-        return $data;
-    } else {//重置缓存
-        $dataclass = '\\Model\\Data\\' . $cachekey;
-        $data = $dataclass::getInstance()->getdata();
-        \Xcs\Context::cache('set', $cachekey, output_json($data));
-    }
-}
-
 //加载系统级别缓存
 function loadcache($cachename, $reset = false) {
     if (!$cachename) {
@@ -183,7 +156,7 @@ function sysdata($cachename, $reset = false) {
     if (is_null($lost)) {
         return $data; //取到全部数据 则返回
     }
-    return \Model\Cache\SysData::lost($lost, $reset);
+    return \Xcs\Cache\SysData::lost($lost, $reset);
 }
 
 /**
