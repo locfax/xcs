@@ -37,7 +37,7 @@ class Context extends Traits\Context {
         if (isset(self::$_configs[$key])) {
             return self::$_configs[$key];
         }
-        $file = APPPATH . '/config/' . strtolower($name) . '.' . $type . '.php';
+        $file = PSROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
             self::$_configs[$key] = array();
             return array();
