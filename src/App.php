@@ -269,7 +269,7 @@ class App {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
         if (!self::$routes) {
-            self::$routes = Context::config('route');
+            self::$routes = Context::config(APPKEY , 'route');
         }
         foreach (self::$routes as $key => $val) {
             $key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
