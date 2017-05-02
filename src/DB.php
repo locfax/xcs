@@ -171,7 +171,7 @@ class DB {
      * $field 无意义
      *
      * @param string $table
-     * @param string $condition
+     * @param mixed $condition
      * @param string $field
      * @return mixed
      */
@@ -309,10 +309,13 @@ class DB {
             $pageparm['length'] = $length;
             $pagebar = Helper\Pager::getInstance()->simplepage($pageparm);
         } else {
+            $pages = ceil($pageparm['totals'] / $length);
+            $nextpage = ($pages > $pageparm['curpage']) ? $pageparm['curpage'] + 1 : $pages;
             $pagebar = array(
                 'totals' => $pageparm['totals'],
-                'pages' => ceil($pageparm['totals'] / $length),
-                'curpage' => $pageparm['curpage']
+                'pagecount' => $pages,
+                'curpage' => $pageparm['curpage'],
+                'nextpage' => $nextpage
             );
         }
         return $pagebar;
