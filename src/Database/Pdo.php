@@ -396,9 +396,9 @@ class Pdo {
     }
 
     /**
-     * @param $tableName
-     * @param $field
-     * @param $condition
+     * @param string $tableName
+     * @param string $field
+     * @param mixed $condition
      * @return bool
      */
     public function result_first($tableName, $field, $condition) {

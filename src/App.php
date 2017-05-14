@@ -42,7 +42,7 @@ class App {
             foreach ($files as $file) {
                 include $file;
             }
-            self::rootNamespace('\\', PSROOT);
+            self::rootNamespace('\\', APPPATH);
             set_error_handler(function ($errno, $error, $file = null, $line = null) {
                 if (error_reporting() & $errno) {
                     throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
@@ -74,7 +74,7 @@ class App {
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
-        self::rootNamespace('\\', PSROOT);
+        self::rootNamespace('\\', APPPATH);
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
             if (error_reporting() & $errno) {
                 throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
@@ -253,7 +253,7 @@ class App {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         };
-        $controllerFilename = APPPATH . APPKEY . '/' . strtolower($controllerName) . '.php';
+        $controllerFilename = APPPATH . 'Controller/' . APPKEY . '/' . strtolower($controllerName) . '.php';
         return is_file($controllerFilename) && require $controllerFilename;
     }
 
@@ -269,7 +269,7 @@ class App {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
         if (!self::$routes) {
-            self::$routes = Context::config(APPKEY , 'route');
+            self::$routes = Context::config(APPKEY, 'route');
         }
         foreach (self::$routes as $key => $val) {
             $key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
