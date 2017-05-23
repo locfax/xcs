@@ -156,16 +156,7 @@ class App {
                 break;
             }
             if (defined('ERRD') && ERRD) {
-                try {
-                    call_user_func(array($controller, $actionMethod));
-                } catch (Exception\ErrorException $exception) { //系统错误
-                    $hexception = new Exception\Exception($exception->getMessage(), $exception->getCode());
-                    $hexception->systemError($exception);
-                } catch (Exception\DbException $exception) { //db异常
-                    throw new Exception\Exception($exception->getMessage(), $exception->getCode());
-                } catch (\Exception $exception) { //普通异常
-                    throw new Exception\Exception($exception->getMessage(), $exception->getCode());
-                }
+                call_user_func(array($controller, $actionMethod));
             } else {
                 try {
                     call_user_func(array($controller, $actionMethod));
