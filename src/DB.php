@@ -199,6 +199,7 @@ class DB {
 
     /**
      * @param $sql
+     * @param $args
      * @return mixed
      */
     public static function exec($sql, $args = null) {
