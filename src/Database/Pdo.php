@@ -315,6 +315,26 @@ class Pdo {
 
     /**
      * @param $sql
+     * @param null $args
+     * @return bool
+     */
+    public function exec($sql, $args = null) {
+        try {
+            if (is_null($args)) {
+                $ret = $this->_link->exec($sql);
+            } else {
+                list($_, $_args) = $this->field_param($args);
+                $sth = $this->_link->prepare($sql);
+                $ret = $sth->execute($_args);
+            }
+            return $ret;
+        } catch (\PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
+     * @param $sql
      * @param $args
      * @return bool
      */

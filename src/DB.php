@@ -201,9 +201,9 @@ class DB {
      * @param $sql
      * @return mixed
      */
-    public static function exec($sql) {
+    public static function exec($sql, $args = null) {
         $db = self::Using(self::$using_dbo_id);
-        return $db->exec($sql);
+        return $db->exec($sql, $args);
     }
 
     /**
