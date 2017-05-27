@@ -393,7 +393,7 @@ class Pdo {
 
     /**
      * @param $sql
-     * @param int $pageparm
+     * @param mixed $pageparm
      * @param int $length
      * @return array|bool
      */
@@ -472,7 +472,7 @@ class Pdo {
      * @param string $message
      * @param int $code
      * @return bool
-     * @throws \Xcs\Exception\Exception
+     * @throws \Xcs\Exception\DbException
      */
     private function _halt($message = '', $code = 0) {
         if ($this->_config['rundev']) {

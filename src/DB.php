@@ -315,6 +315,7 @@ class DB {
             $pagebar = array(
                 'totals' => $pageparm['totals'],
                 'pagecount' => $pages,
+                'prepage' => $pageparm['curpage'] - 1 > 0 ? $pageparm['curpage'] - 1 : 1,
                 'curpage' => $pageparm['curpage'],
                 'nextpage' => $nextpage
             );
