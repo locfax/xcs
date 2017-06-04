@@ -32,7 +32,7 @@ class Strs extends Singleton {
         if (is_array($string)) {
             return array_map('daddcslashes', $string);
         }
-        return addcslashes($string);
+        return addcslashes($string,'');
     }
 
     /*
