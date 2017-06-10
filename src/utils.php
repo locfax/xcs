@@ -15,7 +15,7 @@ function input_char($text) {
     if (empty($text)) {
         return $text;
     }
-    return htmlspecialchars(trim($text), ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
 /*
@@ -27,17 +27,6 @@ function input_text($text) {
         return $text;
     }
     return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
-}
-
-/*
- *
- * function input_char 的还原
- */
-function output_char($text) {
-    if (empty($text)) {
-        return $text;
-    }
-    return stripslashes(htmlspecialchars_decode($text, ENT_QUOTES));
 }
 
 /* qutotes get post cookie by \'
