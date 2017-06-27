@@ -123,6 +123,7 @@ class Template {
                 $this->language['inner'] = array();
             }
             $langvar = $this->language['inner'];
+            $var = '';
         } else {
             if (!isset($this->language['plugin'][$vars[0]])) {
                 $this->language['plugin'][$vars[0]] = array();
