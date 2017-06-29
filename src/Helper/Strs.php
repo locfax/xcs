@@ -2,14 +2,12 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
-
-class Strs extends Singleton {
+class Strs {
 
     /*
      * 随机字符
      */
-    function random($length = 4) {
+    public static function random($length = 4) {
         $reqid = '';
         $characters = array("A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "2", "3", "4", "5", "6", "7", "8", "9");
         shuffle($characters);
@@ -22,7 +20,7 @@ class Strs extends Singleton {
     /* qutotes get post cookie by \char(21)'
      * return string
      */
-    function daddcslashes($string) {
+    public static function daddcslashes($string) {
         if (empty($string)) {
             return $string;
         }
@@ -32,13 +30,13 @@ class Strs extends Singleton {
         if (is_array($string)) {
             return array_map('daddcslashes', $string);
         }
-        return addcslashes($string,'');
+        return addcslashes($string, '');
     }
 
     /*
      * it's paire to daddcslashes
      */
-    function dstripcslashes($value) {
+    public static function dstripcslashes($value) {
         if (empty($value)) {
             return $value;
         }
@@ -54,7 +52,7 @@ class Strs extends Singleton {
     /* cut string to set length
      * return string
      */
-    function cutstr($string, $length, $suffix = true, $charset = "utf-8", $start = 0, $dot = ' ...') {
+    public static function cutstr($string, $length, $suffix = true, $charset = "utf-8", $start = 0, $dot = ' ...') {
         $str = str_replace(array('&amp;', '&quot;', '&lt;', '&gt;'), array('&', '"', '<', '>'), $string);
         if (function_exists("mb_substr")) {
             $strcut = mb_substr($str, $start, $length, $charset);
@@ -75,7 +73,7 @@ class Strs extends Singleton {
         return $suffix ? $strcut . $dot : $strcut;
     }
 
-    function getstr($string, $length, $out_slashes = 0, $html = 0) {
+    public static function getstr($string, $length, $out_slashes = 0, $html = 0) {
         $string = stripslashes($string);
         if ($html < 0) {
             $string = preg_replace("/(\<[^\<]*\>|\r|\n|\s|\[.+?\])/is", ' ', $string);
@@ -83,7 +81,7 @@ class Strs extends Singleton {
             $string = htmlspecialchars($string, ENT_QUOTES);
         }
         if ($length) {
-            $string = $this->cutstr($string, $length, '');
+            $string = self::cutstr($string, $length, '');
         }
         if ($out_slashes) {
             $string = addslashes($string);
@@ -91,7 +89,7 @@ class Strs extends Singleton {
         return $string;
     }
 
-    function convert_encode($in, $out, $string) { // string change charset return string
+    public static function convert_encode($in, $out, $string) { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
             //return mb_convert_encoding($string, $out, $in);
@@ -102,16 +100,16 @@ class Strs extends Singleton {
         }
     }
 
-    function convert_char($in, $out, $string) {
+    public static function convert_char($in, $out, $string) {
         // string change charset return mix
         if (is_array($string)) {
             $ret = array();
             foreach ($string as $str) {
-                $ret[] = $this->convert_char($in, $out, $str);
+                $ret[] = self::convert_char($in, $out, $str);
             }
             return $ret;
         }
-        return $this->convert_encode($in, $out, $string);
+        return self::convert_encode($in, $out, $string);
     }
 
 }

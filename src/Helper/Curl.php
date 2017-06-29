@@ -2,11 +2,9 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
+class Curl {
 
-class Curl extends Singleton{
-
-    public function send($url, $data = '', $httphead = array(), $gzip = false, $charset = 'UTF-8', $rethead = false, $retsession = false) {
+    public static function send($url, $data = '', $httphead = array(), $gzip = false, $charset = 'UTF-8', $rethead = false, $retsession = false) {
         $ch = curl_init();
         if (!$ch) {
             return array('header' => '', 'body' => '', 'http_code' => 0, 'http_info' => '缺少curl模块或未启用');
@@ -49,7 +47,7 @@ class Curl extends Singleton{
         }
 
         if (!isset($httphead['Host'])) {
-            $url_parts = $this->raw_url($url);
+            $url_parts = self::raw_url($url);
             $httphead['Host'] = $url_parts['host'];
         }
         if (isset($httphead['Set-Cookie'])) {
@@ -119,16 +117,16 @@ class Curl extends Singleton{
 
         if (!empty($http_body)) {
             if ($gzip) {
-                $http_body = $this->gzip_decode($http_body, $gzip);
+                $http_body = self::gzip_decode($http_body, $gzip);
             }
             if ('UTF-8' != $charset) {
-                $http_body = $this->convert_encode(strtoupper($charset), 'UTF-8', $http_body);
+                $http_body = self::convert_encode(strtoupper($charset), 'UTF-8', $http_body);
             }
         }
         return array('header' => $http_header, 'body' => $http_body, 'http_code' => $http_code, 'http_info' => $http_info, 'reqheader' => $httpheads);
     }
 
-    private function convert_encode($in, $out, $string) { // string change charset return string
+    private static function convert_encode($in, $out, $string) { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
             //return mb_convert_encoding($string, $out, $in);
@@ -139,7 +137,7 @@ class Curl extends Singleton{
         }
     }
 
-    private function raw_url($_raw_url) {
+    private static function raw_url($_raw_url) {
         $raw_url = (string)$_raw_url;
         if (!strexists($raw_url, '://')) {
             $raw_url = 'http://' . $raw_url;
@@ -154,7 +152,7 @@ class Curl extends Singleton{
         return $retval;
     }
 
-    private function gzip_decode($data, $gzip = 'gzip') {
+    private static function gzip_decode($data, $gzip = 'gzip') {
         $unpacked = false;
         if ('gzip' == $gzip && function_exists('gzinflate')) {
             $flags = ord(substr($data, 3, 1));

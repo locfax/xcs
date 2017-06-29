@@ -300,7 +300,7 @@ class DB {
             );
             $pageparm = array_merge($defpageparm, $pageparm);
             $pageparm['length'] = $length;
-            $pagebar = Helper\Pager::getInstance()->pagebar($pageparm);
+            $pagebar = Helper\Pager::pagebar($pageparm);
         } elseif ('simplepage' == $pageparm['type']) {
             $defpageparm = array(
                 'curpage' => 1,
@@ -308,7 +308,7 @@ class DB {
             );
             $pageparm = array_merge($defpageparm, $pageparm);
             $pageparm['length'] = $length;
-            $pagebar = Helper\Pager::getInstance()->simplepage($pageparm);
+            $pagebar = Helper\Pager::simplepage($pageparm);
         } else {
             $pages = ceil($pageparm['totals'] / $length);
             $nextpage = ($pages > $pageparm['curpage']) ? $pageparm['curpage'] + 1 : $pages;

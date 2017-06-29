@@ -2,18 +2,16 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
+class File {
 
-class File extends Singleton{
-
-    public function mk_dir($path, $mode = DIR_WRITE_MODE) {
+    public static function mk_dir($path, $mode = DIR_WRITE_MODE) {
         if (!is_dir($path)) {
             return mkdir($path, $mode, true);
         }
         return true;
     }
 
-    public function rm_dir($path) {
+    public static function rm_dir($path) {
         $dir = realpath($path);
         if ('' == $dir || '/' == $dir || (3 == strlen($dir) && ':\\' == substr($dir, 1))) {
             return false;
@@ -25,7 +23,7 @@ class File extends Singleton{
                 }
                 $path = $dir . '/' . $file;
                 if (is_dir($path)) {
-                    if (!$this->rm_dir($path)) {
+                    if (!self::rm_dir($path)) {
                         return false;
                     }
                 } else {
@@ -40,7 +38,7 @@ class File extends Singleton{
         }
     }
 
-    function clear_dir($dir) {
+    public static function clear_dir($dir) {
         $d = dir($dir);
         while (($f = $d->read())) {
             if ($f == '.' || $f == '..') {
@@ -58,7 +56,7 @@ class File extends Singleton{
                 }
                 unlink($dir . '/' . $f);
             } elseif (is_dir($dir . '/' . $f)) {
-                $this->clear_dir($dir . '/' . $f);
+                self::clear_dir($dir . '/' . $f);
                 rmdir($dir . '/' . $f);
             }
         }
@@ -70,7 +68,7 @@ class File extends Singleton{
      * 遍历文件目录
      */
 
-    public function list_files($dir, $dirfile = false, $md5 = true, $root = true) {
+    public static function list_files($dir, $dirfile = false, $md5 = true, $root = true) {
         static $return = array();
         if ($root) {
             $return = array();
@@ -81,7 +79,7 @@ class File extends Singleton{
                 continue;
             }
             if (is_dir($dir . $target)) {
-                $this->list_files($dir . $target . '/', $dirfile, $md5, false);
+                self::list_files($dir . $target . '/', $dirfile, $md5, false);
             } else {
                 if ($md5) {
                     $file = $dirfile ? $dir . $target : $target;

@@ -5,9 +5,7 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
-
-class Pinyin extends Singleton{
+class Pinyin {
 
     public static function utf8_to($s, $isfirst = false) {
         return self::to_gb2312(self::utf8_to_gb2312($s), $isfirst);

@@ -2,9 +2,7 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
-
-class Locker extends Singleton{
+class Locker {
 
     const dsn = 'general';
 

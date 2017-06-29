@@ -2,9 +2,7 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
-
-class WaterMark extends Singleton {
+class WaterMark {
 
     /**
      * @param $groundImage
@@ -13,33 +11,33 @@ class WaterMark extends Singleton {
      * @param string $waterText
      * @param int $textFont
      * @param string $textColor
+     * @return mixed
      */
-    public function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000") {
+    public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000") {
         $isWaterImage = false;
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
 
         //读取水印文件
-        if (!empty($waterImage) && is_file($waterImage)) {
-            $isWaterImage = true;
-            $water_info = getimagesize($waterImage);
-            $water_w = $water_info[0]; //取得水印图片的宽
-            $water_h = $water_info[1]; //取得水印图片的高
+        if (empty($waterImage) || !is_file($waterImage)) {
+            return false;
+        }
+        $isWaterImage = true;
+        $water_info = getimagesize($waterImage);
+        $water_w = $water_info[0]; //取得水印图片的宽
+        $water_h = $water_info[1]; //取得水印图片的高
 
-            switch ($water_info[2]) { //取得水印图片的格式
-                case 1:
-                    $water_im = imagecreatefromgif($waterImage);
-                    break;
-                case 2:
-                    $water_im = imagecreatefromjpeg($waterImage);
-                    break;
-                case 3:
-                    $water_im = imagecreatefrompng($waterImage);
-                    break;
-                default:
-                    return $formatMsg;
-            }
-        } else {
-            return;
+        switch ($water_info[2]) { //取得水印图片的格式
+            case 1:
+                $water_im = imagecreatefromgif($waterImage);
+                break;
+            case 2:
+                $water_im = imagecreatefromjpeg($waterImage);
+                break;
+            case 3:
+                $water_im = imagecreatefrompng($waterImage);
+                break;
+            default:
+                return $formatMsg;
         }
 
         //读取背景图片

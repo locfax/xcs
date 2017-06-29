@@ -2,13 +2,11 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
-
-class Arrmap extends Singleton{
+class Arrmap {
 
     //php5.5+自带这个函数 只能处理二维
     //取出数组的指定列值
-    public function column(array $array, $column_key) {
+    public static function column(array $array, $column_key) {
         $retarr = array();
         foreach ($array as $arr) {
             if (is_array($column_key)) {
@@ -33,8 +31,8 @@ class Arrmap extends Singleton{
      *
      * @return array
      */
-    public function sort_field($arr, $sortField, $sortDirection = SORT_ASC) {
-        $this->sort_multi($arr, array($sortField => $sortDirection));
+    public static function sort_field($arr, $sortField, $sortDirection = SORT_ASC) {
+        self::sort_multi($arr, array($sortField => $sortDirection));
         return $arr;
     }
 
@@ -42,7 +40,7 @@ class Arrmap extends Singleton{
      * 数组排序
      */
 
-    private function sort_multi(& $arr, array $args) {
+    private static function sort_multi(& $arr, array $args) {
         $sortArray = array();
         $sortRule = '';
         foreach ($args as $sortField => $sortDir) {
@@ -62,13 +60,13 @@ class Arrmap extends Singleton{
      * 遍历多维数组
      */
 
-    public function walk($arr, callable $function, $apply_keys = false) {
+    public static function walk($arr, callable $function, $apply_keys = false) {
         if (empty($arr)) {
             return null;
         }
         foreach ($arr as $key => $value) {
             if (is_array($value)) {
-                $arr[$key] = $this->walk($value, $function, $apply_keys);
+                $arr[$key] = self::walk($value, $function, $apply_keys);
             } else {
                 $val = $function($value);
                 if ($apply_keys) {
@@ -91,13 +89,13 @@ class Arrmap extends Singleton{
      * @param string $delval
      * @return array
      */
-    public function remove_value($arr, $delval = '') {
+    public static function remove_value($arr, $delval = '') {
         if (empty($arr)) {
             return null;
         }
         foreach ($arr as $key => $value) {
             if (is_array($value)) {
-                $arr[$key] = $this->remove_value($value, $delval);
+                $arr[$key] = self::remove_value($value, $delval);
             } else {
                 if ($delval === $value) {
                     unset($arr[$key]);
@@ -115,13 +113,13 @@ class Arrmap extends Singleton{
      * @param $arr
      * @return array
      */
-    public function remove_empty($arr) {
+    public static function remove_empty($arr) {
         if (empty($arr)) {
             return null;
         }
         foreach ($arr as $key => $value) {
             if (is_array($value)) {
-                $arr[$key] = $this->remove_empty($value);
+                $arr[$key] = self::remove_empty($value);
             } else {
                 if (empty($value)) {
                     unset($arr[$key]);
@@ -144,7 +142,7 @@ class Arrmap extends Singleton{
      *
      * @return array
      */
-    public function to_map($arr, $keyField = null, $valueField = null) {
+    public static function to_map($arr, $keyField = null, $valueField = null) {
         $map = array();
         if ($valueField) {
             foreach ($arr as $row) {
@@ -174,7 +172,7 @@ class Arrmap extends Singleton{
      *
      * @return array
      */
-    public function group_by($arr, $groupField) {
+    public static function group_by($arr, $groupField) {
         $ret = array();
         foreach ($arr as $row) {
             $ret[$row[$groupField]][] = $row;
@@ -197,7 +195,7 @@ class Arrmap extends Singleton{
      *
      * @return array
      */
-    public function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false) {
+    public static function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false) {
         $refs = $arr;
         $pkvRefs = array();
         foreach ($arr as $offset => $row) {
@@ -239,11 +237,11 @@ class Arrmap extends Singleton{
      *
      * @return array
      */
-    public function tree_to($tree, $fchildrens = 'children') {
+    public static function tree_to($tree, $fchildrens = 'children') {
         $arr = array();
         if (isset($tree[$fchildrens]) && is_array($tree[$fchildrens])) {
             foreach ($tree[$fchildrens] as $child) {
-                $arr = array_merge($arr, $this->tree_to($child, $fchildrens));
+                $arr = array_merge($arr, self::tree_to($child, $fchildrens));
             }
             unset($tree[$fchildrens]);
             $arr[] = $tree;

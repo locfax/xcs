@@ -57,7 +57,7 @@ class File extends Singleton {
 
     public function clear() {
         $cachedir = getini('data/_cache');
-        $files = \Xcs\Helper\File::getInstance()->list_files($cachedir);
+        $files = \Xcs\Helper\File::list_files($cachedir);
         foreach ($files as $file) {
             unlink($cachedir . $file);
         }

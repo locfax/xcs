@@ -78,6 +78,6 @@ class Context extends Traits\Context {
      */
     public static function log($data, $code = 0) {
         $logfile = DATAPATH . 'log/run.log';
-        Helper\log::getInstance()->writeLog($logfile, $data);
+        Helper\Log::writeLog($logfile, $data);
     }
 }
