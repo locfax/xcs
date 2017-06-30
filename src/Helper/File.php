@@ -4,6 +4,11 @@ namespace Xcs\Helper;
 
 class File {
 
+    /**
+     * @param $path
+     * @param int $mode
+     * @return bool
+     */
     public static function mk_dir($path, $mode = DIR_WRITE_MODE) {
         if (!is_dir($path)) {
             return mkdir($path, $mode, true);
@@ -11,6 +16,10 @@ class File {
         return true;
     }
 
+    /**
+     * @param $path
+     * @return bool
+     */
     public static function rm_dir($path) {
         $dir = realpath($path);
         if ('' == $dir || '/' == $dir || (3 == strlen($dir) && ':\\' == substr($dir, 1))) {
@@ -38,6 +47,9 @@ class File {
         }
     }
 
+    /**
+     * @param $dir
+     */
     public static function clear_dir($dir) {
         $d = dir($dir);
         while (($f = $d->read())) {
@@ -63,11 +75,14 @@ class File {
         $d->close();
     }
 
-
-    /*
+    /**
      * 遍历文件目录
+     * @param $dir
+     * @param bool $dirfile
+     * @param bool $md5
+     * @param bool $root
+     * @return array
      */
-
     public static function list_files($dir, $dirfile = false, $md5 = true, $root = true) {
         static $return = array();
         if ($root) {

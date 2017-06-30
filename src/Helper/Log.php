@@ -6,7 +6,11 @@ class Log {
 
     const maxsize = 1024000; //最大文件大小1M
 
-    //写入日志
+    /**
+     * 写入日志
+     * @param $filename
+     * @param $msg
+     */
     public static function writeLog($filename, $msg) {
         $res = array();
         $res['msg'] = $msg;
@@ -29,7 +33,11 @@ class Log {
         file_put_contents($filename, $content, FILE_APPEND);
     }
 
-    //读取日志
+    /**
+     * 读取日志
+     * @param $filename
+     * @return mixed|string
+     */
     public static function readLog($filename) {
         if (file_exists($filename)) {
             $content = file_get_contents($filename);

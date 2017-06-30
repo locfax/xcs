@@ -8,7 +8,7 @@ class Session {
     private $db;
     private $prefix;
 
-    public function __construct($prefix = "RSID:", $time = 1800) {
+    public function start($prefix = "RSID:", $time = 1800) {
         $this->prefix = $prefix;
         $this->ttl = $time;
         //ini_set('session.gc_maxlifetime', 1440);

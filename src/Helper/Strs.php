@@ -4,8 +4,10 @@ namespace Xcs\Helper;
 
 class Strs {
 
-    /*
+    /**
      * 随机字符
+     * @param int $length
+     * @return string
      */
     public static function random($length = 4) {
         $reqid = '';
@@ -17,8 +19,10 @@ class Strs {
         return $reqid;
     }
 
-    /* qutotes get post cookie by \char(21)'
-     * return string
+    /**
+     * qutotes get post cookie by \char(21)'
+     * @param $string
+     * @return array|string
      */
     public static function daddcslashes($string) {
         if (empty($string)) {
@@ -33,8 +37,10 @@ class Strs {
         return addcslashes($string, '');
     }
 
-    /*
+    /**
      * it's paire to daddcslashes
+     * @param $value
+     * @return array|string
      */
     public static function dstripcslashes($value) {
         if (empty($value)) {
@@ -49,8 +55,17 @@ class Strs {
         return stripcslashes($value);
     }
 
-    /* cut string to set length
+
+    /**
+     * cut string to set length
      * return string
+     * @param $string
+     * @param $length
+     * @param bool $suffix
+     * @param string $charset
+     * @param int $start
+     * @param string $dot
+     * @return mixed|string
      */
     public static function cutstr($string, $length, $suffix = true, $charset = "utf-8", $start = 0, $dot = ' ...') {
         $str = str_replace(array('&amp;', '&quot;', '&lt;', '&gt;'), array('&', '"', '<', '>'), $string);
@@ -73,6 +88,13 @@ class Strs {
         return $suffix ? $strcut . $dot : $strcut;
     }
 
+    /**
+     * @param $string
+     * @param $length
+     * @param int $out_slashes
+     * @param int $html
+     * @return mixed|string
+     */
     public static function getstr($string, $length, $out_slashes = 0, $html = 0) {
         $string = stripslashes($string);
         if ($html < 0) {
@@ -89,6 +111,12 @@ class Strs {
         return $string;
     }
 
+    /**
+     * @param $in
+     * @param $out
+     * @param $string
+     * @return mixed|string
+     */
     public static function convert_encode($in, $out, $string) { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
@@ -100,6 +128,12 @@ class Strs {
         }
     }
 
+    /**
+     * @param $in
+     * @param $out
+     * @param $string
+     * @return array|mixed|string
+     */
     public static function convert_char($in, $out, $string) {
         // string change charset return mix
         if (is_array($string)) {

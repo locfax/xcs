@@ -54,8 +54,8 @@ class Context extends Traits\Context {
      * @return bool
      */
     public static function cache($cmd, $key = '', $val = '', $ttl = 0) {
-        $cacher = Cacher::getInstance();
         if (in_array($cmd, array('set', 'get', 'rm', 'clear', 'close'))) {
+            $cacher = Cacher::getInstance();
             switch ($cmd) {
                 case 'get':
                     return $cacher->get($key);

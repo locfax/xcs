@@ -4,8 +4,13 @@ namespace Xcs\Helper;
 
 class Arrmap {
 
-    //php5.5+自带这个函数 只能处理二维
-    //取出数组的指定列值
+    /**
+     * php5.5+自带这个函数 但是只能处理二维
+     * 取出数组的指定列值
+     * @param array $array
+     * @param $column_key
+     * @return array
+     */
     public static function column(array $array, $column_key) {
         $retarr = array();
         foreach ($array as $arr) {
@@ -36,10 +41,12 @@ class Arrmap {
         return $arr;
     }
 
-    /*
+    /**
      * 数组排序
+     * @param $arr
+     * @param array $args
+     * @return mixed
      */
-
     private static function sort_multi(& $arr, array $args) {
         $sortArray = array();
         $sortRule = '';
@@ -56,8 +63,13 @@ class Arrmap {
         return $arr;
     }
 
-    /*
+    /**
      * 遍历多维数组
+     *
+     * @param $arr
+     * @param callable $function
+     * @param bool $apply_keys
+     * @return null
      */
     public static function walk($arr, callable $function, $apply_keys = false) {
         if (empty($arr)) {

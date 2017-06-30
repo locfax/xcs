@@ -68,6 +68,11 @@ class Xss extends Singleton {
         return $str;
     }
 
+    /**
+     * @param $str
+     * @param bool $is_image
+     * @return array|bool|mixed|string
+     */
     public function clean($str, $is_image = false) {
         if (is_array($str)) {
             while (list($key) = each($str)) {

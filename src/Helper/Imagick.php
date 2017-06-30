@@ -4,6 +4,10 @@ namespace Xcs\Helper;
 
 class Imagickd {
 
+    /**
+     * @param $tempname
+     * @return bool|HandleImagek
+     */
     public static function createFromFile($tempname) {
         //$fileext = trim(strtolower($ext), '.');
         try {

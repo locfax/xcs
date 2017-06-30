@@ -562,6 +562,10 @@ class Http {
     }
 
 
+    /**
+     * @param $imagetype
+     * @return bool|string
+     */
     public static function image_type_to_extension($imagetype) {
         if (empty($imagetype))
             return false;

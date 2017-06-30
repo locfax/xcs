@@ -9,6 +9,11 @@ namespace Xcs\Helper;
 
 class ImageGd {
 
+    /**
+     * @param $filename
+     * @param string $ext
+     * @return bool|HandleGd
+     */
     public static function createFromFile($filename, $ext = '') {
         if (!$ext) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);

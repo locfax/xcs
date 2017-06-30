@@ -7,15 +7,29 @@ namespace Xcs\Helper;
 
 class Pinyin {
 
+    /**
+     * @param $s
+     * @param bool $isfirst
+     * @return string
+     */
     public static function utf8_to($s, $isfirst = false) {
         return self::to_gb2312(self::utf8_to_gb2312($s), $isfirst);
     }
 
+    /**
+     * @param $s
+     * @return string
+     */
     public static function utf8_to_gb2312($s) {
         return iconv('UTF-8', 'GB2312//IGNORE', $s);
     }
 
-    // 字符串必须为GB2312编码
+    /**
+     * 字符串必须为GB2312编码
+     * @param $s
+     * @param bool $isfirst
+     * @return string
+     */
     public static function to_gb2312($s, $isfirst = false) {
         $res = '';
         $len = strlen($s);
@@ -48,6 +62,10 @@ class Pinyin {
         return $res;
     }
 
+    /**
+     * @param $s
+     * @return bool|string
+     */
     public static function to_first($s) {
         $ascii = ord($s[0]);
         if ($ascii > 0xE0) {
@@ -137,6 +155,9 @@ class Pinyin {
         return false;
     }
 
+    /**
+     * @return array
+     */
     public static function get_pinyin_array() {
         static $py_arr;
         if (isset($py_arr)) {

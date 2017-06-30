@@ -9,6 +9,11 @@ class Uploader extends Singleton {
     private $_files = array();
     private $_count = 0;
 
+    /**
+     * @param $tempfiles
+     * @param bool $cascade
+     * @return $this|null
+     */
     public function init($tempfiles, $cascade = false) {
         $this->reset();
 

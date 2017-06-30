@@ -249,6 +249,11 @@ class DB {
         return $db->counts($sql, $args);
     }
 
+    /**
+     * @param $sql
+     * @param null $args
+     * @return mixed
+     */
     public static function firsts($sql, $args = null) {
         $db = self::Using(self::$using_dbo_id);
         return $db->result_firsts($sql, $args);

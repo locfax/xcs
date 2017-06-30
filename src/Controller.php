@@ -28,6 +28,11 @@ class Controller {
 
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     * @return bool
+     */
     public function __call($name, $arguments) {
         //动作不存在
         if (App::isAjax(true)) {
@@ -45,7 +50,6 @@ class Controller {
     /*
      * 初始变量
      */
-
     private function init_var() {
         $this->timestamp = getgpc('s.REQUEST_TIME') ?: time();
         if (filter_input(INPUT_GET, 'page')) {
@@ -56,7 +60,6 @@ class Controller {
     /*
      * 初始缓存
      */
-
     private function init_cache() {
         $caches = getini('cache/default');
         loadcache($caches);
