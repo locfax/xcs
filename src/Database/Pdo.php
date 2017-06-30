@@ -416,6 +416,25 @@ class Pdo {
     }
 
     /**
+     * @param $tableName
+     * @param string $condition
+     * @param string $field
+     * @return bool
+     */
+    public function count($tableName, $condition, $field = '*') {
+        return $this->result_first($tableName, "COUNT({$field})", $condition);
+    }
+
+    /**
+     * @param $sql
+     * @param null $args
+     * @return bool
+     */
+    public function counts($sql, $args = null) {
+        return $this->result_firsts($sql, $args);
+    }
+
+    /**
      * @param string $tableName
      * @param string $field
      * @param mixed $condition
@@ -437,13 +456,22 @@ class Pdo {
     }
 
     /**
-     * @param $tableName
-     * @param string $condition
-     * @param string $field
+     * @param $sql
+     * @param null $args
      * @return bool
      */
-    public function count($tableName, $condition, $field = '*') {
-        return $this->result_first($tableName, "COUNT({$field})", $condition);
+    public function result_firsts($sql, $args = null) {
+        try {
+            if (is_null($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
+                $sth = $this->_link->prepare($sql);
+                $sth->execute($args);
+            }
+            return $sth->fetchColumn();
+        } catch (\PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode());
+        }
     }
 
     /**

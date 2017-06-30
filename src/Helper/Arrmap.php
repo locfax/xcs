@@ -59,7 +59,6 @@ class Arrmap {
     /*
      * 遍历多维数组
      */
-
     public static function walk($arr, callable $function, $apply_keys = false) {
         if (empty($arr)) {
             return null;

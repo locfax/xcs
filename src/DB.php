@@ -21,7 +21,7 @@ class DB {
         } else {
             $classname = '\\Xcs\\Database\\' . ucfirst($_dsn['driver']);
             $dbo = new $classname;
-            $dbo->connect($_dsn);
+            call_user_func(array($dbo, 'connect'), $_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
         }
         return $dbo;
@@ -238,6 +238,23 @@ class DB {
         $db = self::Using(self::$using_dbo_id);
         return $db->pages($sql, $pageparm, $length);
     }
+
+    /**
+     * @param $sql
+     * @param null $args
+     * @return mixed
+     */
+    public static function counts($sql, $args = null) {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->counts($sql, $args);
+    }
+
+    public static function firsts($sql, $args = null) {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->result_firsts($sql, $args);
+    }
+
+    //--------------多表联合查询---end---------------//
 
     /**
      * 切换数据源对象
