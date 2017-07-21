@@ -1,19 +1,21 @@
 <?php
 
-namespace Xcs;
+namespace Controller;
 
-class Restful extends Controller {
+class RestFul extends \Xcs\Controller {
 
     // 当前请求类型
-    private $_method = '';
+    private $_method = null;
+    //请求附带数据
+    private $_data = null;
     // REST允许的请求类型列表
-    private $allow_method = array('get', 'post', 'put', 'delete');
+    private $allow_method = ['get', 'post'];
     // REST默认请求类型
     private $default_method = 'get';
     // REST允许输出的资源类型列表
-    private $allow_output_type = array(
+    private $allow_output_type = [
         'json' => 'application/json'
-    );
+    ];
 
     public function __construct($controllerName, $actionName) {
         parent::__construct($controllerName, $actionName);
@@ -23,11 +25,15 @@ class Restful extends Controller {
             $method = $this->default_method;
         }
         $this->_method = $method;
+        if ($method = 'post') {
+            $json = file_get_contents('php://input');
+            $this->_data = json_decode($json, true);
+        }
     }
 
     // 发送Http状态信息
-    private function set_http_status($code) {
-        static $_status = array(
+    private function http_status($code) {
+        static $_status = [
             // Informational 1xx
             100 => 'Continue',
             101 => 'Switching Protocols',
@@ -75,7 +81,7 @@ class Restful extends Controller {
             504 => 'Gateway Timeout',
             505 => 'HTTP Version Not Supported',
             509 => 'Bandwidth Limit Exceeded'
-        );
+        ];
         if (isset($_status[$code])) {
             header('HTTP/1.1 ' . $code . ' ' . $_status[$code]);
             // 确保FastCGI模式下正常
@@ -107,7 +113,7 @@ class Restful extends Controller {
      * @param string $charset 页面输出编码
      * @return void
      */
-    private function set_content_type($type, $charset = '') {
+    private function content_type($type, $charset = '') {
         if (headers_sent()) {
             return;
         }
@@ -120,6 +126,10 @@ class Restful extends Controller {
         }
     }
 
+    protected function data() {
+        return $this->_data;
+    }
+
     /**
      * 输出返回数据
      * @access protected
@@ -128,11 +138,11 @@ class Restful extends Controller {
      * @param integer $code HTTP状态
      * @return void
      */
-    protected function response($data, $type = 'json', $code = 200) {
-        $this->set_http_status($code);
-        $this->set_content_type($type);
-        //header('Content-Length: ' . strlen($data));
-        echo $this->encode_data($data, strtolower($type));
+    protected function response($data, $code = 200) {
+        $type = 'json';
+        $this->http_status($code);
+        $this->content_type($type);
+        echo $this->encode_data($data, $type);
     }
 
 }
