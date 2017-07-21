@@ -2,7 +2,9 @@
 
 namespace Xcs;
 
-class Context extends Traits\Context {
+class Context {
+
+    use Traits\Context;
 
     private static $_dsns = array();
     private static $_configs = array();
