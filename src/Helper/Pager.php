@@ -14,7 +14,7 @@ class Pager {
         $curpage = $pageinfo['curpage'];
         $mpurl = $pageinfo['udi'];
         if (isset($pageinfo['param'])) {
-            $mpurl .= $pageinfo['param'];
+            $mpurl .= '?' . $pageinfo['param'];
         }
         $maxpages = isset($pageinfo['maxpages']) ? $pageinfo['maxpages'] : false; //最大页数限制
         $page = isset($pageinfo['showpage']) ? $pageinfo['showpage'] : false; //一次显示多少页码
