@@ -2,9 +2,9 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
+class Uploader {
 
-class Uploader extends Singleton {
+    use \Xcs\Traits\Singleton;
 
     private $_files = array();
     private $_count = 0;

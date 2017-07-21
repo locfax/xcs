@@ -4,7 +4,7 @@ namespace Xcs\Traits;
 
 use Xcs\Exception\Exception;
 
-class Singleton {
+Trait Singleton {
 
     protected static $singleton_instances = array();
 

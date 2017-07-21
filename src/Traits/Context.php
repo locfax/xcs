@@ -4,7 +4,7 @@ namespace Xcs\Traits;
 
 use Xcs\Exception\Exception;
 
-class Context {
+Trait Context {
 
     protected $context_handler;
 
