@@ -2,10 +2,11 @@
 
 namespace Xcs\Cache;
 
-use \Xcs\Traits\Singleton;
 use \Xcs\Exception\Exception;
 
-class Xcache extends Singleton {
+class Xcache {
+
+    use \Xcs\Traits\Singleton;
 
     public $enable = false;
 

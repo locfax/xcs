@@ -2,9 +2,9 @@
 
 namespace Xcs\Cache;
 
-use \Xcs\Traits\Singleton;
+class Redis {
 
-class Redis extends Singleton {
+    use \Xcs\Traits\Singleton;
 
     public $enable = false;
     private $_link = null;

@@ -2,9 +2,9 @@
 
 namespace Xcs\Helper;
 
-use Xcs\Traits\Singleton;
+class Xss {
 
-class Xss extends Singleton {
+    use \Xcs\Traits\Singleton;
 
     /**
      * 非法文件名字符

@@ -2,7 +2,9 @@
 
 namespace Xcs;
 
-class Cacher extends Traits\Singleton {
+class Cacher {
+
+    use \Xcs\Traits\Singleton;
 
     private $config;
     private $prefix;
