@@ -29,6 +29,12 @@ class App {
     }
 
     public static function runFile($preload, $refresh = false) {
+        set_error_handler(function ($errno, $error, $file = null, $line = null) {
+            if (error_reporting() & $errno) {
+                throw new Exception\ErrorException($error, $errno);
+            }
+            return true;
+        });
         if (defined('ERRD') && ERRD) {
             //测试模式
             $dfiles = array(
@@ -43,12 +49,6 @@ class App {
                 include $file;
             }
             self::rootNamespace('\\', APPPATH);
-            set_error_handler(function ($errno, $error, $file = null, $line = null) {
-                if (error_reporting() & $errno) {
-                    throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
-                }
-                return true;
-            });
         } else {
             //正式模式
             self::_runFile($preload, $refresh);
@@ -75,12 +75,6 @@ class App {
         }
         $preloadfile && require $preloadfile;
         self::rootNamespace('\\', APPPATH);
-        set_error_handler(function ($errno, $error, $file = null, $line = null) {
-            if (error_reporting() & $errno) {
-                throw new Exception\ErrorException($error, $errno, $errno, $file, $line);
-            }
-            return true;
-        });
     }
 
     /**

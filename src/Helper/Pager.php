@@ -12,7 +12,7 @@ class Pager {
         $totals = $pageinfo['totals'];
         $perpage = $pageinfo['length'];
         $curpage = $pageinfo['curpage'];
-        $mpurl = url($pageinfo['udi']);
+        $mpurl = $pageinfo['udi'];
         if (isset($pageinfo['param'])) {
             $mpurl .= $pageinfo['param'];
         }
