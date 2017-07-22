@@ -108,11 +108,11 @@ function loctime($utimeoffset) {
     static $dtformat = null, $timeoffset = 8;
     if (is_null($dtformat)) {
         $dtformat = array(
-            'd' => getini('settings/dateformat') ?: 'Y-m-d',
-            't' => getini('settings/timeformat') ?: 'H:i:s'
+            'd' => getini('site/dateformat') ?: 'Y-m-d',
+            't' => getini('site/timeformat') ?: 'H:i:s'
         );
         $dtformat['dt'] = $dtformat['d'] . ' ' . $dtformat['t'];
-        $timeoffset = getini('settings/timezone') ?: $timeoffset; //defualt is Asia/Shanghai
+        $timeoffset = getini('site/timezone') ?: $timeoffset; //defualt is Asia/Shanghai
     }
     $offset = $utimeoffset == 999 ? $timeoffset : $utimeoffset;
     return array($offset, $dtformat);
