@@ -29,38 +29,6 @@ function input_text($text) {
     return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
 }
 
-/* qutotes get post cookie by \'
- * return string
- */
-function daddslashes($string) {
-    if (empty($string)) {
-        return $string;
-    }
-    if (is_numeric($string)) {
-        return $string;
-    }
-    if (is_array($string)) {
-        return array_map('daddslashes', $string);
-    }
-    return addslashes($string);
-}
-
-/*
- * it's paire to daddslashes
- */
-function dstripslashes($value) {
-    if (empty($value)) {
-        return $value;
-    }
-    if (is_numeric($value)) {
-        return $value;
-    }
-    if (is_array($value)) {
-        return array_map('dstripslashes', $value);
-    }
-    return stripslashes($value);
-}
-
 function strexists($str, $needle) {
     return !(false === strpos($str, $needle));
 }

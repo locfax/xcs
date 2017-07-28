@@ -9,7 +9,7 @@
  * @param bool $emptyrun
  * @return null
  */
-function getgpc($variable, $defval = null, $runfunc = '', $emptyrun = false) {
+function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false) {
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
         $var = substr($variable, 2);
@@ -17,6 +17,7 @@ function getgpc($variable, $defval = null, $runfunc = '', $emptyrun = false) {
         $tmp = false;
         $var = $variable;
     }
+    $value = '';
     if ($tmp) {
         switch ($tmp) {
             case 'G':
@@ -217,6 +218,38 @@ function url($udi, $param = array()) {
 
 function floatvaldec($v, $dec = ',') {
     return floatval(str_replace(",", ".", preg_replace("[^-0-9$dec]", "", $v)));
+}
+
+/* qutotes get post cookie by \'
+ * return string
+ */
+function daddslashes($string) {
+    if (empty($string)) {
+        return $string;
+    }
+    if (is_numeric($string)) {
+        return $string;
+    }
+    if (is_array($string)) {
+        return array_map('daddslashes', $string);
+    }
+    return addslashes($string);
+}
+
+/*
+ * it's paire to daddslashes
+ */
+function dstripslashes($value) {
+    if (empty($value)) {
+        return $value;
+    }
+    if (is_numeric($value)) {
+        return $value;
+    }
+    if (is_array($value)) {
+        return array_map('dstripslashes', $value);
+    }
+    return stripslashes($value);
 }
 
 /**
