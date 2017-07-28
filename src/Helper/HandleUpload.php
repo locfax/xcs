@@ -139,11 +139,11 @@ class HandleUpload {
         }
 
         if ($allowExts) {
-            if (\Xcs\Util::strexists($allowExts, ',')) {
+            if (\Xcs\Util::strpos($allowExts, ',')) {
                 $exts = explode(',', $allowExts);
-            } elseif (\Xcs\Util::strexists($allowExts, '/')) {
+            } elseif (\Xcs\Util::strpos($allowExts, '/')) {
                 $exts = explode('/', $allowExts);
-            } elseif (\Xcs\Util::strexists($allowExts, '|')) {
+            } elseif (\Xcs\Util::strpos($allowExts, '|')) {
                 $exts = explode('|', $allowExts);
             } else {
                 $exts = array($allowExts);

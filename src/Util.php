@@ -5,14 +5,28 @@ namespace Xcs;
 //辅助功能函数
 class Util {
 
-    public static function dimplode($arr) {
+    /**
+     * @param $arr
+     * @return string
+     */
+    public static function implode($arr) {
         return "'" . implode("','", (array)$arr) . "'";
     }
 
-    public static function strexists($str, $needle) {
+    /**
+     * @param $str
+     * @param $needle
+     * @return bool
+     */
+    public static function strpos($str, $needle) {
         return !(false === strpos($str, $needle));
     }
 
+    /**
+     * @param $arr
+     * @param $col
+     * @return array
+     */
     public static function array_index($arr, $col) {
         if (!is_array($arr)) {
             return $arr;
@@ -58,7 +72,12 @@ class Util {
         return $obj;
     }
 
-    /* send header */
+    /**
+     * @param $_string
+     * @param bool $replace
+     * @param int $http_response_code
+     * @return bool
+     */
     public static function header($_string, $replace = true, $http_response_code = 0) {
         $string = str_replace(array("\r", "\n"), array('', ''), $_string);
         if (!$http_response_code) {
@@ -69,9 +88,9 @@ class Util {
         return true;
     }
 
-    /* get from url
-     * return string
+    /**
      * @param string $default
+     * @return string
      */
     public static function referer($default = '') {
         $referer = getgpc('s.HTTP_REFERER');
@@ -81,6 +100,10 @@ class Util {
         return strip_tags($referer);
     }
 
+    /**
+     * @param $value
+     * @return array|string
+     */
     public static function urlencode($value) {
         if (is_array($value)) {
             return array_map('self::urlencode', $value);
@@ -88,8 +111,9 @@ class Util {
         return $value ? urlencode($value) : $value;
     }
 
-    /*
-     * json encode
+    /**
+     * @param $arr
+     * @return string
      */
     public static function output_json($arr) {
         if (PHPVER >= 5.4) {
@@ -105,6 +129,9 @@ class Util {
         header("Pragma: no-cache");
     }
 
+    /**
+     * @param bool $nocache
+     */
     public static function output_start($nocache = true) {
         ob_end_clean();
         if (getini('site/gzip') && function_exists('ob_gzhandler')) { //whether start gzip
@@ -117,6 +144,10 @@ class Util {
         }
     }
 
+    /**
+     * @param bool $echo
+     * @return mixed|string
+     */
     public static function output_end($echo = false) {
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
@@ -129,6 +160,11 @@ class Util {
         }
     }
 
+    /**
+     * @param $res
+     * @param string $type
+     * @return bool
+     */
     public static function rep_send($res, $type = 'json') {
         self::output_start();
         if ('html' == $type) {
@@ -152,8 +188,11 @@ class Util {
         return true;
     }
 
-    /* javascript ,alert
-     * return null;
+    /**
+     * @param string $message
+     * @param string $after_action
+     * @param string $url
+     * @return bool
      */
     public static function js_alert($message = '', $after_action = '', $url = '') { //php turn to alert
         $out = "<script language=\"javascript\" type=\"text/javascript\">\n";
@@ -175,8 +214,13 @@ class Util {
         return true;
     }
 
-    /* redirect to rul
-     * return null
+    /**
+     * @param $url
+     * @param int $delay
+     * @param bool $js
+     * @param bool $jsWrapped
+     * @param bool $return
+     * @return bool|null|string
      */
     public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false) {
         $_delay = intval($delay);
@@ -214,6 +258,9 @@ EOT;
         return true;
     }
 
+    /**
+     * @return bool|null
+     */
     public static function isrobot() {
         static $is_robot = null;
         if (isset($is_robot)) {
@@ -221,7 +268,7 @@ EOT;
         }
         $kw_spiders = 'Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla';
         $kw_browsers = 'MSIE|Netscape|Opera|Konqueror|Mozilla';
-        if (!self::strexists(getgpc('s.HTTP_USER_AGENT'), 'http://') && preg_match("/($kw_browsers)/i", getgpc('s.HTTP_USER_AGENT'))) {
+        if (!self::strpos(getgpc('s.HTTP_USER_AGENT'), 'http://') && preg_match("/($kw_browsers)/i", getgpc('s.HTTP_USER_AGENT'))) {
             $is_robot = false;
         } elseif (preg_match("/($kw_spiders)/i", getgpc('s.HTTP_USER_AGENT'))) {
             $is_robot = true;
@@ -231,6 +278,9 @@ EOT;
         return $is_robot;
     }
 
+    /**
+     * @return bool|null
+     */
     public static function ismobile() {
         static $is_mobile = null;
         if (isset($is_mobile)) {
@@ -247,6 +297,9 @@ EOT;
         return $is_mobile;
     }
 
+    /**
+     * @return null
+     */
     public static function clientip() {
         $ip = getgpc('s.REMOTE_ADDR');
         if (getgpc('s.HTTP_CLIENT_IP') && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', getgpc('s.HTTP_CLIENT_IP'))) {
@@ -262,11 +315,11 @@ EOT;
         return $ip;
     }
 
-     /**
+    /**
      * @param bool $table
      * @param bool $stop
      */
-    public static function dpost($table = false, $stop = false) {
+    public static function post($table = false, $stop = false) {
         $str = '';
         $post = $_POST;
         foreach ($post as $k => $v) {

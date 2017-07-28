@@ -28,7 +28,7 @@ class Template {
 
         $this->subtemplates = array();
         for ($i = 1; $i <= 5; $i++) {
-            if (\Xcs\Util::strexists($template, '{subtemplate')) {
+            if (\Xcs\Util::strpos($template, '{subtemplate')) {
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subtemplate'), $template);
             }
         }
