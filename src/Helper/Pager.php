@@ -24,14 +24,14 @@ class Pager {
         $autogoto = true;
         $ajaxtarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'input_char') . "\" " : '';
         $aname = '';
-        if (strexists($mpurl, '#')) {
+        if (\Xcs\Util::strexists($mpurl, '#')) {
             $astrs = explode('#', $mpurl);
             $mpurl = $astrs[0];
             $aname = '#' . $astrs[1];
         }
         $lang['prev'] = '上一页';
         $lang['next'] = '下一页';
-        $mpurl .= strexists($mpurl, '?') ? '&' : '?';
+        $mpurl .= \Xcs\Util::strexists($mpurl, '?') ? '&' : '?';
         $offset = floor($page * 0.5);
         $realpages = ceil($totals / $perpage);
         $pages = $maxpages && $maxpages < $realpages ? $maxpages : $realpages;

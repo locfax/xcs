@@ -58,7 +58,7 @@ class Cacher {
         $ret = false;
         if ($this->enable) {
             $data = array($value);
-            $ret = $this->cacher->set($this->_key($key), output_json($data), $ttl);
+            $ret = $this->cacher->set($this->_key($key), \Xcs\Util::output_json($data), $ttl);
         }
         return $ret;
     }

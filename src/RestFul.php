@@ -101,7 +101,7 @@ class RestFul extends \Xcs\Controller {
             return '';
         }
         if ('json' == $type) {
-            $data = output_json($data);
+            $data = \Xcs\Util::output_json($data);
         }
         return $data;
     }

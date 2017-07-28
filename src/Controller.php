@@ -41,7 +41,7 @@ class Controller {
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
             );
-            return rep_send($retarr, 'json');
+            return json_encode($retarr);
         }
         $args = 'Action:' . $name . "不存在";
         include template('404');

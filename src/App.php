@@ -41,8 +41,7 @@ class App {
                 PSROOT . '/config/base.inc.php', //全局配置
                 PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
                 PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
-                BASEPATH . 'common.php',
-                BASEPATH . 'utils.php'
+                BASEPATH . 'common.php'
             );
             $files = array_merge($dfiles, $preload);
             foreach ($files as $file) {
@@ -67,8 +66,7 @@ class App {
                 PSROOT . '/config/base.inc.php', //全局配置
                 PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
                 PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
-                BASEPATH . 'common.php',
-                BASEPATH . 'utils.php'
+                BASEPATH . 'common.php'
             );
             $files = array_merge($dfiles, $preload);
             $preloadfile = self::makeRunFile($files, $preloadfile);
@@ -172,7 +170,7 @@ class App {
                 'errmsg' => "The controller '" . $controllerName . '\' is not exists!',
                 'data' => ''
             );
-            return rep_send($retarr, 'json');
+            return \Xcs\Util::rep_send($retarr, 'json');
         }
         self::errACT("The controller '" . $controllerName . '\' is not exists!');
     }
@@ -200,13 +198,13 @@ class App {
      * @return bool
      */
     private static function errACT($args) {
-        if (App::isAjax(true)) {
+        if (self::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             );
-            return rep_send($retarr, 'json');
+            return \Xcs\Util::rep_send($retarr, 'json');
         }
         $args = '出错了！' . $args;
         include template('404');
@@ -217,13 +215,13 @@ class App {
      * @return bool
      */
     private static function errACL($args) {
-        if (App::isAjax(true)) {
+        if (self::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             );
-            return rep_send($retarr, 'json');
+            return json_encode($retarr);
         }
         $args = '出错了！' . $args;
         include template('403');

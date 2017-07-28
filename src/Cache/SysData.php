@@ -20,7 +20,7 @@ class SysData {
         $cachem = '\\Model\\Cache\\' . ucfirst($cachename);
         $tmp = $cachem::getInstance()->getdata();
         if (!empty($tmp)) { //必须是数组
-            $data = output_json($tmp);
+            $data = \Xcs\Util::output_json($tmp);
         } else {
             $data = '[]'; //标识为空
         }
@@ -36,7 +36,7 @@ class SysData {
 
     public static function save($cachename, $data, $delcache = true) { //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
-            $data = output_json($data);
+            $data = \Xcs\Util::output_json($data);
         } else {
             $data = trim($data);
         }

@@ -9,7 +9,7 @@
  * @param bool $emptyrun
  * @return null
  */
-function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false) {
+function getgpc($variable, $defval = null, $runfunc = '', $emptyrun = false) {
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
         $var = substr($variable, 2);
@@ -252,36 +252,124 @@ function dstripslashes($value) {
     return stripslashes($value);
 }
 
-/**
- * 数组 转 对象
+/*
  *
- * @param array $arr 数组
- * @return object|mixed
+ * 屏蔽单双引号等
+ * 提供给数据库搜索
  */
-function array_to_object($arr) {
-    if (gettype($arr) != 'array') {
-        return $arr;
+function input_char($text) {
+    if (empty($text)) {
+        return $text;
     }
-    foreach ($arr as $k => $v) {
-        if (gettype($v) == 'array' || getType($v) == 'object') {
-            $arr[$k] = (object)array_to_object($v);
-        }
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+}
+
+/*
+*  屏蔽单双引号等
+*  提供给html显示 或者 input输入框
+*/
+function input_text($text) {
+    if (empty($text)) {
+        return $text;
     }
-    return (object)$arr;
+    return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
+}
+
+
+/**
+ * @param $utimeoffset
+ * @return array
+ */
+function loctime($utimeoffset) {
+    static $dtformat = null, $timeoffset = 8;
+    if (is_null($dtformat)) {
+        $dtformat = array(
+            'd' => getini('settings/dateformat') ?: 'Y-m-d',
+            't' => getini('settings/timeformat') ?: 'H:i:s'
+        );
+        $dtformat['dt'] = $dtformat['d'] . ' ' . $dtformat['t'];
+        $timeoffset = getini('settings/timezone') ?: $timeoffset; //defualt is Asia/Shanghai
+    }
+    $offset = $utimeoffset == 999 ? $timeoffset : $utimeoffset;
+    return array($offset, $dtformat);
 }
 
 /**
- * 对象 转 数组
- *
- * @param object $obj 对象
- * @return array
+ * @param $timestamp
+ * @param string $format
+ * @param int $utimeoffset
+ * @param string $uformat
+ * @return string
  */
-function object_to_array($obj) {
-    $obj = (array)$obj;
-    foreach ($obj as $k => $v) {
-        if (gettype($v) == 'object' || gettype($v) == 'array') {
-            $obj[$k] = (array)object_to_array($v);
+function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '') {
+    if (!$timestamp) {
+        return '';
+    }
+    $loctime = loctime($utimeoffset);
+    $offset = $loctime[0];
+    $dtformat = $loctime[1];
+    $timestamp += $offset * 3600;
+    if ('u' == $format) {
+        $nowtime = time() + $offset * 3600;
+        $todaytimestamp = $nowtime - $nowtime % 86400;
+        $format = !$uformat ? $dtformat['dt'] : $uformat;
+        $s = gmdate($format, $timestamp);
+        $time = $nowtime - $timestamp;
+        if ($timestamp >= $todaytimestamp) {
+            if ($time > 3600) {
+                return '<span title="' . $s . '">' . intval($time / 3600) . '&nbsp;小时前</span>';
+            } elseif ($time > 1800) {
+                return '<span title="' . $s . '">半小时前</span>';
+            } elseif ($time > 60) {
+                return '<span title="' . $s . '">' . intval($time / 60) . '&nbsp;分钟前</span>';
+            } elseif ($time > 0) {
+                return '<span title="' . $s . '">' . $time . '&nbsp;秒前</span>';
+            } elseif (0 == $time) {
+                return '<span title="' . $s . '">刚才</span>';
+            } else {
+                return $s;
+            }
+        } elseif (($days = intval(($todaytimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
+            if (0 == $days) {
+                return '<span title="' . $s . '">昨天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
+            } elseif (1 == $days) {
+                return '<span title="' . $s . '">前天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
+            } else {
+                return '<span title="' . $s . '">' . ($days + 1) . '&nbsp;天前</span>';
+            }
+        } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowtime)) {
+            return '<span title="' . $s . '">' . gmdate('m-d H:i', $timestamp) . '</span>';
+        } else {
+            return $s;
         }
     }
-    return $obj;
+    $format = isset($dtformat[$format]) ? $dtformat[$format] : $format;
+    return gmdate($format, $timestamp);
+}
+
+/**
+ * @param $var
+ * @param int $halt
+ * @param string $func
+ */
+function dump($var, $halt = 0, $func = 'p') {
+    echo '<style>.track {
+      font-family:Verdana, Arial, Helvetica, sans-serif;
+      font-size: 12px;
+      background-color: #FFFFCC;
+      padding: 10px;
+      border: 1px solid #FF9900;
+      }</style>';
+    echo "<div class=\"track\">";
+    echo '<pre>';
+    if ('p' == $func) {
+        print_r($var);
+    } else {
+        var_dump($var);
+    }
+    echo '</pre>';
+    echo "</div>";
+    if ($halt) {
+        exit;
+    }
 }
