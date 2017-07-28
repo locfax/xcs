@@ -75,7 +75,7 @@ class Xss {
      */
     public function clean($str, $is_image = false) {
         if (is_array($str)) {
-            while (list($key) = each($str)) {
+            foreach ($str as $key) {
                 $str[$key] = $this->clean($str[$key]);
             }
             return $str;
