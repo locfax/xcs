@@ -261,14 +261,14 @@ function input_char($text) {
     if (empty($text)) {
         return $text;
     }
-    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars(addslashes($text), ENT_QUOTES, 'UTF-8');
 }
 
 /*
 *  屏蔽单双引号等
 *  提供给html显示 或者 input输入框
 */
-function input_text($text) {
+function output_char($text) {
     if (empty($text)) {
         return $text;
     }

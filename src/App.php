@@ -305,6 +305,37 @@ class App {
     }
 
     /**
+     * 导入所需的类库
+     * @param string $class 类库命名空间字符串
+     * @param string $baseUrl 起始路径
+     * @param string $ext 导入的文件扩展名
+     * @return boolean
+     */
+    public static function vendor($class, $ext = '.php', $baseUrl = LIBPATH) {
+        static $_file = [];
+        $key = $class . $baseUrl . $ext;
+        $class = str_replace(['.', '#'], ['/', '.'], $class);
+
+        if (isset($_file[$key])) { //如果已经include过，不需要再次载入
+            return true;
+        }
+
+        // 如果类存在 则导入类库文件
+        $filename = $baseUrl . $class . $ext;
+
+        if (!empty($filename) && is_file($filename)) {
+            // 开启调试模式Win环境严格区分大小写
+            if (ERRD && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+                return false;
+            }
+            include($filename);
+            $_file[$key] = true;
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * @param bool $retbool
      * @return bool
      */
