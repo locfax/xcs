@@ -229,14 +229,15 @@ class DB {
     }
 
     /**
-     * @param $sql
+     * @param string $sql
+     * @param array $args
      * @param int $pageparm
      * @param int $length
      * @return array
      */
-    public static function pages($sql, $pageparm = 0, $length = 18) {
+    public static function pages($sql, $args = null, $pageparm = 0, $length = 18) {
         $db = self::Using(self::$using_dbo_id);
-        return $db->pages($sql, $pageparm, $length);
+        return $db->pages($sql, $args, $pageparm, $length);
     }
 
     /**

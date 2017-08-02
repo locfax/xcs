@@ -6,7 +6,7 @@ class App {
 
     const _dCTL = 'c';
     const _dACT = 'a';
-    const _controllerPrefix = 'app\\ctl\\';
+    const _controllerPrefix = 'Controller\\';
     const _actionPrefix = 'act_';
 
     static $routes = null;
@@ -236,7 +236,7 @@ class App {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         };
-        $controllerFilename = APPPATH . 'Controller/' . APPKEY . '/' . strtolower($controllerName) . '.php';
+        $controllerFilename = APPPATH . 'Controller/' . APPKEY . '/' . $controllerName . '.php';
         return is_file($controllerFilename) && require $controllerFilename;
     }
 

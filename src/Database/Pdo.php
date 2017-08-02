@@ -379,12 +379,19 @@ class Pdo {
     }
 
     /**
-     * @param $sql
+     * @param string $sql
+     * @param array $args
      * @return bool
      */
-    private function _pages($sql) {
+    private function _pages($sql, $args = null) {
         try {
-            $sth = $this->_link->query($sql);
+            if (is_null($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
+                list($_, $_args) = $this->field_param($args);
+                $sth = $this->_link->prepare($sql);
+                $sth->execute($_args);
+            }
             return $sth->fetchAll();
         } catch (\PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
@@ -392,12 +399,13 @@ class Pdo {
     }
 
     /**
-     * @param $sql
+     * @param string $sql
+     * @param array $args
      * @param mixed $pageparm
      * @param int $length
      * @return array|bool
      */
-    public function pages($sql, $pageparm = 0, $length = 18) {
+    public function pages($sql, $args = null, $pageparm = 0, $length = 18) {
         if (is_array($pageparm)) {
             //固定长度分页模式
             $ret = array('rowsets' => array(), 'pagebar' => '');
@@ -405,13 +413,13 @@ class Pdo {
                 return $ret;
             }
             $start = \Xcs\DB::page_start($pageparm['curpage'], $length, $pageparm['totals']);
-            $ret['rowsets'] = $this->_pages($sql . " LIMIT {$start},{$length}");;
+            $ret['rowsets'] = $this->_pages($sql . " LIMIT {$start},{$length}", $args);;
             $ret['pagebar'] = \Xcs\DB::pagebar($pageparm, $length);;
             return $ret;
         } else {
             //任意长度模式
             $start = $pageparm;
-            return $this->_pages($sql . " LIMIT {$start},{$length}");
+            return $this->_pages($sql . " LIMIT {$start},{$length}", $args);
         }
     }
 
