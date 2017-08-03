@@ -35,7 +35,7 @@ class App {
             }
             return true;
         });
-        if (defined('ERRD') && ERRD) {
+        if (defined('DEBUG') && DEBUG) {
             //测试模式
             $dfiles = array(
                 PSROOT . '/config/base.inc.php', //全局配置
@@ -147,7 +147,7 @@ class App {
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            if (defined('ERRD') && ERRD) {
+            if (defined('DEBUG') && DEBUG) {
                 call_user_func(array($controller, $actionMethod));
             } else {
                 try {
@@ -325,7 +325,7 @@ class App {
 
         if (!empty($filename) && is_file($filename)) {
             // 开启调试模式Win环境严格区分大小写
-            if (ERRD && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+            if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 return false;
             }
             include($filename);

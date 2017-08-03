@@ -11,7 +11,7 @@ class SysData {
         if (!$reset) { //从数据库直接取
             $syscache = \Xcs\DB::dbm(self::dsn)->findOne('common_syscache', '*', array('cname' => 'sys_' . $cachename));
             if ($syscache) {
-                \Xcs\Context::cache('set', $syscache['cname'], stripslashes($syscache['data']));
+                \Xcs\Cache::set($syscache['cname'], stripslashes($syscache['data']));
                 return $syscache['data'];
             }
         }
@@ -29,7 +29,7 @@ class SysData {
         self::save('sys_' . $cachename, $data, false);
 
         //保存缓存到cacher
-        \Xcs\Context::cache('set', 'sys_' . $cachename, $data);
+        \Xcs\Cache::set('sys_' . $cachename, $data);
 
         return $data;
     }
@@ -46,7 +46,7 @@ class SysData {
         if (!$delcache) {
             return;
         }
-        \Xcs\Context::cache('rm', $cachename);
+        \Xcs\Cache::rm($cachename);
     }
 
 }

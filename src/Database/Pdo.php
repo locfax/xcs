@@ -513,7 +513,8 @@ class Pdo {
     private function _halt($message = '', $code = 0) {
         if ($this->_config['rundev']) {
             $this->close();
-            $message = mb_convert_encoding($message, 'utf-8', 'gbk');
+            $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
+            $message = mb_convert_encoding($message, 'UTF-8', $encode);
             throw new \Xcs\Exception\DbException($message, intval($code));
         }
         return false;

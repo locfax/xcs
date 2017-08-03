@@ -113,7 +113,7 @@ class Exception extends \Exception {
     }
 
     public function clear($message) {
-        if (defined('ERRD') && ERRD) {
+        if (defined('DEBUG') && DEBUG) {
             return $message;
         } else {
             return htmlspecialchars(substr(str_replace(array("t", "r", "n"), " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";

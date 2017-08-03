@@ -4,8 +4,6 @@ namespace Xcs;
 
 class Context {
 
-    use Traits\Context;
-
     private static $_dsns = array();
     private static $_configs = array();
 
@@ -46,32 +44,6 @@ class Context {
         }
         self::$_configs[$key] = include $file;
         return self::$_configs[$key];
-    }
-
-    /**
-     * @param $cmd
-     * @param string $key
-     * @param string $val
-     * @param int $ttl
-     * @return bool
-     */
-    public static function cache($cmd, $key = '', $val = '', $ttl = 0) {
-        if (in_array($cmd, array('set', 'get', 'rm', 'clear', 'close'))) {
-            $cacher = Cacher::getInstance();
-            switch ($cmd) {
-                case 'get':
-                    return $cacher->get($key);
-                case 'set':
-                    return $cacher->set($key, $val, $ttl);
-                case 'rm':
-                    return $cacher->rm($key);
-                case 'clear':
-                    return $cacher->clear();
-                case 'close':
-                    return $cacher->close();
-            }
-        }
-        return false;
     }
 
     /**

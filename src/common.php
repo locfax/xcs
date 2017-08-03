@@ -149,7 +149,7 @@ function sysdata($cachename, $reset = false) {
         $lost = $cachename; //强制设置为没取到
         $data = '[]';
     } else {
-        $data = \Xcs\Context::cache('get', 'sys_' . $cachename);
+        $data = \Xcs\Cache::get('sys_' . $cachename);
         if (!$data) {
             $lost = $cachename;  //未取到数据
         }

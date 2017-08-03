@@ -78,7 +78,21 @@ class Locker {
         if ('file' == getini('cache/cacher')) {
             return self::dblock($cmd, $name, $ttl);
         }
-        return \Xcs\Context::cache($cmd, 'process_' . $name, time(), $ttl);
+
+        $ret = false;
+        switch ($cmd) {
+            case 'set':
+                $ret = \Xcs\Cache::set('process_' . $name, time(), $ttl);
+                break;
+            case 'get':
+                $ret = \Xcs\Cache::get('process_' . $name);
+                break;
+            case 'rm':
+                $ret = \Xcs\Cache::set('process_' . $name);
+                break;
+        }
+
+        return $ret;
     }
 
     /**
