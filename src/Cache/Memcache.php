@@ -14,6 +14,10 @@ class Memcache {
         $this->close();
     }
 
+    /**
+     * @param $config
+     * @return $this
+     */
     public function init($config) {
         try {
             $this->_link = new \Memcache();
@@ -39,6 +43,10 @@ class Memcache {
         }
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function get($key) {
         try {
             return $this->_link->get($key);
@@ -47,17 +55,38 @@ class Memcache {
         }
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param int $ttl
+     * @return bool
+     */
     public function set($key, $value, $ttl = 0) {
         try {
-            if ($ttl > 0) {
+            $data = $this->get($key);
+            if ($data) {
                 return $this->_link->set($key, $value, MEMCACHE_COMPRESSED, $ttl);
+            } else {
+                return $this->_link->add($key, $value, MEMCACHE_COMPRESSED, $ttl);
             }
-            return $this->_link->set($key, $value);
         } catch (\MemcachedException $e) {
             return false;
         }
     }
 
+    /**
+     * @param $key
+     * @param int $ttl
+     * @return bool
+     */
+    public function expire($key, $ttl = 0) {
+        return false;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
     public function rm($key) {
         try {
             return $this->_link->delete($key);

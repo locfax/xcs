@@ -34,15 +34,15 @@ class Context {
         static $_configs = array();
         $key = APPKEY . '.' . $name . '.' . $type;
         if (isset($_configs[$key])) {
-            return self::$_configs[$key];
+            return $_configs[$key];
         }
         $file = PSROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            self::$_configs[$key] = array();
+            $_configs[$key] = array();
             return array();
         }
-        self::$_configs[$key] = include $file;
-        return self::$_configs[$key];
+        $_configs[$key] = include $file;
+        return $_configs[$key];
     }
 
 }

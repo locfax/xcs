@@ -20,7 +20,6 @@ class Controller {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
         $this->init_var();
-        $this->init_cache();
         //$this->init_timezone();
     }
 
@@ -55,14 +54,6 @@ class Controller {
         if (filter_input(INPUT_GET, 'page')) {
             $_GET['page'] = max(1, filter_input(INPUT_GET, 'page'));
         }
-    }
-
-    /*
-     * 初始缓存
-     */
-    private function init_cache() {
-        $caches = getini('cache/default');
-        loadcache($caches);
     }
 
     /*

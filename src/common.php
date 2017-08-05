@@ -123,43 +123,6 @@ function getini($key) {
     }
 }
 
-//加载系统级别缓存
-function loadcache($cachename, $reset = false) {
-    if (!$cachename) {
-        return null;
-    }
-    $data = sysdata($cachename, $reset);
-    if ('settings' === $cachename && $data) {
-        \Xcs\App::mergeVars('cfg', array('settings' => json_decode($data, true)));
-        return true;
-    }
-    return json_decode($data, true);
-}
-
-/**
- * 系统级别缓存数据
- * @param $cachename
- * @param $reset
- * @return array|string
- */
-
-function sysdata($cachename, $reset = false) {
-    $lost = null;
-    if ($reset) {
-        $lost = $cachename; //强制设置为没取到
-        $data = '[]';
-    } else {
-        $data = \Xcs\Cache::get('sys_' . $cachename);
-        if (!$data) {
-            $lost = $cachename;  //未取到数据
-        }
-    }
-    if (is_null($lost)) {
-        return $data; //取到全部数据 则返回
-    }
-    return \Xcs\Cache\SysData::lost($lost, $reset);
-}
-
 /**
  * @param $maintpl
  * @param $subtpl

@@ -30,7 +30,8 @@ class Session {
     private function _open() {
         //在运行session_start()时连接redis数据库
         try {
-            $this->db = DB::dbo('redis.cache');
+            $config = array();
+            $this->db = Cache\Redis::getInstance()->init($config);
         } catch (\Exception $ex) {
 
         }

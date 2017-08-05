@@ -14,6 +14,10 @@ class Redis {
         $this->close();
     }
 
+    /**
+     * @param $config
+     * @return $this
+     */
     public function init($config) {
         try {
             $this->_link = new \Redis();
@@ -43,6 +47,10 @@ class Redis {
         }
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function get($key) {
         try {
             return $this->_link->get($key);
@@ -51,6 +59,12 @@ class Redis {
         }
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param int $ttl
+     * @return bool
+     */
     public function set($key, $value, $ttl = 0) {
         try {
             $ret = $this->_link->set($key, $value);
@@ -63,6 +77,19 @@ class Redis {
         }
     }
 
+    /**
+     * @param $key
+     * @param int $ttl
+     * @return mixed
+     */
+    public function expire($key, $ttl = 0) {
+        return $this->_link->expire($key, $ttl);
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
     public function rm($key) {
         try {
             return $this->_link->delete($key);
