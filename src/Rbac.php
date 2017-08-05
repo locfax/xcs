@@ -157,11 +157,15 @@ class Rbac {
     private static function _getACT($controllerName) {
         static $globalAcl = array();
         if (empty($globalAcl)) {
-            $jsonacl = include getini('data/_acl') . strtolower(APPKEY) . 'ACT.php';
-            if (!$jsonacl) {
-                throw new Exception\Exception('ACL文件不存在');
+            $actfile = getini('data/_acl') . strtolower(APPKEY) . 'ACT.php';
+            if (!file_exists($actfile)) {
+                return array();
             }
+            $jsonacl = include $actfile;
             $globalAcl = json_decode($jsonacl, true);
+            if (empty($globalAcl)) {
+                return array();
+            }
         }
         if (isset($globalAcl[$controllerName])) {
             return $globalAcl[$controllerName];
