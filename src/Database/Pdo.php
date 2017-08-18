@@ -314,6 +314,48 @@ class Pdo {
     }
 
     /**
+     * @param string $tableName
+     * @param string $field
+     * @param mixed $condition
+     * @return bool
+     */
+    public function resultFirst($tableName, $field, $condition) {
+        try {
+            if (is_array($condition)) {
+                list($condition, $args) = $this->field_param($condition, ' AND ');
+                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sth->execute($args);
+            } else {
+                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+            }
+            return $sth->fetchColumn();
+        } catch (\PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode());
+        }
+    }
+
+
+    public function getCol($tableName, $field, $condition) {
+        try {
+            if (is_array($condition)) {
+                list($condition, $args) = $this->field_param($condition, ' AND ');
+                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sth->execute($args);
+            } else {
+                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+            }
+            $rows = $sth->fetchAll();
+            $ret = array();
+            foreach ($rows as $row) {
+                $ret[] = $row[$field];
+            }
+            return $ret;
+        } catch (\PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode());
+        }
+    }
+
+    /**
      * @param $sql
      * @param null $args
      * @return bool
@@ -430,7 +472,7 @@ class Pdo {
      * @return bool
      */
     public function count($tableName, $condition, $field = '*') {
-        return $this->result_first($tableName, "COUNT({$field})", $condition);
+        return $this->resultFirst($tableName, "COUNT({$field})", $condition);
     }
 
     /**
@@ -439,28 +481,7 @@ class Pdo {
      * @return bool
      */
     public function counts($sql, $args = null) {
-        return $this->result_firsts($sql, $args);
-    }
-
-    /**
-     * @param string $tableName
-     * @param string $field
-     * @param mixed $condition
-     * @return bool
-     */
-    public function result_first($tableName, $field, $condition) {
-        try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
-                $sth->execute($args);
-            } else {
-                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
-            }
-            return $sth->fetchColumn();
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
-        }
+        return $this->firsts($sql, $args);
     }
 
     /**
@@ -468,7 +489,7 @@ class Pdo {
      * @param null $args
      * @return bool
      */
-    public function result_firsts($sql, $args = null) {
+    public function firsts($sql, $args = null) {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -477,6 +498,25 @@ class Pdo {
                 $sth->execute($args);
             }
             return $sth->fetchColumn();
+        } catch (\PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode());
+        }
+    }
+
+    public function getcols($sql, $args = null) {
+        try {
+            if (is_null($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
+                $sth = $this->_link->prepare($sql);
+                $sth->execute($args);
+            }
+            $rows = $sth->fetchAll();
+            $ret = array();
+            foreach ($rows as $row) {
+                $ret[] = array_pop($row);
+            }
+            return $ret;
         } catch (\PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
         }

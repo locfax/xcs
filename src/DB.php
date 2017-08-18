@@ -186,13 +186,24 @@ class DB {
      * $filed mix  需要返回的字段  或者sql语法
      *
      * @param string $table
-     * @param string $filed
+     * @param string $field
      * @param mixed $condition
      * @return mixed
      */
-    public static function first($table, $filed, $condition) {
+    public static function first($table, $field, $condition) {
         $db = self::Using(self::$using_dbo_id);
-        return $db->result_first($table, $filed, $condition);
+        return $db->resultFirst($table, $field, $condition);
+    }
+
+    /**
+     * @param $table
+     * @param $field
+     * @param $condition
+     * @return mixed
+     */
+    public static function getCol($table, $field, $condition) {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->getCol($table, $field, $condition);
     }
 
     //--------------多表联合查询---start---------------//
@@ -257,7 +268,17 @@ class DB {
      */
     public static function firsts($sql, $args = null) {
         $db = self::Using(self::$using_dbo_id);
-        return $db->result_firsts($sql, $args);
+        return $db->firsts($sql, $args);
+    }
+
+    /**
+     * @param $sql
+     * @param null $args
+     * @return mixed
+     */
+    public static function getcols($sql, $args = null) {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->getcols($sql, $args);
     }
 
     //--------------多表联合查询---end---------------//
