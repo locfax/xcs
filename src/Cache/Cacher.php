@@ -16,8 +16,8 @@ class Cacher {
         $this->config = getini('cache');
         $this->prefix = $this->config['prefix'];
         $cacher = $cacher ?: $this->config['cacher'];
-        if (in_array($cacher, array('file', 'memcache', 'redis', 'xcache'))) {
-            $class = "\\Xcs\\Cache\\".ucfirst($cacher);
+        if (in_array($cacher, array('file', 'memcache', 'redis'))) {
+            $class = "\\Xcs\\Cache\\" . ucfirst($cacher);
             if ($cacher != 'file') {
                 $config = \Xcs\Context::dsn($cacher . '.cache');
             } else {
@@ -32,12 +32,8 @@ class Cacher {
         //return $this;
     }
 
-    public static function factory($cacher) {
-        return new self($cacher);
-    }
-
     public function close() {
-        $this->enable && $this->cacher->close();
+        return $this->enable && $this->cacher->close();
     }
 
     public function get($key) {
