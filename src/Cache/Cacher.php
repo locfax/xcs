@@ -29,7 +29,6 @@ class Cacher {
         } else {
             throw new \Xcs\Exception\Exception('不存在的缓存器');
         }
-        return $this;
     }
 
     public function close() {
