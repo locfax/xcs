@@ -265,7 +265,8 @@ class Template {
     }
 
     private function transamp($str) {
-        $str = str_replace('&', '&amp;', $str[0]);
+        //$str = str_replace('&', '&amp;', $str[0]);
+        $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
         $str = str_replace('\"', '"', $str);
         return $str;
