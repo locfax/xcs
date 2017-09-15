@@ -522,13 +522,6 @@ class Pdo {
         }
     }
 
-    /**
-     * @return string
-     */
-    public function version() {
-        return 'pdo null';
-    }
-
     public function start_trans() {
         $this->_link->beginTransaction();
     }

@@ -360,13 +360,6 @@ class Mongo {
         }
     }
 
-    /**
-     * @return string
-     */
-    public function version() {
-        return 'mongo null';
-    }
-
     private function _halt($message = '', $code = 0) {
         if ($this->_config['rundev']) {
             $this->close();
