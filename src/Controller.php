@@ -4,8 +4,6 @@ namespace Xcs;
 
 class Controller {
 
-    //用户信息
-    protected $login_user = null;
     //当前控制器
     protected $_ctl;
     //当前动作
@@ -21,10 +19,6 @@ class Controller {
         $this->_act = $actionName;
         $this->init_var();
         //$this->init_timezone();
-    }
-
-    public function __destruct() {
-
     }
 
     /**
@@ -65,14 +59,9 @@ class Controller {
         $timeoffset && date_default_timezone_set('Etc/GMT' . ($timeoffset > 0 ? '-' : '+') . abs($timeoffset));
     }
 
-    final function checklogin() {
-        if ($this->login_user) {
-            return $this->login_user;
-        }
-        $this->login_user = User::getUser();
-        return $this->login_user;
-    }
-
+    /*
+     * 权限验证
+     */
     final function checkacl($controllerName, $actionName, $auth = AUTH) {
         return Rbac::check($controllerName, $actionName, $auth);
     }
