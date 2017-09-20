@@ -19,28 +19,28 @@ class Rbac {
     public static function check($controllerName, $actionName = null, $auth = 'general') {
         $_controllerName = strtoupper($controllerName);
         $_actionName = strtolower($actionName);
-        $ACT = self::_getACT($_controllerName);
-        //if controller offer empty ACT, authtype 'general' then allow
+        $ACL = self::_getACL($_controllerName);
+        //if controller offer empty AC, authtype 'general' then allow
         if ('general' == $auth) {
-            if (is_null($ACT) || empty($ACT)) {
+            if (is_null($ACL) || empty($ACL)) {
                 return true;
             }
         } else {
-            if (is_null($ACT) || empty($ACT)) {
+            if (is_null($ACL) || empty($ACL)) {
                 return false;
             }
         }
         // get user rolearray
         $roles = User::getRolesArray();
         // 1, check user's role whether allow to call controller
-        if (!self::_check($roles, $ACT)) {
+        if (!self::_check($roles, $ACL)) {
             return false;
         }
         // 2, check user's role whether allow to call action
         if (!is_null($_actionName)) {
             //$actionName = strtoupper($_actionName);
-            if (isset($ACT['actions'][$_actionName])) {
-                if (!self::_check($roles, $ACT['actions'][$_actionName])) {
+            if (isset($ACL['actions'][$_actionName])) {
+                if (!self::_check($roles, $ACL['actions'][$_actionName])) {
                     return false;
                 }
             }
@@ -50,37 +50,37 @@ class Rbac {
 
     /**
      * @param $_roles
-     * @param $ACT
+     * @param $ACL
      * @return bool
      */
-    private static function _check($_roles, $ACT) {
+    private static function _check($_roles, $ACL) {
         $roles = array_map('strtoupper', $_roles);
-        if ($ACT['allow'] == self::ACL_EVERYONE) {
+        if ($ACL['allow'] == self::ACL_EVERYONE) {
             //if allow all role ,and deny is't set ,then allow
-            if ($ACT['deny'] == self::ACL_NULL) {
+            if ($ACL['deny'] == self::ACL_NULL) {
                 return true;
             }
-            //if deny is ACT_NO_ROLE ,then user has role, allow
-            if ($ACT['deny'] == self::ACL_NO_ROLE) {
+            //if deny is AC_NO_ROLE ,then user has role, allow
+            if ($ACL['deny'] == self::ACL_NO_ROLE) {
                 if (empty($roles)) {
                     return false;
                 }
                 return true;
             }
             //if deny is ACL_HAS_ROLE ,then user's role is empty , allow
-            if ($ACT['deny'] == self::ACL_HAS_ROLE) {
+            if ($ACL['deny'] == self::ACL_HAS_ROLE) {
                 if (empty($roles)) {
                     return true;
                 }
                 return false;
             }
-            //if deny is ACL_EVERYONE ,then ACT is false
-            if ($ACT['deny'] == self::ACL_EVERYONE) {
+            //if deny is ACL_EVERYONE ,then AC is false
+            if ($ACL['deny'] == self::ACL_EVERYONE) {
                 return false;
             }
             //if deny has't the role of user's roles , allow
             foreach ($roles as $role) {
-                if (in_array($role, $ACT['deny'], true)) {
+                if (in_array($role, $ACL['deny'], true)) {
                     return false;
                 }
             }
@@ -89,24 +89,24 @@ class Rbac {
 
         do {
             //if allow request role , user's role has't the role , deny
-            if ($ACT['allow'] == self::ACL_HAS_ROLE) {
+            if ($ACL['allow'] == self::ACL_HAS_ROLE) {
                 if (!empty($roles)) {
                     break;
                 }
                 return false;
             }
             //if allow request user's role is empty , but user's role is not empty , deny
-            if ($ACT['allow'] == self::ACL_NO_ROLE) {
+            if ($ACL['allow'] == self::ACL_NO_ROLE) {
                 if (empty($roles)) {
                     break;
                 }
                 return false;
             }
-            if ($ACT['allow'] != self::ACL_NULL) {
+            if ($ACL['allow'] != self::ACL_NULL) {
                 //if allow request the rolename , then check
                 $passed = false;
                 foreach ($roles as $role) {
-                    if (in_array($role, $ACT['allow'], true)) {
+                    if (in_array($role, $ACL['allow'], true)) {
                         $passed = true;
                         break;
                     }
@@ -118,30 +118,30 @@ class Rbac {
         } while (false);
 
         //if deny is't set , allow
-        if ($ACT['deny'] == self::ACL_NULL) {
+        if ($ACL['deny'] == self::ACL_NULL) {
             return true;
         }
         //if deny is ACL_NO_ROEL, user'role is't empty , allow
-        if ($ACT['deny'] == self::ACL_NO_ROLE) {
+        if ($ACL['deny'] == self::ACL_NO_ROLE) {
             if (empty($roles)) {
                 return false;
             }
             return true;
         }
         //if deny is ACL_HAS_ROLE, user's role is empty ,allow
-        if ($ACT['deny'] == self::ACL_HAS_ROLE) {
+        if ($ACL['deny'] == self::ACL_HAS_ROLE) {
             if (empty($roles)) {
                 return true;
             }
             return false;
         }
         //if deny is ACL_EVERYONE, then deny all
-        if ($ACT['deny'] == self::ACL_EVERYONE) {
+        if ($ACL['deny'] == self::ACL_EVERYONE) {
             return false;
         }
         //only deny hasn't the role of user's role ,allow
         foreach ($roles as $role) {
-            if (in_array($role, $ACT['deny'], true)) {
+            if (in_array($role, $ACL['deny'], true)) {
                 return false;
             }
         }
@@ -154,15 +154,10 @@ class Rbac {
      * @return null
      * @throws Exception\Exception
      */
-    private static function _getACT($controllerName) {
+    private static function _getACL($controllerName) {
         static $globalAcl = array();
         if (empty($globalAcl)) {
-            $actfile = getini('data/_acl') . strtolower(APPKEY) . 'ACT.php';
-            if (!file_exists($actfile)) {
-                return array();
-            }
-            $jsonacl = include $actfile;
-            $globalAcl = json_decode($jsonacl, true);
+            $globalAcl = SysCache::loadcache('acl' . APPKEY);
             if (empty($globalAcl)) {
                 return array();
             }

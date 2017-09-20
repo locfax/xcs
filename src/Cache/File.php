@@ -34,7 +34,7 @@ class File {
         $cachefile = getini('data/_cache') . $key . '.php';
         if (is_file($cachefile)) {
             $data = include $cachefile;
-            if ($data && $data['timeout'] > time()) {
+            if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
                 return $data['data'];
             }
             unlink($cachefile);
@@ -52,8 +52,8 @@ class File {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
         } else {
-            //默认存储一个月
-            $timeout = time() + 30 * 24 * 3600;
+            //默认存储永久
+            $timeout = 0;
         }
 
         $cachefile = getini('data/_cache') . $key . '.php';
