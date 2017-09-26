@@ -2,6 +2,6 @@
 
 namespace Xcs\Exception;
 
-class DbException extends \Exception {
+class DbException extends Exception {
 
 }

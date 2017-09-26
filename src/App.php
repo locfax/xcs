@@ -182,13 +182,14 @@ class App {
      */
     public static function mergeVars($group, $vars = null) {
         static $_CDATA = array(APPKEY => array('dsn' => null, 'cfg' => null, 'data' => null));
+        $appkey = APPKEY;
         if (is_null($vars)) {
-            return $_CDATA[APPKEY][$group];
+            return $_CDATA[$appkey][$group];
         }
-        if (is_null($_CDATA[APPKEY][$group])) {
-            $_CDATA[APPKEY][$group] = $vars;
+        if (is_null($_CDATA[$appkey][$group])) {
+            $_CDATA[$appkey][$group] = $vars;
         } else {
-            $_CDATA[APPKEY][$group] = array_merge($_CDATA[APPKEY][$group], $vars);
+            $_CDATA[$appkey][$group] = array_merge($_CDATA[$appkey][$group], $vars);
         }
         return true;
     }
