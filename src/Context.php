@@ -12,19 +12,20 @@ class Context {
      */
     public static function dsn($dsnid) {
         static $_dsns = array();
-        if (!isset($_dsns[APPKEY])) {
+        $appkey = APPKEY;
+        if (!isset($_dsns[$appkey])) {
             $dsns = App::mergeVars('dsn');
             foreach ($dsns as $key => $dsn) {
-                $dsns[$key]['dsnkey'] = md5(APPKEY . '_' . $key . '_' . $dsn['driver'] . '_' . $dsn['dsn']); //连接池key
+                $dsns[$key]['dsnkey'] = md5($appkey . '_' . $key . '_' . $dsn['driver'] . '_' . $dsn['dsn']); //连接池key
             }
-            $_dsns[APPKEY] = $dsns;
-            if (!isset($_dsns[APPKEY][$dsnid])) {
-                $_dsns[APPKEY][$dsnid] = array();
+            $_dsns[$appkey] = $dsns;
+            if (!isset($_dsns[$appkey][$dsnid])) {
+                $_dsns[$appkey][$dsnid] = array();
             }
             $dsns = null;
         }
         //如果没配置$dsnid 会报错
-        return $_dsns[APPKEY][$dsnid];
+        return $_dsns[$appkey][$dsnid];
     }
 
     /**
