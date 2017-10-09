@@ -4,8 +4,6 @@ namespace Xcs;
 
 class Context {
 
-    use Traits\Context;
-
     /**
      * @param $dsnid
      * @return mixed
