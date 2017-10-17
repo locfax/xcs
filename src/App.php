@@ -313,9 +313,9 @@ class App {
      * @return boolean
      */
     public static function vendor($class, $ext = '.php', $baseUrl = LIBPATH) {
-        static $_file = [];
+        static $_file = array();
         $key = $class . $baseUrl . $ext;
-        $class = str_replace(['.', '#'], ['/', '.'], $class);
+        $class = str_replace(array('.', '#'), array('/', '.'), $class);
 
         if (isset($_file[$key])) { //如果已经include过，不需要再次载入
             return true;

@@ -93,7 +93,7 @@ class Util {
      * @return string
      */
     public static function referer($default = '') {
-        $referer = getgpc('s.HTTP_REFERER');
+        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
         if (empty($referer)) {
             $referer = $default;
         }
@@ -116,7 +116,7 @@ class Util {
      * @return string
      */
     public static function output_json($arr) {
-        if (PHPVER >= 5.4) {
+        if (floatval(PHP_VERSION) >= 5.4) {
             return json_encode($arr, JSON_UNESCAPED_UNICODE);
         }
         $json = json_encode(self::urlencode($arr));
@@ -268,9 +268,9 @@ EOT;
         }
         $kw_spiders = 'Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla';
         $kw_browsers = 'MSIE|Netscape|Opera|Konqueror|Mozilla';
-        if (!self::strpos(getgpc('s.HTTP_USER_AGENT'), 'http://') && preg_match("/($kw_browsers)/i", getgpc('s.HTTP_USER_AGENT'))) {
+        if (!self::strpos($_SERVER['HTTP_USER_AGENT'], 'http://') && preg_match("/($kw_browsers)/i", $_SERVER['HTTP_USER_AGENT'])) {
             $is_robot = false;
-        } elseif (preg_match("/($kw_spiders)/i", getgpc('s.HTTP_USER_AGENT'))) {
+        } elseif (preg_match("/($kw_spiders)/i", $_SERVER['HTTP_USER_AGENT'])) {
             $is_robot = true;
         } else {
             $is_robot = false;
@@ -286,7 +286,7 @@ EOT;
         if (isset($is_mobile)) {
             return $is_mobile;
         }
-        $ua = getgpc('s.HTTP_USER_AGENT');
+        $ua = $_SERVER['HTTP_USER_AGENT'];
         if (empty($ua)) {
             $is_mobile = false;
         } elseif (strpos($ua, 'Mobile') !== false || strpos($ua, 'Android') !== false || strpos($ua, 'Silk/') !== false || strpos($ua, 'Kindle') !== false || strpos($ua, 'BlackBerry') !== false || strpos($ua, 'Opera Mini') !== false || strpos($ua, 'Opera Mobi') !== false) {
@@ -301,18 +301,34 @@ EOT;
      * @return null
      */
     public static function clientip() {
-        $ip = getgpc('s.REMOTE_ADDR');
-        if (getgpc('s.HTTP_CLIENT_IP') && preg_match('/^([0-9]{1,3}\.){3}[0-9]{1,3}$/', getgpc('s.HTTP_CLIENT_IP'))) {
-            $ip = getgpc('s.HTTP_CLIENT_IP');
-        } elseif (getgpc('s.HTTP_X_FORWARDED_FOR') && preg_match_all('#\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}#s', getgpc('s.HTTP_X_FORWARDED_FOR'), $matches)) {
-            foreach ($matches[0] AS $xip) {
-                if (!preg_match('#^(10|172\.16|192\.168)\.#', $xip)) {
-                    $ip = $xip;
-                    break;
-                }
-            }
+        $onlineip = '';
+        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+            $onlineip = getenv('HTTP_CLIENT_IP');
+        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
+            $onlineip = getenv('HTTP_X_FORWARDED_FOR');
+        } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+            $onlineip = getenv('REMOTE_ADDR');
+        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+            $onlineip = $_SERVER['REMOTE_ADDR'];
         }
-        return $ip;
+        return $onlineip;
+    }
+
+    /**
+     * @return array|false|string
+     */
+    public static function client_ip() {
+        $onlineip = '';
+        if (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+            $onlineip = getenv('REMOTE_ADDR');
+        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+            $onlineip = $_SERVER['REMOTE_ADDR'];
+        } elseif (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+            $onlineip = getenv('HTTP_CLIENT_IP');
+        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
+            $onlineip = getenv('HTTP_X_FORWARDED_FOR');
+        }
+        return $onlineip;
     }
 
     /**
