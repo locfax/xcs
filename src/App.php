@@ -30,49 +30,40 @@ class App {
 
     public static function runFile($preload, $refresh = false) {
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
-            if (error_reporting() & $errno) {
-                throw new Exception\ErrorException($error, $errno);
-            }
-            return true;
+            throw new Exception\ErrorException($error, $errno);
         });
+        $dfiles = array(
+            PSROOT . '/config/base.inc.php', //全局配置
+            PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
+            PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
+            BASEPATH . 'common.php'
+        );
         if (defined('DEBUG') && DEBUG) {
             //测试模式
-            $dfiles = array(
-                PSROOT . '/config/base.inc.php', //全局配置
-                PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
-                PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
-                BASEPATH . 'common.php'
-            );
             $files = array_merge($dfiles, $preload);
             foreach ($files as $file) {
                 include $file;
             }
-            self::rootNamespace('\\', APPPATH);
         } else {
             //正式模式
-            self::_runFile($preload, $refresh);
+            self::_runFile($preload, $dfiles, $refresh);
         }
+        self::rootNamespace('\\', APPPATH);
     }
 
     /**
-     * @param $preload
+     * @param array $preload
+     * @param array $dfiles
      * @param bool $refresh
      * @return bool
      */
-    public static function _runFile($preload, $refresh = false) {
+    public static function _runFile($preload, $dfiles, $refresh = false) {
         $preloadfile = DATAPATH . 'preload/runtime_' . APPKEY . '_files.php';
         if (!is_file($preloadfile) || $refresh) {
-            $dfiles = array(
-                PSROOT . '/config/base.inc.php', //全局配置
-                PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
-                PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
-                BASEPATH . 'common.php'
-            );
             $files = array_merge($dfiles, $preload);
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
         $preloadfile && require $preloadfile;
-        self::rootNamespace('\\', APPPATH);
     }
 
     /**
@@ -147,19 +138,7 @@ class App {
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            if (defined('DEBUG') && DEBUG) {
-                call_user_func(array($controller, $actionMethod));
-            } else {
-                try {
-                    call_user_func(array($controller, $actionMethod));
-                } catch (Exception\ErrorException $exception) { //系统错误
-                    //静默
-                } catch (Exception\DbException $exception) { //db异常
-                    //静默
-                } catch (\Exception $exception) { //普通异常
-                    //静默
-                }
-            }
+            call_user_func(array($controller, $actionMethod));
             $controller = null;
             return true;
         } while (false);

@@ -175,7 +175,7 @@ class Exception extends \Exception {
   background: none repeat scroll 0 0 #FFFFCC;
   border: 1px solid #aaaaaa;
   color: #000000;
-  font: arial, sans-serif;
+  font-family: arial, sans-serif;
   font-size: 9pt;
   line-height: 160%;
   margin-top: 1em;
