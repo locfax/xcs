@@ -339,15 +339,14 @@ class Pdo {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}");
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}");
             }
-            $rows = $sth->fetchAll();
             $ret = array();
-            foreach ($rows as $row) {
-                $ret[] = $row[$field];
+            while ($col = $sth->fetchColumn()) {
+                $ret[] = $col;
             }
             return $ret;
         } catch (\PDOException $e) {
@@ -511,10 +510,9 @@ class Pdo {
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             }
-            $rows = $sth->fetchAll();
             $ret = array();
-            foreach ($rows as $row) {
-                $ret[] = array_pop($row);
+            while ($col = $sth->fetchColumn()) {
+                $ret[] = $col;
             }
             return $ret;
         } catch (\PDOException $e) {
