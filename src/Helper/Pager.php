@@ -85,8 +85,8 @@ class Pager {
         if ($curpage > $realpages) {
             $curpage = $realpages;
         }
-        $prev = $curpage > 1 ? '<li class="previous"><a href="' . $mpurl . 'page' . ($curpage - 1) . '.htm">' . $lang['prev'] . '</a></li>' : '';
-        $next = $curpage < $realpages ? "<li class='next'><a href=\"" . $mpurl . 'page' . ($curpage + 1) . '.htm">' . $lang['next'] . '</a></li>' : '';
+        $prev = $curpage > 1 ? '<li class="previous"><a href="' . $mpurl . '?page=' . ($curpage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
+        $next = $curpage < $realpages ? "<li class='next'><a href=\"" . $mpurl . '?page=' . ($curpage + 1) .'">' . $lang['next'] . '</a></li>' : '';
         $pagenum = "<li class=\"pager-nums\">{$curpage} / {$realpages}</li>";
         if ($next || $prev) {
             $return .= $prev . $pagenum . $next;
