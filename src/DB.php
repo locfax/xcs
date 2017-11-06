@@ -332,7 +332,7 @@ class DB {
             }
         }
         if (self::$using_dbo_id === 'none') {
-            throw new Exception\Exception('dsn is none', 0);
+            throw new Exception\DbException('dsn is none', 0);
         }
         return self::dbm(self::$using_dbo_id);
     }

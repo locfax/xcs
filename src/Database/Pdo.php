@@ -586,15 +586,15 @@ class Pdo {
      * @param bool $commit_no_errors
      */
     public function end_trans($commit_no_errors = true) {
-        //try {
+        try {
             if ($commit_no_errors) {
                 $this->_link->commit();
             } else {
                 $this->_link->rollBack();
             }
-//        } catch (\PDOException $PDOException) {
-//            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
-//        }
+        } catch (\PDOException $PDOException) {
+            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
+        }
     }
 
     /**
