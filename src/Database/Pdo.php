@@ -5,7 +5,7 @@ namespace Xcs\Database;
 class Pdo {
 
     private $_config = null;
-    private $_link = null;
+    public $_link = null;
 
     public function __destruct() {
         $this->close();
@@ -22,6 +22,7 @@ class Pdo {
 
     /**
      * @param $config
+     * @param bool $buffered
      * @param string $type
      * @return bool
      */
@@ -35,6 +36,7 @@ class Pdo {
                 \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
                 \PDO::ATTR_EMULATE_PREPARES => false,
                 \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+                //\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
                 \PDO::ATTR_PERSISTENT => false
             );
             $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
@@ -573,19 +575,26 @@ class Pdo {
         }
     }
 
+    /**
+     * @return mixed
+     */
     public function start_trans() {
-        $this->_link->beginTransaction();
+        return $this->_link->beginTransaction();
     }
 
     /**
      * @param bool $commit_no_errors
      */
     public function end_trans($commit_no_errors = true) {
-        if ($commit_no_errors) {
-            $this->_link->commit();
-        } else {
-            $this->_link->rollBack();
-        }
+        //try {
+            if ($commit_no_errors) {
+                $this->_link->commit();
+            } else {
+                $this->_link->rollBack();
+            }
+//        } catch (\PDOException $PDOException) {
+//            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
+//        }
     }
 
     /**
@@ -615,23 +624,6 @@ class Pdo {
         $totalpage = ceil($totalnum / $ppp);
         $_page = max(1, min($totalpage, intval($page)));
         return ($_page - 1) * $ppp;
-    }
-
-    /**
-     * @param $string
-     * @return array|string
-     */
-    private function daddslashes($string) {
-        if (empty($string)) {
-            return $string;
-        }
-        if (is_numeric($string)) {
-            return $string;
-        }
-        if (is_array($string)) {
-            return array_map('$this->daddslashes', $string);
-        }
-        return addslashes($string);
     }
 
     /**

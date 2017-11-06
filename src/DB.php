@@ -17,14 +17,16 @@ class DB {
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
-            $dbo->connect($_dsn);
+            if(is_null($dbo->_link)) {
+                $dbo->connect($_dsn);
+            }
         } else {
             if ('mongo' == $_dsn['driver']) {
-                $dbo = new \Xcs\Database\Mongo();
+                $dbo = new Database\Mongo();
             } elseif ('mysql' == $_dsn['driver']) {
-                $dbo = new \Xcs\Database\Pdo();
+                $dbo = new Database\Pdo();
             } else {
-                $dbo = new \Xcs\Database\Pdo(); //默认为Pdo
+                $dbo = new Database\Pdo(); //默认为Pdo
             }
             call_user_func(array($dbo, 'connect'), $_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
@@ -34,16 +36,19 @@ class DB {
 
     /**
      * @param string $dsnid
-     * @return \Xcs\Database\Pdo
+     * @return Database\Pdo
      */
     public static function dbm($dsnid = 'portal') {
+        static $inc = 0;
         $_dsn = Context::dsn($dsnid);
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
-            $dbo->connect($_dsn);
+            if(is_null($dbo->_link)) {
+                $dbo->connect($_dsn);
+            }
         } else {
-            $dbo = new \Xcs\Database\Pdo();
+            $dbo = new Database\Pdo();
             call_user_func(array($dbo, 'connect'), $_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
         }
