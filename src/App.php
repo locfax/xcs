@@ -30,7 +30,7 @@ class App {
 
     public static function runFile($preload, $refresh = false) {
         set_error_handler(function ($errno, $error, $file = null, $line = null) {
-            throw new Exception\ErrorException($error, $errno);
+            throw new \ErrorException($error, $errno);
         });
         $dfiles = array(
             PSROOT . '/config/base.inc.php', //全局配置
@@ -138,7 +138,15 @@ class App {
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            call_user_func(array($controller, $actionMethod));
+            try {
+                call_user_func(array($controller, $actionMethod));
+            } catch (\ErrorException $exception) {
+                throw new Exception\ErrorException($exception->getMessage(), $exception->getCode());
+            } catch (\Exception $exception) {
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+            } catch (\Throwable $exception) {
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+            }
             $controller = null;
             return true;
         } while (false);

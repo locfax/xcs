@@ -124,14 +124,15 @@ class Pdo {
             $comma = ',';
         }
         try {
-            $sth = $this->_link->prepare('INSERT INTO ' . $tableName . '(' . $fields . ') VALUES (' . $values . ')');
+            $sql = 'INSERT INTO ' . $tableName . '(' . $fields . ') VALUES (' . $values . ')';
+            $sth = $this->_link->prepare($sql);
             $data = $sth->execute($args);
             if ($retid) {
                 return $this->_link->lastInsertId();
             }
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -154,14 +155,15 @@ class Pdo {
             $comma = ',';
         }
         try {
-            $sth = $this->_link->prepare('REPLACE INTO ' . $tableName . '(' . $fields . ') VALUES (' . $values . ')');
+            $sql = 'REPLACE INTO ' . $tableName . '(' . $fields . ') VALUES (' . $values . ')';
+            $sth = $this->_link->prepare($sql);
             $data = $sth->execute($args);
             if ($retnum) {
                 return $sth->rowCount();
             }
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -184,7 +186,8 @@ class Pdo {
                 list($data, $argsf) = $this->field_param($data, ',');
                 list($condition, $argsw) = $this->field_param($condition, ' AND ');
                 $args = array_merge($argsf, $argsw);
-                $sth = $this->_link->prepare("UPDATE {$tableName} SET {$data} WHERE {$condition}");
+                $sql = "UPDATE {$tableName} SET {$data} WHERE {$condition}";
+                $sth = $this->_link->prepare($sql);
                 $data = $sth->execute($args);
                 if ($retnum) {
                     return $sth->rowCount();
@@ -194,10 +197,11 @@ class Pdo {
                 if (is_array($data)) {
                     $data = $this->field_value($data, ',');
                 }
-                return $this->_link->exec("UPDATE {$tableName} SET {$data} WHERE {$condition}");
+                $sql = "UPDATE {$tableName} SET {$data} WHERE {$condition}";
+                return $this->_link->exec($sql);
             }
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -216,9 +220,10 @@ class Pdo {
         }
         $limit = $muti ? '' : ' LIMIT 1';
         try {
-            return $this->_link->exec('DELETE FROM ' . $tableName . ' WHERE ' . $condition . $limit);
+            $sql = 'DELETE FROM ' . $tableName . ' WHERE ' . $condition . $limit;
+            return $this->_link->exec($sql);
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -233,10 +238,12 @@ class Pdo {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT 0,1');
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT 0,1';
+                $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT 0,1');
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT 0,1';
+                $sth = $this->_link->query($sql);
             }
             if ($retobj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
@@ -246,7 +253,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -262,10 +269,12 @@ class Pdo {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition);
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition;
+                $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition);
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition;
+                $sth = $this->_link->query($sql);
             }
             if ($retobj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
@@ -278,7 +287,7 @@ class Pdo {
             }
             return $this->array_index($data, $index);
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -297,10 +306,12 @@ class Pdo {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
                 $args[':start'] = $start;
                 $args[':length'] = $length;
-                $sth = $this->_link->prepare('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT :start,:length');
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . ' LIMIT :start,:length';
+                $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query('SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . " LIMIT {$start},{$length}");
+                $sql = 'SELECT ' . $field . ' FROM ' . $tableName . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
+                $sth = $this->_link->query($sql);
             }
             if ($retobj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
@@ -310,7 +321,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -351,16 +362,18 @@ class Pdo {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sql = "SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1";
+                $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1");
+                $sql = "SELECT {$field} AS result FROM {$tableName} WHERE  {$condition} LIMIT 0,1";
+                $sth = $this->_link->query($sql);
             }
             $data = $sth->fetchColumn();
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -369,10 +382,12 @@ class Pdo {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sth = $this->_link->prepare("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}");
+                $sql = "SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}";
+                $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sth = $this->_link->query("SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}");
+                $sql = "SELECT {$field} AS result FROM {$tableName} WHERE  {$condition}";
+                $sth = $this->_link->query($sql);
             }
             $data = array();
             while ($col = $sth->fetchColumn()) {
@@ -381,7 +396,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -401,7 +416,7 @@ class Pdo {
             }
             return $ret;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -428,7 +443,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -459,7 +474,7 @@ class Pdo {
             }
             return $this->array_index($data, $index);
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -486,7 +501,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -552,7 +567,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -571,7 +586,7 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode());
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
@@ -603,12 +618,12 @@ class Pdo {
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    private function _halt($message = '', $code = 0) {
+    private function _halt($message = '', $code = 0, $sql) {
         if ($this->_config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            throw new \Xcs\Exception\DbException($message, intval($code));
+            throw new \Xcs\Exception\DbException($message . ' SQL:' . $sql, intval($code));
         }
         return false;
     }
