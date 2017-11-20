@@ -18,7 +18,7 @@ class DB {
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
             if(is_null($dbo->_link)) {
-                $dbo->connect($_dsn);
+                call_user_func(array($dbo, 'connect'), $_dsn);
             }
         } else {
             if ('mongo' == $_dsn['driver']) {
@@ -45,7 +45,7 @@ class DB {
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
             if(is_null($dbo->_link)) {
-                $dbo->connect($_dsn);
+                call_user_func(array($dbo, 'connect'), $_dsn);
             }
         } else {
             $dbo = new Database\Pdo();
