@@ -170,7 +170,7 @@ class Util {
         if ('html' == $type) {
             header("Content-type: text/html; charset=UTF-8");
         } elseif ('json' == $type) {
-            header('Content-type: text/html; charset=UTF-8');
+            header('Content-type: text/json; charset=UTF-8');
             $res = self::output_json($res);
         } elseif ('xml' == $type) {
             header("Content-type: text/xml");

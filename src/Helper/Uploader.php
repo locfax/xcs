@@ -14,7 +14,7 @@ class Uploader {
      * @param bool $cascade
      * @return $this|null
      */
-    public function init($tempfiles, $cascade = false) {
+    public function init($tempfiles, $cascade = true) {
         $this->reset();
 
         if (!is_array($tempfiles)) {
@@ -30,7 +30,7 @@ class Uploader {
                     if ($struct['error'][$i] != UPLOAD_ERR_NO_FILE) {
                         $arr[] = new HandleUpload($struct, $field, $i);
                         if (!$cascade) {
-                            $this->_files["{$field}{$i}"] = &$arr[count($arr) - 1];
+                            $this->_files["{$field}{$i}"] = $arr[count($arr) - 1];
                         }
                     }
                 }
