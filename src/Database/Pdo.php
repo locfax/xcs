@@ -615,10 +615,11 @@ class Pdo {
     /**
      * @param string $message
      * @param int $code
+     * @param string $sql
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    private function _halt($message = '', $code = 0, $sql) {
+    private function _halt($message = '', $code = 0, $sql = '') {
         if ($this->_config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
