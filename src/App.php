@@ -29,9 +29,6 @@ class App {
     }
 
     public static function runFile($preload, $refresh = false) {
-        set_error_handler(function ($errno, $error, $file = null, $line = null) {
-            throw new \ErrorException($error, $errno);
-        });
         $dfiles = array(
             PSROOT . '/config/base.inc.php', //全局配置
             PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
@@ -40,6 +37,10 @@ class App {
         );
         if (defined('DEBUG') && DEBUG) {
             //测试模式
+            set_error_handler(function ($errno, $error, $file = null, $line = null) {
+                throw new \ErrorException($error, $errno);
+            });
+
             $files = array_merge($dfiles, $preload);
             foreach ($files as $file) {
                 include $file;
