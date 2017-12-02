@@ -17,6 +17,7 @@ class Memcache {
     /**
      * @param $config
      * @return $this
+     * @throws \Exception
      */
     public function init($config) {
         try {
@@ -32,7 +33,7 @@ class Memcache {
                 $this->enable = true;
             }
         } catch (\MemcachedException $e) {
-
+            throw new \Exception('memcache初始化错误');
         }
         return $this;
     }

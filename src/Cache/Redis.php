@@ -17,6 +17,7 @@ class Redis {
     /**
      * @param $config
      * @return $this
+     * @throws \Exception
      */
     public function init($config) {
         try {
@@ -36,7 +37,7 @@ class Redis {
                 $this->enable = true;
             }
         } catch (\RedisException $ex) {
-
+            throw new \Exception('redis初始化错误');
         }
         return $this;
     }

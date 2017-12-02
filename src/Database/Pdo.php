@@ -624,7 +624,7 @@ class Pdo {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            throw new \Xcs\Exception\DbException($message . ' SQL:' . $sql, intval($code));
+            throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
         }
         return false;
     }

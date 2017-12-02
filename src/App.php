@@ -38,7 +38,7 @@ class App {
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $error, $file = null, $line = null) {
-                throw new \ErrorException($error, $errno);
+                throw new Exception\ErrorException($error, $errno);
             });
 
             $files = array_merge($dfiles, $preload);
@@ -141,8 +141,10 @@ class App {
             }
             try {
                 call_user_func(array($controller, $actionMethod));
-            } catch (\ErrorException $exception) {
-                throw new Exception\ErrorException($exception->getMessage(), $exception->getCode());
+            } catch (Exception\ErrorException $exception) {
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+            } catch (Exception\DbException $exception) {
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             } catch (\Exception $exception) {
                 throw new Exception\Exception($exception->getMessage(), $exception->getCode());
             } catch (\Throwable $exception) {

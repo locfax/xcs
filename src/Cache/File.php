@@ -2,8 +2,6 @@
 
 namespace Xcs\Cache;
 
-use \Xcs\Exception\Exception;
-
 class File {
 
     use \Xcs\Traits\Singleton;
@@ -12,11 +10,11 @@ class File {
 
     /**
      * @return $this
-     * @throws Exception
+     * @throws \Exception
      */
     public function init() {
         if (!is_dir(getini('data/_cache'))) {
-            throw new Exception('路径:' . getini('data/_cache') . ' 不可写');
+            throw new \Exception('路径:' . getini('data/_cache') . ' 不可写');
         }
         $this->enable = true;
         return $this;
