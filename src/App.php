@@ -142,13 +142,13 @@ class App {
             try {
                 call_user_func(array($controller, $actionMethod));
             } catch (Exception\ErrorException $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             } catch (Exception\DbException $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             } catch (\Exception $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             } catch (\Throwable $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode());
+                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             }
             $controller = null;
             return true;

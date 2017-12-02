@@ -4,8 +4,8 @@ namespace Xcs\Exception;
 
 class Exception extends \Exception {
 
-    public function __construct($message = '', $code = 0) {
-        parent::__construct($message, $code);
+    public function __construct($message = '', $code = 0, $previous = null) {
+        parent::__construct($message, $code, $previous);
         $this->exceptionError($this, 'Exception');
         set_exception_handler(function () {
         }); //不用自带的显示异常
