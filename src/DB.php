@@ -28,7 +28,7 @@ class DB {
             } else {
                 $dbo = new Database\Pdo(); //默认为Pdo
             }
-            call_user_func(array($dbo, 'connect'), $_dsn);
+            $dbo->connect($_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
         }
         return $dbo;
@@ -39,7 +39,6 @@ class DB {
      * @return Database\Pdo
      */
     public static function dbm($dsnid = 'portal') {
-        static $inc = 0;
         $_dsn = Context::dsn($dsnid);
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
@@ -49,7 +48,7 @@ class DB {
             }
         } else {
             $dbo = new Database\Pdo();
-            call_user_func(array($dbo, 'connect'), $_dsn);
+            $dbo->connect($_dsn);
             self::$used_dbo[$dsnkey] = $dbo;
         }
         return $dbo;
@@ -318,7 +317,7 @@ class DB {
      * 切换数据源对象
      *
      * @param null $id
-     * @throws Exception\Exception
+     * @throws Exception\DbException
      * @return mixed
      */
     public static function Using($id = null) {

@@ -4,8 +4,8 @@ namespace Xcs\Database;
 
 class Pdo {
 
-    private $_config = null;
-    public $_link = null;
+    private $_config = false;
+    public $_link = false;
 
     public function __destruct() {
         $this->close();
@@ -17,17 +17,16 @@ class Pdo {
      * @return mixed
      */
     public function __call($func, $args) {
-        return call_user_func_array(array($this->_link, $func), $args);
+        return $this->_link && call_user_func_array(array($this->_link, $func), $args);
     }
 
     /**
      * @param $config
-     * @param bool $buffered
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function connect($config, $type = '') {
-        if (is_null($this->_config)) {
+        if (!$this->_config) {
             $this->_config = $config;
         }
         try {
@@ -45,7 +44,7 @@ class Pdo {
             if ('RETRY' !== $type) {
                 return $this->reconnect();
             }
-            $this->_link = null;
+            $this->_link = false;
             return $this->_halt($e->getMessage(), $e->getCode());
         }
     }
@@ -58,7 +57,7 @@ class Pdo {
     }
 
     public function close() {
-        $this->_link = null;
+        $this->_link = false;
     }
 
     /**

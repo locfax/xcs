@@ -20,43 +20,6 @@ class Strs {
     }
 
     /**
-     * qutotes get post cookie by \char(21)'
-     * @param $string
-     * @return array|string
-     */
-    public static function daddcslashes($string) {
-        if (empty($string)) {
-            return $string;
-        }
-        if (is_numeric($string)) {
-            return $string;
-        }
-        if (is_array($string)) {
-            return array_map('daddcslashes', $string);
-        }
-        return addcslashes($string, '');
-    }
-
-    /**
-     * it's paire to daddcslashes
-     * @param $value
-     * @return array|string
-     */
-    public static function dstripcslashes($value) {
-        if (empty($value)) {
-            return $value;
-        }
-        if (is_numeric($value)) {
-            return $value;
-        }
-        if (is_array($value)) {
-            return array_map('dstripcslashes', $value);
-        }
-        return stripcslashes($value);
-    }
-
-
-    /**
      * cut string to set length
      * return string
      * @param $string

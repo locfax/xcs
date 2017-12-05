@@ -4,9 +4,9 @@ namespace Xcs\Database;
 
 class Mongo {
 
-    private $_config = null;
-    private $_link = null;
-    private $_client = null;
+    private $_config = false;
+    public $_link = false;
+    public $_client = false;
 
     public function __destruct() {
         $this->close();
@@ -18,16 +18,16 @@ class Mongo {
      * @return mixed
      */
     public function __call($func, $args) {
-        return call_user_func_array(array($this->_client, $func), $args);
+        return $this->_client && call_user_func_array(array($this->_client, $func), $args);
     }
 
     /**
      * @param $config
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function connect($config, $type = '') {
-        if (is_null($this->_config)) {
+        if (!$this->_config) {
             $this->_config = $config;
         }
         try {
@@ -45,7 +45,10 @@ class Mongo {
     }
 
     public function close() {
-        $this->_link && $this->_link->close();
+        if ($this->_link) {
+            $this->_link->close();
+            $this->_client = null;
+        }
     }
 
     /**
@@ -360,11 +363,18 @@ class Mongo {
         }
     }
 
-    private function _halt($message = '', $code = 0) {
+    /**
+     * @param string $message
+     * @param int $code
+     * @param string $sql
+     * @return bool
+     * @throws \Xcs\Exception\DbException
+     */
+    private function _halt($message = '', $code = 0, $sql = '') {
         if ($this->_config['rundev']) {
             $this->close();
             $message = mb_convert_encoding($message, 'utf-8', 'gbk');
-            throw new \Xcs\Exception\DbException($message, intval($code));
+            throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
         }
         return false;
     }

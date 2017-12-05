@@ -1,7 +1,5 @@
 <?php
 
-//系统级别函数
-
 /**
  * @param $variable
  * @param null $defval
@@ -103,7 +101,10 @@ function gpc_val($val, $runfunc, $emptyrun) {
     return $val;
 }
 
-//keypath  path1/path2/path3
+/**
+ * @param $key
+ * @return null
+ */
 function getini($key) {
     $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
@@ -179,12 +180,18 @@ function url($udi, $param = array()) {
     return SITEPATH . $url;
 }
 
+/**
+ * @param $v
+ * @param string $dec
+ * @return float
+ */
 function floatvaldec($v, $dec = ',') {
     return floatval(str_replace(",", ".", preg_replace("[^-0-9$dec]", "", $v)));
 }
 
-/* qutotes get post cookie by \'
- * return string
+/**
+ * @param $string
+ * @return array|string
  */
 function daddslashes($string) {
     if (empty($string)) {
@@ -199,8 +206,9 @@ function daddslashes($string) {
     return addslashes($string);
 }
 
-/*
- * it's paire to daddslashes
+/**
+ * @param $value
+ * @return array|string
  */
 function dstripslashes($value) {
     if (empty($value)) {
@@ -215,10 +223,45 @@ function dstripslashes($value) {
     return stripslashes($value);
 }
 
-/*
- *
- * 屏蔽单双引号等
- * 提供给数据库搜索
+/**
+ * qutotes get post cookie by \char(21)'
+ * @param $string
+ * @return array|string
+ */
+function daddcslashes($string) {
+    if (empty($string)) {
+        return $string;
+    }
+    if (is_numeric($string)) {
+        return $string;
+    }
+    if (is_array($string)) {
+        return array_map('daddcslashes', $string);
+    }
+    return addcslashes($string, '');
+}
+
+/**
+ * it's paire to daddcslashes
+ * @param $value
+ * @return array|string
+ */
+function dstripcslashes($value) {
+    if (empty($value)) {
+        return $value;
+    }
+    if (is_numeric($value)) {
+        return $value;
+    }
+    if (is_array($value)) {
+        return array_map('dstripcslashes', $value);
+    }
+    return stripcslashes($value);
+}
+
+/**
+ * @param $text
+ * @return string
  */
 function input_char($text) {
     if (empty($text)) {
@@ -227,10 +270,10 @@ function input_char($text) {
     return htmlspecialchars(addslashes($text), ENT_QUOTES, 'UTF-8');
 }
 
-/*
-*  屏蔽单双引号等
-*  提供给html显示 或者 input输入框
-*/
+/**
+ * @param $text
+ * @return string
+ */
 function output_char($text) {
     if (empty($text)) {
         return $text;
@@ -238,6 +281,26 @@ function output_char($text) {
     return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
 }
 
+/**
+ * @param $str
+ * @param bool $url_encoded
+ * @return null|string|string[]
+ */
+function remove_invisible_characters($str, $url_encoded = TRUE) {
+    $non_displayables = array();
+    // every control character except newline (dec 10),
+    // carriage return (dec 13) and horizontal tab (dec 09)
+    if ($url_encoded) {
+        $non_displayables[] = '/%0[0-8bcef]/i';    // url encoded 00-08, 11, 12, 14, 15
+        $non_displayables[] = '/%1[0-9a-f]/i';    // url encoded 16-31
+        $non_displayables[] = '/%7f/i';    // url encoded 127
+    }
+    $non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';    // 00-08, 11, 12, 14-31, 127
+    do {
+        $str = preg_replace($non_displayables, '', $str, -1, $count);
+    } while ($count);
+    return $str;
+}
 
 /**
  * @param $utimeoffset
@@ -333,6 +396,38 @@ function dump($var, $halt = 0, $func = 'p') {
     echo '</pre>';
     echo "</div>";
     if ($halt) {
+        exit;
+    }
+}
+
+/**
+ * @param bool $table
+ * @param bool $stop
+ */
+function post($table = false, $stop = false) {
+    $str = '';
+    $post = $_POST;
+    foreach ($post as $k => $v) {
+        $str .= "\$" . $k . "= getgpc('p." . $k . "');\n";
+    }
+    dump($str);
+    if (!$table) {
+        $str = "\$post = array(\n";
+        foreach ($post as $k => $v) {
+            $str .= "'" . $k . "'=> \$" . $k . ",\n";
+        }
+        $str .= "\n)";
+        dump($str);
+    } else {
+        $tablecols = include getini('data/_fields') . $table . '.php';
+        $str = "\$post = array(\n";
+        foreach ($tablecols as $col => $arr) {
+            $str .= "'" . $col . "'=> \$" . $arr . ",\n";
+        }
+        $str .= "\n);";
+        dump($str);
+    }
+    if ($stop) {
         exit;
     }
 }

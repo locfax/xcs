@@ -331,36 +331,4 @@ EOT;
         return $onlineip;
     }
 
-    /**
-     * @param bool $table
-     * @param bool $stop
-     */
-    public static function post($table = false, $stop = false) {
-        $str = '';
-        $post = $_POST;
-        foreach ($post as $k => $v) {
-            $str .= "\$" . $k . "= getgpc('p." . $k . "');\n";
-        }
-        dump($str);
-        if (!$table) {
-            $str = "\$post = array(\n";
-            foreach ($post as $k => $v) {
-                $str .= "'" . $k . "'=> \$" . $k . ",\n";
-            }
-            $str .= "\n)";
-            dump($str);
-        } else {
-            $tablecols = include getini('data/_fields') . $table . '.php';
-            $str = "\$post = array(\n";
-            foreach ($tablecols as $col => $arr) {
-                $str .= "'" . $col . "'=> \$" . $arr . ",\n";
-            }
-            $str .= "\n);";
-            dump($str);
-        }
-        if ($stop) {
-            exit;
-        }
-    }
-
 }

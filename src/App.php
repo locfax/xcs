@@ -28,6 +28,10 @@ class App {
         self::dispatching($uri);
     }
 
+    /**
+     * @param $preload
+     * @param bool $refresh
+     */
     public static function runFile($preload, $refresh = false) {
         $dfiles = array(
             PSROOT . '/config/base.inc.php', //全局配置
@@ -56,7 +60,6 @@ class App {
      * @param array $preload
      * @param array $dfiles
      * @param bool $refresh
-     * @return bool
      */
     public static function _runFile($preload, $dfiles, $refresh = false) {
         $preloadfile = DATAPATH . 'preload/runtime_' . APPKEY . '_files.php';
