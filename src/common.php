@@ -181,15 +181,6 @@ function url($udi, $param = array()) {
 }
 
 /**
- * @param $v
- * @param string $dec
- * @return float
- */
-function floatvaldec($v, $dec = ',') {
-    return floatval(str_replace(",", ".", preg_replace("[^-0-9$dec]", "", $v)));
-}
-
-/**
  * @param $string
  * @return array|string
  */

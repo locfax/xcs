@@ -116,7 +116,7 @@ class Util {
      * @return string
      */
     public static function output_json($arr) {
-        if (floatval(PHP_VERSION) >= 5.4) {
+        if (version_compare(PHP_VERSION, '5.4', '>=')) {
             return json_encode($arr, JSON_UNESCAPED_UNICODE);
         }
         $json = json_encode(self::urlencode($arr));
