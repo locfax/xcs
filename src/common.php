@@ -365,6 +365,25 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '') 
 }
 
 /**
+ * @param $data
+ * @param string $code
+ */
+function runlog($data, $code = 'debug') {
+    $logfile = DATAPATH . 'run.log';
+    $log = new \Monolog\Logger('run');
+    $log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, \Monolog\Logger::WARNING));
+    if ($code == 'info') {
+        $log->addInfo($data);
+    } elseif ($code == 'warn') {
+        $log->addWarning($data);
+    } elseif ($code == 'error') {
+        $log->addError($data);
+    } else {
+        $log->addDebug($data);
+    }
+}
+
+/**
  * @param $var
  * @param int $halt
  * @param string $func
