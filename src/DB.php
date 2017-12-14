@@ -317,7 +317,6 @@ class DB {
      * 切换数据源对象
      *
      * @param null $id
-     * @throws Exception\DbException
      * @return mixed
      */
     public static function Using($id = null) {
@@ -329,9 +328,6 @@ class DB {
             if ($id != self::$using_dbo_id) {
                 self::$using_dbo_id = $id;
             }
-        }
-        if (self::$using_dbo_id === 'none') {
-            throw new Exception\DbException('dsn is none', 0);
         }
         return self::dbm(self::$using_dbo_id);
     }
