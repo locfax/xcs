@@ -32,7 +32,7 @@ class Cacher {
             $this->enable = $this->cacher->enable;
             $this->type = $cacher;
         } else {
-            throw new \Exception('不存在的缓存器');
+            throw new \Xcs\Exception\ExException('不存在的缓存器');
         }
     }
 

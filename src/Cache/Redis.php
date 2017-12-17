@@ -37,7 +37,7 @@ class Redis {
                 $this->enable = true;
             }
         } catch (\RedisException $ex) {
-            throw new \Exception('redis初始化错误');
+            throw new \Xcs\Exception\ExException('redis初始化错误');
         }
         return $this;
     }

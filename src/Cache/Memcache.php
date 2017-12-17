@@ -33,7 +33,7 @@ class Memcache {
                 $this->enable = true;
             }
         } catch (\MemcachedException $e) {
-            throw new \Exception('memcache初始化错误');
+            throw new \Xcs\Exception\ExException('memcache初始化错误');
         }
         return $this;
     }
