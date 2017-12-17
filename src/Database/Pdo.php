@@ -24,7 +24,7 @@ class Pdo {
      * @param $config
      * @param string $type
      * @return mixed
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function connect($config, $type = '') {
         if (!$this->_config) {
@@ -52,6 +52,7 @@ class Pdo {
 
     /**
      * @return bool
+     * @throws \Xcs\Exception\DbException
      */
     public function reconnect() {
         return $this->connect($this->_config, 'RETRY');
@@ -110,7 +111,7 @@ class Pdo {
      * @param array $data
      * @param bool $retid
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function create($tableName, array $data, $retid = false) {
         if (empty($data)) {
@@ -142,7 +143,7 @@ class Pdo {
      * @param array $data
      * @param bool $retnum
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function replace($tableName, array $data, $retnum = false) {
         if (empty($data)) {
@@ -175,7 +176,7 @@ class Pdo {
      * @param $condition
      * @param bool $retnum
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function update($tableName, $data, $condition, $retnum = false) {
         if (empty($data)) {
@@ -213,7 +214,7 @@ class Pdo {
      * @param $condition
      * @param bool $muti
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function remove($tableName, $condition, $muti = true) {
         if (empty($condition)) {
@@ -237,7 +238,7 @@ class Pdo {
      * @param $condition
      * @param $retobj
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function findOne($tableName, $field, $condition, $retobj = false) {
         try {
@@ -269,7 +270,7 @@ class Pdo {
      * @param null $index
      * @param bool $retobj
      * @return array|bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false) {
         try {
@@ -305,7 +306,7 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false) {
         try {
@@ -340,6 +341,7 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @return array|bool
+     * @throws \Xcs\Exception\DbException
      */
     public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -364,7 +366,7 @@ class Pdo {
      * @param string $field
      * @param mixed $condition
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function resultFirst($tableName, $field, $condition) {
         try {
@@ -419,7 +421,7 @@ class Pdo {
      * @param $sql
      * @param null $args
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function exec($sql, $args = null) {
         try {
@@ -441,7 +443,7 @@ class Pdo {
      * @param $args
      * @param $retobj
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function row($sql, $args = null, $retobj = false) {
         try {
@@ -470,7 +472,7 @@ class Pdo {
      * @param $index
      * @param $retobj
      * @return bool|array
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false) {
         try {
@@ -501,7 +503,7 @@ class Pdo {
      * @param array $args
      * @param bool $retobj
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     private function _pages($sql, $args = null, $retobj = false) {
         try {
@@ -531,6 +533,7 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @return array|bool
+     * @throws \Xcs\Exception\DbException
      */
     public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -555,6 +558,7 @@ class Pdo {
      * @param string $condition
      * @param string $field
      * @return bool
+     * @throws \Xcs\Exception\DbException
      */
     public function count($tableName, $condition, $field = '*') {
         return $this->resultFirst($tableName, "COUNT({$field})", $condition);
@@ -564,7 +568,7 @@ class Pdo {
      * @param $sql
      * @param null $args
      * @return bool
-     *  @throws \Xcs\Exception\DbException
+     * @throws \Xcs\Exception\DbException
      */
     public function counts($sql, $args = null) {
         return $this->firsts($sql, $args);
