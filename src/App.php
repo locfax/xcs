@@ -42,7 +42,7 @@ class App {
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $error, $file = null, $line = null) {
-                throw new Exception\ErrorException($error, $errno);
+                throw new \Exception($error, $errno);
             });
 
             $files = array_merge($dfiles, $preload);
@@ -127,7 +127,7 @@ class App {
      * @param $controllerName
      * @param $actionName
      * @return bool
-     * @throws Exception\Exception
+     * @throws Exception\ExException
      */
     public static function executeAction($controllerName, $actionName) {
         $controllerName = ucfirst($controllerName);
@@ -144,14 +144,10 @@ class App {
             }
             try {
                 call_user_func(array($controller, $actionMethod));
-            } catch (Exception\ErrorException $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
-            } catch (Exception\DbException $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             } catch (\Exception $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+                throw new Exception\ExException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             } catch (\Throwable $exception) {
-                throw new Exception\Exception($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
+                throw new Exception\ExException($exception->getMessage(), $exception->getCode(), $exception->getPrevious());
             }
             $controller = null;
             return true;

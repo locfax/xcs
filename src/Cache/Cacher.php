@@ -12,6 +12,11 @@ class Cacher {
     public $enable;
     public $type;
 
+    /**
+     * Cacher constructor.
+     * @param null $cacher
+     * @throws \Exception
+     */
     public function __construct($cacher = null) {
         $this->config = getini('cache');
         $this->prefix = $this->config['prefix'];

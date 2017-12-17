@@ -8,6 +8,10 @@ class Xcache {
 
     public $enable = false;
 
+    /**
+     * @return $this
+     * @throws \Exception
+     */
     public function init() {
         if (!function_exists('xcache_get')) {
             throw new \Exception('xcache 扩展没安装?');
