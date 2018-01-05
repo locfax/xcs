@@ -4,11 +4,39 @@ namespace Xcs\Database;
 
 class Pdo {
 
-    private $_config = false;
-    public $_link = false;
+    private $_config = null;
+    public $_link = null;
 
     public function __destruct() {
         $this->close();
+    }
+
+    /**
+     * @param $config
+     */
+    public function __construct($config) {
+        if (is_null($this->_config)) {
+            $this->_config = $config;
+        }
+
+        $opt = array(
+            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
+            \PDO::ATTR_EMULATE_PREPARES => false,
+            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
+            //\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+            \PDO::ATTR_PERSISTENT => false
+        );
+        $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
+
+    }
+
+    public function reconnect() {
+        $this->__construct($this->_config);
+    }
+
+    public function close() {
+        $this->_link = null;
     }
 
     /**
@@ -18,48 +46,6 @@ class Pdo {
      */
     public function __call($func, $args) {
         return $this->_link && call_user_func_array(array($this->_link, $func), $args);
-    }
-
-    /**
-     * @param $config
-     * @param string $type
-     * @return mixed
-     * @throws \Xcs\Exception\DbException
-     */
-    public function connect($config, $type = '') {
-        if (!$this->_config) {
-            $this->_config = $config;
-        }
-        try {
-            $opt = array(
-                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-                \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-                \PDO::ATTR_EMULATE_PREPARES => false,
-                \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-                //\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-                \PDO::ATTR_PERSISTENT => false
-            );
-            $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
-            return true;
-        } catch (\PDOException $e) {
-            if ('RETRY' !== $type) {
-                return $this->reconnect();
-            }
-            $this->_link = false;
-            return $this->_halt($e->getMessage(), $e->getCode());
-        }
-    }
-
-    /**
-     * @return bool
-     * @throws \Xcs\Exception\DbException
-     */
-    public function reconnect() {
-        return $this->connect($this->_config, 'RETRY');
-    }
-
-    public function close() {
-        $this->_link = false;
     }
 
     /**
@@ -305,7 +291,7 @@ class Pdo {
      * @param int $start
      * @param int $length
      * @param bool $retobj
-     * @return bool
+     * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
     private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false) {
@@ -502,7 +488,7 @@ class Pdo {
      * @param string $sql
      * @param array $args
      * @param bool $retobj
-     * @return bool
+     * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
     private function _pages($sql, $args = null, $retobj = false) {
