@@ -17,9 +17,6 @@ class DB {
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
-            if(is_null($dbo->_link)) {
-                call_user_func(array($dbo, 'connect'), $_dsn);
-            }
         } else {
             if ('mongo' == $_dsn['driver']) {
                 $dbo = new Database\Mongo($_dsn);
