@@ -28,7 +28,6 @@ class Pdo {
             \PDO::ATTR_PERSISTENT => false
         );
         $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
-
     }
 
     public function reconnect() {
@@ -96,10 +95,11 @@ class Pdo {
      * @param $tableName
      * @param array $data
      * @param bool $retid
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function create($tableName, array $data, $retid = false) {
+    public function create($tableName, array $data, $retid = false, $type = '') {
         if (empty($data)) {
             return false;
         }
@@ -120,6 +120,10 @@ class Pdo {
             }
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->create($tableName, $data, $retid, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -128,10 +132,11 @@ class Pdo {
      * @param $tableName
      * @param array $data
      * @param bool $retnum
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function replace($tableName, array $data, $retnum = false) {
+    public function replace($tableName, array $data, $retnum = false, $type = '') {
         if (empty($data)) {
             return false;
         }
@@ -152,6 +157,10 @@ class Pdo {
             }
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->replace($tableName, $data, $retnum, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -161,10 +170,11 @@ class Pdo {
      * @param array $data
      * @param $condition
      * @param bool $retnum
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function update($tableName, $data, $condition, $retnum = false) {
+    public function update($tableName, $data, $condition, $retnum = false, $type = '') {
         if (empty($data)) {
             return false;
         }
@@ -191,6 +201,10 @@ class Pdo {
                 return $this->_link->exec($sql);
             }
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->update($tableName, $data, $condition, $retnum, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -199,10 +213,11 @@ class Pdo {
      * @param $tableName
      * @param $condition
      * @param bool $muti
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function remove($tableName, $condition, $muti = true) {
+    public function remove($tableName, $condition, $muti = true, $type = '') {
         if (empty($condition)) {
             return false;
         }
@@ -214,6 +229,10 @@ class Pdo {
             $sql = 'DELETE FROM ' . $tableName . ' WHERE ' . $condition . $limit;
             return $this->_link->exec($sql);
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->remove($tableName, $condition, $muti, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -223,10 +242,11 @@ class Pdo {
      * @param string $field
      * @param $condition
      * @param $retobj
+     * @param $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function findOne($tableName, $field, $condition, $retobj = false) {
+    public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -245,6 +265,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->findOne($tableName, $field, $condition, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -255,10 +279,11 @@ class Pdo {
      * @param string $condition
      * @param null $index
      * @param bool $retobj
+     * @param string $type
      * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
-    public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false) {
+    public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -280,6 +305,10 @@ class Pdo {
             }
             return $this->array_index($data, $index);
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->findAll($tableName, $field, $condition, $index, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -291,10 +320,11 @@ class Pdo {
      * @param int $start
      * @param int $length
      * @param bool $retobj
+     * @param string $type
      * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
-    private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false) {
+    private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -315,6 +345,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->_page($tableName, $field, $condition, $start, $length, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -351,10 +385,11 @@ class Pdo {
      * @param string $tableName
      * @param string $field
      * @param mixed $condition
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function resultFirst($tableName, $field, $condition) {
+    public function resultFirst($tableName, $field, $condition, $type = '') {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -369,6 +404,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->resultFirst($tableName, $field, $condition, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -378,10 +417,11 @@ class Pdo {
      * @param $tableName
      * @param $field
      * @param $condition
+     * @param $type
      * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
-    public function getCol($tableName, $field, $condition) {
+    public function getCol($tableName, $field, $condition, $type = '') {
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -399,17 +439,22 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->getCol($tableName, $field, $condition, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
     /**
-     * @param $sql
-     * @param null $args
+     * @param string $sql
+     * @param $args
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function exec($sql, $args = null) {
+    public function exec($sql, $args = null, $type = '') {
         try {
             if (is_null($args)) {
                 $ret = $this->_link->exec($sql);
@@ -420,6 +465,10 @@ class Pdo {
             }
             return $ret;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->exec($sql, $args, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -428,10 +477,11 @@ class Pdo {
      * @param $sql
      * @param $args
      * @param $retobj
+     * @param $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function row($sql, $args = null, $retobj = false) {
+    public function row($sql, $args = null, $retobj = false, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -448,6 +498,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->row($sql, $args, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -457,10 +511,11 @@ class Pdo {
      * @param $args
      * @param $index
      * @param $retobj
+     * @param $type
      * @return bool|array
      * @throws \Xcs\Exception\DbException
      */
-    public function rowset($sql, $args = null, $index = null, $retobj = false) {
+    public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -480,6 +535,10 @@ class Pdo {
             }
             return $this->array_index($data, $index);
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->rowset($sql, $args, $index, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -488,10 +547,11 @@ class Pdo {
      * @param string $sql
      * @param array $args
      * @param bool $retobj
+     * @param string $type
      * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
-    private function _pages($sql, $args = null, $retobj = false) {
+    private function _pages($sql, $args = null, $retobj = false, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -508,6 +568,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->_pages($sql, $args, $retobj, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -561,12 +625,13 @@ class Pdo {
     }
 
     /**
-     * @param $sql
+     * @param string $sql
      * @param null $args
+     * @param string $type
      * @return bool
      * @throws \Xcs\Exception\DbException
      */
-    public function firsts($sql, $args = null) {
+    public function firsts($sql, $args = null, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -578,17 +643,22 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->firsts($sql, $args, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
     /**
-     * @param $sql
+     * @param string $sql
      * @param null $args
+     * @param string $type
      * @return array|bool
      * @throws \Xcs\Exception\DbException
      */
-    public function getcols($sql, $args = null) {
+    public function getcols($sql, $args = null, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -603,6 +673,10 @@ class Pdo {
             $sth->closeCursor();
             return $data;
         } catch (\PDOException $e) {
+            if ('RETRY' != $type) {
+                $this->reconnect();
+                return $this->getcols($sql, $args, 'RETRY');
+            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
