@@ -27,7 +27,11 @@ class Pdo {
             //\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             \PDO::ATTR_PERSISTENT => false
         );
-        $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
+        try {
+            $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
+        } catch (\PDOException $exception) {
+
+        }
     }
 
     public function reconnect() {
@@ -100,6 +104,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function create($tableName, array $data, $retid = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         if (empty($data)) {
             return false;
         }
@@ -137,6 +144,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function replace($tableName, array $data, $retnum = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         if (empty($data)) {
             return false;
         }
@@ -175,6 +185,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function update($tableName, $data, $condition, $retnum = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         if (empty($data)) {
             return false;
         }
@@ -218,6 +231,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function remove($tableName, $condition, $muti = true, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         if (empty($condition)) {
             return false;
         }
@@ -247,6 +263,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -284,6 +303,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -325,6 +347,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -390,6 +415,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -422,6 +450,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function getCol($tableName, $field, $condition, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_array($condition)) {
                 list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -455,6 +486,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function exec($sql, $args = null, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $ret = $this->_link->exec($sql);
@@ -482,6 +516,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function row($sql, $args = null, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -516,6 +553,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -552,6 +592,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     private function _pages($sql, $args = null, $retobj = false, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -632,6 +675,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function firsts($sql, $args = null, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
@@ -659,6 +705,9 @@ class Pdo {
      * @throws \Xcs\Exception\DbException
      */
     public function getcols($sql, $args = null, $type = '') {
+        if (is_null($this->_link)) {
+            return $this->_halt('server is not connected!');
+        }
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);

@@ -2,8 +2,6 @@
 
 namespace Xcs\Traits;
 
-use Xcs\Exception\Exception;
-
 Trait Context {
 
     protected $context_handler;
@@ -30,7 +28,7 @@ Trait Context {
 
     public function getContextHandler($throw_exception = false) {
         if (!$this->context_handler && $throw_exception) {
-            throw new Exception('Please set context handler before use');
+            throw new \Xcs\Exception\ExException('Please set context handler before use');
         }
         return $this->context_handler ?: false;
     }

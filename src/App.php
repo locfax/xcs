@@ -280,7 +280,7 @@ class App {
             $file = trim(substr($classname, strlen($namespace)), '\\');
             $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
             if (!is_file($file)) {
-                throw new Exception\Exception($file . '不存在');
+                throw new Exception\ExException($file . '不存在');
             }
             require $file;
         };

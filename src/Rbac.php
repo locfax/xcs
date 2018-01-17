@@ -160,7 +160,6 @@ class Rbac {
     /**
      * @param $controllerName
      * @return null
-     * @throws Exception\Exception
      */
     private static function _getACL($controllerName) {
         static $globalAcl = array();

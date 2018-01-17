@@ -2,14 +2,12 @@
 
 namespace Xcs\Traits;
 
-use Xcs\Exception\Exception;
-
 Trait Singleton {
 
     protected static $singleton_instances = array();
 
     public function __clone() {
-        throw new Exception('Cloning ' . __CLASS__ . ' is not allowed');
+        throw new \Xcs\Exception\ExException('Cloning ' . __CLASS__ . ' is not allowed');
     }
 
     /**
