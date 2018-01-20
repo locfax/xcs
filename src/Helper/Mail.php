@@ -16,7 +16,7 @@ class Mail {
         'mailsend' => 2,
         'auth' => true,
         'auth_username' => 'admin@uvtodo.com',
-        'auth_password' => 'lroqipgrtfqjbhhg',
+        'auth_password' => '12345678',
     );
 
     function send($email_to, $subject, $message) {
