@@ -491,18 +491,16 @@ class Pdo {
         }
         try {
             if (is_null($args)) {
-                $ret = $this->_link->exec($sql);
+                $sth = $this->_link->query($sql);
             } else {
                 list($_, $_args) = $this->field_param($args);
                 $sth = $this->_link->prepare($sql);
-                $ret = $sth->execute($_args);
+                $sth->execute($_args);
             }
+            $ret = $sth->fetch();
+            $sth->closeCursor();
             return $ret;
         } catch (\PDOException $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->exec($sql, $args, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
