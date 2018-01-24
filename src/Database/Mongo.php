@@ -19,13 +19,12 @@ class Mongo {
         if (is_null($this->_config)) {
             $this->_config = $config;
         }
-
-        $this->_link = new \MongoClient($config['dsn'], array("connect" => false));
         try {
+            $this->_link = new \MongoClient($config['dsn'], array("connect" => false));
             $this->_link->connect();
             $this->_client = $this->_link->selectDB($config['database']);
         } catch (\MongoConnectionException $e) {
-
+            $this->_halt('client is not connected!');
         }
     }
 
@@ -55,12 +54,8 @@ class Mongo {
      * @param bool $retid
      * @param string $type
      * @return bool|string
-     * @throws \Xcs\Exception\DbException
      */
     public function create($table, $document = array(), $retid = false, $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             if (isset($document['_id'])) {
                 if (!is_object($document['_id'])) {
@@ -90,12 +85,8 @@ class Mongo {
      * @param array $document
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function replace($table, $document = array(), $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             if (isset($document['_id'])) {
                 $document['_id'] = new \MongoId($document['_id']);
@@ -119,12 +110,8 @@ class Mongo {
      * @param string $options
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function update($table, $document = array(), $condition = array(), $options = 'set', $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new \MongoId($condition['_id']);
@@ -151,7 +138,6 @@ class Mongo {
             } elseif ('addToSet' == $options) { //追加到内镶文档
                 $ret = $collection->update($condition, array('$addToSet' => $document));
             }
-            //$pushAll $pullAll
             return $ret;
         } catch (\Exception $ex) {
             if ('RETRY' !== $type) {
@@ -168,12 +154,8 @@ class Mongo {
      * @param bool $muti
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function remove($table, $condition = array(), $muti = false, $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new \MongoId($condition['_id']);
@@ -200,12 +182,8 @@ class Mongo {
      * @param array $condition
      * @param string $type
      * @return mixed
-     * @throws \Xcs\Exception\DbException
      */
     public function findOne($table, $fields = array(), $condition = array(), $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new \MongoId($condition['_id']);
@@ -231,12 +209,8 @@ class Mongo {
      * @param array $query
      * @param string $type
      * @return array|bool|\Generator
-     * @throws \Xcs\Exception\DbException
      */
     public function findAll($table, $fields = array(), $query = array(), $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             $collection = $this->_client->selectCollection($table);
             if (isset($query['query'])) {
@@ -271,12 +245,8 @@ class Mongo {
      * @param int $length
      * @param string $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     private function _page($table, $fields, $condition, $offset = 0, $length = 18, $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             $collection = $this->_client->selectCollection($table);
             if ('fields' == $condition['type']) {
@@ -295,7 +265,7 @@ class Mongo {
             } else {
                 //内镶文档查询
                 if (!$fields) {
-                    throw new \Xcs\Exception\ExException('fields is empty', 0);
+                    throw new \Xcs\Exception\DbException('fields is empty', 0);
                 }
                 $cursor = $collection->findOne($condition['query'], array($fields => array('$slice' => array($offset, $length))));
                 return $cursor[$fields];
@@ -316,7 +286,6 @@ class Mongo {
      * @param int $pageparm
      * @param int $length
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     function page($table, $field, $condition, $pageparm = 0, $length = 18) {
         if (is_array($pageparm)) {
@@ -341,12 +310,8 @@ class Mongo {
      * @param array $condition
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function count($table, $condition = array(), $type = '') {
-        if (!$this->_client) {
-            return $this->_halt('client is not connected!');
-        }
         try {
             $collection = $this->_client->selectCollection($table);
             if (isset($condition['_id'])) {
@@ -367,14 +332,17 @@ class Mongo {
      * @param int $code
      * @param string $sql
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     private function _halt($message = '', $code = 0, $sql = '') {
         if ($this->_config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
+            try {
+                throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
+            } catch (\Xcs\Exception\DbException $e) {
+                exit;
+            }
         }
         return false;
     }
