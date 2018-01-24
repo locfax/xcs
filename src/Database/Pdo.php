@@ -30,7 +30,7 @@ class Pdo {
         try {
             $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
         } catch (\PDOException $exception) {
-
+            $this->_halt($exception->getMessage(), $exception->getCode(), 'no connected');
         }
     }
 
@@ -101,7 +101,6 @@ class Pdo {
      * @param bool $retid
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function create($tableName, array $data, $retid = false, $type = '') {
         if (is_null($this->_link)) {
@@ -141,7 +140,6 @@ class Pdo {
      * @param bool $retnum
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function replace($tableName, array $data, $retnum = false, $type = '') {
         if (is_null($this->_link)) {
@@ -182,7 +180,6 @@ class Pdo {
      * @param bool $retnum
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function update($tableName, $data, $condition, $retnum = false, $type = '') {
         if (is_null($this->_link)) {
@@ -228,7 +225,6 @@ class Pdo {
      * @param bool $muti
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function remove($tableName, $condition, $muti = true, $type = '') {
         if (is_null($this->_link)) {
@@ -260,7 +256,6 @@ class Pdo {
      * @param $retobj
      * @param $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -300,7 +295,6 @@ class Pdo {
      * @param bool $retobj
      * @param string $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -344,7 +338,6 @@ class Pdo {
      * @param bool $retobj
      * @param string $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -386,7 +379,6 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -412,7 +404,6 @@ class Pdo {
      * @param mixed $condition
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
         if (is_null($this->_link)) {
@@ -447,7 +438,6 @@ class Pdo {
      * @param $condition
      * @param $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     public function getCol($tableName, $field, $condition, $type = '') {
         if (is_null($this->_link)) {
@@ -483,7 +473,6 @@ class Pdo {
      * @param $args
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function exec($sql, $args = null, $type = '') {
         if (is_null($this->_link)) {
@@ -511,7 +500,6 @@ class Pdo {
      * @param $retobj
      * @param $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function row($sql, $args = null, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -548,7 +536,6 @@ class Pdo {
      * @param $retobj
      * @param $type
      * @return bool|array
-     * @throws \Xcs\Exception\DbException
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -587,7 +574,6 @@ class Pdo {
      * @param bool $retobj
      * @param string $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     private function _pages($sql, $args = null, $retobj = false, $type = '') {
         if (is_null($this->_link)) {
@@ -624,7 +610,6 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -649,7 +634,6 @@ class Pdo {
      * @param string $condition
      * @param string $field
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function count($tableName, $condition, $field = '*') {
         return $this->resultFirst($tableName, "COUNT({$field})", $condition);
@@ -659,7 +643,6 @@ class Pdo {
      * @param $sql
      * @param null $args
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function counts($sql, $args = null) {
         return $this->firsts($sql, $args);
@@ -670,7 +653,6 @@ class Pdo {
      * @param null $args
      * @param string $type
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     public function firsts($sql, $args = null, $type = '') {
         if (is_null($this->_link)) {
@@ -700,7 +682,6 @@ class Pdo {
      * @param null $args
      * @param string $type
      * @return array|bool
-     * @throws \Xcs\Exception\DbException
      */
     public function getcols($sql, $args = null, $type = '') {
         if (is_null($this->_link)) {
@@ -737,7 +718,6 @@ class Pdo {
 
     /**
      * @param bool $commit_no_errors
-     * @throws \Xcs\Exception\DbException
      */
     public function end_trans($commit_no_errors = true) {
         try {
@@ -756,18 +736,20 @@ class Pdo {
      * @param int $code
      * @param string $sql
      * @return bool
-     * @throws \Xcs\Exception\DbException
      */
     private function _halt($message = '', $code = 0, $sql = '') {
         if ($this->_config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
+            try {
+                throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
+            } catch (\Xcs\Exception\DbException $e) {
+
+            }
         }
         return false;
     }
-
 
     /**
      * @param int $page
