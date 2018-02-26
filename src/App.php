@@ -21,8 +21,7 @@ class App {
         }
         self::runFile($preload, $refresh);
         if (isset($_GET['s'])) {
-            $uri = rtrim($_GET['s'], '.htm');
-            $uri = rtrim($uri, '.html');
+            $uri = str_replace(array('.htm', '.html'), '', $_GET['s']);
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
