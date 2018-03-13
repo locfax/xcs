@@ -146,14 +146,6 @@ class App {
             return true;
         } while (false);
         //控制器加载失败
-        if (self::isAjax(true)) {
-            $retarr = array(
-                'errcode' => 1,
-                'errmsg' => "The controller '" . $controllerName . '\' is not exists!',
-                'data' => ''
-            );
-            return \Xcs\Util::rep_send($retarr, 'json');
-        }
         self::errACT("The controller '" . $controllerName . '\' is not exists!');
     }
 
@@ -204,7 +196,7 @@ class App {
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             );
-            return json_encode($retarr);
+            return \Xcs\Util::rep_send($retarr, 'json');
         }
         $args = '出错了！' . $args;
         include template('403');
