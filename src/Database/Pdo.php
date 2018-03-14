@@ -464,7 +464,7 @@ class Pdo {
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($_args);
             }
-            $ret = $sth->fetch();
+            $ret = $sth->rowCount();
             $sth->closeCursor();
             return $ret;
         } catch (\PDOException $e) {
