@@ -30,7 +30,7 @@ class Redis {
             }
             $connect = $this->_link->$server($config['host'], $config['port'], $config['timeout']);
             if ($connect && $config['password']) {
-                $connect = $this->_link->auth($config['login'] . "-" . $config['password'] . "-" . $config['database']);
+                $connect = $this->_link->auth($config['password']);
             }
             if ($connect) {
                 $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
