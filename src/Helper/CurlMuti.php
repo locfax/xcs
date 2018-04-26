@@ -11,7 +11,7 @@ class CurlMuti {
      * @param string $charset
      * @return array
      */
-    function send($urls, $data = '', $httphead = array(), $charset = 'UTF-8') {
+    public static function send($urls, $data = '', $httphead = array(), $charset = 'UTF-8') {
         //创建多个curl语柄
         $mhandle = curl_multi_init();
 
@@ -23,7 +23,6 @@ class CurlMuti {
             }
             //设置超时时间
             curl_setopt($conn[$key], CURLOPT_TIMEOUT, 30);
-            curl_setopt($conn[$key], CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
             //HTTp定向级别
             curl_setopt($conn[$key], CURLOPT_MAXREDIRS, 7);
             //这里不要header，加块效率
@@ -31,12 +30,33 @@ class CurlMuti {
             // 302 redirect
             curl_setopt($conn[$key], CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($conn[$key], CURLOPT_RETURNTRANSFER, 1);
+
+            if (!isset($httphead['Host'])) {
+                $url_parts = self::raw_url($url);
+                $httphead['Host'] = $url_parts['host'];
+            }
+            if (isset($httphead['Set-Cookie'])) {
+                curl_setopt($conn[$key], CURLOPT_COOKIE, $httphead['Set-Cookie']);
+                unset($httphead['Set-Cookie']);
+            }
+            if (isset($httphead['Referer'])) {
+                curl_setopt($conn[$key], CURLOPT_REFERER, $httphead['Referer']);
+                unset($httphead['Referer']);
+            }
+            if (isset($httphead['User-Agent'])) {
+                curl_setopt($conn[$key], CURLOPT_USERAGENT, $httphead['User-Agent']);
+                unset($httphead['User-Agent']);
+            } else {
+                curl_setopt($conn[$key], CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
+            }
+
             $heads = array();
             foreach ($httphead as $k => $v) {
                 $heads[] = $k . ': ' . $v;
             }
             unset($k);
             curl_setopt($conn[$key], CURLOPT_HTTPHEADER, $heads);
+
             /* 设置请求头部 */
             if (!empty($data)) {
                 if (is_array($data)) {
@@ -89,7 +109,7 @@ class CurlMuti {
                 $res[$key]['body'] = $http_body;
             }
             //获取返回http信息
-            $conn[$key]['http_info'] = curl_getinfo($conn[$key]);
+            $res[$key]['http_info'] = curl_getinfo($conn[$key]);
             //关闭语柄
             curl_close($conn[$key]);
             //释放资源
@@ -114,5 +134,24 @@ class CurlMuti {
         } else {
             return $string;
         }
+    }
+
+    /**
+     * @param $_raw_url
+     * @return mixed
+     */
+    private static function raw_url($_raw_url) {
+        $raw_url = (string)$_raw_url;
+        if (strpos($raw_url, '://') === false) {
+            $raw_url = 'http://' . $raw_url;
+        }
+        $retval = parse_url($raw_url);
+        if (!isset($retval['path'])) {
+            $retval['path'] = '/';
+        }
+        if (!isset($retval['port'])) {
+            $retval['port'] = '80';
+        }
+        return $retval;
     }
 }

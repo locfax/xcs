@@ -29,6 +29,8 @@ class Curl {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         /* 返回SESSION COOKIE */
         curl_setopt($ch, CURLOPT_COOKIESESSION, $retsession);
+        /* http 定向级别 */
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 7);
         /* 使用0层自动跳转 */
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         /* 超时时间30 */
@@ -71,6 +73,8 @@ class Curl {
         if (isset($httphead['User-Agent'])) {
             curl_setopt($ch, CURLOPT_USERAGENT, $httphead['User-Agent']);
             unset($httphead['User-Agent']);
+        } else {
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
         }
 
         /* 构造头部 */
@@ -159,7 +163,7 @@ class Curl {
      */
     private static function raw_url($_raw_url) {
         $raw_url = (string)$_raw_url;
-        if (!\Xcs\Util::strpos($raw_url, '://')) {
+        if (strpos($raw_url, '://') === false) {
             $raw_url = 'http://' . $raw_url;
         }
         $retval = parse_url($raw_url);
@@ -182,9 +186,6 @@ class Curl {
         if ('gzip' == $gzip && function_exists('gzinflate')) {
             $flags = ord(substr($data, 3, 1));
             $headerlen = 10;
-            //$extralen = 0;
-            //$filenamelen = 0;
-
             if ($flags & 4) {
                 $extralen = unpack('v', substr($data, 10, 2));
                 $extralen = (int)$extralen[1];
