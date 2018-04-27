@@ -7,7 +7,7 @@
  * @param bool $emptyrun
  * @return null
  */
-function getgpc($variable, $defval = null, $runfunc = '', $emptyrun = false) {
+function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false) {
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
         $var = substr($variable, 2);
