@@ -2,7 +2,7 @@
 
 namespace Xcs\Database;
 
-class Pdo {
+class Mysqli {
 
     private $_config = null;
     public $_link = null;
@@ -18,18 +18,10 @@ class Pdo {
         if (is_null($this->_config)) {
             $this->_config = $config;
         }
-
-        $opt = array(
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
-            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-            \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
-            \PDO::ATTR_PERSISTENT => false
-        );
         try {
-            $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
-        } catch (\PDOException $exception) {
+            $this->_link = new \mysqli($config['host'], $config['login'], $config['secret'], $config['dbname'], $config['port']);
+            $this->_link->set_charset('UTF8');
+        } catch (\Exception $exception) {
             $this->_halt($exception->getMessage(), $exception->getCode(), 'connect_error');
         }
     }
@@ -43,7 +35,10 @@ class Pdo {
     }
 
     public function close() {
-        $this->_link = null;
+        if ($this->_link) {
+            $this->_link->close();
+            $this->_link = null;
+        }
     }
 
     /**
@@ -78,23 +73,7 @@ class Pdo {
      * @return string
      */
     public function qvalue($value) {
-        return $this->_link->quote($value);
-    }
-
-    /**
-     * @param array $fields
-     * @param string $glue
-     * @return array
-     */
-    public function field_param(array $fields, $glue = ',') {
-        $args = array();
-        $sql = $comma = '';
-        foreach ($fields as $field => $value) {
-            $sql .= $comma . $this->qfield($field) . ' = :' . $field;
-            $args[':' . $field] = $value;
-            $comma = $glue;
-        }
-        return array($sql, $args);
+        return $this->_link->real_escape_string($value);
     }
 
     /**
@@ -130,19 +109,20 @@ class Pdo {
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
-            $values .= $comma . ':' . $field;
-            $args[':' . $field] = $this->qvalue($value);
+            $values .= $comma . $this->qvalue($value);
             $comma = ',';
         }
         try {
             $sql = 'INSERT INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-            $sth = $this->_link->prepare($sql);
-            $data = $sth->execute($args);
+            $data = $this->_link->query($sql);
+            if (!$data) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
             if ($retid) {
-                return $this->_link->lastInsertId();
+                return $this->_link->insert_id;
             }
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->create($tableName, $data, $retid, 'RETRY');
@@ -166,19 +146,20 @@ class Pdo {
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
-            $values .= $comma . ':' . $field;
-            $args[':' . $field] = $this->qvalue($value);
+            $values .= $comma . $this->qvalue($value);
             $comma = ',';
         }
         try {
             $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-            $sth = $this->_link->prepare($sql);
-            $data = $sth->execute($args);
+            $data = $this->_link->query($sql);
+            if (!$data) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
             if ($retnum) {
-                return $sth->rowCount();
+                return $this->_link->affected_rows;
             }
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->replace($tableName, $data, $retnum, 'RETRY');
@@ -204,24 +185,23 @@ class Pdo {
                 if (!is_array($data)) {
                     $this->_halt('$data参数必须为数组', 0);
                 }
-                list($data, $argsf) = $this->field_param($data, ',');
-                list($condition, $argsw) = $this->field_param($condition, ' AND ');
-                $args = array_merge($argsf, $argsw);
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
-                $sth = $this->_link->prepare($sql);
-                $data = $sth->execute($args);
-                if ($retnum) {
-                    return $sth->rowCount();
-                }
-                return $data;
+                $data = $this->field_value($data, ',');
+                $condition = $this->field_value($condition, ' AND ');
             } else {
                 if (is_array($data)) {
-                    $data = $this->field_value($data, ',');
+                    $data = $this->field_value($data);
                 }
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
-                return $this->_link->exec($sql);
             }
-        } catch (\PDOException $e) {
+            $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
+            $data = $this->_link->query($sql);
+            if (!$data) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
+            if ($retnum) {
+                return $this->_link->affected_rows;
+            }
+            return $data;
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->update($tableName, $data, $condition, $retnum, 'RETRY');
@@ -247,8 +227,13 @@ class Pdo {
         $limit = $muti ? '' : ' LIMIT 1';
         try {
             $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . $limit;
-            return $this->_link->exec($sql);
-        } catch (\PDOException $e) {
+            $data = $this->_link->query($sql);
+            if (!$data) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
+            $data = $this->_link->affected_rows;
+            return $data;
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->remove($tableName, $condition, $muti, 'RETRY');
@@ -266,24 +251,23 @@ class Pdo {
      * @return bool
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
+        if (is_array($condition)) {
+            $condition = $this->field_value($condition, ' AND ');
+        }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
         try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
-                $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
             if ($retobj) {
-                $data = $sth->fetch(\PDO::FETCH_OBJ);
+                $data = $sth->fetch_object();
             } else {
-                $data = $sth->fetch();
+                $data = $sth->fetch_assoc();
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->findOne($tableName, $field, $condition, $retobj, 'RETRY');
@@ -302,27 +286,24 @@ class Pdo {
      * @return array|bool
      */
     public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
+        if (is_array($condition)) {
+            $condition = $this->field_value($condition, ' AND ');
+        }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
         try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
-                $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
+            $data = $sth->fetch_all(MYSQLI_ASSOC);
             if ($retobj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll();
-                if (!is_null($index)) {
-                    $data = $this->array_index($data, $index);
-                }
+                $data = (array)$this->array_to_object($data);
+            } elseif (!is_null($index)) {
+                $data = $this->array_index($data, $index);
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->findAll($tableName, $field, $condition, $index, $retobj, 'RETRY');
@@ -344,24 +325,20 @@ class Pdo {
     private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
             if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $args[':start'] = $start;
-                $args[':length'] = $length;
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT :start,:length';
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
-                $sth = $this->_link->query($sql);
+                $condition = $this->field_value($condition, ' AND ');
             }
+            $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
+            $data = $sth->fetch_all(MYSQLI_ASSOC);
             if ($retobj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll();
+                $data = (array)$this->array_to_object($data);
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->_page($tableName, $field, $condition, $start, $length, $retobj, 'RETRY');
@@ -407,18 +384,17 @@ class Pdo {
     public function resultFirst($tableName, $field, $condition, $type = '') {
         try {
             if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
-                $sth = $this->_link->query($sql);
+                $condition = $this->field_value($condition, ' AND ');
             }
-            $data = $sth->fetchColumn();
-            $sth->closeCursor();
-            return $data;
-        } catch (\PDOException $e) {
+            $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
+            }
+            $data = $sth->fetch_assoc();
+            $sth->close();
+            return isset($data['result']) ? $data['result'] : null;
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->resultFirst($tableName, $field, $condition, 'RETRY');
@@ -438,21 +414,20 @@ class Pdo {
     public function getCol($tableName, $field, $condition, $type = '') {
         try {
             if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
-                $sth = $this->_link->query($sql);
+                $condition = $this->field_value($condition, ' AND ');
+            }
+            $sql = "SELECT {$field} FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
             $data = array();
-            while ($col = $sth->fetchColumn()) {
-                $data[] = $col;
+            while ($col = $sth->fetch_row()) {
+                $data[] = $col[0];
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->getCol($tableName, $field, $condition, 'RETRY');
@@ -469,17 +444,14 @@ class Pdo {
      */
     public function exec($sql, $args = null, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                list($_, $_args) = $this->field_param($args);
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
-            $ret = $sth->rowCount();
-            $sth->closeCursor();
+            $ret = $this->_link->affected_rows;
+            $sth->close();
             return $ret;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->exec($sql, $args, 'RETRY');
@@ -497,21 +469,18 @@ class Pdo {
      */
     public function row($sql, $args = null, $retobj = false, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                list($_, $_args) = $this->field_param($args);
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
             if ($retobj) {
-                $data = $sth->fetch(\PDO::FETCH_OBJ);
+                $data = $sth->fetch_object();
             } else {
-                $data = $sth->fetch();
+                $data = $sth->fetch_assoc();
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->row($sql, $args, $retobj, 'RETRY');
@@ -530,24 +499,19 @@ class Pdo {
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                list($_, $_args) = $this->field_param($args);
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
+            $data = $sth->fetch_all(MYSQLI_ASSOC);
             if ($retobj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll();
-                if (!is_null($index)) {
-                    $data = $this->array_index($data, $index);
-                }
+                $data = (array)$this->array_to_object($data);
+            } elseif (!is_null($index)) {
+                $data = $this->array_index($data, $index);
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->rowset($sql, $args, $index, $retobj, 'RETRY');
@@ -565,21 +529,19 @@ class Pdo {
      */
     private function _pages($sql, $args = null, $retobj = false, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                list($_, $_args) = $this->field_param($args);
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
+            $data = $sth->fetch_all(MYSQLI_ASSOC);
             if ($retobj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll();
+                $data = (array)$this->array_to_object($data);
+            } elseif (!is_null($index)) {
+                $data = $this->array_index($data, $index);
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->_pages($sql, $args, $retobj, 'RETRY');
@@ -641,16 +603,14 @@ class Pdo {
      */
     public function firsts($sql, $args = null, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
-            $data = $sth->fetchColumn();
-            $sth->closeCursor();
-            return $data;
-        } catch (\PDOException $e) {
+            $data = $sth->fetch_row();
+            $sth->close();
+            return $data[0];
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->firsts($sql, $args, 'RETRY');
@@ -667,19 +627,17 @@ class Pdo {
      */
     public function getcols($sql, $args = null, $type = '') {
         try {
-            if (is_null($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
+            $sth = $this->_link->query($sql);
+            if (!$sth) {
+                throw new \Exception($this->_link->error, $this->_link->errno);
             }
             $data = array();
-            while ($col = $sth->fetchColumn()) {
-                $data[] = $col;
+            while ($col = $sth->fetch_row()) {
+                $data[] = $col[0];
             }
-            $sth->closeCursor();
+            $sth->close();
             return $data;
-        } catch (\PDOException $e) {
+        } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
                 return $this->getcols($sql, $args, 'RETRY');
@@ -692,21 +650,20 @@ class Pdo {
      * @return mixed
      */
     public function start_trans() {
-        return $this->_link->beginTransaction();
+        $this->_link->query('SET AUTOCOMMIT = 0');
+        $this->_link->query('START TRANSACTION');
     }
 
     /**
      * @param bool $commit_no_errors
      */
     public function end_trans($commit_no_errors = true) {
-        try {
-            if ($commit_no_errors) {
-                $this->_link->commit();
-            } else {
-                $this->_link->rollBack();
-            }
-        } catch (\PDOException $PDOException) {
-            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
+        if ($commit_no_errors) {
+            $this->_link->query('COMMIT');
+            $this->_link->query('SET AUTOCOMMIT = 1');
+        } else {
+            $this->_link->query('ROLLBACK');
+            $this->_link->query('SET AUTOCOMMIT = 1');
         }
     }
 
@@ -724,7 +681,7 @@ class Pdo {
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
             } catch (\Xcs\Exception\DbException $e) {
-                exit;
+                exit();
             }
         }
         return false;
@@ -758,4 +715,21 @@ class Pdo {
         return $rows;
     }
 
+    /**
+     * 数组 转 对象
+     *
+     * @param array $arr 数组
+     * @return object|mixed
+     */
+    public function array_to_object($arr) {
+        if (gettype($arr) != 'array') {
+            return $arr;
+        }
+        foreach ($arr as $k => $v) {
+            if (gettype($v) == 'array' || getType($v) == 'object') {
+                $arr[$k] = $this->array_to_object($v);
+            }
+        }
+        return (object)$arr;
+    }
 }

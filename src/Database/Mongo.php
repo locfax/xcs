@@ -35,6 +35,11 @@ class Mongo {
         $this->__construct($this->_config);
     }
 
+
+    public function info() {
+        return $this->_config;
+    }
+
     public function close() {
         if ($this->_link) {
             $this->_link->close();
