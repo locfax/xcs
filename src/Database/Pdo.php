@@ -78,6 +78,12 @@ class Pdo {
      * @return string
      */
     public function qvalue($value) {
+        if (empty($value)) {
+            return $value;
+        }
+        if (is_numeric($value)) {
+            return $value;
+        }
         return $this->_link->quote($value);
     }
 
@@ -131,7 +137,7 @@ class Pdo {
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
             $values .= $comma . ':' . $field;
-            $args[':' . $field] = $this->qvalue($value);
+            $args[':' . $field] = $value;
             $comma = ',';
         }
         try {
@@ -167,7 +173,7 @@ class Pdo {
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
             $values .= $comma . ':' . $field;
-            $args[':' . $field] = $this->qvalue($value);
+            $args[':' . $field] = $value;
             $comma = ',';
         }
         try {

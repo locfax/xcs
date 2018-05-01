@@ -106,10 +106,10 @@ class Locker {
         $db = \Xcs\DB::dbo(self::dsn);
         switch ($cmd) {
             case 'set':
-                $ret = $db->replace('common_process', array('processid' => $name, 'expiry' => time() + $ttl));
+                $ret = $db->replace('base_process', array('processid' => $name, 'expiry' => time() + $ttl));
                 break;
             case 'get':
-                $ret = $db->findOne('common_process', '*', array('processid' => $name));
+                $ret = $db->findOne('base_process', '*', array('processid' => $name));
                 if (empty($ret) || $ret['expiry'] < time()) {
                     $ret = false;
                 } else {
@@ -117,7 +117,7 @@ class Locker {
                 }
                 break;
             case 'rm':
-                $ret = $db->remove('common_process', "processid='$name' OR expiry < " . time());
+                $ret = $db->remove('base_process', "processid='$name' OR expiry < " . time());
                 break;
         }
         return $ret;

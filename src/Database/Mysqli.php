@@ -73,7 +73,13 @@ class Mysqli {
      * @return string
      */
     public function qvalue($value) {
-        return $this->_link->real_escape_string($value);
+        if (empty($value)) {
+            return $value;
+        }
+        if (is_numeric($value)) {
+            return $value;
+        }
+        return "'" . $this->_link->real_escape_string($value) . "'";
     }
 
     /**
@@ -114,14 +120,14 @@ class Mysqli {
         }
         try {
             $sql = 'INSERT INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-            $data = $this->_link->query($sql);
-            if (!$data) {
+            $ret = $this->_link->query($sql);
+            if (!$ret) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
             if ($retid) {
-                return $this->_link->insert_id;
+                $ret = $this->_link->insert_id;
             }
-            return $data;
+            return $ret;
         } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
@@ -149,16 +155,16 @@ class Mysqli {
             $values .= $comma . $this->qvalue($value);
             $comma = ',';
         }
+        $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
         try {
-            $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-            $data = $this->_link->query($sql);
-            if (!$data) {
+            $ret = $this->_link->query($sql);
+            if (!$ret) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
             if ($retnum) {
-                return $this->_link->affected_rows;
+                $ret = $this->_link->affected_rows;
             }
-            return $data;
+            return $ret;
         } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
@@ -180,19 +186,19 @@ class Mysqli {
         if (empty($data)) {
             return false;
         }
-        try {
-            if (is_array($condition)) {
-                if (!is_array($data)) {
-                    $this->_halt('$data参数必须为数组', 0);
-                }
-                $data = $this->field_value($data, ',');
-                $condition = $this->field_value($condition, ' AND ');
-            } else {
-                if (is_array($data)) {
-                    $data = $this->field_value($data);
-                }
+        if (is_array($condition)) {
+            if (!is_array($data)) {
+                $this->_halt('$data参数必须为数组', 0);
             }
-            $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
+            $data = $this->field_value($data, ',');
+            $condition = $this->field_value($condition, ' AND ');
+        } else {
+            if (is_array($data)) {
+                $data = $this->field_value($data);
+            }
+        }
+        $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
+        try {
             $data = $this->_link->query($sql);
             if (!$data) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
@@ -225,8 +231,8 @@ class Mysqli {
             $condition = $this->field_value($condition, ' AND ');
         }
         $limit = $muti ? '' : ' LIMIT 1';
+        $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . $limit;
         try {
-            $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . $limit;
             $data = $this->_link->query($sql);
             if (!$data) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
@@ -382,11 +388,11 @@ class Mysqli {
      * @return bool
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
+        if (is_array($condition)) {
+            $condition = $this->field_value($condition, ' AND ');
+        }
+        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
         try {
-            if (is_array($condition)) {
-                $condition = $this->field_value($condition, ' AND ');
-            }
-            $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
             $sth = $this->_link->query($sql);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
@@ -412,11 +418,11 @@ class Mysqli {
      * @return array|bool
      */
     public function getCol($tableName, $field, $condition, $type = '') {
+        if (is_array($condition)) {
+            $condition = $this->field_value($condition, ' AND ');
+        }
+        $sql = "SELECT {$field} FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
         try {
-            if (is_array($condition)) {
-                $condition = $this->field_value($condition, ' AND ');
-            }
-            $sql = "SELECT {$field} FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
             $sth = $this->_link->query($sql);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
