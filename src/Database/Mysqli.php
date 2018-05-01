@@ -73,9 +73,6 @@ class Mysqli {
      * @return string
      */
     public function qvalue($value) {
-        if (empty($value)) {
-            return $value;
-        }
         if (is_numeric($value)) {
             return $value;
         }
@@ -190,14 +187,17 @@ class Mysqli {
             if (!is_array($data)) {
                 $this->_halt('$data参数必须为数组', 0);
             }
-            $data = $this->field_value($data, ',');
-            $condition = $this->field_value($condition, ' AND ');
+            $_data = $this->field_value($data, ',');
+            $_condition = $this->field_value($condition, ' AND ');
+            $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
         } else {
             if (is_array($data)) {
-                $data = $this->field_value($data);
+                $_data = $this->field_value($data);
+            } else {
+                $_data = $data;
             }
+            $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$condition}";
         }
-        $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
         try {
             $data = $this->_link->query($sql);
             if (!$data) {
@@ -228,10 +228,12 @@ class Mysqli {
             return false;
         }
         if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
         $limit = $muti ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . $limit;
+        $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
         try {
             $data = $this->_link->query($sql);
             if (!$data) {
@@ -258,9 +260,11 @@ class Mysqli {
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 0,1';
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -291,11 +295,17 @@ class Mysqli {
      * @param string $type
      * @return array|bool
      */
-    public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
-        if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '') {
+        if (is_array($condition) && !empty($condition)) {
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
+        if ($_condition) {
+            $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition;
+        } else {
+            $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName);
+        }
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -328,12 +338,18 @@ class Mysqli {
      * @param string $type
      * @return array|bool
      */
-    private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
+    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
-            if (is_array($condition)) {
-                $condition = $this->field_value($condition, ' AND ');
+            if (is_array($condition) && !empty($condition)) {
+                $_condition = $this->field_value($condition, ' AND ');
+            } else {
+                $_condition = $condition;
             }
-            $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
+            if ($_condition) {
+                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . " LIMIT {$start},{$length}";
+            } else {
+                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . " LIMIT {$start},{$length}";
+            }
             $sth = $this->_link->query($sql);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
@@ -388,10 +404,12 @@ class Mysqli {
      * @return bool
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
-        if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+        if (is_array($condition) && !empty($condition)) {
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
-        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
+        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition} LIMIT 0,1";
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -417,11 +435,17 @@ class Mysqli {
      * @param $type
      * @return array|bool
      */
-    public function getCol($tableName, $field, $condition, $type = '') {
-        if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+    public function getCol($tableName, $field, $condition = '', $type = '') {
+        if (is_array($condition) && !empty($condition)) {
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
-        $sql = "SELECT {$field} FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+        if ($_condition) {
+            $sql = "SELECT {$field} FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+        } else {
+            $sql = "SELECT {$field} FROM " . $this->qtable($tableName);
+        }
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {

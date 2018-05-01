@@ -78,9 +78,6 @@ class Pdo {
      * @return string
      */
     public function qvalue($value) {
-        if (empty($value)) {
-            return $value;
-        }
         if (is_numeric($value)) {
             return $value;
         }
@@ -143,11 +140,11 @@ class Pdo {
         try {
             $sql = 'INSERT INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
             $sth = $this->_link->prepare($sql);
-            $data = $sth->execute($args);
+            $ret = $sth->execute($args);
             if ($retid) {
-                return $this->_link->lastInsertId();
+                $ret = $this->_link->lastInsertId();
             }
-            return $data;
+            return $ret;
         } catch (\PDOException $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
@@ -179,11 +176,11 @@ class Pdo {
         try {
             $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
             $sth = $this->_link->prepare($sql);
-            $data = $sth->execute($args);
+            $ret = $sth->execute($args);
             if ($retnum) {
-                return $sth->rowCount();
+                $ret = $sth->rowCount();
             }
-            return $data;
+            return $ret;
         } catch (\PDOException $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
@@ -210,21 +207,23 @@ class Pdo {
                 if (!is_array($data)) {
                     $this->_halt('$data参数必须为数组', 0);
                 }
-                list($data, $argsf) = $this->field_param($data, ',');
-                list($condition, $argsw) = $this->field_param($condition, ' AND ');
+                list($_data, $argsf) = $this->field_param($data, ',');
+                list($_condition, $argsw) = $this->field_param($condition, ' AND ');
                 $args = array_merge($argsf, $argsw);
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
+                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
                 $sth = $this->_link->prepare($sql);
-                $data = $sth->execute($args);
+                $ret = $sth->execute($args);
                 if ($retnum) {
-                    return $sth->rowCount();
+                    $ret = $sth->rowCount();
                 }
-                return $data;
+                return $ret;
             } else {
                 if (is_array($data)) {
-                    $data = $this->field_value($data, ',');
+                    $_data = $this->field_value($data, ',');
+                } else {
+                    $_data = $data;
                 }
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$data} WHERE {$condition}";
+                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$condition}";
                 return $this->_link->exec($sql);
             }
         } catch (\PDOException $e) {
@@ -248,11 +247,13 @@ class Pdo {
             return false;
         }
         if (is_array($condition)) {
-            $condition = $this->field_value($condition, ' AND ');
+            $_condition = $this->field_value($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
         $limit = $muti ? '' : ' LIMIT 1';
         try {
-            $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . $limit;
+            $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
             return $this->_link->exec($sql);
         } catch (\PDOException $e) {
             if ('RETRY' != $type) {
@@ -274,8 +275,8 @@ class Pdo {
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         try {
             if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
+                list($_condition, $args) = $this->field_param($condition, ' AND ');
+                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 0,1';
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
@@ -307,15 +308,19 @@ class Pdo {
      * @param string $type
      * @return array|bool
      */
-    public function findAll($tableName, $field = '*', $condition = '1', $index = null, $retobj = false, $type = '') {
+    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '') {
         try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
+            if (is_array($condition) && !empty($condition)) {
+                list($_condition, $args) = $this->field_param($condition, ' AND ');
+                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition;
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
+                if (empty($condition)) {
+                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName);
+                } else {
+                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
+                }
                 $sth = $this->_link->query($sql);
             }
             if ($retobj) {
@@ -347,17 +352,21 @@ class Pdo {
      * @param string $type
      * @return array|bool
      */
-    private function _page($tableName, $field, $condition, $start = 0, $length = 20, $retobj = false, $type = '') {
+    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
+            if (is_array($condition) && !empty($condition)) {
+                list($_condition, $args) = $this->field_param($condition, ' AND ');
                 $args[':start'] = $start;
                 $args[':length'] = $length;
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT :start,:length';
+                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT :start,:length';
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
+                if (empty($condition)) {
+                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . " LIMIT {$start},{$length}";
+                } else {
+                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
+                }
                 $sth = $this->_link->query($sql);
             }
             if ($retobj) {
@@ -413,8 +422,8 @@ class Pdo {
     public function resultFirst($tableName, $field, $condition, $type = '') {
         try {
             if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
+                list($_condition, $args) = $this->field_param($condition, ' AND ');
+                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition} LIMIT 0,1";
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
@@ -441,15 +450,19 @@ class Pdo {
      * @param $type
      * @return array|bool
      */
-    public function getCol($tableName, $field, $condition, $type = '') {
+    public function getCol($tableName, $field, $condition = '', $type = '') {
         try {
-            if (is_array($condition)) {
-                list($condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+            if (is_array($condition) && !empty($condition)) {
+                list($_condition, $args) = $this->field_param($condition, ' AND ');
+                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition}";
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+                if (empty($condition)) {
+                    $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName);
+                } else {
+                    $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+                }
                 $sth = $this->_link->query($sql);
             }
             $data = array();

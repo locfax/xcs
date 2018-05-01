@@ -148,7 +148,7 @@ class DB {
      * @param bool $retobj
      * @return mixed
      */
-    public static function findAll($table, $field = '*', $condition = '1', $index = null, $retobj = false) {
+    public static function findAll($table, $field = '*', $condition = '', $index = null, $retobj = false) {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $index, $retobj);
     }
@@ -163,7 +163,7 @@ class DB {
      * @param bool $retobj
      * @return array
      */
-    public static function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
+    public static function page($table, $field, $condition = '', $pageparm = 0, $length = 18, $retobj = false) {
         $db = self::Using(self::$using_dbo_id);
         return $db->page($table, $field, $condition, $pageparm, $length, $retobj);
     }
@@ -178,7 +178,7 @@ class DB {
      * @param string $field
      * @return mixed
      */
-    public static function count($table, $condition, $field = '*') {
+    public static function count($table, $condition, $field = '1') {
         $db = self::Using(self::$using_dbo_id);
         return $db->count($table, $condition, $field);
     }
@@ -204,7 +204,7 @@ class DB {
      * @param $condition
      * @return mixed
      */
-    public static function getCol($table, $field, $condition) {
+    public static function getCol($table, $field, $condition = '') {
         $db = self::Using(self::$using_dbo_id);
         return $db->getCol($table, $field, $condition);
     }
