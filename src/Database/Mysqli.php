@@ -479,7 +479,6 @@ class Mysqli {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
             $ret = $this->_link->affected_rows;
-            $sth->close();
             return $ret;
         } catch (\Exception $e) {
             if ('RETRY' != $type) {
