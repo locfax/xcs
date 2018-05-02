@@ -42,12 +42,25 @@ class App {
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $errstr, $errfile = null, $errline = null) {
-                throw new Exception\ExException($errstr, $errno);
+                try {
+                    throw new Exception\ExException($errstr, $errno);
+                } catch (Exception\ExException $exception) {
+
+                }
             });
 
+            define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
             register_shutdown_function(function () {
                 $error = error_get_last();
-                throw new Exception\ExException($error['message'], $error["type"]);
+                if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
+                    $errno = $error["type"];
+                    $errstr = $error["message"];
+                    try {
+                        throw new Exception\ExException($errstr, $errno, 'systemError');
+                    } catch (Exception\ExException $exception) {
+
+                    }
+                }
             });
 
             $files = array_merge($dfiles, $preload);
