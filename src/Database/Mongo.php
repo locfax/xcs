@@ -347,7 +347,7 @@ class Mongo {
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             try {
-                throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code));
+                throw new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
             } catch (\Xcs\Exception\DbException $e) {
                 exit;
             }
