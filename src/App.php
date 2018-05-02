@@ -41,8 +41,13 @@ class App {
         );
         if (defined('DEBUG') && DEBUG) {
             //测试模式
-            set_error_handler(function ($errno, $error, $file = null, $line = null) {
-                throw new Exception\ExException($error, $errno);
+            set_error_handler(function ($errno, $errstr, $errfile = null, $errline = null) {
+                throw new Exception\ExException($errstr, $errno);
+            });
+
+            register_shutdown_function(function () {
+                $error = error_get_last();
+                throw new Exception\ExException($error['message'], $error["type"]);
             });
 
             $files = array_merge($dfiles, $preload);

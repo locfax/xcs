@@ -8,7 +8,8 @@ class ExException extends \Exception {
         parent::__construct($message, $code, $previous);
         $this->exceptionError($this, 'Exception');
         set_exception_handler(function () {
-        }); //不用自带的显示异常
+            //不用自带的显示异常
+        });
     }
 
     public function systemError($exception) {
