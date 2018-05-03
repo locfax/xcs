@@ -249,9 +249,9 @@ class App {
         }
         foreach (self::$routes as $key => $val) {
             $key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
-            if (preg_match('#' . $key . '#', $uri, $matches)) {
-                if (strpos($val, '$') !== FALSE && strpos($key, '(') !== FALSE) {
-                    $val = preg_replace('#' . $key . '#', $val, $uri);
+            if (preg_match('#^' . $key . '$#', $uri, $matches)) {
+                if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                    $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }
                 $req = explode('/', $val);
                 self::setRequest($req);
