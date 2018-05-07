@@ -565,8 +565,6 @@ class Mysqli {
             $data = $sth->fetch_all(MYSQLI_ASSOC);
             if ($retobj) {
                 $data = (array)$this->array_to_object($data);
-            } elseif (!is_null($index)) {
-                $data = $this->array_index($data, $index);
             }
             $sth->close();
             return $data;
