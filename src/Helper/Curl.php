@@ -37,6 +37,8 @@ class Curl {
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         /* 请求地址 */
         curl_setopt($ch, CURLOPT_URL, $url);
+        /* HTTP Basic Authentication */
+        //curl_setopt($ch,CURLOPT_USERPWD,"username:password");
 
         /* 设置请求头部 */
         if (!empty($data)) {
@@ -124,7 +126,6 @@ class Curl {
         } else {
             $http_body = $http_response;
         }
-        //dump($http_header);
 
         /* 关闭资源 */
         curl_close($ch);

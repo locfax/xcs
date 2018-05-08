@@ -22,7 +22,7 @@ class Mongo {
         try {
             $this->_link = new \MongoClient($config['dsn'], array("connect" => false));
             $this->_link->connect();
-            $this->_client = $this->_link->selectDB($config['database']);
+            $this->_client = $this->_link->selectDB($config['dbname']);
             if (isset($config['login']) && $config['login']) {
                 $this->_client->authenticate($config['login'], $config['secret']);
             }
