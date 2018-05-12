@@ -105,7 +105,7 @@ class Mysqli {
      * @param array $data
      * @param bool $retid
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function create($tableName, array $data, $retid = false, $type = '') {
         if (empty($data)) {
@@ -142,7 +142,7 @@ class Mysqli {
      * @param array $data
      * @param bool $retnum
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function replace($tableName, array $data, $retnum = false, $type = '') {
         if (empty($data)) {
@@ -180,7 +180,7 @@ class Mysqli {
      * @param $condition
      * @param bool $retnum
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function update($tableName, $data, $condition, $retnum = false, $type = '') {
         if (empty($data)) {
@@ -224,7 +224,7 @@ class Mysqli {
      * @param $condition
      * @param bool $muti
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function remove($tableName, $condition, $muti = true, $type = '') {
         if (empty($condition)) {
@@ -259,7 +259,7 @@ class Mysqli {
      * @param $condition
      * @param $retobj
      * @param $type
-     * @return bool
+     * @return mixed
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         if (is_array($condition)) {
@@ -296,7 +296,7 @@ class Mysqli {
      * @param null $index
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '') {
         if (is_array($condition) && !empty($condition)) {
@@ -310,7 +310,7 @@ class Mysqli {
             $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName);
         }
         try {
-            $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
@@ -320,6 +320,7 @@ class Mysqli {
             } elseif (!is_null($index)) {
                 $data = $this->array_index($data, $index);
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -339,7 +340,7 @@ class Mysqli {
      * @param int $length
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
@@ -361,6 +362,7 @@ class Mysqli {
             if ($retobj) {
                 $data = (array)$this->array_to_object($data);
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -379,7 +381,7 @@ class Mysqli {
      * @param int $pageparm
      * @param int $length
      * @param bool $retobj
-     * @return array|bool
+     * @return mixed
      */
     public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -404,7 +406,7 @@ class Mysqli {
      * @param string $field
      * @param mixed $condition
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
         if (is_array($condition) && !empty($condition)) {
@@ -436,7 +438,7 @@ class Mysqli {
      * @param $field
      * @param $condition
      * @param $type
-     * @return array|bool
+     * @return mixed
      */
     public function getCol($tableName, $field, $condition = '', $type = '') {
         if (is_array($condition) && !empty($condition)) {
@@ -450,7 +452,7 @@ class Mysqli {
             $sql = "SELECT {$field} FROM " . $this->qtable($tableName);
         }
         try {
-            $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
@@ -458,6 +460,7 @@ class Mysqli {
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -473,7 +476,7 @@ class Mysqli {
      * @param string $sql
      * @param $args
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function exec($sql, $args = null, $type = '') {
         try {
@@ -497,7 +500,7 @@ class Mysqli {
      * @param $args
      * @param $retobj
      * @param $type
-     * @return bool
+     * @return mixed
      */
     public function row($sql, $args = null, $retobj = false, $type = '') {
         try {
@@ -527,11 +530,11 @@ class Mysqli {
      * @param $index
      * @param $retobj
      * @param $type
-     * @return bool|array
+     * @return mixed
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
         try {
-            $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
@@ -541,6 +544,7 @@ class Mysqli {
             } elseif (!is_null($index)) {
                 $data = $this->array_index($data, $index);
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -557,11 +561,11 @@ class Mysqli {
      * @param array $args
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     private function _pages($sql, $args = null, $retobj = false, $type = '') {
         try {
-            $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
@@ -569,6 +573,7 @@ class Mysqli {
             if ($retobj) {
                 $data = (array)$this->array_to_object($data);
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -586,7 +591,7 @@ class Mysqli {
      * @param mixed $pageparm
      * @param int $length
      * @param bool $retobj
-     * @return array|bool
+     * @return mixed
      */
     public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -610,7 +615,7 @@ class Mysqli {
      * @param $tableName
      * @param string $condition
      * @param string $field
-     * @return bool
+     * @return mixed
      */
     public function count($tableName, $condition, $field = '*') {
         return $this->resultFirst($tableName, "COUNT({$field})", $condition);
@@ -619,7 +624,7 @@ class Mysqli {
     /**
      * @param $sql
      * @param null $args
-     * @return bool
+     * @return mixed
      */
     public function counts($sql, $args = null) {
         return $this->firsts($sql, $args);
@@ -629,7 +634,7 @@ class Mysqli {
      * @param string $sql
      * @param null $args
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function firsts($sql, $args = null, $type = '') {
         try {
@@ -653,11 +658,11 @@ class Mysqli {
      * @param string $sql
      * @param null $args
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
-    public function getcols($sql, $args = null, $type = '') {
+    public function getCols($sql, $args = null, $type = '') {
         try {
-            $sth = $this->_link->query($sql);
+            $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
@@ -665,6 +670,7 @@ class Mysqli {
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
+            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {

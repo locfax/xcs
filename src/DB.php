@@ -284,7 +284,7 @@ class DB {
      */
     public static function getCols($sql, $args = null) {
         $db = self::Using(self::$using_dbo_id);
-        return $db->getcols($sql, $args);
+        return $db->getCols($sql, $args);
     }
 
     //--------------多表联合查询---end---------------//

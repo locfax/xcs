@@ -23,12 +23,19 @@ class Pdo {
             \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
             \PDO::ATTR_EMULATE_PREPARES => false,
-            \PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES utf8',
-            \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
             \PDO::ATTR_PERSISTENT => false
         );
         try {
+            $mysql = false;
+            if (strpos($config['dsn'], 'mysql') !== false) {
+                $opt[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
+                $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
+                $mysql = true;
+            }
             $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
+            if (!$mysql) {
+                $this->_link->exec('SET NAMES utf8');
+            }
         } catch (\PDOException $exception) {
             $this->_halt($exception->getMessage(), $exception->getCode(), 'connect_error');
         }
@@ -126,7 +133,7 @@ class Pdo {
      * @param array $data
      * @param bool $retid
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function create($tableName, array $data, $retid = false, $type = '') {
         if (empty($data)) {
@@ -162,7 +169,7 @@ class Pdo {
      * @param array $data
      * @param bool $retnum
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function replace($tableName, array $data, $retnum = false, $type = '') {
         if (empty($data)) {
@@ -199,7 +206,7 @@ class Pdo {
      * @param $condition
      * @param bool $retnum
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function update($tableName, $data, $condition, $retnum = false, $type = '') {
         if (empty($data)) {
@@ -243,7 +250,7 @@ class Pdo {
      * @param $condition
      * @param bool $muti
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function remove($tableName, $condition, $muti = true, $type = '') {
         if (empty($condition)) {
@@ -273,7 +280,7 @@ class Pdo {
      * @param $condition
      * @param $retobj
      * @param $type
-     * @return bool
+     * @return mixed
      */
     public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
         try {
@@ -309,7 +316,7 @@ class Pdo {
      * @param null $index
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '') {
         try {
@@ -353,7 +360,7 @@ class Pdo {
      * @param int $length
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '') {
         try {
@@ -395,7 +402,7 @@ class Pdo {
      * @param int $pageparm
      * @param int $length
      * @param bool $retobj
-     * @return array|bool
+     * @return mixed
      */
     public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -420,7 +427,7 @@ class Pdo {
      * @param string $field
      * @param mixed $condition
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function resultFirst($tableName, $field, $condition, $type = '') {
         try {
@@ -445,13 +452,12 @@ class Pdo {
         }
     }
 
-
     /**
      * @param $tableName
      * @param $field
      * @param $condition
      * @param $type
-     * @return array|bool
+     * @return mixed
      */
     public function getCol($tableName, $field, $condition = '', $type = '') {
         try {
@@ -487,7 +493,7 @@ class Pdo {
      * @param string $sql
      * @param $args
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function exec($sql, $args = null, $type = '') {
         try {
@@ -515,7 +521,7 @@ class Pdo {
      * @param $args
      * @param $retobj
      * @param $type
-     * @return bool
+     * @return mixed
      */
     public function row($sql, $args = null, $retobj = false, $type = '') {
         try {
@@ -548,7 +554,7 @@ class Pdo {
      * @param $index
      * @param $retobj
      * @param $type
-     * @return bool|array
+     * @return mixed
      */
     public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
         try {
@@ -583,7 +589,7 @@ class Pdo {
      * @param array $args
      * @param bool $retobj
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
     private function _pages($sql, $args = null, $retobj = false, $type = '') {
         try {
@@ -616,7 +622,7 @@ class Pdo {
      * @param mixed $pageparm
      * @param int $length
      * @param bool $retobj
-     * @return array|bool
+     * @return mixed
      */
     public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false) {
         if (is_array($pageparm)) {
@@ -640,7 +646,7 @@ class Pdo {
      * @param $tableName
      * @param string $condition
      * @param string $field
-     * @return bool
+     * @return mixed
      */
     public function count($tableName, $condition, $field = '*') {
         return $this->resultFirst($tableName, "COUNT({$field})", $condition);
@@ -649,7 +655,7 @@ class Pdo {
     /**
      * @param $sql
      * @param null $args
-     * @return bool
+     * @return mixed
      */
     public function counts($sql, $args = null) {
         return $this->firsts($sql, $args);
@@ -659,7 +665,7 @@ class Pdo {
      * @param string $sql
      * @param null $args
      * @param string $type
-     * @return bool
+     * @return mixed
      */
     public function firsts($sql, $args = null, $type = '') {
         try {
@@ -685,9 +691,9 @@ class Pdo {
      * @param string $sql
      * @param null $args
      * @param string $type
-     * @return array|bool
+     * @return mixed
      */
-    public function getcols($sql, $args = null, $type = '') {
+    public function getCols($sql, $args = null, $type = '') {
         try {
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
