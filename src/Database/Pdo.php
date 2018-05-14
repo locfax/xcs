@@ -122,7 +122,7 @@ class Pdo {
     public function field_value(array $fields, $glue = ',') {
         $addsql = $comma = '';
         foreach ($fields as $field => $value) {
-            $addsql .= $comma . $this->qfield($field) . "=" . $this->qvalue($value);
+            $addsql .= $comma . $this->qfield($field) . " = " . $this->qvalue($value);
             $comma = $glue;
         }
         return $addsql;

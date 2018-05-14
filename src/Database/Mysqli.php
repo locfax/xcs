@@ -94,7 +94,7 @@ class Mysqli {
     public function field_value(array $fields, $glue = ',') {
         $addsql = $comma = '';
         foreach ($fields as $field => $value) {
-            $addsql .= $comma . $this->qfield($field) . "=" . $this->qvalue($value);
+            $addsql .= $comma . $this->qfield($field) . " = " . $this->qvalue($value);
             $comma = $glue;
         }
         return $addsql;
@@ -202,14 +202,14 @@ class Mysqli {
             $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$condition}";
         }
         try {
-            $data = $this->_link->query($sql);
-            if (!$data) {
+            $ret = $this->_link->query($sql);
+            if (!$ret) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
             if ($retnum) {
                 return $this->_link->affected_rows;
             }
-            return $data;
+            return $ret;
         } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
@@ -238,12 +238,12 @@ class Mysqli {
         $limit = $muti ? '' : ' LIMIT 1';
         $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
         try {
-            $data = $this->_link->query($sql);
-            if (!$data) {
+            $ret = $this->_link->query($sql);
+            if (!$ret) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
-            $data = $this->_link->affected_rows;
-            return $data;
+            $ret = $this->_link->affected_rows;
+            return $ret;
         } catch (\Exception $e) {
             if ('RETRY' != $type) {
                 $this->reconnect();
