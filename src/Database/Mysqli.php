@@ -320,7 +320,6 @@ class Mysqli {
             } elseif (!is_null($index)) {
                 $data = $this->array_index($data, $index);
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -362,7 +361,6 @@ class Mysqli {
             if ($retobj) {
                 $data = (array)$this->array_to_object($data);
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -460,7 +458,6 @@ class Mysqli {
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -544,7 +541,6 @@ class Mysqli {
             } elseif (!is_null($index)) {
                 $data = $this->array_index($data, $index);
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -573,7 +569,6 @@ class Mysqli {
             if ($retobj) {
                 $data = (array)$this->array_to_object($data);
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
@@ -670,7 +665,6 @@ class Mysqli {
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
-            $sth->free();
             $sth->close();
             return $data;
         } catch (\Exception $e) {
