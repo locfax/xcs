@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class CurlMuti {
+class CurlMuti
+{
 
     /**
      * @param $urls
@@ -11,7 +12,8 @@ class CurlMuti {
      * @param string $charset
      * @return array
      */
-    public static function send($urls, $data = '', $httphead = array(), $charset = 'UTF-8') {
+    public static function send($urls, $data = '', $httphead = array(), $charset = 'UTF-8')
+    {
         //创建多个curl语柄
         $mhandle = curl_multi_init();
 
@@ -126,7 +128,8 @@ class CurlMuti {
      * @param $string
      * @return mixed|string
      */
-    private static function convert_encode($in, $out, $string) { // string change charset return string
+    private static function convert_encode($in, $out, $string)
+    { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
         } elseif (function_exists('iconv')) {
@@ -140,7 +143,8 @@ class CurlMuti {
      * @param $_raw_url
      * @return mixed
      */
-    private static function raw_url($_raw_url) {
+    private static function raw_url($_raw_url)
+    {
         $raw_url = (string)$_raw_url;
         if (strpos($raw_url, '://') === false) {
             $raw_url = 'http://' . $raw_url;

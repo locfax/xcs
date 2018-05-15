@@ -2,7 +2,8 @@
 
 namespace Xcs\Cache;
 
-class Redis {
+class Redis
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -10,7 +11,8 @@ class Redis {
     private $_link = null;
     private $_plink = false;
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->close();
     }
 
@@ -19,7 +21,8 @@ class Redis {
      * @return $this
      * @throws \Exception
      */
-    public function init($config) {
+    public function init($config)
+    {
         try {
             $this->_link = new \Redis();
             if ($config['pconnect']) {
@@ -42,7 +45,8 @@ class Redis {
         return $this;
     }
 
-    public function close() {
+    public function close()
+    {
         if (!$this->_plink) {
             $this->_link && $this->_link->close();
         }
@@ -52,7 +56,8 @@ class Redis {
      * @param $key
      * @return bool
      */
-    public function get($key) {
+    public function get($key)
+    {
         try {
             return $this->_link->get($key);
         } catch (\RedisException $e) {
@@ -66,7 +71,8 @@ class Redis {
      * @param int $ttl
      * @return bool
      */
-    public function set($key, $value, $ttl = 0) {
+    public function set($key, $value, $ttl = 0)
+    {
         try {
             $ret = $this->_link->set($key, $value);
             if ($ttl > 0) {
@@ -83,7 +89,8 @@ class Redis {
      * @param int $ttl
      * @return mixed
      */
-    public function expire($key, $ttl = 0) {
+    public function expire($key, $ttl = 0)
+    {
         return $this->_link->expire($key, $ttl);
     }
 
@@ -91,7 +98,8 @@ class Redis {
      * @param $key
      * @return bool
      */
-    public function rm($key) {
+    public function rm($key)
+    {
         try {
             return $this->_link->delete($key);
         } catch (\RedisException $e) {
@@ -99,7 +107,8 @@ class Redis {
         }
     }
 
-    public function clear() {
+    public function clear()
+    {
         try {
             return $this->_link->flushDB();
         } catch (\RedisException $e) {

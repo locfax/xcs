@@ -2,7 +2,8 @@
 
 namespace Xcs\Cache;
 
-class Cacher {
+class Cacher
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -17,7 +18,8 @@ class Cacher {
      * @param null $cacher
      * @throws \Exception
      */
-    public function __construct($cacher = null) {
+    public function __construct($cacher = null)
+    {
         $this->config = getini('cache');
         $this->prefix = $this->config['prefix'];
         $cacher = $cacher ?: $this->config['cacher'];
@@ -36,11 +38,13 @@ class Cacher {
         }
     }
 
-    public function close() {
+    public function close()
+    {
         return $this->enable && $this->cacher->close();
     }
 
-    public function get($key) {
+    public function get($key)
+    {
         $ret = null;
         if ($this->enable) {
             $json = $this->cacher->get($this->_key($key));
@@ -54,7 +58,8 @@ class Cacher {
         return $ret;
     }
 
-    public function set($key, $value, $ttl = 0) {
+    public function set($key, $value, $ttl = 0)
+    {
         $ret = false;
         if ($this->enable) {
             $data = array($value);
@@ -63,7 +68,8 @@ class Cacher {
         return $ret;
     }
 
-    public function rm($key) {
+    public function rm($key)
+    {
         $ret = false;
         if ($this->enable) {
             $ret = $this->cacher->rm($this->_key($key));
@@ -71,7 +77,8 @@ class Cacher {
         return $ret;
     }
 
-    public function clear() {
+    public function clear()
+    {
         $ret = false;
         if ($this->enable) {
             $ret = $this->cacher->clear();
@@ -79,7 +86,8 @@ class Cacher {
         return $ret;
     }
 
-    private function _key($str) {
+    private function _key($str)
+    {
         return $this->prefix . $str;
     }
 

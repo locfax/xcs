@@ -2,13 +2,15 @@
 
 namespace Xcs\Helper;
 
-class Imagickd {
+class Imagickd
+{
 
     /**
      * @param $tempname
      * @return bool|HandleImagek
      */
-    public static function createFromFile($tempname) {
+    public static function createFromFile($tempname)
+    {
         //$fileext = trim(strtolower($ext), '.');
         try {
             $handle = new \Imagick($tempname);
@@ -18,7 +20,8 @@ class Imagickd {
         return new HandleImagek($handle);
     }
 
-    public static function hex2rgb($color, $default = 'ffffff') {
+    public static function hex2rgb($color, $default = 'ffffff')
+    {
         $hex = trim($color, '#&Hh');
         $len = strlen($hex);
         if (3 == $len) {

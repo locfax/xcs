@@ -2,7 +2,8 @@
 
 namespace Xcs\Database;
 
-class Mysqli {
+class Mysqli
+{
 
     private $_config = null;
     public $_link = null;

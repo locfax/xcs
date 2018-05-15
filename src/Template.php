@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class Template {
+class Template
+{
 
     private $subtemplates = array();
     private $replacecode = array('search' => array(), 'replace' => array());
@@ -12,7 +13,8 @@ class Template {
     private $cachedir = '';
     private $file = '';
 
-    public function parse($cachedir, $tpldir, $tplfile, $cachefile, $file) {
+    public function parse($cachedir, $tpldir, $tplfile, $cachefile, $file)
+    {
         $this->file = $file;
         $this->tpldir = $tpldir;
         $this->cachedir = $cachedir;
@@ -103,7 +105,8 @@ class Template {
         $this->save($this->cachedir . $cachefile, $template, FILE_READ_MODE);
     }
 
-    private function save($filename, $content, $mode) {
+    private function save($filename, $content, $mode)
+    {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
             touch($filename) && chmod($filename, FILE_WRITE_MODE); //全读写
@@ -115,7 +118,8 @@ class Template {
         return $ret;
     }
 
-    private function language_tags($_var) {
+    private function language_tags($_var)
+    {
         $vars = explode(':', $_var[1]);
         $isplugin = count($vars) == 2;
         if (!$isplugin) {
@@ -152,21 +156,24 @@ class Template {
         }
     }
 
-    private function url_tags($parameter) {
+    private function url_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         $this->replacecode['search'][$i] = $search = "<!--URL_TAG_$i-->";
         $this->replacecode['replace'][$i] = "<?php echo url(\"$parameter[1]\"); ?>";
         return $search;
     }
 
-    private function surl_tags($parameter) {
+    private function surl_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         $this->replacecode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
         $this->replacecode['replace'][$i] = url("$parameter[1]");
         return $search;
     }
 
-    private function adv_tags($parameter) {
+    private function adv_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         if (!isset($parameter[2])) {
             $this->replacecode['search'][$i] = $search = "<!--AD_TAG_$i-->";
@@ -178,13 +185,15 @@ class Template {
         return $search;
     }
 
-    private function script_tags($parameter) {
+    private function script_tags($parameter)
+    {
         $tplfile = template($parameter[1], true);
         $content = implode('', file($this->tpldir . $tplfile));
         return $content;
     }
 
-    private function date_tags($parameter) {
+    private function date_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         if (!isset($parameter[2])) {
             $this->replacecode['search'][$i] = $search = "<!--DATE_TAG_$i-->";
@@ -196,7 +205,8 @@ class Template {
         return $search;
     }
 
-    private function function_tags($parameter) {
+    private function function_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         if (!isset($parameter[2])) {
             $this->replacecode['search'][$i] = $search = "<!--FUNCTION_TAG_$i-->";
@@ -208,7 +218,8 @@ class Template {
         return $search;
     }
 
-    private function eval_tags($php) {
+    private function eval_tags($php)
+    {
         $php = str_replace('\"', '"', $php[1]);
         $i = count($this->replacecode['search']);
         $this->replacecode['search'][$i] = $search = "<!--EVAL_TAG_$i-->";
@@ -216,14 +227,16 @@ class Template {
         return $search;
     }
 
-    private function config_tags($parameter) {
+    private function config_tags($parameter)
+    {
         $i = count($this->replacecode['search']);
         $this->replacecode['search'][$i] = $search = "<!--CONFIG_TAG_$i-->";
         $this->replacecode['replace'][$i] = (null != getini("settings/$parameter[1]")) ? getini("settings/$parameter[1]") : getini("$parameter[1]");
         return $search;
     }
 
-    private function tag_subtemplate($file) {
+    private function tag_subtemplate($file)
+    {
         $tplfile = template($file[2], true);
         $content = implode('', file($this->tpldir . $tplfile));
         if ($content) {
@@ -234,37 +247,44 @@ class Template {
         }
     }
 
-    private function tag_template($parameter) {
+    private function tag_template($parameter)
+    {
         $return = "<?php include template(\"$parameter[1]\"); ?>";
         return $this->stripvtags($return);
     }
 
-    private function tag_echo($parameter) {
+    private function tag_echo($parameter)
+    {
         $return = "<?php echo $parameter[1]; ?>";
         return $this->stripvtags($return);
     }
 
-    private function tag_if($parameter) {
+    private function tag_if($parameter)
+    {
         $return = "$parameter[1]<?php if($parameter[2]) { ?>$parameter[3]";
         return $this->stripvtags($return);
     }
 
-    private function tag_elseif($parameter) {
+    private function tag_elseif($parameter)
+    {
         $return = "$parameter[1]<?php }elseif($parameter[2]) { ?>$parameter[3]";
         return $this->stripvtags($return);
     }
 
-    private function tag_loop($parameter) {
+    private function tag_loop($parameter)
+    {
         $return = "<?php if(!empty($parameter[1])){ foreach($parameter[1] as $parameter[2]) { ?>";
         return $this->stripvtags($return);
     }
 
-    private function tag_loopas($parameter) {
+    private function tag_loopas($parameter)
+    {
         $return = "<?php if(!empty($parameter[1])){ foreach($parameter[1] as $parameter[2] => $parameter[3]) { ?>";
         return $this->stripvtags($return);
     }
 
-    private function transamp($str) {
+    private function transamp($str)
+    {
         //$str = str_replace('&', '&amp;', $str[0]);
         $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
@@ -272,18 +292,21 @@ class Template {
         return $str;
     }
 
-    private function addquote($var) {
+    private function addquote($var)
+    {
         $var = '<?=' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([a-zA-Z0-9_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
     }
 
-    private function stripvtags($expr, $statement = '') {
+    private function stripvtags($expr, $statement = '')
+    {
         $expr = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $statement = str_replace("\\\"", "\"", $statement);
         return $expr . $statement;
     }
 
-    private function stripblock($parameter) {
+    private function stripblock($parameter)
+    {
         $var = $parameter[1];
         $s = $parameter[2];
         $s = str_replace('\\"', '"', $s);

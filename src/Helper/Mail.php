@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Mail {
+class Mail
+{
 
     public $debug = true;
 
@@ -19,7 +20,8 @@ class Mail {
         'auth_password' => '12345678',
     );
 
-    function send($email_to, $subject, $message) {
+    function send($email_to, $subject, $message)
+    {
         $mail = $this->mail;
         $charset = 'UTF-8';
         $timeoffset = 8;
@@ -163,7 +165,8 @@ EOT;
         }
     }
 
-    function fsocketopen($hostname, $port = 80, &$errno, &$errstr, $timeout = 15) {
+    function fsocketopen($hostname, $port = 80, &$errno, &$errstr, $timeout = 15)
+    {
         $fp = '';
         if (function_exists('fsockopen')) {
             $fp = fsockopen($hostname, $port, $errno, $errstr, $timeout);
@@ -175,7 +178,8 @@ EOT;
         return $fp;
     }
 
-    function runlog($k1, $k2, $k3) {
+    function runlog($k1, $k2, $k3)
+    {
         if ($this->debug) {
             echo $k1 . " ------" . $k2 . "-------" . $k3 . '<br>';
         }

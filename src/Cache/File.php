@@ -2,7 +2,8 @@
 
 namespace Xcs\Cache;
 
-class File {
+class File
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -12,7 +13,8 @@ class File {
      * @return $this
      * @throws \Exception
      */
-    public function init() {
+    public function init()
+    {
         if (!is_dir(getini('data/_cache'))) {
             throw new \Xcs\Exception\ExException('路径:' . getini('data/_cache') . ' 不可写');
         }
@@ -20,7 +22,8 @@ class File {
         return $this;
     }
 
-    public function close() {
+    public function close()
+    {
 
     }
 
@@ -28,7 +31,8 @@ class File {
      * @param $key
      * @return null
      */
-    public function get($key) {
+    public function get($key)
+    {
         $cachefile = getini('data/_cache') . $key . '.php';
         if (is_file($cachefile)) {
             $data = include $cachefile;
@@ -46,7 +50,8 @@ class File {
      * @param int $ttl
      * @return bool|int
      */
-    public function set($key, $val, $ttl = 0) {
+    public function set($key, $val, $ttl = 0)
+    {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
         } else {
@@ -65,7 +70,8 @@ class File {
      * @param int $ttl
      * @return bool
      */
-    public function expire($key, $ttl = 0) {
+    public function expire($key, $ttl = 0)
+    {
         return false;
     }
 
@@ -73,7 +79,8 @@ class File {
      * @param $key
      * @return bool
      */
-    public function rm($key) {
+    public function rm($key)
+    {
         $cachefile = getini('data/_cache') . $key . '.php';
         if (file_exists($cachefile)) {
             unlink($cachefile);
@@ -84,7 +91,8 @@ class File {
     /**
      * @return bool
      */
-    public function clear() {
+    public function clear()
+    {
         $cachedir = getini('data/_cache');
         $files = \Xcs\Helper\File::list_files($cachedir);
         foreach ($files as $file) {
@@ -99,7 +107,8 @@ class File {
      * @param $mode
      * @return bool|int
      */
-    public function save($filename, $content, $mode) {
+    public function save($filename, $content, $mode)
+    {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
             touch($filename) && chmod($filename, FILE_WRITE_MODE); //全读写

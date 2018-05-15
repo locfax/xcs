@@ -4,7 +4,8 @@ namespace Xcs\Helper;
 /**
  * 数据采集，doGET,doPOST,文件下载
  */
-class Http {
+class Http
+{
 
     static public $way = 0;
 
@@ -12,7 +13,8 @@ class Http {
      * 手动设置访问方式
      * @param  $way
      */
-    public static function setWay($way) {
+    public static function setWay($way)
+    {
         self::$way = intval($way);
     }
 
@@ -20,7 +22,8 @@ class Http {
      * 返回请求类型
      * @return int
      */
-    public static function getSupport() {
+    public static function getSupport()
+    {
         //如果指定访问方式，则按指定的方式去访问
         if (isset(self::$way) && in_array(self::$way, array(1, 2, 3)))
             return self::$way;
@@ -44,7 +47,8 @@ class Http {
      * @param $header
      * @return mixed
      */
-    public static function doGet($url, $timeout = 5, $header = "") {
+    public static function doGet($url, $timeout = 5, $header = "")
+    {
         if (empty($url) || empty($timeout)) {
             return false;
         }
@@ -75,7 +79,8 @@ class Http {
      * @param  $data_type
      * @return mixed
      */
-    public static function doPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "") {
+    public static function doPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    {
         if (empty($url) || empty($post_data) || empty($timeout))
             return false;
         if (!preg_match('/^(http|https)/is', $url))
@@ -103,7 +108,8 @@ class Http {
      * @param  $header
      * @return mixed
      */
-    public static function curlGet($url, $timeout = 5, $header = "") {
+    public static function curlGet($url, $timeout = 5, $header = "")
+    {
         $header = empty($header) ? self::defaultHeader() : $header;
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
@@ -127,7 +133,8 @@ class Http {
      * @param  $data_type
      * @return mixed
      */
-    public static function curlPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "") {
+    public static function curlPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    {
         $header = empty($header) ? '' : $header;
         //支持json数据数据提交
         if ($data_type == 'json') {
@@ -159,7 +166,8 @@ class Http {
      * @param  $header
      * @return boolean
      */
-    public static function socketGet($url, $timeout = 5, $header = "") {
+    public static function socketGet($url, $timeout = 5, $header = "")
+    {
         $header = empty($header) ? self::defaultHeader() : $header;
         $url2 = parse_url($url);
         $url2["path"] = isset($url2["path"]) ? $url2["path"] : "/";
@@ -194,7 +202,8 @@ class Http {
      * @param  $data_type
      * @return boolean
      */
-    public static function socketPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "") {
+    public static function socketPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    {
         $header = empty($header) ? self::defaultHeader() : $header;
         //支持json数据数据提交
         if ($data_type == 'json') {
@@ -236,7 +245,8 @@ class Http {
      * @param  $header
      * @return mixed
      */
-    public static function phpGet($url, $timeout = 5, $header = "") {
+    public static function phpGet($url, $timeout = 5, $header = "")
+    {
         $header = empty($header) ? self::defaultHeader() : $header;
         $opts = array(
             'http' => array(
@@ -258,7 +268,8 @@ class Http {
      * @param  $data_type
      * @return mixed
      */
-    public static function phpPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "") {
+    public static function phpPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    {
         $header = empty($header) ? self::defaultHeader() : $header;
         //支持json数据数据提交
         if ($data_type == 'json') {
@@ -285,7 +296,8 @@ class Http {
      * 默认模拟的header头
      * @return string
      */
-    public static function defaultHeader() {
+    public static function defaultHeader()
+    {
         $header = "User-Agent:Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.12) Gecko/20101026 Firefox/3.6.12\r\n";
         $header .= "Accept:text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8\r\n";
         $header .= "Accept-language: zh-cn,zh;q=0.5\r\n";
@@ -298,7 +310,8 @@ class Http {
      * @param  $fsock
      * @return boolean
      */
-    private static function GetHttpContent($fsock = null) {
+    private static function GetHttpContent($fsock = null)
+    {
         $out = null;
         while ($buff = @fgets($fsock, 2048)) {
             $out .= $buff;
@@ -326,7 +339,8 @@ class Http {
      * @param  $expire //下载内容浏览器缓存时间
      * @return boolean
      */
-    public static function download($filename, $showname = '', $expire = 1800) {
+    public static function download($filename, $showname = '', $expire = 1800)
+    {
         if (file_exists($filename) && is_file($filename)) {
             $length = filesize($filename);
         } else {
@@ -354,9 +368,10 @@ class Http {
      * 获取文件的mime_content类型
      * +----------------------------------------------------------
      * @return string
-    +----------------------------------------------------------
+     * +----------------------------------------------------------
      */
-    private static function mime_content_type($filename) {
+    private static function mime_content_type($filename)
+    {
         static $contentType = array(
             'ai' => 'application/postscript',
             'aif' => 'audio/x-aiff',
@@ -566,7 +581,8 @@ class Http {
      * @param $imagetype
      * @return bool|string
      */
-    public static function image_type_to_extension($imagetype) {
+    public static function image_type_to_extension($imagetype)
+    {
         if (empty($imagetype))
             return false;
         switch ($imagetype) {

@@ -7,7 +7,8 @@
  * @param bool $emptyrun
  * @return null
  */
-function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false) {
+function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false)
+{
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
         $var = substr($variable, 2);
@@ -77,7 +78,8 @@ function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun =
  * @param $emptyrun
  * @return string
  */
-function gpc_val($val, $runfunc, $emptyrun) {
+function gpc_val($val, $runfunc, $emptyrun)
+{
     if ('' == $val) {
         return $emptyrun ? $runfunc($val) : '';
     }
@@ -105,7 +107,8 @@ function gpc_val($val, $runfunc, $emptyrun) {
  * @param $key
  * @return null
  */
-function getini($key) {
+function getini($key)
+{
     $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
     switch (count($k)) {
@@ -131,7 +134,8 @@ function getini($key) {
  * @param $cachefile
  * @param $file
  */
-function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file) {
+function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file)
+{
     $tpldir = getini('data/tpldir');
     if (is_file($tpldir . $subtpl)) {
         $tpltime = filemtime($tpldir . $subtpl);
@@ -150,7 +154,8 @@ function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file) {
  * @param bool $gettplfile
  * @return string
  */
-function template($file, $gettplfile = false) {
+function template($file, $gettplfile = false)
+{
     $_tplid = getini('site/themes');
     $tplfile = $_tplid . '/' . $file . '.htm';
     if ($gettplfile) {
@@ -168,7 +173,8 @@ function template($file, $gettplfile = false) {
  * @param $param
  * @return string
  */
-function url($udi, $param = array()) {
+function url($udi, $param = array())
+{
     $_udi = explode('/', $udi);
     $url = '?' . \Xcs\App::_dCTL . '=' . $_udi[0] . '&' . \Xcs\App::_dACT . '=' . $_udi[1];
 
@@ -184,7 +190,8 @@ function url($udi, $param = array()) {
  * @param $string
  * @return array|string
  */
-function daddslashes($string) {
+function daddslashes($string)
+{
     if (empty($string)) {
         return $string;
     }
@@ -201,7 +208,8 @@ function daddslashes($string) {
  * @param $value
  * @return array|string
  */
-function dstripslashes($value) {
+function dstripslashes($value)
+{
     if (empty($value)) {
         return $value;
     }
@@ -219,7 +227,8 @@ function dstripslashes($value) {
  * @param $string
  * @return array|string
  */
-function daddcslashes($string) {
+function daddcslashes($string)
+{
     if (empty($string)) {
         return $string;
     }
@@ -237,7 +246,8 @@ function daddcslashes($string) {
  * @param $value
  * @return array|string
  */
-function dstripcslashes($value) {
+function dstripcslashes($value)
+{
     if (empty($value)) {
         return $value;
     }
@@ -254,7 +264,8 @@ function dstripcslashes($value) {
  * @param $text
  * @return string
  */
-function input_char($text) {
+function input_char($text)
+{
     if (empty($text)) {
         return $text;
     }
@@ -268,7 +279,8 @@ function input_char($text) {
  * @param $text
  * @return string
  */
-function output_char($text) {
+function output_char($text)
+{
     if (empty($text)) {
         return $text;
     }
@@ -283,7 +295,8 @@ function output_char($text) {
  * @param bool $url_encoded
  * @return null|string|string[]
  */
-function remove_invisible_characters($str, $url_encoded = TRUE) {
+function remove_invisible_characters($str, $url_encoded = TRUE)
+{
     $non_displayables = array();
     // every control character except newline (dec 10),
     // carriage return (dec 13) and horizontal tab (dec 09)
@@ -303,7 +316,8 @@ function remove_invisible_characters($str, $url_encoded = TRUE) {
  * @param $utimeoffset
  * @return array
  */
-function loctime($utimeoffset) {
+function loctime($utimeoffset)
+{
     static $dtformat = null, $timeoffset = 8;
     if (is_null($dtformat)) {
         $dtformat = array(
@@ -324,7 +338,8 @@ function loctime($utimeoffset) {
  * @param string $uformat
  * @return string
  */
-function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '') {
+function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
+{
     if (!$timestamp) {
         return '';
     }
@@ -374,7 +389,8 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '') 
  * @param $data
  * @param string $code
  */
-function runlog($data, $code = 'debug') {
+function runlog($data, $code = 'debug')
+{
     $logfile = DATAPATH . 'run.log';
     $log = new \Monolog\Logger('run');
     $log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, \Monolog\Logger::WARNING));
@@ -394,7 +410,8 @@ function runlog($data, $code = 'debug') {
  * @param int $halt
  * @param string $func
  */
-function dump($var, $halt = 0, $func = 'p') {
+function dump($var, $halt = 0, $func = 'p')
+{
     echo '<style>.track {
       font-family:Verdana, Arial, Helvetica, sans-serif;
       font-size: 12px;
@@ -420,7 +437,8 @@ function dump($var, $halt = 0, $func = 'p') {
  * @param bool $table
  * @param bool $stop
  */
-function post($table = false, $stop = false) {
+function post($table = false, $stop = false)
+{
     $str = '';
     $post = $_POST;
     foreach ($post as $k => $v) {

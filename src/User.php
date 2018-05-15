@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class User {
+class User
+{
 
     const _USERKEY = 'um_';
     const _ROLEKEY = 'roles';
@@ -14,7 +15,8 @@ class User {
      * @param int $left
      * @return bool
      */
-    public static function setUser($uid = '', array $userData, $rolesData = null, $left = 0) {
+    public static function setUser($uid = '', array $userData, $rolesData = null, $left = 0)
+    {
         if (!is_null($rolesData)) {
             $userData[self::_ROLEKEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
         }
@@ -27,13 +29,15 @@ class User {
      * @param string $uid
      * @return null
      */
-    public static function getUser($uid = '') {
+    public static function getUser($uid = '')
+    {
         $datakey = self::_USERKEY . $uid;
         $ret = self::_getData($datakey);
         return $ret;
     }
 
-    public static function clearUser($uid = '') {
+    public static function clearUser($uid = '')
+    {
         $datakey = self::_USERKEY . $uid;
         self::_setData($datakey, '', -86400 * 365);
     }
@@ -42,7 +46,8 @@ class User {
      * @param string $uid
      * @return null
      */
-    public static function getRoles($uid = '') {
+    public static function getRoles($uid = '')
+    {
         $user = self::getUser($uid);
         return isset($user[self::_ROLEKEY]) ?
             $user[self::_ROLEKEY] :
@@ -54,7 +59,8 @@ class User {
      * @param string $uid
      * @return array
      */
-    public static function getRolesArray($uid = '') {
+    public static function getRolesArray($uid = '')
+    {
         $roles = self::getRoles($uid);
         if (empty($roles)) {
             return array();
@@ -70,7 +76,8 @@ class User {
      * @param null $type
      * @return array
      */
-    private static function _getData($key, $type = null) {
+    private static function _getData($key, $type = null)
+    {
         $ret = '';
         if (is_null($type)) {
             $type = getini('auth/handle');
@@ -99,7 +106,8 @@ class User {
      * @param null $type
      * @return bool
      */
-    private static function _setData($key, $val, $life = 0, $type = null) {
+    private static function _setData($key, $val, $life = 0, $type = null)
+    {
         $ret = false;
         if (is_null($type)) {
             $type = getini('auth/handle');
@@ -133,7 +141,8 @@ class User {
      * @param null $key
      * @return string
      */
-    public static function getCookieKey($var, $prefix = true, $key = null) {
+    public static function getCookieKey($var, $prefix = true, $key = null)
+    {
         if ($prefix) {
             if (is_null($key)) {
                 $var = getini('auth/prefix') . substr(md5(getini('auth/key')), -7, 7) . '_' . $var;
@@ -152,7 +161,8 @@ class User {
      * @param int $expiry
      * @return string
      */
-    public static function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0) {
+    public static function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0)
+    {
         static $hash_auth = null;
         if (is_null($hash_auth)) {
             $hash_key = getini('auth/key') ?: PHP_VERSION;

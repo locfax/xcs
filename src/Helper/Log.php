@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Log {
+class Log
+{
 
     const maxsize = 1024000; //最大文件大小1M
 
@@ -11,7 +12,8 @@ class Log {
      * @param $filename
      * @param $msg
      */
-    public static function writeLog($filename, $msg) {
+    public static function writeLog($filename, $msg)
+    {
         $res = array();
         $res['msg'] = $msg;
         $res['logtime'] = date("Y-m-d H:i:s", time());
@@ -38,7 +40,8 @@ class Log {
      * @param $filename
      * @return mixed|string
      */
-    public static function readLog($filename) {
+    public static function readLog($filename)
+    {
         if (file_exists($filename)) {
             $content = file_get_contents($filename);
             $json = json_decode('[' . $content . ']', true);

@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class Rbac {
+class Rbac
+{
 
     const ACL_EVERYONE = 'ACL_EVERYONE';
     const ACL_HAS_ROLE = 'ACL_HAS_ROLE';
@@ -16,7 +17,8 @@ class Rbac {
      * @param string $auth
      * @return bool
      */
-    public static function check($controllerName, $actionName = null, $auth = 'general') {
+    public static function check($controllerName, $actionName = null, $auth = 'general')
+    {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
 
@@ -56,7 +58,8 @@ class Rbac {
      * @param $ACL
      * @return bool
      */
-    private static function _check($_roles, $ACL) {
+    private static function _check($_roles, $ACL)
+    {
         $roles = array_map('strtoupper', $_roles);
         if ($ACL['allow'] == self::ACL_EVERYONE) {
 
@@ -161,7 +164,8 @@ class Rbac {
      * @param $controllerName
      * @return null
      */
-    private static function _getACL($controllerName) {
+    private static function _getACL($controllerName)
+    {
         static $globalAcl = array();
         if (empty($globalAcl)) {
             $globalAcl = SysCache::loadcache('acl' . APPKEY);

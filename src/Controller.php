@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class Controller {
+class Controller
+{
 
     //当前控制器
     protected $_ctl;
@@ -14,7 +15,8 @@ class Controller {
     /*
      * 初始执行
      */
-    public function __construct($controllerName, $actionName) {
+    public function __construct($controllerName, $actionName)
+    {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
         $this->init_var();
@@ -26,7 +28,8 @@ class Controller {
      * @param $arguments
      * @return bool
      */
-    public function __call($name, $arguments) {
+    public function __call($name, $arguments)
+    {
         //动作不存在
         if (App::isAjax(true)) {
             $retarr = array(
@@ -43,7 +46,8 @@ class Controller {
     /*
      * 初始变量
      */
-    private function init_var() {
+    private function init_var()
+    {
         $this->timestamp = getgpc('s.REQUEST_TIME') ?: time();
         if (filter_input(INPUT_GET, 'page')) {
             $_GET['page'] = max(1, filter_input(INPUT_GET, 'page'));
@@ -53,7 +57,8 @@ class Controller {
     /*
      * 时区
      */
-    private function init_timezone() {
+    private function init_timezone()
+    {
         //php > 5.1
         $timeoffset = getini('settings/timezone');
         $timeoffset && date_default_timezone_set('Etc/GMT' . ($timeoffset > 0 ? '-' : '+') . abs($timeoffset));
@@ -62,7 +67,8 @@ class Controller {
     /*
      * 权限验证
      */
-    final function checkacl($controllerName, $actionName, $auth = AUTH) {
+    final function checkacl($controllerName, $actionName, $auth = AUTH)
+    {
         return Rbac::check($controllerName, $actionName, $auth);
     }
 

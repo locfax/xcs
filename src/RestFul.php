@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class RestFul extends \Xcs\Controller {
+class RestFul extends \Xcs\Controller
+{
 
     // 当前请求类型
     private $_method = null;
@@ -17,7 +18,8 @@ class RestFul extends \Xcs\Controller {
         'json' => 'application/json'
     ];
 
-    public function __construct($controllerName, $actionName) {
+    public function __construct($controllerName, $actionName)
+    {
         parent::__construct($controllerName, $actionName);
         // 请求方式检测
         $method = strtolower(getgpc('s.REQUEST_METHOD'));
@@ -32,7 +34,8 @@ class RestFul extends \Xcs\Controller {
     }
 
     // 发送Http状态信息
-    private function http_status($code) {
+    private function http_status($code)
+    {
         static $_status = [
             // Informational 1xx
             100 => 'Continue',
@@ -96,7 +99,8 @@ class RestFul extends \Xcs\Controller {
      * @param String $type 返回类型 JSON XML
      * @return string
      */
-    private function encode_data($data, $type = 'json') {
+    private function encode_data($data, $type = 'json')
+    {
         if (empty($data)) {
             return '';
         }
@@ -113,7 +117,8 @@ class RestFul extends \Xcs\Controller {
      * @param string $charset 页面输出编码
      * @return void
      */
-    private function content_type($type, $charset = '') {
+    private function content_type($type, $charset = '')
+    {
         if (headers_sent()) {
             return;
         }
@@ -126,7 +131,8 @@ class RestFul extends \Xcs\Controller {
         }
     }
 
-    protected function data() {
+    protected function data()
+    {
         return $this->_data;
     }
 
@@ -138,7 +144,8 @@ class RestFul extends \Xcs\Controller {
      * @param integer $code HTTP状态
      * @return void
      */
-    protected function response($data, $code = 200) {
+    protected function response($data, $code = 200)
+    {
         $type = 'json';
         $this->http_status($code);
         $this->content_type($type);

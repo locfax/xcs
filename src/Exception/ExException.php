@@ -2,9 +2,11 @@
 
 namespace Xcs\Exception;
 
-class ExException extends \Exception {
+class ExException extends \Exception
+{
 
-    public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null) {
+    public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null)
+    {
         parent::__construct($message, $code, $previous);
         $this->exceptionError($this, $type);
         set_exception_handler(function () {
@@ -12,7 +14,8 @@ class ExException extends \Exception {
         });
     }
 
-    public function systemError($exception) {
+    public function systemError($exception)
+    {
         $this->exceptionError($exception, 'SystemError');
     }
 
@@ -22,7 +25,8 @@ class ExException extends \Exception {
      * @static
      * @access public
      */
-    public function debugBacktrace() {
+    public function debugBacktrace()
+    {
         $skipFunc[] = 'handle_exception';
         $skipFunc[] = 'handle_error';
         $skipFunc[] = 'ErrorFunc::systemError';
@@ -67,7 +71,8 @@ class ExException extends \Exception {
      * @param $type
      * @param mixed $exception
      */
-    public function exceptionError($exception, $type = 'Exception') {
+    public function exceptionError($exception, $type = 'Exception')
+    {
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
         krsort($trace);
@@ -109,11 +114,13 @@ class ExException extends \Exception {
         $this->showError($type, $errorMsg, $phpMsg);
     }
 
-    public function writeErrorLog($message) {
+    public function writeErrorLog($message)
+    {
         return false; // 暂时不写入
     }
 
-    public function clear($message) {
+    public function clear($message)
+    {
         if (defined('DEBUG') && DEBUG) {
             return $message;
         } else {
@@ -130,7 +137,8 @@ class ExException extends \Exception {
      * @param string $errorMsg
      * @param string $phpMsg
      */
-    public static function showError($type, $errorMsg, $phpMsg = '') {
+    public static function showError($type, $errorMsg, $phpMsg = '')
+    {
         ob_get_length() && ob_end_clean();
 
         $title = $type ? $type : 'System';

@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Uploader {
+class Uploader
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -14,7 +15,8 @@ class Uploader {
      * @param bool $cascade
      * @return $this|null
      */
-    public function init($tempfiles, $cascade = true) {
+    public function init($tempfiles, $cascade = true)
+    {
         $this->reset();
 
         if (!is_array($tempfiles)) {
@@ -47,7 +49,8 @@ class Uploader {
         return $this;
     }
 
-    public function reset() {
+    public function reset()
+    {
         $this->_files = array();
         $this->_count = 0;
     }
@@ -55,14 +58,16 @@ class Uploader {
     /**
      * @return int
      */
-    public function getCount() {
+    public function getCount()
+    {
         return $this->_count;
     }
 
     /**
      * @return array|bool
      */
-    public function getFiles() {
+    public function getFiles()
+    {
         $return = false;
         if (empty($this->_files)) {
             return $return;
@@ -74,7 +79,8 @@ class Uploader {
      * @param $name
      * @return bool
      */
-    public function getFile($name) {
+    public function getFile($name)
+    {
         $return = false;
         if (!isset($this->_files[$name])) {
             return $return;
@@ -86,14 +92,16 @@ class Uploader {
      * @param $name
      * @return bool
      */
-    public function isFileExist($name) {
+    public function isFileExist($name)
+    {
         return isset($this->_files[$name]);
     }
 
     /**
      * @param $destDir
      */
-    public function batchMove($destDir) {
+    public function batchMove($destDir)
+    {
         foreach ($this->_files as $file) {
             $file->move($destDir . '/' . $file->getFilename());
         }

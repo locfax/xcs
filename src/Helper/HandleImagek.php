@@ -2,19 +2,23 @@
 
 namespace Xcs\Helper;
 
-class HandleImagek {
+class HandleImagek
+{
 
     protected $_handle = null;
 
-    public function __construct($handle) {
+    public function __construct($handle)
+    {
         $this->_handle = $handle;
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->destroy();
     }
 
-    private function destroy() {
+    private function destroy()
+    {
         if (!$this->_handle) {
             $this->_handle->destroy();
         }
@@ -26,7 +30,8 @@ class HandleImagek {
       参数:
      */
 
-    public function crop($width, $height, $options = array()) {
+    public function crop($width, $height, $options = array())
+    {
         if (is_null($this->_handle)) {
             return $this;
         }
@@ -38,7 +43,8 @@ class HandleImagek {
         $this->_handle->thumbnailImage($width, $height, $options['bestfit'], $options['fill']);
     }
 
-    public function watermark($waterImage, $pos = 5, $Opacity = 0.2) {
+    public function watermark($waterImage, $pos = 5, $Opacity = 0.2)
+    {
         $water = new \Imagick($waterImage);
         $water->setImageOpacity($Opacity);
         $dw = new \ImagickDraw();
@@ -54,7 +60,8 @@ class HandleImagek {
       参数: $filepath:生成的缩略图位置 ,string
      */
 
-    public function saveAsJpeg($filepath) {
+    public function saveAsJpeg($filepath)
+    {
         $this->_handle->writeImage($filepath);
     }
 
@@ -72,7 +79,8 @@ class HandleImagek {
       $dst:处理后的目标图片存储位置,string型
      */
 
-    public function contrast($type, $apply, $w = 0, $h = 0, $x = 0, $y = 0) {
+    public function contrast($type, $apply, $w = 0, $h = 0, $x = 0, $y = 0)
+    {
         if ($type) {
             $s = 9;
         } else {
@@ -99,7 +107,8 @@ class HandleImagek {
       $src:保存图片的地址,string型
      */
 
-    public function text($text, $color, $size, $font = 'FetteSteinschrift') {
+    public function text($text, $color, $size, $font = 'FetteSteinschrift')
+    {
         $font = APPPATH . "vendor/captcha/fonts/en/" . $font . ".ttf";
         $draw = new \ImagickDraw();
         $draw->setGravity(\Imagick::GRAVITY_CENTER);
@@ -127,7 +136,8 @@ class HandleImagek {
       $x,$y:水印位置,int型
      */
 
-    public function mark($text, $color, $size, $font, $x, $y) {
+    public function mark($text, $color, $size, $font, $x, $y)
+    {
         $im = $this->text($text, $color, $size, $font);
         $this->_handle->compositeImage($im, \Imagick::COMPOSITE_OVER, $x, $y);
         $im->destroy();
@@ -143,7 +153,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function gaussianblur($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function gaussianblur($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -167,7 +178,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function sharpen($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function sharpen($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -191,7 +203,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function raise($raise, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function raise($raise, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -223,7 +236,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function frame($frame_width, $frame_height, $bevel, $color, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function frame($frame_width, $frame_height, $bevel, $color, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -249,7 +263,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function oilpaint($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function oilpaint($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -273,7 +288,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function spread($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function spread($radius, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -297,7 +313,8 @@ class HandleImagek {
       $angle:倾斜角度,int型
      */
 
-    public function polaroidEffect($src, $color, $angle = 0) {
+    public function polaroidEffect($src, $color, $angle = 0)
+    {
         if (15 != abs($angle)) {
             $srcs = array($src, $src, $src, $src);
             $bg = new \ImagickDraw();
@@ -365,7 +382,8 @@ class HandleImagek {
       $brushpath:画笔轨迹,array型
      */
 
-    public function brushpng($color, $size, $brushpath) {
+    public function brushpng($color, $size, $brushpath)
+    {
         $info = $this->_handle->getImageGeometry();
         $image = new \Imagick();
         $image->newImage($info["width"], $info["height"], "transparent", "png");
@@ -395,7 +413,8 @@ class HandleImagek {
       $png:需要合并的png图片地址,string型
      */
 
-    public function dobrush($png) {
+    public function dobrush($png)
+    {
         if (is_file($png)) {
             $imagepng = new \Imagick($png);
             $imagepng->setImageFormat("png");
@@ -412,7 +431,8 @@ class HandleImagek {
       $angle:旋转角度,int型
      */
 
-    public function rotate($angle) {
+    public function rotate($angle)
+    {
         $this->_handle->rotateImage(new \ImagickPixel(), $angle);
     }
 
@@ -426,7 +446,8 @@ class HandleImagek {
       $type:true表示存储图片,false表示返回处理后的Imagick对象
      */
 
-    public function brightness($n, $s_x = 0, $e_x = 0, $s_y = 0, $e_y = 0) {
+    public function brightness($n, $s_x = 0, $e_x = 0, $s_y = 0, $e_y = 0)
+    {
         $info = $this->_handle->getImageGeometry();
         $w = $info["width"];
         $h = $info["height"];
@@ -477,7 +498,8 @@ class HandleImagek {
       $dst:保存图片的地址,string型
      */
 
-    public function grayscale($apply, $x = 0, $y = 0, $w = 0, $h = 0) {
+    public function grayscale($apply, $x = 0, $y = 0, $w = 0, $h = 0)
+    {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
             $apply = false;
         }
@@ -509,7 +531,8 @@ class HandleImagek {
       此函数在安全模式下不能运行
      */
 
-    public function prequality($src, $dst, $q) {
+    public function prequality($src, $dst, $q)
+    {
         exec("convert -quality {$q} {$src} {$dst}");
     }
 

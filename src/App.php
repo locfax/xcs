@@ -2,7 +2,8 @@
 
 namespace Xcs;
 
-class App {
+class App
+{
 
     const _dCTL = 'c';
     const _dACT = 'a';
@@ -15,7 +16,8 @@ class App {
      * @param array $preload
      * @param bool $refresh
      */
-    public static function run($preload, $refresh = false) {
+    public static function run($preload, $refresh = false)
+    {
         if (!defined('APPKEY')) {
             exit('APPKEY not defined!');
         }
@@ -32,7 +34,8 @@ class App {
      * @param $preload
      * @param bool $refresh
      */
-    public static function runFile($preload, $refresh = false) {
+    public static function runFile($preload, $refresh = false)
+    {
         $dfiles = array(
             PSROOT . '/config/base.inc.php', //全局配置
             PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
@@ -79,7 +82,8 @@ class App {
      * @param array $dfiles
      * @param bool $refresh
      */
-    public static function _runFile($preload, $dfiles, $refresh = false) {
+    public static function _runFile($preload, $dfiles, $refresh = false)
+    {
         $preloadfile = DATAPATH . 'preload/runtime_' . APPKEY . '_files.php';
         if (!is_file($preloadfile) || $refresh) {
             $files = array_merge($dfiles, $preload);
@@ -93,7 +97,8 @@ class App {
      * @param $runfile
      * @return bool
      */
-    public static function makeRunFile($runtimefiles, $runfile) {
+    public static function makeRunFile($runtimefiles, $runfile)
+    {
         $content = '';
         foreach ($runtimefiles as $filename) {
             $data = php_strip_whitespace($filename);
@@ -120,7 +125,8 @@ class App {
      * @param string $uri
      * @return bool
      */
-    public static function dispatching($uri) {
+    public static function dispatching($uri)
+    {
         if (defined('ROUTE') && ROUTE) {
             self::router($uri);
         }
@@ -146,7 +152,8 @@ class App {
      * @param $actionName
      * @return bool
      */
-    public static function executeAction($controllerName, $actionName) {
+    public static function executeAction($controllerName, $actionName)
+    {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::_actionPrefix . $actionName;
         do {
@@ -172,7 +179,8 @@ class App {
      * @param null $vars
      * @return mixed
      */
-    public static function mergeVars($group, $vars = null) {
+    public static function mergeVars($group, $vars = null)
+    {
         static $_CDATA = array(APPKEY => array('dsn' => null, 'cfg' => null, 'data' => null));
         $appkey = APPKEY;
         if (is_null($vars)) {
@@ -190,7 +198,8 @@ class App {
      * @param $args
      * @return bool
      */
-    private static function errACT($args) {
+    private static function errACT($args)
+    {
         if (self::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
@@ -207,7 +216,8 @@ class App {
      * @param $args
      * @return bool
      */
-    private static function errACL($args) {
+    private static function errACL($args)
+    {
         if (self::isAjax(true)) {
             $retarr = array(
                 'errcode' => 1,
@@ -225,7 +235,8 @@ class App {
      * @param $controllerClass
      * @return bool
      */
-    private static function _loadController($controllerName, $controllerClass) {
+    private static function _loadController($controllerName, $controllerClass)
+    {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         };
@@ -237,7 +248,8 @@ class App {
      * @param $uri
      * @return bool|void
      */
-    public static function router($uri) {
+    public static function router($uri)
+    {
         if (!$uri) {
             return;
         }
@@ -263,7 +275,8 @@ class App {
     /**
      * @param $req
      */
-    private static function setRequest($req) {
+    private static function setRequest($req)
+    {
         $_GET[self::_dCTL] = array_shift($req);
         $_GET[self::_dACT] = array_shift($req);
         $parmnum = count($req);
@@ -280,7 +293,8 @@ class App {
      * @param $namespace
      * @param $path
      */
-    public static function rootNamespace($namespace, $path) {
+    public static function rootNamespace($namespace, $path)
+    {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
         $loader = function ($classname) use ($namespace, $path) {
@@ -304,7 +318,8 @@ class App {
      * @param string $ext 导入的文件扩展名
      * @return boolean
      */
-    public static function vendor($class, $ext = '.php', $baseUrl = LIBPATH) {
+    public static function vendor($class, $ext = '.php', $baseUrl = LIBPATH)
+    {
         static $_file = array();
         $key = $class . $baseUrl . $ext;
         $class = str_replace(array('.', '#'), array('/', '.'), $class);
@@ -332,7 +347,8 @@ class App {
      * @param bool $retbool
      * @return bool
      */
-    public static function isPost($retbool = true) {
+    public static function isPost($retbool = true)
+    {
         if ('POST' == getgpc('s.REQUEST_METHOD')) {
             return $retbool;
         }
@@ -343,7 +359,8 @@ class App {
      * @param bool $retbool
      * @return bool
      */
-    public static function isAjax($retbool = true) {
+    public static function isAjax($retbool = true)
+    {
         if ('XMLHttpRequest' == getgpc('s.HTTP_X_REQUESTED_WITH')) {
             return $retbool;
         }

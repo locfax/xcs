@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Html {
+class Html
+{
 
     /**
      * @param $name
@@ -11,7 +12,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function dropdown_list($name, $arr, $selected = null, $extra = null) {
+    public static function dropdown_list($name, $arr, $selected = null, $extra = null)
+    {
         $str = "<select name=\"{$name}\" {$extra} >\n";
         foreach ($arr as $value => $title) {
             $str .= '<option value="' . htmlspecialchars($value) . '"';
@@ -32,7 +34,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function radio_group($name, $arr, $checked = null, $separator = '', $extra = null) {
+    public static function radio_group($name, $arr, $checked = null, $separator = '', $extra = null)
+    {
         $ix = 0;
         $str = "";
         foreach ($arr as $value => $title) {
@@ -59,7 +62,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function checkbox_group($name, $arr, $selected = array(), $separator = '', $extra = null) {
+    public static function checkbox_group($name, $arr, $selected = array(), $separator = '', $extra = null)
+    {
         $ix = 0;
         if (!is_array($selected)) {
             $selected = array($selected);
@@ -89,7 +93,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function checkbox($name, $value = 1, $checked = false, $label = '', $extra = null) {
+    public static function checkbox($name, $value = 1, $checked = false, $label = '', $extra = null)
+    {
         $str = "<input name=\"{$name}\" type=\"checkbox\" id=\"{$name}_1\" value=\"{$value}\"";
         if ($checked) {
             $str .= " checked";
@@ -109,7 +114,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function textbox($name, $value = '', $width = null, $maxLength = null, $extra = null) {
+    public static function textbox($name, $value = '', $width = null, $maxLength = null, $extra = null)
+    {
         $str = "<input name=\"{$name}\" type=\"text\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
             $str .= "size=\"{$width}\" ";
@@ -129,7 +135,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function password($name, $value = '', $width = null, $maxLength = null, $extra = null) {
+    public static function password($name, $value = '', $width = null, $maxLength = null, $extra = null)
+    {
         $str = "<input name=\"{$name}\" type=\"password\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
             $str .= "size=\"{$width}\" ";
@@ -149,7 +156,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function textarea($name, $value = '', $width = null, $height = null, $extra = null) {
+    public static function textarea($name, $value = '', $width = null, $height = null, $extra = null)
+    {
         $str = "<textarea name=\"{$name}\"";
         if ($width) {
             $str .= "cols=\"{$width}\" ";
@@ -169,7 +177,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function hidden($name, $value = '', $extra = null) {
+    public static function hidden($name, $value = '', $extra = null)
+    {
         $str = "<input name=\"{$name}\" type=\"hidden\" value=\"";
         $str .= htmlspecialchars($value);
         $str .= "\" {$extra} />\n";
@@ -182,7 +191,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function filefield($name, $width = null, $extra = null) {
+    public static function filefield($name, $width = null, $extra = null)
+    {
         $str = "<input name=\"{$name}\" type=\"file\"";
         if ($width) {
             $str .= " size=\"{$width}\"";
@@ -199,7 +209,8 @@ class Html {
      * @param null $extra
      * @return string
      */
-    public static function form_open($name, $action, $method = 'post', $onsubmit = '', $extra = null) {
+    public static function form_open($name, $action, $method = 'post', $onsubmit = '', $extra = null)
+    {
         $str = "<form name=\"{$name}\" action=\"{$action}\" method=\"{$method}\" ";
         if ($onsubmit) {
             $str .= "onsubmit=\"{$onsubmit}\"";
@@ -211,7 +222,8 @@ class Html {
     /**
      * @return string
      */
-    public static function form_close() {
+    public static function form_close()
+    {
         return "</form>\n";
     }
 

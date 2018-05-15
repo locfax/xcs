@@ -2,13 +2,15 @@
 
 namespace Xcs;
 
-class Context {
+class Context
+{
 
     /**
      * @param $dsnid
      * @return mixed
      */
-    public static function dsn($dsnid) {
+    public static function dsn($dsnid)
+    {
         static $_dsns = array();
         $appkey = APPKEY;
         if (!isset($_dsns[$appkey])) {
@@ -31,7 +33,8 @@ class Context {
      * @param $type
      * @return bool|mixed
      */
-    public static function config($name, $type = 'inc') {
+    public static function config($name, $type = 'inc')
+    {
         static $_configs = array();
         $key = APPKEY . '.' . $name . '.' . $type;
         if (isset($_configs[$key])) {

@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Arrmap {
+class Arrmap
+{
 
     /**
      * php5.5+自带这个函数 但是只能处理二维
@@ -11,7 +12,8 @@ class Arrmap {
      * @param $column_key
      * @return array
      */
-    public static function column(array $array, $column_key) {
+    public static function column(array $array, $column_key)
+    {
         $retarr = array();
         foreach ($array as $arr) {
             if (is_array($column_key)) {
@@ -36,7 +38,8 @@ class Arrmap {
      *
      * @return array
      */
-    public static function sort_field($arr, $sortField, $sortDirection = SORT_ASC) {
+    public static function sort_field($arr, $sortField, $sortDirection = SORT_ASC)
+    {
         self::sort_multi($arr, array($sortField => $sortDirection));
         return $arr;
     }
@@ -47,7 +50,8 @@ class Arrmap {
      * @param array $args
      * @return mixed
      */
-    private static function sort_multi(& $arr, array $args) {
+    private static function sort_multi(& $arr, array $args)
+    {
         $sortArray = array();
         $sortRule = '';
         foreach ($args as $sortField => $sortDir) {
@@ -71,7 +75,8 @@ class Arrmap {
      * @param bool $apply_keys
      * @return null
      */
-    public static function walk($arr, callable $function, $apply_keys = false) {
+    public static function walk($arr, callable $function, $apply_keys = false)
+    {
         if (empty($arr)) {
             return null;
         }
@@ -100,7 +105,8 @@ class Arrmap {
      * @param string $delval
      * @return array
      */
-    public static function remove_value($arr, $delval = '') {
+    public static function remove_value($arr, $delval = '')
+    {
         if (empty($arr)) {
             return null;
         }
@@ -124,7 +130,8 @@ class Arrmap {
      * @param $arr
      * @return array
      */
-    public static function remove_empty($arr) {
+    public static function remove_empty($arr)
+    {
         if (empty($arr)) {
             return null;
         }
@@ -153,7 +160,8 @@ class Arrmap {
      *
      * @return array
      */
-    public static function to_map($arr, $keyField = null, $valueField = null) {
+    public static function to_map($arr, $keyField = null, $valueField = null)
+    {
         $map = array();
         if ($valueField) {
             foreach ($arr as $row) {
@@ -183,7 +191,8 @@ class Arrmap {
      *
      * @return array
      */
-    public static function group_by($arr, $groupField) {
+    public static function group_by($arr, $groupField)
+    {
         $ret = array();
         foreach ($arr as $row) {
             $ret[$row[$groupField]][] = $row;
@@ -206,7 +215,8 @@ class Arrmap {
      *
      * @return array
      */
-    public static function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false) {
+    public static function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false)
+    {
         $refs = $arr;
         $pkvRefs = array();
         foreach ($arr as $offset => $row) {
@@ -248,7 +258,8 @@ class Arrmap {
      *
      * @return array
      */
-    public static function tree_to($tree, $fchildrens = 'children') {
+    public static function tree_to($tree, $fchildrens = 'children')
+    {
         $arr = array();
         if (isset($tree[$fchildrens]) && is_array($tree[$fchildrens])) {
             foreach ($tree[$fchildrens] as $child) {

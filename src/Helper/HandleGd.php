@@ -2,19 +2,23 @@
 
 namespace Xcs\Helper;
 
-class HandleGd {
+class HandleGd
+{
 
     protected $_handle = null;
 
-    public function __construct($handle) {
+    public function __construct($handle)
+    {
         $this->_handle = $handle;
     }
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->destroy();
     }
 
-    public function resize($width, $height) {
+    public function resize($width, $height)
+    {
         //低质量
         if (is_null($this->_handle)) {
             return $this;
@@ -26,7 +30,8 @@ class HandleGd {
         return $this;
     }
 
-    public function autoresize($width, $height) {
+    public function autoresize($width, $height)
+    {
         if (is_null($this->_handle)) {
             return $this;
         }
@@ -50,7 +55,8 @@ class HandleGd {
         return $this;
     }
 
-    public function resampled($width, $height) {
+    public function resampled($width, $height)
+    {
         //高质量
         if (is_null($this->_handle)) {
             return $this;
@@ -62,7 +68,8 @@ class HandleGd {
         return $this;
     }
 
-    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff') {
+    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff')
+    {
         if (is_null($this->_handle)) {
             return $this;
         }
@@ -123,7 +130,8 @@ class HandleGd {
         return $this;
     }
 
-    public function cut($options = array()) {
+    public function cut($options = array())
+    {
         if (is_null($this->_handle)) {
             return $this;
         }
@@ -169,7 +177,8 @@ class HandleGd {
         return $this;
     }
 
-    public function crop($width, $height, $options = array()) {
+    public function crop($width, $height, $options = array())
+    {
         if (is_null($this->_handle)) {
             return $this;
         }
@@ -259,19 +268,23 @@ class HandleGd {
         return $this;
     }
 
-    public function saveAsJpeg($filename, $quality = 80) {
+    public function saveAsJpeg($filename, $quality = 80)
+    {
         imagejpeg($this->_handle, $filename, $quality);
     }
 
-    public function saveAsPng($filename) {
+    public function saveAsPng($filename)
+    {
         imagepng($this->_handle, $filename);
     }
 
-    function saveAsGif($filename) {
+    function saveAsGif($filename)
+    {
         imagegif($this->_handle, $filename);
     }
 
-    function destroy() {
+    function destroy()
+    {
         if (!$this->_handle) {
             imagedestroy($this->_handle);
         }
@@ -280,7 +293,8 @@ class HandleGd {
 
 }
 
-function imagecreatefrombmp($fname) {
+function imagecreatefrombmp($fname)
+{
     $buf = file_get_contents($fname);
     if (strlen($buf) < 54) {
         return false;

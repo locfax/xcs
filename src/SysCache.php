@@ -2,12 +2,14 @@
 
 namespace Xcs;
 
-class SysCache {
+class SysCache
+{
 
     const dsn = 'general';
 
     //加载系统级别缓存
-    public static function loadcache($cachename, $reset = false) {
+    public static function loadcache($cachename, $reset = false)
+    {
         if (!$cachename) {
             return null;
         }
@@ -22,7 +24,8 @@ class SysCache {
      * @return array|string
      */
 
-    public static function data($cachename, $reset = false) {
+    public static function data($cachename, $reset = false)
+    {
         $lost = null;
         if ($reset) {
             $lost = $cachename; //强制设置为没取到
@@ -39,7 +42,8 @@ class SysCache {
         return self::lost($lost, $reset);
     }
 
-    public static function lost($cachename, $reset = false) {
+    public static function lost($cachename, $reset = false)
+    {
         if (!$reset) { //允许从数据库直接获取
             $syscache = DB::dbm(self::dsn)->findOne('base_syscache', '*', array('cname' => 'sys_' . $cachename));
             if ($syscache) {
@@ -66,7 +70,8 @@ class SysCache {
         return $data;
     }
 
-    public static function save($cachename, $data, $delcache = true) { //$delcache true 会清理该缓存，在下次需要时自动载入缓存
+    public static function save($cachename, $data, $delcache = true)
+    { //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
             $data = Util::output_json($data);
         } else {

@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Curl {
+class Curl
+{
 
     /**
      * @param $url
@@ -14,7 +15,8 @@ class Curl {
      * @param bool $retsession
      * @return array
      */
-    public static function send($url, $data = '', $httphead = array(), $gzip = false, $charset = 'UTF-8', $rethead = false, $retsession = false) {
+    public static function send($url, $data = '', $httphead = array(), $gzip = false, $charset = 'UTF-8', $rethead = false, $retsession = false)
+    {
         $ch = curl_init();
         if (!$ch) {
             return array('header' => '', 'body' => '', 'http_code' => 0, 'http_info' => '缺少curl模块或未启用');
@@ -147,7 +149,8 @@ class Curl {
      * @param $string
      * @return mixed|string
      */
-    private static function convert_encode($in, $out, $string) { // string change charset return string
+    private static function convert_encode($in, $out, $string)
+    { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
             //return mb_convert_encoding($string, $out, $in);
@@ -162,7 +165,8 @@ class Curl {
      * @param $_raw_url
      * @return mixed
      */
-    private static function raw_url($_raw_url) {
+    private static function raw_url($_raw_url)
+    {
         $raw_url = (string)$_raw_url;
         if (strpos($raw_url, '://') === false) {
             $raw_url = 'http://' . $raw_url;
@@ -182,7 +186,8 @@ class Curl {
      * @param string $gzip
      * @return bool|string
      */
-    private static function gzip_decode($data, $gzip = 'gzip') {
+    private static function gzip_decode($data, $gzip = 'gzip')
+    {
         $unpacked = false;
         if ('gzip' == $gzip && function_exists('gzinflate')) {
             $flags = ord(substr($data, 3, 1));

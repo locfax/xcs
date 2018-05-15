@@ -2,13 +2,15 @@
 
 namespace Xcs;
 
-class Session {
+class Session
+{
 
     private $ttl;
     private $db;
     private $prefix;
 
-    public function start($prefix = "RSID:", $time = 1800) {
+    public function start($prefix = "RSID:", $time = 1800)
+    {
         $this->prefix = $prefix;
         $this->ttl = $time;
         //ini_set('session.gc_maxlifetime', 1440);
@@ -16,7 +18,8 @@ class Session {
         $this->save_handler();
     }
 
-    private function save_handler() {
+    private function save_handler()
+    {
         session_set_save_handler(
             array(&$this, '_open'), //在运行session_start()时执行
             array(&$this, '_close'), //在脚本执行完成或调用session_write_close() 或 session_destroy()时被执行,即在所有session操作完后被执行
@@ -27,7 +30,8 @@ class Session {
         );
     }
 
-    private function _open() {
+    private function _open()
+    {
         //在运行session_start()时连接redis数据库
         try {
             $config = array();
@@ -37,11 +41,13 @@ class Session {
         }
     }
 
-    private function _close() {
+    private function _close()
+    {
 
     }
 
-    private function _read($id) {
+    private function _read($id)
+    {
         try {
             $id = $this->prefix . $id;
             $sessData = $this->db->get($id);
@@ -52,7 +58,8 @@ class Session {
         }
     }
 
-    private function _write($id, $data) {
+    private function _write($id, $data)
+    {
         try {
             $id = $this->prefix . $id;
             $this->db->set($id, $data);
@@ -62,7 +69,8 @@ class Session {
         }
     }
 
-    private function _destroy($id) {
+    private function _destroy($id)
+    {
         try {
             $this->db->del($this->prefix . $id);
         } catch (\Exception $ex) {
@@ -70,7 +78,8 @@ class Session {
         }
     }
 
-    private function _gc($max) {
+    private function _gc($max)
+    {
         //一般不需要操作什么
     }
 

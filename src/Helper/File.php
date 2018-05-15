@@ -2,14 +2,16 @@
 
 namespace Xcs\Helper;
 
-class File {
+class File
+{
 
     /**
      * @param $path
      * @param int $mode
      * @return bool
      */
-    public static function mk_dir($path, $mode = DIR_WRITE_MODE) {
+    public static function mk_dir($path, $mode = DIR_WRITE_MODE)
+    {
         if (!is_dir($path)) {
             return mkdir($path, $mode, true);
         }
@@ -20,7 +22,8 @@ class File {
      * @param $path
      * @return bool
      */
-    public static function rm_dir($path) {
+    public static function rm_dir($path)
+    {
         $dir = realpath($path);
         if ('' == $dir || '/' == $dir || (3 == strlen($dir) && ':\\' == substr($dir, 1))) {
             return false;
@@ -50,7 +53,8 @@ class File {
     /**
      * @param $dir
      */
-    public static function clear_dir($dir) {
+    public static function clear_dir($dir)
+    {
         $d = dir($dir);
         while (($f = $d->read())) {
             if ($f == '.' || $f == '..') {
@@ -83,7 +87,8 @@ class File {
      * @param bool $root
      * @return array
      */
-    public static function list_files($dir, $dirfile = false, $md5 = true, $root = true) {
+    public static function list_files($dir, $dirfile = false, $md5 = true, $root = true)
+    {
         static $return = array();
         if ($root) {
             $return = array();

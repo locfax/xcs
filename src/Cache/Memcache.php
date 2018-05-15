@@ -2,7 +2,8 @@
 
 namespace Xcs\Cache;
 
-class Memcache {
+class Memcache
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -10,7 +11,8 @@ class Memcache {
     private $_link = null;
     private $_plink = false;
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->close();
     }
 
@@ -19,7 +21,8 @@ class Memcache {
      * @return $this
      * @throws \Exception
      */
-    public function init($config) {
+    public function init($config)
+    {
         try {
             $this->_link = new \Memcache();
             if ($config['pconnect']) {
@@ -38,7 +41,8 @@ class Memcache {
         return $this;
     }
 
-    public function close() {
+    public function close()
+    {
         if (!$this->_plink) {
             $this->_link && $this->_link->close();
         }
@@ -48,7 +52,8 @@ class Memcache {
      * @param $key
      * @return bool
      */
-    public function get($key) {
+    public function get($key)
+    {
         try {
             return $this->_link->get($key);
         } catch (\MemcachedException $e) {
@@ -62,7 +67,8 @@ class Memcache {
      * @param int $ttl
      * @return bool
      */
-    public function set($key, $value, $ttl = 0) {
+    public function set($key, $value, $ttl = 0)
+    {
         try {
             $data = $this->get($key);
             if ($data) {
@@ -80,7 +86,8 @@ class Memcache {
      * @param int $ttl
      * @return bool
      */
-    public function expire($key, $ttl = 0) {
+    public function expire($key, $ttl = 0)
+    {
         return false;
     }
 
@@ -88,7 +95,8 @@ class Memcache {
      * @param $key
      * @return bool
      */
-    public function rm($key) {
+    public function rm($key)
+    {
         try {
             return $this->_link->delete($key);
         } catch (\MemcachedException $e) {
@@ -96,7 +104,8 @@ class Memcache {
         }
     }
 
-    public function clear() {
+    public function clear()
+    {
         return $this->_link->flush();
     }
 

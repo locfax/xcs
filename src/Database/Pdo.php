@@ -2,7 +2,8 @@
 
 namespace Xcs\Database;
 
-class Pdo {
+class Pdo
+{
 
     private $_config = null;
     public $_link = null;

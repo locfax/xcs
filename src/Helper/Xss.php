@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Xss {
+class Xss
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -52,7 +53,8 @@ class Xss {
     );
     protected $_xss_hash = null;
 
-    public function remove_invisible_characters($str, $url_encoded = true) {
+    public function remove_invisible_characters($str, $url_encoded = true)
+    {
         $non_displayables = array();
         if ($url_encoded) {
             $non_displayables[] = '/%0[0-8bcef]/';
@@ -73,7 +75,8 @@ class Xss {
      * @param bool $is_image
      * @return array|bool|mixed|string
      */
-    public function clean($str, $is_image = false) {
+    public function clean($str, $is_image = false)
+    {
         if (is_array($str)) {
             foreach ($str as $key) {
                 $str[$key] = $this->clean($str[$key]);
@@ -142,7 +145,8 @@ class Xss {
         return $str;
     }
 
-    protected function _remove_evil_attributes($str, $is_image) {
+    protected function _remove_evil_attributes($str, $is_image)
+    {
         $evil_attributes = array('on\w*', 'style', 'xmlns', 'formaction', 'form', 'xlink:href');
         if (true == $is_image) {
             unset($evil_attributes[array_search('xmlns', $evil_attributes)]);
@@ -166,27 +170,33 @@ class Xss {
         return $str;
     }
 
-    protected function _sanitize_naughty_html($matches) {
+    protected function _sanitize_naughty_html($matches)
+    {
         return '&lt;' . $matches[1] . $matches[2] . $matches[3] . str_replace(array('>', '<'), array('&gt;', '&lt;'), $matches[4]);
     }
 
-    protected function _js_link_removal($match) {
+    protected function _js_link_removal($match)
+    {
         return str_replace($match[1], preg_replace('#href=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si', '', $this->_filter_attributes(str_replace(array('<', '>'), '', $match[1]))), $match[0]);
     }
 
-    protected function _js_img_removal($match) {
+    protected function _js_img_removal($match)
+    {
         return str_replace($match[1], preg_replace('#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si', '', $this->_filter_attributes(str_replace(array('<', '>'), '', $match[1]))), $match[0]);
     }
 
-    protected function _compact_exploded_words($matches) {
+    protected function _compact_exploded_words($matches)
+    {
         return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
     }
 
-    protected function _convert_attribute($match) {
+    protected function _convert_attribute($match)
+    {
         return str_replace(array('>', '<', '\\'), array('&gt;', '&lt;', '\\\\'), $match[0]);
     }
 
-    protected function _filter_attributes($str) {
+    protected function _filter_attributes($str)
+    {
         $out = '';
         if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches)) {
             foreach ($matches[0] as $match) {
@@ -196,7 +206,8 @@ class Xss {
         return $out;
     }
 
-    public function xss_hash() {
+    public function xss_hash()
+    {
         if (null == $this->_xss_hash) {
             $rand = $this->get_random_bytes(16);
             $this->_xss_hash = (false === $rand) ? md5(uniqid(mt_rand(), true)) : bin2hex($rand);
@@ -204,7 +215,8 @@ class Xss {
         return $this->_xss_hash;
     }
 
-    public function get_random_bytes($length) {
+    public function get_random_bytes($length)
+    {
         if (empty($length) || !ctype_digit((string)$length)) {
             return false;
         }
@@ -228,12 +240,14 @@ class Xss {
         return false;
     }
 
-    protected function _decode_entity($match) {
+    protected function _decode_entity($match)
+    {
         $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
         return str_replace($this->xss_hash(), '&', $this->entity_decode($match, 'UTF-8'));
     }
 
-    public function entity_decode($str, $charset = 'UTF-8') {
+    public function entity_decode($str, $charset = 'UTF-8')
+    {
         if (false === strpos($str, '&')) {
             return $str;
         }
@@ -267,7 +281,8 @@ class Xss {
         return $str;
     }
 
-    protected function _do_never_allowed($str) {
+    protected function _do_never_allowed($str)
+    {
         $str = str_replace(array_keys($this->never_allowed_str), $this->never_allowed_str, $str);
         foreach ($this->never_allowed_regex as $regex) {
             $str = preg_replace('#' . $regex . '#is', '[del]', $str);

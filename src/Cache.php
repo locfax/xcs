@@ -2,13 +2,15 @@
 
 namespace Xcs;
 
-class Cache {
+class Cache
+{
 
     /**
      * @param string $key
      * @return mixed
      */
-    public static function get($key = '') {
+    public static function get($key = '')
+    {
         $cacher = Cache\Cacher::getInstance();
         return $cacher->get($key);
     }
@@ -19,7 +21,8 @@ class Cache {
      * @param int $ttl
      * @return mixed
      */
-    public static function set($key = '', $val = '', $ttl = 0) {
+    public static function set($key = '', $val = '', $ttl = 0)
+    {
         $cacher = Cache\Cacher::getInstance();
         return $cacher->set($key, $val, $ttl);
     }
@@ -28,7 +31,8 @@ class Cache {
      * @param string $key
      * @return mixed
      */
-    public static function rm($key = '') {
+    public static function rm($key = '')
+    {
         $cacher = Cache\Cacher::getInstance();
         return $cacher->rm($key);
     }
@@ -36,7 +40,8 @@ class Cache {
     /**
      * @return mixed
      */
-    public static function clear() {
+    public static function clear()
+    {
         $cacher = Cache\Cacher::getInstance();
         return $cacher->clear();
     }
@@ -44,7 +49,8 @@ class Cache {
     /**
      * @return mixed
      */
-    public static function close() {
+    public static function close()
+    {
         $cacher = Cache\Cacher::getInstance();
         return $cacher->close();
     }

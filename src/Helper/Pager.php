@@ -2,13 +2,15 @@
 
 namespace Xcs\Helper;
 
-class Pager {
+class Pager
+{
 
     /**
      * @param $pageinfo
      * @return string
      */
-    public static function pagebar($pageinfo) {
+    public static function pagebar($pageinfo)
+    {
         $totals = $pageinfo['totals'];
         $perpage = $pageinfo['length'];
         $curpage = $pageinfo['curpage'];
@@ -70,7 +72,8 @@ class Pager {
      * @param $pageinfo
      * @return string
      */
-    public static function simplepage($pageinfo) {
+    public static function simplepage($pageinfo)
+    {
         //<ul class='pager'>
         //<li class="previous"><a href="{SITEPATH}list/分享发现/page1/">上一页</a></li><li class="pager-nums">2 / 4</li><li class='next'><a href='{SITEPATH}list/分享发现/lastest/page3/'>下一页</a></li>
         //</ul>
@@ -86,7 +89,7 @@ class Pager {
             $curpage = $realpages;
         }
         $prev = $curpage > 1 ? '<li class="previous"><a href="' . $mpurl . '?page=' . ($curpage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
-        $next = $curpage < $realpages ? "<li class='next'><a href=\"" . $mpurl . '?page=' . ($curpage + 1) .'">' . $lang['next'] . '</a></li>' : '';
+        $next = $curpage < $realpages ? "<li class='next'><a href=\"" . $mpurl . '?page=' . ($curpage + 1) . '">' . $lang['next'] . '</a></li>' : '';
         $pagenum = "<li class=\"pager-nums\">{$curpage} / {$realpages}</li>";
         if ($next || $prev) {
             $return .= $prev . $pagenum . $next;

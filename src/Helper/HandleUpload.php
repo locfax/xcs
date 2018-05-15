@@ -2,12 +2,14 @@
 
 namespace Xcs\Helper;
 
-class HandleUpload {
+class HandleUpload
+{
 
     private $_file = array();
     private $_name;
 
-    public function __construct($struct, $name, $ix = false) {
+    public function __construct($struct, $name, $ix = false)
+    {
         if ($ix !== false) {
             $s = array(
                 'name' => $struct['name'][$ix],
@@ -29,7 +31,8 @@ class HandleUpload {
      * @param $name
      * @param $value
      */
-    public function setAttribute($name, $value) {
+    public function setAttribute($name, $value)
+    {
         $this->_file[$name] = $value;
     }
 
@@ -37,49 +40,56 @@ class HandleUpload {
      * @param $name
      * @return mixed
      */
-    public function getAttribute($name) {
+    public function getAttribute($name)
+    {
         return $this->_file[$name];
     }
 
     /**
      * @return mixed
      */
-    public function getName() {
+    public function getName()
+    {
         return $this->_name;
     }
 
     /**
      * @return bool
      */
-    public function isSuccessed() {
+    public function isSuccessed()
+    {
         return $this->_file['error'] == UPLOAD_ERR_OK;
     }
 
     /**
      * @return mixed
      */
-    public function getError() {
+    public function getError()
+    {
         return $this->_file['error'];
     }
 
     /**
      * @return mixed
      */
-    public function isMoved() {
+    public function isMoved()
+    {
         return $this->_file['is_moved'];
     }
 
     /**
      * @return mixed
      */
-    public function getFilename() {
+    public function getFilename()
+    {
         return $this->_file['name'];
     }
 
     /**
      * @return string
      */
-    public function getExt() {
+    public function getExt()
+    {
         if ($this->isMoved()) {
             $ext = pathinfo($this->getNewPath(), PATHINFO_EXTENSION);
         } else {
@@ -91,14 +101,16 @@ class HandleUpload {
     /**
      * @return mixed
      */
-    public function getSize() {
+    public function getSize()
+    {
         return $this->_file['size'];
     }
 
     /**
      * @return mixed
      */
-    public function getMimeType() {
+    public function getMimeType()
+    {
         if (class_exists('finfo', false)) {
             $finfo = new \finfo(FILEINFO_MIME);
         } else {
@@ -117,14 +129,16 @@ class HandleUpload {
     /**
      * @return mixed
      */
-    public function getTmpName() {
+    public function getTmpName()
+    {
         return $this->_file['tmp_name'];
     }
 
     /**
      * @return mixed
      */
-    public function getNewPath() {
+    public function getNewPath()
+    {
         return $this->_file['new_path'];
     }
 
@@ -133,7 +147,8 @@ class HandleUpload {
      * @param null $maxSize
      * @return int
      */
-    public function check($allowExts = null, $maxSize = null) {
+    public function check($allowExts = null, $maxSize = null)
+    {
         if (!$this->isSuccessed()) {
             return 1;
         }
@@ -180,7 +195,8 @@ class HandleUpload {
      * @param $destPath
      * @return bool
      */
-    public function move($destPath) {
+    public function move($destPath)
+    {
         $this->_file['is_moved'] = true;
         $this->_file['new_path'] = $destPath;
         return move_uploaded_file($this->_file['tmp_name'], $destPath);
@@ -190,11 +206,13 @@ class HandleUpload {
      * @param $destPath
      * @return bool
      */
-    public function copy($destPath) {
+    public function copy($destPath)
+    {
         return copy($this->_file['tmp_name'], $destPath);
     }
 
-    public function remove() {
+    public function remove()
+    {
         if ($this->isMoved()) {
             unlink($this->getNewPath());
         } else {
@@ -202,7 +220,8 @@ class HandleUpload {
         }
     }
 
-    public function removeMovedFile() {
+    public function removeMovedFile()
+    {
         if ($this->isMoved()) {
             unlink($this->getNewPath());
         }

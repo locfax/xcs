@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class WaterMark {
+class WaterMark
+{
 
     /**
      * @param $groundImage
@@ -13,7 +14,8 @@ class WaterMark {
      * @param string $textColor
      * @return mixed
      */
-    public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000") {
+    public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000")
+    {
         $isWaterImage = false;
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
 

@@ -2,7 +2,8 @@
 
 namespace Xcs\Helper;
 
-class Locker {
+class Locker
+{
 
     const dsn = 'general';
 
@@ -12,7 +13,8 @@ class Locker {
      * @param int $ttl
      * @return bool
      */
-    public static function islocked($process, $ttl = 0) {
+    public static function islocked($process, $ttl = 0)
+    {
         $_ttl = $ttl < 1 ? 600 : intval($ttl);
         if (self::status('get', $process)) {
             return true;
@@ -24,7 +26,8 @@ class Locker {
      * 进度解锁
      * @param $process
      */
-    public static function unlock($process) {
+    public static function unlock($process)
+    {
         self::status('rm', $process);
         self::cmd('rm', $process);
     }
@@ -35,7 +38,8 @@ class Locker {
      * @param $process
      * @return bool
      */
-    public static function status($action, $process) {
+    public static function status($action, $process)
+    {
         static $plist = array();
         switch ($action) {
             case 'set' :
@@ -56,7 +60,8 @@ class Locker {
      * @param $ttl
      * @return bool
      */
-    private static function trylock($name, $ttl) {
+    private static function trylock($name, $ttl)
+    {
         if (!self::cmd('get', $name)) {
             self::cmd('set', $name, $ttl);
             $ret = false;
@@ -74,7 +79,8 @@ class Locker {
      * @param int $ttl
      * @return bool|string
      */
-    private static function cmd($cmd, $name, $ttl = 0) {
+    private static function cmd($cmd, $name, $ttl = 0)
+    {
         if ('file' == getini('cache/cacher')) {
             return self::dblock($cmd, $name, $ttl);
         }
@@ -101,7 +107,8 @@ class Locker {
      * @param int $ttl
      * @return bool|string
      */
-    private static function dblock($cmd, $name, $ttl = 0) {
+    private static function dblock($cmd, $name, $ttl = 0)
+    {
         $ret = '';
         $db = \Xcs\DB::dbo(self::dsn);
         switch ($cmd) {

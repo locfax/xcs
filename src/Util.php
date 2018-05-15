@@ -3,13 +3,15 @@
 namespace Xcs;
 
 //辅助功能函数
-class Util {
+class Util
+{
 
     /**
      * @param $arr
      * @return string
      */
-    public static function implode($arr) {
+    public static function implode($arr)
+    {
         return "'" . implode("','", (array)$arr) . "'";
     }
 
@@ -18,7 +20,8 @@ class Util {
      * @param $needle
      * @return bool
      */
-    public static function strpos($str, $needle) {
+    public static function strpos($str, $needle)
+    {
         return !(false === strpos($str, $needle));
     }
 
@@ -27,7 +30,8 @@ class Util {
      * @param $col
      * @return array
      */
-    public static function array_index($arr, $col) {
+    public static function array_index($arr, $col)
+    {
         if (!is_array($arr)) {
             return $arr;
         }
@@ -44,7 +48,8 @@ class Util {
      * @param array $arr 数组
      * @return object|mixed
      */
-    public static function array_to_object($arr) {
+    public static function array_to_object($arr)
+    {
         if (gettype($arr) != 'array') {
             return $arr;
         }
@@ -62,7 +67,8 @@ class Util {
      * @param object $obj 对象
      * @return array
      */
-    public static function object_to_array($obj) {
+    public static function object_to_array($obj)
+    {
         $obj = (array)$obj;
         foreach ($obj as $k => $v) {
             if (gettype($v) == 'object' || gettype($v) == 'array') {
@@ -78,7 +84,8 @@ class Util {
      * @param int $http_response_code
      * @return bool
      */
-    public static function header($_string, $replace = true, $http_response_code = 0) {
+    public static function header($_string, $replace = true, $http_response_code = 0)
+    {
         $string = str_replace(array("\r", "\n"), array('', ''), $_string);
         if (!$http_response_code) {
             header($string, $replace);
@@ -92,7 +99,8 @@ class Util {
      * @param string $default
      * @return string
      */
-    public static function referer($default = '') {
+    public static function referer($default = '')
+    {
         $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
         if (empty($referer)) {
             $referer = $default;
@@ -104,7 +112,8 @@ class Util {
      * @param $value
      * @return array|string
      */
-    public static function urlencode($value) {
+    public static function urlencode($value)
+    {
         if (is_array($value)) {
             return array_map('self::urlencode', $value);
         }
@@ -115,7 +124,8 @@ class Util {
      * @param $arr
      * @return string
      */
-    public static function output_json($arr) {
+    public static function output_json($arr)
+    {
         if (version_compare(PHP_VERSION, '5.4', '>=')) {
             return json_encode($arr, JSON_UNESCAPED_UNICODE);
         }
@@ -123,7 +133,8 @@ class Util {
         return urldecode($json);
     }
 
-    public static function output_nocache() {
+    public static function output_nocache()
+    {
         header("Expires: -1");
         header("Cache-Control: no-store, private, post-check=0, pre-check=0, max-age=0", false);
         header("Pragma: no-cache");
@@ -132,7 +143,8 @@ class Util {
     /**
      * @param bool $nocache
      */
-    public static function output_start($nocache = true) {
+    public static function output_start($nocache = true)
+    {
         ob_end_clean();
         if (getini('site/gzip') && function_exists('ob_gzhandler')) { //whether start gzip
             ob_start('ob_gzhandler');
@@ -148,7 +160,8 @@ class Util {
      * @param bool $echo
      * @return mixed|string
      */
-    public static function output_end($echo = false) {
+    public static function output_end($echo = false)
+    {
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
         $content = preg_replace("/([\\x01-\\x08\\x0b-\\x0c\\x0e-\\x1f])+/", ' ', $content);
@@ -165,7 +178,8 @@ class Util {
      * @param string $type
      * @return bool
      */
-    public static function rep_send($res, $type = 'json') {
+    public static function rep_send($res, $type = 'json')
+    {
         self::output_start();
         if ('html' == $type) {
             header("Content-type: text/html; charset=UTF-8");
@@ -194,7 +208,8 @@ class Util {
      * @param string $url
      * @return bool
      */
-    public static function js_alert($message = '', $after_action = '', $url = '') { //php turn to alert
+    public static function js_alert($message = '', $after_action = '', $url = '')
+    { //php turn to alert
         $out = "<script language=\"javascript\" type=\"text/javascript\">\n";
         if (!empty($message)) {
             $out .= "alert(\"";
@@ -222,7 +237,8 @@ class Util {
      * @param bool $return
      * @return bool|null|string
      */
-    public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false) {
+    public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false)
+    {
         $_delay = intval($delay);
         if (!$js) {
             if (headers_sent() || $_delay > 0) {
@@ -261,7 +277,8 @@ EOT;
     /**
      * @return bool|null
      */
-    public static function isrobot() {
+    public static function isrobot()
+    {
         static $is_robot = null;
         if (isset($is_robot)) {
             return $is_robot;
@@ -281,7 +298,8 @@ EOT;
     /**
      * @return bool|null
      */
-    public static function ismobile() {
+    public static function ismobile()
+    {
         static $is_mobile = null;
         if (isset($is_mobile)) {
             return $is_mobile;
@@ -300,7 +318,8 @@ EOT;
     /**
      * @return null
      */
-    public static function clientip() {
+    public static function clientip()
+    {
         $onlineip = '';
         if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
             $onlineip = getenv('HTTP_CLIENT_IP');
@@ -317,7 +336,8 @@ EOT;
     /**
      * @return array|false|string
      */
-    public static function client_ip() {
+    public static function client_ip()
+    {
         $onlineip = '';
         if (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
             $onlineip = getenv('REMOTE_ADDR');

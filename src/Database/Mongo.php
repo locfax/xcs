@@ -2,7 +2,8 @@
 
 namespace Xcs\Database;
 
-class Mongo {
+class Mongo
+{
 
     private $_config = null;
     public $_link = null;

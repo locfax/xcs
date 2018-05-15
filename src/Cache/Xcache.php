@@ -2,7 +2,8 @@
 
 namespace Xcs\Cache;
 
-class Xcache {
+class Xcache
+{
 
     use \Xcs\Traits\Singleton;
 
@@ -12,7 +13,8 @@ class Xcache {
      * @return $this
      * @throws \Exception
      */
-    public function init() {
+    public function init()
+    {
         if (!function_exists('xcache_get')) {
             throw new \Xcs\Exception\ExException('xcache 扩展没安装?');
         }
@@ -20,7 +22,8 @@ class Xcache {
         return $this;
     }
 
-    public function close() {
+    public function close()
+    {
 
     }
 
@@ -28,7 +31,8 @@ class Xcache {
      * @param $key
      * @return mixed
      */
-    public function get($key) {
+    public function get($key)
+    {
         return xcache_get($key);
     }
 
@@ -38,7 +42,8 @@ class Xcache {
      * @param int $ttl
      * @return bool
      */
-    public function set($key, $value, $ttl = 0) {
+    public function set($key, $value, $ttl = 0)
+    {
         if ($ttl > 0) {
             return xcache_set($key, $value, $ttl);
         }
@@ -50,7 +55,8 @@ class Xcache {
      * @param int $ttl
      * @return bool
      */
-    public function expire($key, $ttl = 0) {
+    public function expire($key, $ttl = 0)
+    {
         return false;
     }
 
@@ -58,11 +64,13 @@ class Xcache {
      * @param $key
      * @return bool
      */
-    public function rm($key) {
+    public function rm($key)
+    {
         return xcache_unset($key);
     }
 
-    public function clear() {
+    public function clear()
+    {
         xcache_clear_cache(1, -1);
     }
 
