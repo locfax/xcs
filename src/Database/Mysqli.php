@@ -7,14 +7,16 @@ class Mysqli {
     private $_config = null;
     public $_link = null;
 
-    public function __destruct() {
+    public function __destruct()
+    {
         $this->close();
     }
 
     /**
      * @param $config
      */
-    public function __construct($config) {
+    public function __construct($config)
+    {
         if (is_null($this->_config)) {
             $this->_config = $config;
         }
@@ -26,15 +28,18 @@ class Mysqli {
         }
     }
 
-    public function reconnect() {
+    public function reconnect()
+    {
         $this->__construct($this->_config);
     }
 
-    public function info() {
+    public function info()
+    {
         return $this->_config;
     }
 
-    public function close() {
+    public function close()
+    {
         if ($this->_link) {
             $this->_link->close();
             $this->_link = null;
@@ -46,7 +51,8 @@ class Mysqli {
      * @param $args
      * @return mixed
      */
-    public function __call($func, $args) {
+    public function __call($func, $args)
+    {
         return $this->_link && call_user_func_array(array($this->_link, $func), $args);
     }
 
@@ -54,7 +60,8 @@ class Mysqli {
      * @param $tableName
      * @return string
      */
-    public function qtable($tableName) {
+    public function qtable($tableName)
+    {
         if (strpos($tableName, '.') === false) {
             return "`{$tableName}`";
         }
@@ -69,7 +76,8 @@ class Mysqli {
      * @param $fieldName
      * @return string
      */
-    public function qfield($fieldName) {
+    public function qfield($fieldName)
+    {
         $_fieldName = trim($fieldName);
         $ret = ($_fieldName == '*') ? '*' : "`{$_fieldName}`";
         return $ret;
@@ -79,11 +87,12 @@ class Mysqli {
      * @param $value
      * @return string
      */
-    public function qvalue($value) {
-        if (is_numeric($value)) {
-            return $value;
+    public function qvalue($value)
+    {
+        if (gettype($value) === 'string') {
+            return "'" . $this->_link->real_escape_string($value) . "'";
         }
-        return "'" . $this->_link->real_escape_string($value) . "'";
+        return $value;
     }
 
     /**
@@ -91,7 +100,8 @@ class Mysqli {
      * @param string $glue
      * @return string
      */
-    public function field_value(array $fields, $glue = ',') {
+    public function field_value(array $fields, $glue = ',')
+    {
         $addsql = $comma = '';
         foreach ($fields as $field => $value) {
             $addsql .= $comma . $this->qfield($field) . " = " . $this->qvalue($value);
@@ -107,7 +117,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function create($tableName, array $data, $retid = false, $type = '') {
+    public function create($tableName, array $data, $retid = false, $type = '')
+    {
         if (empty($data)) {
             return false;
         }
@@ -144,7 +155,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function replace($tableName, array $data, $retnum = false, $type = '') {
+    public function replace($tableName, array $data, $retnum = false, $type = '')
+    {
         if (empty($data)) {
             return false;
         }
@@ -182,7 +194,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function update($tableName, $data, $condition, $retnum = false, $type = '') {
+    public function update($tableName, $data, $condition, $retnum = false, $type = '')
+    {
         if (empty($data)) {
             return false;
         }
@@ -226,7 +239,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function remove($tableName, $condition, $muti = true, $type = '') {
+    public function remove($tableName, $condition, $muti = true, $type = '')
+    {
         if (empty($condition)) {
             return false;
         }
@@ -261,7 +275,8 @@ class Mysqli {
      * @param $type
      * @return mixed
      */
-    public function findOne($tableName, $field, $condition, $retobj = false, $type = '') {
+    public function findOne($tableName, $field, $condition, $retobj = false, $type = '')
+    {
         if (is_array($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
         } else {
@@ -298,7 +313,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '') {
+    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '')
+    {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
         } else {
@@ -341,7 +357,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '') {
+    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '')
+    {
         try {
             if (is_array($condition) && !empty($condition)) {
                 $_condition = $this->field_value($condition, ' AND ');
@@ -381,7 +398,8 @@ class Mysqli {
      * @param bool $retobj
      * @return mixed
      */
-    public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false) {
+    public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false)
+    {
         if (is_array($pageparm)) {
             //固定长度分页模式
             $ret = array('rowsets' => array(), 'pagebar' => '');
@@ -406,7 +424,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function resultFirst($tableName, $field, $condition, $type = '') {
+    public function resultFirst($tableName, $field, $condition, $type = '')
+    {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
         } else {
@@ -438,7 +457,8 @@ class Mysqli {
      * @param $type
      * @return mixed
      */
-    public function getCol($tableName, $field, $condition = '', $type = '') {
+    public function getCol($tableName, $field, $condition = '', $type = '')
+    {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
         } else {
@@ -475,7 +495,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function exec($sql, $args = null, $type = '') {
+    public function exec($sql, $args = null, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -499,7 +520,8 @@ class Mysqli {
      * @param $type
      * @return mixed
      */
-    public function row($sql, $args = null, $retobj = false, $type = '') {
+    public function row($sql, $args = null, $retobj = false, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -529,7 +551,8 @@ class Mysqli {
      * @param $type
      * @return mixed
      */
-    public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '') {
+    public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
@@ -559,7 +582,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    private function _pages($sql, $args = null, $retobj = false, $type = '') {
+    private function _pages($sql, $args = null, $retobj = false, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
@@ -588,7 +612,8 @@ class Mysqli {
      * @param bool $retobj
      * @return mixed
      */
-    public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false) {
+    public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false)
+    {
         if (is_array($pageparm)) {
             //固定长度分页模式
             $ret = array('rowsets' => array(), 'pagebar' => '');
@@ -612,7 +637,8 @@ class Mysqli {
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $field = '*') {
+    public function count($tableName, $condition, $field = '*')
+    {
         return $this->resultFirst($tableName, "COUNT({$field})", $condition);
     }
 
@@ -621,7 +647,8 @@ class Mysqli {
      * @param null $args
      * @return mixed
      */
-    public function counts($sql, $args = null) {
+    public function counts($sql, $args = null)
+    {
         return $this->firsts($sql, $args);
     }
 
@@ -631,7 +658,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function firsts($sql, $args = null, $type = '') {
+    public function firsts($sql, $args = null, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql);
             if (!$sth) {
@@ -655,7 +683,8 @@ class Mysqli {
      * @param string $type
      * @return mixed
      */
-    public function getCols($sql, $args = null, $type = '') {
+    public function getCols($sql, $args = null, $type = '')
+    {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
             if (!$sth) {
@@ -679,7 +708,8 @@ class Mysqli {
     /**
      * @return mixed
      */
-    public function start_trans() {
+    public function start_trans()
+    {
         $this->_link->query('SET AUTOCOMMIT = 0');
         $this->_link->query('START TRANSACTION');
     }
@@ -687,7 +717,8 @@ class Mysqli {
     /**
      * @param bool $commit_no_errors
      */
-    public function end_trans($commit_no_errors = true) {
+    public function end_trans($commit_no_errors = true)
+    {
         if ($commit_no_errors) {
             $this->_link->query('COMMIT');
             $this->_link->query('SET AUTOCOMMIT = 1');
@@ -703,7 +734,8 @@ class Mysqli {
      * @param string $sql
      * @return bool
      */
-    private function _halt($message = '', $code = 0, $sql = '') {
+    private function _halt($message = '', $code = 0, $sql = '')
+    {
         if ($this->_config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
@@ -723,7 +755,8 @@ class Mysqli {
      * @param int $totalnum
      * @return int
      */
-    private function page_start($page, $ppp, $totalnum) {
+    private function page_start($page, $ppp, $totalnum)
+    {
         $totalpage = ceil($totalnum / $ppp);
         $_page = max(1, min($totalpage, intval($page)));
         return ($_page - 1) * $ppp;
@@ -734,7 +767,8 @@ class Mysqli {
      * @param $col
      * @return array
      */
-    private function array_index($arr, $col) {
+    private function array_index($arr, $col)
+    {
         if (!is_array($arr)) {
             return $arr;
         }
@@ -751,7 +785,8 @@ class Mysqli {
      * @param array $arr 数组
      * @return object|mixed
      */
-    public function array_to_object($arr) {
+    public function array_to_object($arr)
+    {
         if (gettype($arr) != 'array') {
             return $arr;
         }
