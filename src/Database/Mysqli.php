@@ -744,7 +744,7 @@ class Mysqli
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'MysqliDbException');
             } catch (\Xcs\Exception\DbException $e) {
-                exit();
+
             }
         }
         return false;

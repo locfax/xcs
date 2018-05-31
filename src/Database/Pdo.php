@@ -786,7 +786,7 @@ class Pdo
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
             } catch (\Xcs\Exception\DbException $e) {
-                exit;
+
             }
         }
         return false;
