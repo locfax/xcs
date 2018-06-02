@@ -4,6 +4,7 @@ namespace Xcs\Helper;
 
 class Pager
 {
+    use \Xcs\Traits\Singleton;
 
     /**
      * @param $pageinfo
@@ -26,14 +27,14 @@ class Pager
         $autogoto = true;
         $ajaxtarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'input_char') . "\" " : '';
         $aname = '';
-        if (\Xcs\Util::strpos($mpurl, '#')) {
+        if (self::strpos($mpurl, '#')) {
             $astrs = explode('#', $mpurl);
             $mpurl = $astrs[0];
             $aname = '#' . $astrs[1];
         }
         $lang['prev'] = '上一页';
         $lang['next'] = '下一页';
-        $mpurl .= \Xcs\Util::strpos($mpurl, '?') ? '&' : '?';
+        $mpurl .= self::strpos($mpurl, '?') ? '&' : '?';
         $offset = floor($page * 0.5);
         $realpages = ceil($totals / $perpage);
         $pages = $maxpages && $maxpages < $realpages ? $maxpages : $realpages;
@@ -100,4 +101,13 @@ class Pager
         return $return;
     }
 
+    /**
+     * @param $str
+     * @param $needle
+     * @return bool
+     */
+    private static function strpos($str, $needle)
+    {
+        return !(false === strpos($str, $needle));
+    }
 }

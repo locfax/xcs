@@ -154,11 +154,11 @@ class HandleUpload
         }
 
         if ($allowExts) {
-            if (\Xcs\Util::strpos($allowExts, ',')) {
+            if ($this->strpos($allowExts, ',')) {
                 $exts = explode(',', $allowExts);
-            } elseif (\Xcs\Util::strpos($allowExts, '/')) {
+            } elseif ($this->strpos($allowExts, '/')) {
                 $exts = explode('/', $allowExts);
-            } elseif (\Xcs\Util::strpos($allowExts, '|')) {
+            } elseif ($this->strpos($allowExts, '|')) {
                 $exts = explode('|', $allowExts);
             } else {
                 $exts = array($allowExts);
@@ -227,4 +227,13 @@ class HandleUpload
         }
     }
 
+    /**
+     * @param $str
+     * @param $needle
+     * @return bool
+     */
+    private function strpos($str, $needle)
+    {
+        return !(false === strpos($str, $needle));
+    }
 }

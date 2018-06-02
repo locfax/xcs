@@ -5,6 +5,8 @@ namespace Xcs\Helper;
 class Log2
 {
 
+    use \Xcs\Traits\Singleton;
+
     private $log_file_format = 'Y-m-d';
 
     private $log_file_dir;
