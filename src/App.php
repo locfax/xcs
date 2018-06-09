@@ -68,10 +68,10 @@ class App
 
             $files = array_merge($dfiles, $preload);
             foreach ($files as $file) {
-                include $file;
+                include($file);
             }
         } else {
-            //正式模式
+            //部署模式
             self::_runFile($preload, $dfiles, $refresh);
         }
         self::rootNamespace('\\', APPPATH);
@@ -89,7 +89,7 @@ class App
             $files = array_merge($dfiles, $preload);
             $preloadfile = self::makeRunFile($files, $preloadfile);
         }
-        $preloadfile && require $preloadfile;
+        $preloadfile && require($preloadfile);
     }
 
     /**
@@ -134,11 +134,28 @@ class App
         $_actionName = getgpc('g.' . self::_dACT, getini('site/defaultAction'), 'strtolower');
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $_controllerName);
         $actionName = preg_replace('/[^a-z0-9_]+/i', '', $_actionName);
-        if (defined('AUTH') && AUTH) {
-            $ret = Rbac::check($controllerName, $actionName, AUTH);
-            if (!$ret) {
-                $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
-                return self::errACL($args);
+        $routerAuth = isset($_GET['__AUTH__']) ?: false;
+        if (defined('AUTH') && AUTH || $routerAuth) {
+            if ($routerAuth) {
+                $roles = User::getRoles();
+                if (empty($roles)) {
+                    if (function_exists('no_role_redirect')) {
+                        $gourl = getini('site/no_role_url') ?: '/';
+                        return call_user_func('no_role_redirect', $gourl);
+                    } else {
+                        try {
+                            throw new Exception\ExException('未定义 no_role_redirect() 函数', 0);
+                        } catch (Exception\ExException $exception) {
+
+                        }
+                    }
+                }
+            } else {
+                $ret = Rbac::check($controllerName, $actionName, AUTH);
+                if (!$ret) {
+                    $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
+                    return self::errACL($args);
+                }
             }
         }
         self::executeAction($controllerName, $actionName);
@@ -333,7 +350,7 @@ class App
 
         if (!empty($filename) && is_file($filename)) {
             // 开启调试模式Win环境严格区分大小写
-            if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+            if (defined('DEBUG') && DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 return false;
             }
             include($filename);
