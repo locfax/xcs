@@ -135,26 +135,24 @@ class App
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $_controllerName);
         $actionName = preg_replace('/[^a-z0-9_]+/i', '', $_actionName);
         $routerAuth = isset($_GET['__AUTH__']) ?: false;
-        if (defined('AUTH') && AUTH || $routerAuth) {
-            if ($routerAuth) {
-                $roles = User::getRoles();
-                if (empty($roles)) {
-                    if (function_exists('no_role_redirect')) {
-                        $gourl = getini('site/no_role_url') ?: '/';
-                        return call_user_func('no_role_redirect', $gourl);
-                    } else {
-                        try {
-                            throw new Exception\ExException('未定义 no_role_redirect() 函数', 0);
-                        } catch (Exception\ExException $exception) {
+        if (defined('AUTH') && AUTH) {
+            $ret = Rbac::check($controllerName, $actionName, AUTH);
+            if (!$ret) {
+                $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
+                return self::errACL($args);
+            }
+        } elseif ($routerAuth) {
+            $roles = User::getRoles();
+            if (empty($roles)) {
+                if (function_exists('no_role_redirect')) {
+                    $gourl = getini('site/no_role_url') ?: '/';
+                    return call_user_func('no_role_redirect', $gourl);
+                } else {
+                    try {
+                        throw new Exception\ExException('未定义 no_role_redirect() 函数', 0);
+                    } catch (Exception\ExException $exception) {
 
-                        }
                     }
-                }
-            } else {
-                $ret = Rbac::check($controllerName, $actionName, AUTH);
-                if (!$ret) {
-                    $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
-                    return self::errACL($args);
                 }
             }
         }
