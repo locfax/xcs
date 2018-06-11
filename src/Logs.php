@@ -1,8 +1,8 @@
 <?php
 
-namespace Xcs\Helper;
+namespace Xcs;
 
-class Log
+class Logs
 {
 
     const maxsize = 1024000; //最大文件大小1M

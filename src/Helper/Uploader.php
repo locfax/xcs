@@ -5,8 +5,6 @@ namespace Xcs\Helper;
 class Uploader
 {
 
-    use \Xcs\Traits\Singleton;
-
     private $_files = array();
     private $_count = 0;
 

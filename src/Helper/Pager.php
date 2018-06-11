@@ -4,7 +4,6 @@ namespace Xcs\Helper;
 
 class Pager
 {
-    use \Xcs\Traits\Singleton;
 
     /**
      * @param $pageinfo
