@@ -24,19 +24,17 @@ class DB
         $_dsn = Context::dsn($dsnid);
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
-            $dbo = self::$used_dbo[$dsnkey];
+            return self::$used_dbo[$dsnkey];
+        } elseif ('mongo' == $_dsn['driver']) {
+            $dbo = new Database\Mongo($_dsn);
+        } elseif ('pdo' == $_dsn['driver']) {
+            $dbo = new Database\Pdo($_dsn);
+        } elseif ('mysqli' == $_dsn['driver']) {
+            $dbo = new Database\Mysqli($_dsn);
         } else {
-            if ('mongo' == $_dsn['driver']) {
-                $dbo = new Database\Mongo($_dsn);
-            } elseif ('pdo' == $_dsn['driver']) {
-                $dbo = new Database\Pdo($_dsn);
-            } elseif ('mysqli' == $_dsn['driver']) {
-                $dbo = new Database\Mysqli($_dsn);
-            } else {
-                $dbo = new Database\Mysqli($_dsn);
-            }
-            self::$used_dbo[$dsnkey] = $dbo;
+            $dbo = new Database\Mysqli($_dsn);
         }
+        self::$used_dbo[$dsnkey] = $dbo;
         return $dbo;
     }
 
@@ -49,17 +47,15 @@ class DB
         $_dsn = Context::dsn($dsnid);
         $dsnkey = $_dsn['dsnkey']; //连接池key
         if (isset(self::$used_dbo[$dsnkey])) {
-            $dbo = self::$used_dbo[$dsnkey];
+            return self::$used_dbo[$dsnkey];
+        } elseif ('pdo' == $_dsn['driver']) {
+            $dbo = new Database\Pdo($_dsn);
+        } elseif ('mysqli' == $_dsn['driver']) {
+            $dbo = new Database\Mysqli($_dsn);
         } else {
-            if ('pdo' == $_dsn['driver']) {
-                $dbo = new Database\Pdo($_dsn);
-            } elseif ('mysqli' == $_dsn['driver']) {
-                $dbo = new Database\Mysqli($_dsn);
-            } else {
-                $dbo = new Database\Mysqli($_dsn);
-            }
-            self::$used_dbo[$dsnkey] = $dbo;
+            $dbo = new Database\Mysqli($_dsn);
         }
+        self::$used_dbo[$dsnkey] = $dbo;
         return $dbo;
     }
 
