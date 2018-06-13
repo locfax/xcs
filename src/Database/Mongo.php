@@ -366,7 +366,7 @@ class Mongo
             try {
                 throw new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
             } catch (\Xcs\Exception\DbException $e) {
-
+                exit;
             }
         }
         return false;

@@ -67,7 +67,7 @@ class Mysqli
             return "`{$tableName}`";
         }
         $arr = explode('.', $tableName);
-        if (count($arr) > 2) {
+        if (count($arr) >= 2) {
             $this->_halt("tableName:{$tableName} 最多只能有一个点.", 0, '');
         }
         return "`{$arr[0]}`.`{$arr[1]}`";
@@ -744,7 +744,7 @@ class Mysqli
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'MysqliDbException');
             } catch (\Xcs\Exception\DbException $e) {
-
+                exit;
             }
         }
         return false;
