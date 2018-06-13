@@ -28,10 +28,12 @@ class DB
         } else {
             if ('mongo' == $_dsn['driver']) {
                 $dbo = new Database\Mongo($_dsn);
+            } elseif ('pdo' == $_dsn['driver']) {
+                $dbo = new Database\Pdo($_dsn);
             } elseif ('mysqli' == $_dsn['driver']) {
                 $dbo = new Database\Mysqli($_dsn);
             } else {
-                $dbo = new Database\Pdo($_dsn);
+                $dbo = new Database\Mysqli($_dsn);
             }
             self::$used_dbo[$dsnkey] = $dbo;
         }
@@ -49,7 +51,13 @@ class DB
         if (isset(self::$used_dbo[$dsnkey])) {
             $dbo = self::$used_dbo[$dsnkey];
         } else {
-            $dbo = new Database\Mysqli($_dsn);
+            if ('pdo' == $_dsn['driver']) {
+                $dbo = new Database\Pdo($_dsn);
+            } elseif ('mysqli' == $_dsn['driver']) {
+                $dbo = new Database\Mysqli($_dsn);
+            } else {
+                $dbo = new Database\Mysqli($_dsn);
+            }
             self::$used_dbo[$dsnkey] = $dbo;
         }
         return $dbo;
