@@ -634,7 +634,7 @@ class Mysqli
 
     /**
      * @param $tableName
-     * @param string $condition
+     * @param mixed $condition
      * @param string $field
      * @return mixed
      */
