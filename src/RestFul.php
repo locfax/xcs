@@ -10,24 +10,20 @@ class RestFul extends \Xcs\Controller
     //请求附带数据
     private $_data = null;
     // REST允许的请求类型列表
-    private $allow_method = ['get', 'post'];
+    private $allow_method = ['get', 'post', 'put', 'delete'];
     // REST默认请求类型
     private $default_method = 'get';
-    // REST允许输出的资源类型列表
-    private $allow_output_type = [
-        'json' => 'application/json'
-    ];
 
     public function __construct($controllerName, $actionName)
     {
         parent::__construct($controllerName, $actionName);
         // 请求方式检测
-        $method = strtolower(getgpc('s.REQUEST_METHOD'));
+        $method = getgpc('s.REQUEST_METHOD', 'get', 'strtolower');
         if (!in_array($method, $this->allow_method)) {
             $method = $this->default_method;
         }
         $this->_method = $method;
-        if ($method = 'post') {
+        if ($method != 'get') {
             $json = file_get_contents('php://input');
             $this->_data = json_decode($json, true);
         }
@@ -92,45 +88,6 @@ class RestFul extends \Xcs\Controller
         }
     }
 
-    /**
-     * 编码数据
-     * @access protected
-     * @param mixed $data 要返回的数据
-     * @param String $type 返回类型 JSON XML
-     * @return string
-     */
-    private function encode_data($data, $type = 'json')
-    {
-        if (empty($data)) {
-            return '';
-        }
-        if ('json' == $type) {
-            $data = \Xcs\Util::output_json($data);
-        }
-        return $data;
-    }
-
-    /**
-     * 设置页面输出的CONTENT_TYPE和编码
-     * @access public
-     * @param string $type content_type 类型对应的扩展名
-     * @param string $charset 页面输出编码
-     * @return void
-     */
-    private function content_type($type, $charset = '')
-    {
-        if (headers_sent()) {
-            return;
-        }
-        if (empty($charset)) {
-            $charset = getini('site/charset');
-        }
-        $type = strtolower($type);
-        if (isset($this->allow_output_type[$type])) { //过滤content_type
-            header('Content-Type: ' . $this->allow_output_type[$type] . '; charset=' . $charset);
-        }
-    }
-
     protected function data()
     {
         return $this->_data;
@@ -144,12 +101,10 @@ class RestFul extends \Xcs\Controller
      * @param integer $code HTTP状态
      * @return void
      */
-    protected function response($data, $code = 200)
+    protected function response($data, $code = 200, $type = "json")
     {
-        $type = 'json';
         $this->http_status($code);
-        $this->content_type($type);
-        echo $this->encode_data($data, $type);
+        \Xcs\Util::rep_send($data, $type);
     }
 
 }
