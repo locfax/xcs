@@ -9,13 +9,13 @@ class Curl
      * @param $url
      * @param string $data
      * @param array $httphead
-     * @param bool $gzip
-     * @param string $charset
+     * @param bool $retgzip
+     * @param string $retcharset
      * @param bool $rethead
      * @param bool $retsession
      * @return array
      */
-    public static function send($url, $data = '', $httphead = array(), $gzip = false, $charset = 'UTF-8', $rethead = false, $retsession = false)
+    public static function send($url, $data = '', $httphead = array(), $retgzip = false, $retcharset = 'UTF-8', $rethead = false, $retsession = false)
     {
         $ch = curl_init();
         if (!$ch) {
@@ -56,10 +56,21 @@ class Curl
                 $poststr = trim($data);
                 $httphead['Content-Length'] = strlen($poststr);
             }
-            curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
+
+            if (isset($httphead['Method'])) {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
+                unset($httphead['Method']);
+            } else {
+                curl_setopt($ch, CURLOPT_POST, true);
+            }
         } else {
-            curl_setopt($ch, CURLOPT_HTTPGET, true);
+            if (isset($httphead['Method'])) {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
+                unset($httphead['Method']);
+            } else {
+                curl_setopt($ch, CURLOPT_HTTPGET, true);
+            }
         }
 
         if (!isset($httphead['Host'])) {
@@ -133,11 +144,11 @@ class Curl
         curl_close($ch);
 
         if (!empty($http_body)) {
-            if ($gzip) {
-                $http_body = self::gzip_decode($http_body, $gzip);
+            if ($retgzip) {
+                $http_body = self::gzip_decode($http_body, $retgzip);
             }
-            if ('UTF-8' != $charset) {
-                $http_body = self::convert_encode(strtoupper($charset), 'UTF-8', $http_body);
+            if ('UTF-8' != $retcharset) {
+                $http_body = self::convert_encode(strtoupper($retcharset), 'UTF-8', $http_body);
             }
         }
         return array('header' => $http_header, 'body' => $http_body, 'http_code' => $http_code, 'http_info' => $http_info, 'reqheader' => $httpheads);
