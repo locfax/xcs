@@ -42,27 +42,35 @@ class Curl
         /* HTTP Basic Authentication */
         //curl_setopt($ch,CURLOPT_USERPWD,"username:password");
 
+        $fopen = null;
+
         /* 设置请求头部 */
         if (!empty($data)) {
             if (is_array($data)) {
-                if (isset($data['__file'])) {
-                    $data[$data['__file']] = class_exists('\CURLFile', false) ? new \CURLFile($data[$data['__file']]) : '@' . $data[$data['__file']];
-                    unset($data['__file']);
+                if (isset($data['__formfile'])) {
+                    $data[$data['__formfile']] = class_exists('\CURLFile', false) ? new \CURLFile($data[$data['__formfile']]) : '@' . $data[$data['__formfile']];
+                    unset($data['__formfile']);
                     $poststr = $data;
-                } else {
+                } elseif (!isset($data['__putfile'])) {
                     $poststr = http_build_query($data);
                 }
             } else {
                 $poststr = trim($data);
-                $httphead['Content-Length'] = strlen($poststr);
             }
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
-
             if (isset($httphead['Method'])) {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
-                unset($httphead['Method']);
+                if ($httphead['Method'] == 'PUT') {
+                    curl_setopt($ch, CURLOPT_PUT, true);
+                    $fopen = fopen($data[$data['__putfile']], 'r');
+                    curl_setopt($ch, CURLOPT_INFILE, $fopen);//设置上传文件的FILE指针
+                    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data[$data['__putfile']]));//设置上传文件的大小
+                } else {
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
+                    unset($httphead['Method']);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
+                }
             } else {
                 curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
             }
         } else {
             if (isset($httphead['Method'])) {
@@ -139,6 +147,8 @@ class Curl
         } else {
             $http_body = $http_response;
         }
+
+        $fopen && fclose($fopen);
 
         /* 关闭资源 */
         curl_close($ch);
