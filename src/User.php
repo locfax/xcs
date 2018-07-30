@@ -5,17 +5,17 @@ namespace Xcs;
 class User
 {
 
-    const _USERKEY = 'um_';
+    const _USERKEY = 'USS_';
     const _ROLEKEY = 'roles';
 
     /**
      * @param $userData
-     * @param string $uid
+     * @param int $uid
      * @param null $rolesData
      * @param int $left
      * @return bool
      */
-    public static function setUser($uid = '', array $userData, $rolesData = null, $left = 0)
+    public static function setUser($uid, array $userData, $rolesData = null, $left = 0)
     {
         if (!is_null($rolesData)) {
             $userData[self::_ROLEKEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
@@ -90,10 +90,6 @@ class User
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key], 'DECODE'), true) : null;
-        } elseif ('REDIS' == $type) {
-            $redis = DB::dbo('redis.user');
-            $data = $redis->get($key);
-            $ret = $data ? $data : null;
         }
         return $ret;
     }
@@ -128,9 +124,6 @@ class User
             $key = self::getCookieKey($key);
             $val = $val ? self::authCode(json_encode($val), 'ENCODE') : '';
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
-        } elseif ('REDIS' == $type) {
-            $redis = DB::dbo('redis.user');
-            $ret = $redis->set(getini('auth/prefix') . $key, $val, $life);
         }
         return $ret;
     }
@@ -152,7 +145,6 @@ class User
         }
         return $var;
     }
-
 
     /**
      * @param $string

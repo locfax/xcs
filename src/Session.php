@@ -15,11 +15,6 @@ class Session
         $this->ttl = $time;
         //ini_set('session.gc_maxlifetime', 1440);
         session_module_name('user'); //session保存方式, 也可以在Php.ini中设置
-        $this->save_handler();
-    }
-
-    private function save_handler()
-    {
         session_set_save_handler(
             array(&$this, '_open'), //在运行session_start()时执行
             array(&$this, '_close'), //在脚本执行完成或调用session_write_close() 或 session_destroy()时被执行,即在所有session操作完后被执行
@@ -30,23 +25,23 @@ class Session
         );
     }
 
-    private function _open()
+    public function _open()
     {
         //在运行session_start()时连接redis数据库
         try {
-            $config = array();
+            $config = Context::dsn('session');
             $this->db = Cache\Redis::getInstance()->init($config);
         } catch (\Exception $ex) {
 
         }
     }
 
-    private function _close()
+    public function _close()
     {
 
     }
 
-    private function _read($id)
+    public function _read($id)
     {
         try {
             $id = $this->prefix . $id;
@@ -58,7 +53,7 @@ class Session
         }
     }
 
-    private function _write($id, $data)
+    public function _write($id, $data)
     {
         try {
             $id = $this->prefix . $id;
@@ -69,7 +64,7 @@ class Session
         }
     }
 
-    private function _destroy($id)
+    public function _destroy($id)
     {
         try {
             $this->db->del($this->prefix . $id);
@@ -78,7 +73,7 @@ class Session
         }
     }
 
-    private function _gc($max)
+    public function _gc($max)
     {
         //一般不需要操作什么
     }
