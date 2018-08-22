@@ -12,7 +12,7 @@ class Controller
     //时间戳
     protected $timestamp;
 
-    /*
+    /**
      * 初始执行
      */
     public function __construct($controllerName, $actionName)
@@ -37,13 +37,13 @@ class Controller
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
             );
-            return json_encode($retarr);
+            return Util::rep_send($retarr);
         }
         $args = 'Action:' . $name . "不存在";
         include template('404');
     }
 
-    /*
+    /**
      * 初始变量
      */
     private function init_var()
@@ -54,7 +54,7 @@ class Controller
         }
     }
 
-    /*
+    /**
      * 时区
      */
     private function init_timezone()
@@ -64,7 +64,7 @@ class Controller
         $timeoffset && date_default_timezone_set('Etc/GMT' . ($timeoffset > 0 ? '-' : '+') . abs($timeoffset));
     }
 
-    /*
+    /**
      * 权限验证
      */
     final function checkacl($controllerName, $actionName, $auth = AUTH)

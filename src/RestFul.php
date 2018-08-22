@@ -4,32 +4,49 @@ namespace Xcs;
 
 class RestFul extends \Xcs\Controller
 {
-
     // 当前请求类型
     private $_method = null;
-    //请求附带数据
-    private $_data = null;
     // REST允许的请求类型列表
     private $allow_method = ['get', 'post', 'put', 'delete'];
-    // REST默认请求类型
-    private $default_method = 'get';
 
     public function __construct($controllerName, $actionName)
     {
         parent::__construct($controllerName, $actionName);
         // 请求方式检测
-        $method = getgpc('s.REQUEST_METHOD', 'get', 'strtolower');
+        $method = strtolower(getgpc('s.REQUEST_METHOD', 'get'));
         if (!in_array($method, $this->allow_method)) {
-            $method = $this->default_method;
+            $method = 'get';
         }
         $this->_method = $method;
-        if ($method != 'get') {
-            $json = file_get_contents('php://input');
-            $this->_data = json_decode($json, true);
-        }
+        $this->request();
     }
 
-    // 发送Http状态信息
+    /**
+     * @param $name
+     * @param $arguments
+     * @return bool
+     */
+    public function __call($name, $arguments)
+    {
+        //动作不存在
+        $retarr = array(
+            'errcode' => 1,
+            'errmsg' => 'Action ' . $name . '不存在!',
+        );
+        Util::rep_send($retarr);
+    }
+
+    /**
+     * @return mixed|null
+     */
+    protected function rawdata()
+    {
+        return file_get_contents('php://input');
+    }
+
+    /**
+     * @param $code
+     */
     private function http_status($code)
     {
         static $_status = [
@@ -88,11 +105,6 @@ class RestFul extends \Xcs\Controller
         }
     }
 
-    protected function data()
-    {
-        return $this->_data;
-    }
-
     /**
      * 输出返回数据
      * @access protected
@@ -104,7 +116,19 @@ class RestFul extends \Xcs\Controller
     protected function response($data, $code = 200, $type = "json")
     {
         $this->http_status($code);
-        \Xcs\Util::rep_send($data, $type);
+        Util::rep_send($data, $type);
     }
 
+    protected function request()
+    {
+        if ('get' == $this->_method) {
+            call_user_func(array($this, '_' . $this->_act . '_get'));
+        } elseif ('post' == $this->_method) {
+            call_user_func(array($this, '_' . $this->_act . '_post'));
+        } elseif ('put' == $this->_method) {
+            call_user_func(array($this, '_' . $this->_act . '_put'));
+        } elseif ('delete' == $this->_method) {
+            call_user_func(array($this, '_' . $this->_act . '_delete'));
+        }
+    }
 }
