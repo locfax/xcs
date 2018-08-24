@@ -4,16 +4,14 @@ namespace Xcs;
 
 class Session
 {
-
     private $ttl;
-    private $db;
+    private $handle;
     private $prefix;
 
-    public function start($prefix = "RSID:", $time = 1800)
+    public function start($prefix = "session:", $time = 1800)
     {
         $this->prefix = $prefix;
         $this->ttl = $time;
-        //ini_set('session.gc_maxlifetime', 1440);
         session_module_name('user'); //session保存方式, 也可以在Php.ini中设置
         session_set_save_handler(
             array(&$this, '_open'), //在运行session_start()时执行
@@ -23,17 +21,22 @@ class Session
             array(&$this, '_destroy'), //在运行session_destroy()时执行
             array(&$this, '_gc') //redis 设置了ttl 会自动销毁, 所以gc里不做任何操作
         );
+        $this->connect();
+    }
+
+    private function connect()
+    {
+        if (!$this->handle) {
+            $config = Context::dsn('session');
+            $handle = getini('auth/handle');
+            $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
+            $this->handle = $handle::getInstance()->init($config);
+        }
     }
 
     public function _open()
     {
-        //在运行session_start()时连接redis数据库
-        try {
-            $config = Context::dsn('session');
-            $this->db = Cache\Redis::getInstance()->init($config);
-        } catch (\Exception $ex) {
 
-        }
     }
 
     public function _close()
@@ -43,39 +46,26 @@ class Session
 
     public function _read($id)
     {
-        try {
-            $id = $this->prefix . $id;
-            $sessData = $this->db->get($id);
-            $this->db->expire($id, $this->ttl); //重新设置ttl 防止超时
-            return $sessData;
-        } catch (\Exception $ex) {
-
-        }
+        $id = $this->prefix . $id;
+        $sessData = $this->handle->get($id);
+        $this->ttl && $this->handle->set($id, $sessData, $this->ttl); //重新设置ttl 防止超时
+        return $sessData;
     }
 
     public function _write($id, $data)
     {
-        try {
-            $id = $this->prefix . $id;
-            $this->db->set($id, $data);
-            $this->db->expire($id, $this->ttl);
-        } catch (\Exception $ex) {
-
-        }
+        $id = $this->prefix . $id;
+        $this->handle->set($id, $data, $this->ttl);
     }
 
     public function _destroy($id)
     {
-        try {
-            $this->db->del($this->prefix . $id);
-        } catch (\Exception $ex) {
-
-        }
+        $this->handle->rm($this->prefix . $id);
     }
 
     public function _gc($max)
     {
-        //一般不需要操作什么
+
     }
 
 }

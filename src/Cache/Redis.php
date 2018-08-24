@@ -11,11 +11,6 @@ class Redis
     private $_link = null;
     private $_plink = false;
 
-    public function __destruct()
-    {
-        $this->close();
-    }
-
     /**
      * @param $config
      * @return $this
@@ -91,7 +86,7 @@ class Redis
      */
     public function expire($key, $ttl = 0)
     {
-        return $this->_link->expire($key, $ttl);
+        return false;
     }
 
     /**

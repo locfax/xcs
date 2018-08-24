@@ -11,11 +11,6 @@ class Memcache
     private $_link = null;
     private $_plink = false;
 
-    public function __destruct()
-    {
-        $this->close();
-    }
-
     /**
      * @param $config
      * @return $this

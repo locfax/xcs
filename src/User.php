@@ -4,66 +4,58 @@ namespace Xcs;
 
 class User
 {
-
-    const _USERKEY = 'USS_';
-    const _ROLEKEY = 'roles';
+    const _USERKEY = 'TATA';
+    const _ROLEKEY = 'ROLE';
 
     /**
-     * @param $userData
-     * @param int $uid
+     * @param array $userData
      * @param null $rolesData
      * @param int $left
      * @return bool
      */
-    public static function setUser($uid, array $userData, $rolesData = null, $left = 0)
+    public static function setUser(array $userData, $rolesData = null, $left = 0)
     {
         if (!is_null($rolesData)) {
             $userData[self::_ROLEKEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
         }
-        $datakey = self::_USERKEY . $uid;
+        $datakey = getini('auth/prefix') . self::_USERKEY;
         $ret = self::_setData($datakey, $userData, $left);
         return $ret;
     }
 
     /**
-     * @param string $uid
-     * @return null
+     * @return array
      */
-    public static function getUser($uid = '')
+    public static function getUser()
     {
-        $datakey = self::_USERKEY . $uid;
+        $datakey = getini('auth/prefix') . self::_USERKEY;
         $ret = self::_getData($datakey);
         return $ret;
     }
 
-    public static function clearUser($uid = '')
+    public static function clearUser()
     {
-        $datakey = self::_USERKEY . $uid;
+        $datakey = getini('auth/prefix') . self::_USERKEY;
         self::_setData($datakey, '', -86400 * 365);
     }
 
     /**
-     * @param string $uid
-     * @return null
+     * @return mixed|null
      */
-    public static function getRoles($uid = '')
+    public static function getRoles()
     {
-        $user = self::getUser($uid);
-        return isset($user[self::_ROLEKEY]) ?
-            $user[self::_ROLEKEY] :
-            null;
+        $user = self::getUser();
+        return isset($user[self::_ROLEKEY]) ? $user[self::_ROLEKEY] : null;
     }
 
-
     /**
-     * @param string $uid
      * @return array
      */
-    public static function getRolesArray($uid = '')
+    public static function getRolesArray()
     {
-        $roles = self::getRoles($uid);
+        $roles = self::getRoles();
         if (empty($roles)) {
-            return array();
+            return [];
         }
         if (!is_array($roles)) {
             $roles = explode(',', $roles);
@@ -73,49 +65,132 @@ class User
 
     /**
      * @param $key
-     * @param null $type
+     * @param array $data
+     * @param int $ttl
+     * @return bool
+     */
+    public static function setData($key, array $data, $ttl = 0)
+    {
+        return self::_setData($key, $data, $ttl);
+    }
+
+    /**
+     * @param string $key
+     * @return array
+     */
+    public static function getData($key)
+    {
+        return self::_getData($key);
+    }
+
+    /**
+     * @return null|string
+     */
+    public static function getSid()
+    {
+        $type = getini('auth/method');
+        if ('SESSION' == $type) {
+            if (PHP_SESSION_NONE == session_status()) {
+                $handle = getini('auth/handle');
+                if ($handle) {
+                    (new Session())->start();
+                }
+                session_start();
+            }
+            return session_id();
+        }
+        return null;
+    }
+
+    /**
+     * @param $sid
+     * @param $data
+     * @return bool
+     */
+    public static function setSession($sid, $data = null)
+    {
+        if (is_null($data)) {
+            return false;
+        }
+        return self::_setData('sid:' . $sid, $data, 0, 'SESSID');
+    }
+
+    /**
+     * @param $sid
+     * @return array
+     */
+    public static function getSession($sid)
+    {
+        return self::_getData('sid:' . $sid, 'SESSID');
+    }
+
+    /**
+     * @param string $key
+     * @param string $type
      * @return array
      */
     private static function _getData($key, $type = null)
     {
         $ret = '';
         if (is_null($type)) {
-            $type = getini('auth/handle');
+            $type = getini('auth/method');
         }
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
+                $handle = getini('auth/handle');
+                if ($handle) {
+                    (new Session())->start();
+                }
                 session_start();
             }
-            $ret = isset($_SESSION[getini('auth/prefix') . $key]) ? $_SESSION[getini('auth/prefix') . $key] : null;
+            $ret = isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+            if ($ret) {
+                $ret = json_decode($ret, true);
+            }
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key], 'DECODE'), true) : null;
+        } elseif ('SESSID' == $type) {
+            static $handle = null;
+            if (is_null($handle)) {
+                $config = Context::dsn('session');
+                $handle = getini('auth/session');
+                $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
+                $handle = $handle::getInstance()->init($config);
+            }
+            $ret = $handle->get($key);
+            if ($ret) {
+                $ret = json_decode($ret, true);
+            }
         }
         return $ret;
     }
 
-
     /**
-     * @param $key
-     * @param $val
+     * @param string $key
+     * @param array $val
      * @param int $life
      * @param null $type
      * @return bool
      */
-    private static function _setData($key, $val, $life = 0, $type = null)
+    private static function _setData($key, array $val, $life = 0, $type = null)
     {
         $ret = false;
         if (is_null($type)) {
-            $type = getini('auth/handle');
+            $type = getini('auth/method');
         }
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
+                $handle = getini('auth/handle');
+                if ($handle) {
+                    (new Session())->start();
+                }
                 session_start();
             }
             if ($life >= 0) {
-                $_SESSION[getini('auth/prefix') . $key] = $val;
+                $_SESSION[$key] = json_encode($val);
             } else {
-                unset($_SESSION[getini('auth/prefix') . $key]);
+                unset($_SESSION[$key]);
             }
             $ret = true;
         } elseif ('COOKIE' == $type) {
@@ -124,6 +199,15 @@ class User
             $key = self::getCookieKey($key);
             $val = $val ? self::authCode(json_encode($val), 'ENCODE') : '';
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
+        } elseif ('SESSID' == $type) {
+            static $handle = null;
+            if (is_null($handle)) {
+                $config = Context::dsn('session');
+                $handle = getini('auth/session');
+                $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
+                $handle = $handle::getInstance()->init($config);
+            }
+            $ret = $handle->set($key, json_encode($val), $life);
         }
         return $ret;
     }
@@ -138,9 +222,9 @@ class User
     {
         if ($prefix) {
             if (is_null($key)) {
-                $var = getini('auth/prefix') . substr(md5(getini('auth/key')), -7, 7) . '_' . $var;
+                $var = substr(md5(getini('auth/key')), -7, 7) . '_' . $var;
             } else {
-                $var = getini('auth/prefix') . $key . '_' . $var;
+                $var = $key . '_' . $var;
             }
         }
         return $var;
