@@ -32,11 +32,11 @@ class Controller
     {
         //动作不存在
         if (App::isAjax(true)) {
-            $retarr = array(
+            $retarr = [
                 'errcode' => 1,
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
-            );
+            ];
             return Util::rep_send($retarr);
         }
         $args = 'Action:' . $name . "不存在";

@@ -7,7 +7,7 @@ class Mail
 
     public $debug = true;
 
-    public $mail = array(
+    public $mail = [
         'version' => '1.0',
         'maildelimiter' => 1,
         'sitename' => 'uvtodo.com',
@@ -18,7 +18,7 @@ class Mail
         'auth' => true,
         'auth_username' => 'admin@uvtodo.com',
         'auth_password' => '12345678',
-    );
+    ];
 
     function send($email_to, $subject, $message)
     {

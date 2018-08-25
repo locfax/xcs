@@ -89,9 +89,9 @@ class File
      */
     public static function list_files($dir, $dirfile = false, $md5 = true, $root = true)
     {
-        static $return = array();
+        static $return = [];
         if ($root) {
-            $return = array();
+            $return = [];
         }
         $filepoint = opendir($dir);
         while (($target = readdir($filepoint)) !== false) {

@@ -25,7 +25,7 @@ class Http
     public static function getSupport()
     {
         //如果指定访问方式，则按指定的方式去访问
-        if (isset(self::$way) && in_array(self::$way, array(1, 2, 3)))
+        if (isset(self::$way) && in_array(self::$way, [1, 2, 3]))
             return self::$way;
 
         //自动获取最佳访问方式
@@ -79,7 +79,7 @@ class Http
      * @param  $data_type
      * @return mixed
      */
-    public static function doPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    public static function doPost($url, $post_data = [], $timeout = 5, $header = "", $data_type = "")
     {
         if (empty($url) || empty($post_data) || empty($timeout))
             return false;
@@ -118,7 +118,7 @@ class Http
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, FALSE);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array($header)); //模拟的header头
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [$header]); //模拟的header头
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
@@ -133,7 +133,7 @@ class Http
      * @param  $data_type
      * @return mixed
      */
-    public static function curlPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    public static function curlPost($url, $post_data = [], $timeout = 5, $header = "", $data_type = "")
     {
         $header = empty($header) ? '' : $header;
         //支持json数据数据提交
@@ -153,7 +153,7 @@ class Http
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $timeout);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, array($header)); //模拟的header头
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [$header]); //模拟的header头
         $result = curl_exec($ch);
         curl_close($ch);
         return $result;
@@ -202,7 +202,7 @@ class Http
      * @param  $data_type
      * @return boolean
      */
-    public static function socketPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    public static function socketPost($url, $post_data = [], $timeout = 5, $header = "", $data_type = "")
     {
         $header = empty($header) ? self::defaultHeader() : $header;
         //支持json数据数据提交
@@ -248,13 +248,14 @@ class Http
     public static function phpGet($url, $timeout = 5, $header = "")
     {
         $header = empty($header) ? self::defaultHeader() : $header;
-        $opts = array(
-            'http' => array(
+        $opts = [
+            'http' => [
                 'protocol_version' => '1.0', //http协议版本(若不指定php5.2系默认为http1.0)
                 'method' => "GET", //获取方式
                 'timeout' => $timeout, //超时时间
-                'header' => $header)
-        );
+                'header' => $header
+            ]
+        ];
         $context = stream_context_create($opts);
         return @file_get_contents($url, false, $context);
     }
@@ -268,7 +269,7 @@ class Http
      * @param  $data_type
      * @return mixed
      */
-    public static function phpPost($url, $post_data = array(), $timeout = 5, $header = "", $data_type = "")
+    public static function phpPost($url, $post_data = [], $timeout = 5, $header = "", $data_type = "")
     {
         $header = empty($header) ? self::defaultHeader() : $header;
         //支持json数据数据提交
@@ -280,14 +281,15 @@ class Http
             $post_string = $post_data;
         }
         $header .= "Content-length: " . strlen($post_string);
-        $opts = array(
-            'http' => array(
+        $opts = [
+            'http' => [
                 'protocol_version' => '1.0', //http协议版本(若不指定php5.2系默认为http1.0)
                 'method' => "POST", //获取方式
                 'timeout' => $timeout, //超时时间
                 'header' => $header,
-                'content' => $post_string)
-        );
+                'content' => $post_string
+            ]
+        ];
         $context = stream_context_create($opts);
         return @file_get_contents($url, false, $context);
     }
@@ -372,7 +374,7 @@ class Http
      */
     private static function mime_content_type($filename)
     {
-        static $contentType = array(
+        static $contentType = [
             'ai' => 'application/postscript',
             'aif' => 'audio/x-aiff',
             'aifc' => 'audio/x-aiff',
@@ -566,7 +568,7 @@ class Http
             'xyz' => 'chemical/x-xyz',
             'z' => 'application/x-compress',
             'zip' => 'application/zip',
-        );
+        ];
         $type = strtolower(substr(strrchr($filename, '.'), 1));
         if (isset($contentType[$type])) {
             $mime = $contentType[$type];

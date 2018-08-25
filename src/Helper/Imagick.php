@@ -30,7 +30,7 @@ class Imagick
             $hex = $default;
         }
         $dec = hexdec($hex);
-        return array(($dec >> 16) & 0xff, ($dec >> 8) & 0xff, $dec & 0xff);
+        return [($dec >> 16) & 0xff, ($dec >> 8) & 0xff, $dec & 0xff];
     }
 
 }

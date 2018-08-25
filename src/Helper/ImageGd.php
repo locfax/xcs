@@ -21,13 +21,13 @@ class ImageGd
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
         }
         $fileext = trim(strtolower($ext), '.');
-        $ext2functions = array(
+        $ext2functions = [
             'jpg' => 'imagecreatefromjpeg',
             'jpeg' => 'imagecreatefromjpeg',
             'png' => 'imagecreatefrompng',
             'gif' => 'imagecreatefromgif',
             'bmp' => 'imagecreatefrombmp'
-        );
+        ];
         if (!isset($ext2functions[$fileext])) {
             return false;
         }
@@ -45,7 +45,7 @@ class ImageGd
             $hex = $default;
         }
         $dec = hexdec($hex);
-        return array(($dec >> 16) & 0xff, ($dec >> 8) & 0xff, $dec & 0xff);
+        return [($dec >> 16) & 0xff, ($dec >> 8) & 0xff, $dec & 0xff];
     }
 
 }

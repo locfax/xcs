@@ -23,7 +23,7 @@ class Cacher
         $this->config = getini('cache');
         $this->prefix = $this->config['prefix'];
         $cacher = $cacher ?: $this->config['cacher'];
-        if (in_array($cacher, array('file', 'memcache', 'redis'))) {
+        if (in_array($cacher, ['file', 'memcache', 'redis'])) {
             $class = "\\Xcs\\Cache\\" . ucfirst($cacher);
             if ($cacher != 'file') {
                 $config = \Xcs\Context::dsn($cacher . '.cache');
@@ -62,7 +62,7 @@ class Cacher
     {
         $ret = false;
         if ($this->enable) {
-            $data = array($value);
+            $data = [$value];
             $ret = $this->cacher->set($this->_key($key), \Xcs\Util::output_json($data), $ttl);
         }
         return $ret;

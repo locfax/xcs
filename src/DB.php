@@ -7,7 +7,7 @@ class DB
 
     private static $default_dbo_id = APPDSN;
     private static $using_dbo_id = null;
-    private static $used_dbo = array();
+    private static $used_dbo = [];
 
     public static function info()
     {
@@ -382,7 +382,7 @@ class DB
     public static function pagebar($pageparm, $length)
     {
         if (!isset($pageparm['type']) || 'pagebar' == $pageparm['type']) {
-            $defpageparm = array(
+            $defpageparm = [
                 'curpage' => 1,
                 'maxpages' => 0,
                 'showpage' => 10,
@@ -390,28 +390,28 @@ class DB
                 'shownum' => false,
                 'showkbd' => false,
                 'simple' => false
-            );
+            ];
             $pageparm = array_merge($defpageparm, $pageparm);
             $pageparm['length'] = $length;
             $pagebar = Helper\Pager::pagebar($pageparm);
         } elseif ('simplepage' == $pageparm['type']) {
-            $defpageparm = array(
+            $defpageparm = [
                 'curpage' => 1,
                 'udi' => ''
-            );
+            ];
             $pageparm = array_merge($defpageparm, $pageparm);
             $pageparm['length'] = $length;
             $pagebar = Helper\Pager::simplepage($pageparm);
         } else {
             $pages = ceil($pageparm['totals'] / $length);
             $nextpage = ($pages > $pageparm['curpage']) ? $pageparm['curpage'] + 1 : $pages;
-            $pagebar = array(
+            $pagebar = [
                 'totals' => $pageparm['totals'],
                 'pagecount' => $pages,
                 'prepage' => $pageparm['curpage'] - 1 > 0 ? $pageparm['curpage'] - 1 : 1,
                 'curpage' => $pageparm['curpage'],
                 'nextpage' => $nextpage
-            );
+            ];
         }
         return $pagebar;
     }

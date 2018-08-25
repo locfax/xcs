@@ -35,7 +35,7 @@ class Util
         if (!is_array($arr)) {
             return $arr;
         }
-        $rows = array();
+        $rows = [];
         foreach ($arr as $row) {
             $rows[$row[$col]] = $row;
         }
@@ -86,7 +86,7 @@ class Util
      */
     public static function header($_string, $replace = true, $http_response_code = 0)
     {
-        $string = str_replace(array("\r", "\n"), array('', ''), $_string);
+        $string = str_replace(["\r", "\n"], ['', ''], $_string);
         if (!$http_response_code) {
             header($string, $replace);
         } else {
@@ -165,7 +165,7 @@ class Util
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
         $content = preg_replace("/([\\x01-\\x08\\x0b-\\x0c\\x0e-\\x1f])+/", ' ', $content);
-        $content = str_replace(array(chr(0), ']]>'), array(' ', ']]&gt;'), $content);
+        $content = str_replace([chr(0), ']]>'], [' ', ']]&gt;'], $content);
         if ($echo) {
             echo $content;
         } else {
@@ -213,7 +213,7 @@ class Util
         $out = "<script language=\"javascript\" type=\"text/javascript\">\n";
         if (!empty($message)) {
             $out .= "alert(\"";
-            $out .= str_replace("\\\\n", "\\n", str_replace(array("\r", "\n"), array('', '\n'), $message));
+            $out .= str_replace("\\\\n", "\\n", str_replace(["\r", "\n"], ['', '\n'], $message));
             $out .= "\");\n";
         }
         if (!empty($after_action)) {

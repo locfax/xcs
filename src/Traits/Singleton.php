@@ -5,7 +5,7 @@ namespace Xcs\Traits;
 Trait Singleton
 {
 
-    protected static $singleton_instances = array();
+    protected static $singleton_instances = [];
 
     public function __clone()
     {

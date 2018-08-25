@@ -12,7 +12,7 @@ class CurlMuti
      * @param string $charset
      * @return array
      */
-    public static function send($urls, $data = '', $httphead = array(), $charset = 'UTF-8')
+    public static function send($urls, $data = '', $httphead = [], $charset = 'UTF-8')
     {
         //创建多个curl语柄
         $mhandle = curl_multi_init();
@@ -52,7 +52,7 @@ class CurlMuti
                 curl_setopt($conn[$key], CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
             }
 
-            $heads = array();
+            $heads = [];
             foreach ($httphead as $k => $v) {
                 $heads[] = $k . ': ' . $v;
             }
@@ -95,7 +95,7 @@ class CurlMuti
             } while ($mrc == CURLM_CALL_MULTI_PERFORM);
         }
 
-        $res = array();
+        $res = [];
         foreach ($urls as $key => $url) {
             if (0 != curl_errno($conn[$key])) {
                 $res[$key]['http_code'] = 0;

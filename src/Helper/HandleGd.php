@@ -130,16 +130,16 @@ class HandleGd
         return $this;
     }
 
-    public function cut($options = array())
+    public function cut($options = [])
     {
         if (is_null($this->_handle)) {
             return $this;
         }
-        $default_options = array(
-            'pos' => array('lux' => 0, 'luy' => 0, 'ldx' => 0, 'ldy' => 100, 'rux' => 100, 'rdx' => 100, 'rdy' => 100),
+        $default_options = [
+            'pos' => ['lux' => 0, 'luy' => 0, 'ldx' => 0, 'ldy' => 100, 'rux' => 100, 'rdx' => 100, 'rdy' => 100],
             'bgcolor' => '0xfff',
             'border' => 0
-        );
+        ];
         $options = array_merge($default_options, $options);
 
         $dst_w = round($options['pos']['rux'] - $options['pos']['lux']);
@@ -177,19 +177,19 @@ class HandleGd
         return $this;
     }
 
-    public function crop($width, $height, $options = array())
+    public function crop($width, $height, $options = [])
     {
         if (is_null($this->_handle)) {
             return $this;
         }
-        $default_options = array(
+        $default_options = [
             'fullimage' => true,
             'pos' => 'center',
             'bgcolor' => '0xfff',
             'enlarge' => true,
             'reduce' => true,
             'border' => 0
-        );
+        ];
         $options = array_merge($default_options, $options);
         $dest = imagecreatetruecolor($width, $height);
 
@@ -318,7 +318,7 @@ function imagecreatefrombmp($fname)
         case 4:
             $colorset = unpack("L*", substr($buf, 54, 64));
             for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = array();
+                $colors = [];
                 $y_pos = $y * $line_len + $file_header["bfOffBits"];
                 for ($x = 0; $x < $info_header["biWidth"]; $x++) {
                     if ($x % 2)
@@ -333,7 +333,7 @@ function imagecreatefrombmp($fname)
         case 8:
             $colorset = unpack("L*", substr($buf, 54, 1024));
             for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = array();
+                $colors = [];
                 $y_pos = $y * $line_len + $file_header["bfOffBits"];
                 for ($x = 0; $x < $info_header["biWidth"]; $x++) {
                     $colors[] = $colorset[ord($buf[$y_pos + $x]) + 1];
@@ -344,7 +344,7 @@ function imagecreatefrombmp($fname)
             break;
         case 16:
             for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = array();
+                $colors = [];
                 $y_pos = $y * $line_len + $file_header["bfOffBits"];
                 for ($x = 0; $x < $info_header["biWidth"]; $x++) {
                     $i = $x * 2;
@@ -357,7 +357,7 @@ function imagecreatefrombmp($fname)
             break;
         case 24:
             for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = array();
+                $colors = [];
                 $y_pos = $y * $line_len + $file_header["bfOffBits"];
                 for ($x = 0; $x < $info_header["biWidth"]; $x++) {
                     $i = $x * 3;

@@ -23,7 +23,7 @@ class App
         }
         self::runFile($preload, $refresh);
         if (isset($_GET['s'])) {
-            $uri = trim(str_replace(array('.htm', '.html'), '', $_GET['s']),'/');
+            $uri = trim(str_replace(['.htm', '.html'], '', $_GET['s']),'/');
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
@@ -36,12 +36,12 @@ class App
      */
     public static function runFile($preload, $refresh = false)
     {
-        $dfiles = array(
+        $dfiles = [
             PSROOT . '/config/base.inc.php', //全局配置
             PSROOT . '/config/' . APPKEY . '.dsn.php', //数据库配置
             PSROOT . '/config/' . APPKEY . '.inc.php', //应用配置
             BASEPATH . 'common.php'
-        );
+        ];
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $errstr, $errfile = null, $errline = null) {
@@ -102,7 +102,7 @@ class App
         $content = '';
         foreach ($runtimefiles as $filename) {
             $data = php_strip_whitespace($filename);
-            $content .= str_replace(array('<?php', '?>', '<php_', '_php>'), array('', '', '<?php', '?>'), $data);
+            $content .= str_replace(['<?php', '?>', '<php_', '_php>'], ['', '', '<?php', '?>'], $data);
         }
         $filedir = dirname($runfile);
         if (!is_dir($filedir)) {
@@ -181,7 +181,7 @@ class App
             if (!$controller instanceof $controllerClass) {
                 break;
             }
-            call_user_func(array($controller, $actionMethod));
+            call_user_func([$controller, $actionMethod]);
             $controller = null;
             return true;
         } while (false);
@@ -196,7 +196,7 @@ class App
      */
     public static function mergeVars($group, $vars = null)
     {
-        static $_CDATA = array(APPKEY => array('dsn' => null, 'cfg' => null, 'data' => null));
+        static $_CDATA = [APPKEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
         $appkey = APPKEY;
         if (is_null($vars)) {
             return $_CDATA[$appkey][$group];
@@ -216,11 +216,11 @@ class App
     private static function errACT($args)
     {
         if (self::isAjax(true)) {
-            $retarr = array(
+            $retarr = [
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
-            );
+            ];
             return \Xcs\Util::rep_send($retarr, 'json');
         }
         $args = '出错了！' . $args;
@@ -234,11 +234,11 @@ class App
     private static function errACL($args)
     {
         if (self::isAjax(true)) {
-            $retarr = array(
+            $retarr = [
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
-            );
+            ];
             return \Xcs\Util::rep_send($retarr, 'json');
         }
         $args = '出错了！' . $args;
@@ -275,7 +275,7 @@ class App
             self::$routes = Context::config(APPKEY, 'route');
         }
         foreach (self::$routes as $key => $val) {
-            $key = str_replace(array(':any', ':num'), array('[^/]+', '[0-9]+'), $key);
+            $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
             if (preg_match('#^' . $key . '$#', $uri, $matches)) {
                 if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
                     $val = preg_replace('#^' . $key . '$#', $val, $uri);
@@ -335,9 +335,9 @@ class App
      */
     public static function vendor($class, $ext = '.php', $baseUrl = LIBPATH)
     {
-        static $_file = array();
+        static $_file = [];
         $key = $class . $baseUrl . $ext;
-        $class = str_replace(array('.', '#'), array('/', '.'), $class);
+        $class = str_replace(['.', '#'], ['/', '.'], $class);
 
         if (isset($_file[$key])) { //如果已经include过，不需要再次载入
             return true;

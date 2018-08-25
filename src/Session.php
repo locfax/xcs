@@ -14,12 +14,12 @@ class Session
         $this->ttl = $time;
         session_module_name('user'); //session保存方式, 也可以在Php.ini中设置
         session_set_save_handler(
-            array(&$this, '_open'), //在运行session_start()时执行
-            array(&$this, '_close'), //在脚本执行完成或调用session_write_close() 或 session_destroy()时被执行,即在所有session操作完后被执行
-            array(&$this, '_read'), //在运行session_start()时执行,因为在session_start时,会去read当前session数据
-            array(&$this, '_write'), //此方法在脚本结束和使用session_write_close()强制提交SESSION数据时执行
-            array(&$this, '_destroy'), //在运行session_destroy()时执行
-            array(&$this, '_gc') //redis 设置了ttl 会自动销毁, 所以gc里不做任何操作
+            [&$this, '_open'], //在运行session_start()时执行
+            [&$this, '_close'], //在脚本执行完成或调用session_write_close() 或 session_destroy()时被执行,即在所有session操作完后被执行
+            [&$this, '_read'], //在运行session_start()时执行,因为在session_start时,会去read当前session数据
+            [&$this, '_write'], //此方法在脚本结束和使用session_write_close()强制提交SESSION数据时执行
+            [&$this, '_destroy'], //在运行session_destroy()时执行
+            [&$this, '_gc'] //redis 设置了ttl 会自动销毁, 所以gc里不做任何操作
         );
         $this->connect();
     }

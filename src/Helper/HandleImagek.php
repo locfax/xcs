@@ -30,15 +30,15 @@ class HandleImagek
       参数:
      */
 
-    public function crop($width, $height, $options = array())
+    public function crop($width, $height, $options = [])
     {
         if (is_null($this->_handle)) {
             return $this;
         }
-        $default_options = array(
+        $default_options = [
             'bestfit' => true,
             'fill' => false
-        );
+        ];
         $options = array_merge($default_options, $options);
         $this->_handle->thumbnailImage($width, $height, $options['bestfit'], $options['fill']);
     }
@@ -316,7 +316,7 @@ class HandleImagek
     public function polaroidEffect($src, $color, $angle = 0)
     {
         if (15 != abs($angle)) {
-            $srcs = array($src, $src, $src, $src);
+            $srcs = [$src, $src, $src, $src];
             $bg = new \ImagickDraw();
             $images = new \Imagick($srcs);
             $format = $images->getImageFormat();

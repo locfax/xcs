@@ -14,7 +14,7 @@ class Logs
      */
     public static function writeLog($filename, $msg)
     {
-        $res = array();
+        $res = [];
         $res['msg'] = $msg;
         $res['logtime'] = date("Y-m-d H:i:s", time());
 

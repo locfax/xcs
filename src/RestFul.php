@@ -29,10 +29,10 @@ class RestFul extends \Xcs\Controller
     public function __call($name, $arguments)
     {
         //动作不存在
-        $retarr = array(
+        $retarr = [
             'errcode' => 1,
             'errmsg' => 'Action ' . $name . '不存在!',
-        );
+        ];
         Util::rep_send($retarr);
     }
 
@@ -122,13 +122,13 @@ class RestFul extends \Xcs\Controller
     protected function request()
     {
         if ('get' == $this->_method) {
-            call_user_func(array($this, '_' . $this->_act . '_get'));
+            call_user_func([$this, '_' . $this->_act . '_get']);
         } elseif ('post' == $this->_method) {
-            call_user_func(array($this, '_' . $this->_act . '_post'));
+            call_user_func([$this, '_' . $this->_act . '_post']);
         } elseif ('put' == $this->_method) {
-            call_user_func(array($this, '_' . $this->_act . '_put'));
+            call_user_func([$this, '_' . $this->_act . '_put']);
         } elseif ('delete' == $this->_method) {
-            call_user_func(array($this, '_' . $this->_act . '_delete'));
+            call_user_func([$this, '_' . $this->_act . '_delete']);
         }
     }
 }

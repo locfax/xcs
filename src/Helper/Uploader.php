@@ -5,7 +5,7 @@ namespace Xcs\Helper;
 class Uploader
 {
 
-    private $_files = array();
+    private $_files = [];
     private $_count = 0;
 
     /**
@@ -25,7 +25,7 @@ class Uploader
                 continue;
             }
             if (is_array($struct['error'])) {
-                $arr = array();
+                $arr = [];
                 for ($i = 0; $i < count($struct['error']); $i++) {
                     if ($struct['error'][$i] != UPLOAD_ERR_NO_FILE) {
                         $arr[] = new HandleUpload($struct, $field, $i);
@@ -49,7 +49,7 @@ class Uploader
 
     public function reset()
     {
-        $this->_files = array();
+        $this->_files = [];
         $this->_count = 0;
     }
 

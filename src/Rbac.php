@@ -166,11 +166,11 @@ class Rbac
      */
     private static function _getACL($controllerName)
     {
-        static $globalAcl = array();
+        static $globalAcl = [];
         if (empty($globalAcl)) {
             $globalAcl = SysCache::loadcache('acl' . APPKEY);
             if (empty($globalAcl)) {
-                return array();
+                return [];
             }
         }
         if (isset($globalAcl[$controllerName])) {

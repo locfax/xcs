@@ -14,10 +14,10 @@ class Arrmap
      */
     public static function column(array $array, $column_key)
     {
-        $retarr = array();
+        $retarr = [];
         foreach ($array as $arr) {
             if (is_array($column_key)) {
-                $ret = array();
+                $ret = [];
                 foreach ($column_key as $key) {
                     $ret[] = isset($arr[$key]) ? $arr[$key] : null;
                 }
@@ -40,7 +40,7 @@ class Arrmap
      */
     public static function sort_field($arr, $sortField, $sortDirection = SORT_ASC)
     {
-        self::sort_multi($arr, array($sortField => $sortDirection));
+        self::sort_multi($arr, [$sortField => $sortDirection]);
         return $arr;
     }
 
@@ -52,7 +52,7 @@ class Arrmap
      */
     private static function sort_multi(& $arr, array $args)
     {
-        $sortArray = array();
+        $sortArray = [];
         $sortRule = '';
         foreach ($args as $sortField => $sortDir) {
             foreach ($arr as $offset => $row) {
@@ -162,7 +162,7 @@ class Arrmap
      */
     public static function to_map($arr, $keyField = null, $valueField = null)
     {
-        $map = array();
+        $map = [];
         if ($valueField) {
             foreach ($arr as $row) {
                 if ($keyField) {
@@ -193,7 +193,7 @@ class Arrmap
      */
     public static function group_by($arr, $groupField)
     {
-        $ret = array();
+        $ret = [];
         foreach ($arr as $row) {
             $ret[$row[$groupField]][] = $row;
         }
@@ -218,12 +218,12 @@ class Arrmap
     public static function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false)
     {
         $refs = $arr;
-        $pkvRefs = array();
+        $pkvRefs = [];
         foreach ($arr as $offset => $row) {
             $pkvRefs[$row[$fid]] = &$arr[$offset];
         }
 
-        $tree = array();
+        $tree = [];
         foreach ($arr as $offset => $row) {
             $parentId = $row[$fparent];
             if ($parentId) {
@@ -245,7 +245,7 @@ class Arrmap
             }
         }
         if ($returnReferences) {
-            return array('tree' => $tree, 'refs' => $refs);
+            return ['tree' => $tree, 'refs' => $refs];
         }
         return $tree;
     }
@@ -260,7 +260,7 @@ class Arrmap
      */
     public static function tree_to($tree, $fchildrens = 'children')
     {
-        $arr = array();
+        $arr = [];
         if (isset($tree[$fchildrens]) && is_array($tree[$fchildrens])) {
             foreach ($tree[$fchildrens] as $child) {
                 $arr = array_merge($arr, self::tree_to($child, $fchildrens));

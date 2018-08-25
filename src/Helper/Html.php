@@ -62,11 +62,11 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function checkbox_group($name, $arr, $selected = array(), $separator = '', $extra = null)
+    public static function checkbox_group($name, $arr, $selected = [], $separator = '', $extra = null)
     {
         $ix = 0;
         if (!is_array($selected)) {
-            $selected = array($selected);
+            $selected = [$selected];
         }
         $str = "";
         foreach ($arr as $value => $title) {

@@ -11,7 +11,7 @@ class Context
      */
     public static function dsn($dsnid)
     {
-        static $_dsns = array();
+        static $_dsns = [];
         $appkey = APPKEY;
         if (!isset($_dsns[$appkey])) {
             $dsns = App::mergeVars('dsn');
@@ -20,7 +20,7 @@ class Context
             }
             $_dsns[$appkey] = $dsns;
             if (!isset($_dsns[$appkey][$dsnid])) {
-                $_dsns[$appkey][$dsnid] = array();
+                $_dsns[$appkey][$dsnid] = [];
             }
             $dsns = null;
         }
@@ -35,15 +35,15 @@ class Context
      */
     public static function config($name, $type = 'inc')
     {
-        static $_configs = array();
+        static $_configs = [];
         $key = APPKEY . '.' . $name . '.' . $type;
         if (isset($_configs[$key])) {
             return $_configs[$key];
         }
         $file = PSROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            $_configs[$key] = array();
-            return array();
+            $_configs[$key] = [];
+            return [];
         }
         $_configs[$key] = include $file;
         return $_configs[$key];

@@ -33,7 +33,7 @@ class ExException extends \Exception
         $skipFunc[] = 'ErrorFunc::debugBacktrace';
         $debugBacktrace = debug_backtrace();
         ksort($debugBacktrace);
-        $phpMsg = array();
+        $phpMsg = [];
         foreach ($debugBacktrace as $error) {
             if (!isset($error['file'])) {
                 // 利用反射API来获取方法/函数所在的文件和行数
@@ -58,7 +58,7 @@ class ExException extends \Exception
                 continue;
             }
             $error['line'] = sprintf('%04d', $error['line']);
-            $phpMsg[] = array('file' => $error['file'], 'line' => $error['line'], 'function' => $func);
+            $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $func];
         }
         return $phpMsg;
     }
@@ -76,8 +76,8 @@ class ExException extends \Exception
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
         krsort($trace);
-        $trace[] = array('file' => $exception->getFile(), 'line' => $exception->getLine(), 'function' => 'break');
-        $phpMsg = array();
+        $trace[] = ['file' => $exception->getFile(), 'line' => $exception->getLine(), 'function' => 'break'];
+        $phpMsg = [];
         foreach ($trace as $error) {
             if (!empty($error['function'])) {
                 $fun = '';
@@ -109,7 +109,7 @@ class ExException extends \Exception
             if (!isset($error['line'])) {
                 continue;
             }
-            $phpMsg[] = array('file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']);
+            $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
         }
         $this->showError($type, $errorMsg, $phpMsg);
     }
@@ -124,7 +124,7 @@ class ExException extends \Exception
         if (defined('DEBUG') && DEBUG) {
             return $message;
         } else {
-            return htmlspecialchars(substr(str_replace(array("t", "r", "n"), " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
+            return htmlspecialchars(substr(str_replace(["t", "r", "n"], " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
         }
     }
 
