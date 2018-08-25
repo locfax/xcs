@@ -27,6 +27,8 @@ class DB
             return self::$used_dbo[$dsnkey];
         } elseif ('mongo' == $_dsn['driver']) {
             $dbo = new Database\Mongo($_dsn);
+        } elseif ('mongodb' == $_dsn['driver']) {
+            $dbo = new Database\MongoDb($_dsn);
         } elseif ('pdo' == $_dsn['driver']) {
             $dbo = new Database\Pdo($_dsn);
         } elseif ('mysqli' == $_dsn['driver']) {

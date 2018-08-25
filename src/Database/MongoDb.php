@@ -2,12 +2,24 @@
 
 namespace Xcs\Database;
 
-class Mongo
-{
+use \MongoDB\BSON\ObjectID;
+use \MongoDB\Driver\BulkWrite;
+use \MongoDB\Driver\Exception\BulkWriteException;
+use \MongoDB\Driver\Exception\ConnectionException;
+use \MongoDB\Driver\Exception\RuntimeException;
+use \MongoDB\Driver\Manager;
+use \MongoDB\Driver\Query as MongoQuery;
+use \MongoDB\Driver\Command;
+use \MongoDB\Driver\ReadPreference;
+use \MongoDB\Driver\WriteConcern;
 
+class MongoDb
+{
     private $_config = null;
     private $_link = null;
-    private $_client = null;
+    private $_writeConcern = null;
+    private $_dbname = null;
+
 
     public function __destruct()
     {
@@ -23,13 +35,12 @@ class Mongo
             $this->_config = $config;
         }
         try {
-            $this->_link = new \MongoClient($config['dsn'], ["connect" => true]);
-            $this->_client = $this->_link->selectDB($config['dbname']);
-            if (isset($config['login']) && $config['login']) {
-                $this->_client->authenticate($config['login'], $config['secret']);
-            }
-        } catch (\MongoConnectionException $e) {
-            $this->_halt('client is not connected!');
+            $uri = 'mongodb://' . ($config['login'] ? "{$config['login']}" : '') . ($config['secret'] ? ":{$config['secret']}@" : '') . $config['host'] . ($config['port'] ? ":{$config['port']}" : '') . '/' . ($config['dbname'] ? "{$config['dbname']}" : '');
+            $this->_link = new Manager($uri);
+            $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 1000);
+            $this->_dbname = $config['dbname'];
+        } catch (ConnectionException $e) {
+            $this->_halt('client is not connected! ' . $e->getMessage());
         }
     }
 
@@ -46,10 +57,7 @@ class Mongo
 
     public function close()
     {
-        if ($this->_link) {
-            $this->_link->close();
-            $this->_client = null;
-        }
+
     }
 
     /**
@@ -59,7 +67,7 @@ class Mongo
      */
     public function __call($func, $args)
     {
-        return $this->_client && call_user_func_array([$this->_client, $func], $args);
+
     }
 
     /**
@@ -74,19 +82,19 @@ class Mongo
         try {
             if (isset($document['_id'])) {
                 if (!is_object($document['_id'])) {
-                    $document['_id'] = new \MongoId($document['_id']);
+                    $document['_id'] = new ObjectID($document['_id']);
                 }
             } else {
-                $document['_id'] = new \MongoId();
+                $document['_id'] = new ObjectID();
             }
-            $collection = $this->_client->selectCollection($table);
-            $ret = $collection->insert($document, ['w' => 1]);
-            if ($retid && $ret) {
-                $insert_id = (string)$document['_id'];
-                return $insert_id;
+            $bulk = new BulkWrite();
+            $_id = $bulk->insert($document);
+            $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
+            if ($retid) {
+                return (string)$_id;
             }
-            return $ret['ok'];
-        } catch (\Exception $ex) {
+            return $ret->getInsertedCount();
+        } catch (BulkWriteException $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
                 return $this->create($table, $document, $retid, 'RETRY');
@@ -103,29 +111,14 @@ class Mongo
      */
     public function replace($table, $document = [], $type = '')
     {
-        try {
-            if (isset($document['_id'])) {
-                if (!is_object($document['_id'])) {
-                    $document['_id'] = new \MongoId($document['_id']);
-                }
-            }
-            $collection = $this->_client->selectCollection($table);
-            $ret = $collection->save($document);
-            return $ret['ok'];
-        } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->replace($table, $document, 'RETRY');
-            }
-            return $this->_halt($ex->getMessage(), $ex->getCode());
-        }
+        throw new \Xcs\Exception\DbException('未实现', 404);
     }
 
     /**
      * @param $table
      * @param array $document
      * @param array $condition
-     * @param string $options
+     * @param mixed $options
      * @param string $type
      * @return bool
      */
@@ -134,33 +127,33 @@ class Mongo
         try {
             if (isset($condition['_id'])) {
                 if (!is_object($condition['_id'])) {
-                    $condition['_id'] = new \MongoId($condition['_id']);
+                    $condition['_id'] = new ObjectID($condition['_id']);
                 }
             }
-            $collection = $this->_client->selectCollection($table);
+            $bulk = new BulkWrite();
             if (is_bool($options)) {
                 $options = 'set';
             }
-            $ret = null;
             if ('muti' == $options) {
-                $ret = $collection->update($condition, $document, ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, $document, ['multi' => false, 'upsert' => false]);
             } elseif ('set' == $options) { //更新 字段
-                $ret = $collection->update($condition, ['$set' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$set' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('inc' == $options) { //递增 字段
-                $ret = $collection->update($condition, ['$inc' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$inc' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('unset' == $options) { //删除 字段
-                $ret = $collection->update($condition, ['$unset' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$unset' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('push' == $options) { //推入内镶文档
-                $ret = $collection->update($condition, ['$push' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$push' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('pop' == $options) { //删除内镶文档最后一个或者第一个
-                $ret = $collection->update($condition, ['$pop' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$pop' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('pull' == $options) { //删除内镶文档某个值得项
-                $ret = $collection->update($condition, ['$pull' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$pull' => $document], ['multi' => false, 'upsert' => false]);
             } elseif ('addToSet' == $options) { //追加到内镶文档
-                $ret = $collection->update($condition, ['$addToSet' => $document], ['multi' => false, 'upsert' => false]);
+                $bulk->update($condition, ['$addToSet' => $document], ['multi' => false, 'upsert' => false]);
             }
-            return $ret;
-        } catch (\Exception $ex) {
+            $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
+            return $ret->getModifiedCount();
+        } catch (BulkWriteException $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
                 return $this->update($table, $document, $condition, $options, 'RETRY');
@@ -176,22 +169,21 @@ class Mongo
      * @param string $type
      * @return bool
      */
-    public function remove($table, $condition = [], $muti = false, $type = '')
+    public function remove($table, $condition = array(), $muti = false, $type = '')
     {
         try {
             if (isset($condition['_id'])) {
-                if (!is_object($condition['_id'])) {
-                    $condition['_id'] = new \MongoId($condition['_id']);
-                }
+                $condition['_id'] = new ObjectID($condition['_id']);
             }
-            $collection = $this->_client->selectCollection($table);
+            $bulk = new BulkWrite();
             if ($muti) {
-                $ret = $collection->remove($condition);
+                $bulk->delete($condition, ['limit' => 0]);
             } else {
-                $ret = $collection->remove($condition, ['justOne' => true]);
+                $bulk->delete($condition, ['limit' => 1]);
             }
-            return $ret;
-        } catch (\Exception $ex) {
+            $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
+            return $ret->getDeletedCount();
+        } catch (BulkWriteException $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
                 return $this->remove($table, $condition, $muti, 'RETRY');
@@ -211,17 +203,21 @@ class Mongo
     {
         try {
             if (isset($condition['_id'])) {
-                if (!is_object($condition['_id'])) {
-                    $condition['_id'] = new \MongoId($condition['_id']);
-                }
+                $condition['_id'] = new ObjectID($condition['_id']);
             }
-            $collection = $this->_client->selectCollection($table);
-            $cursor = $collection->findOne($condition, $fields);
-            if (isset($cursor['_id'])) {
-                $cursor['_id'] = $cursor['nid'] = $cursor['_id']->{'$id'};
+            $options = [];
+            $query = new MongoQuery($condition, $options);
+            $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
+            $cursor = $cursor->toArray();
+            if (empty($cursor)) {
+                return false;
             }
-            return $cursor;
-        } catch (\Exception $ex) {
+            $ret = (array)$cursor[0];
+            if (isset($ret['_id'])) {
+                $ret['_id'] = $ret['nid'] = (string)$ret['_id'];
+            }
+            return $ret;
+        } catch (RuntimeException $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
                 return $this->findOne($table, $fields, $condition, 'RETRY');
@@ -233,26 +229,29 @@ class Mongo
     /**
      * @param $table
      * @param array $fields
-     * @param array $condition
+     * @param array $query
      * @param string $type
-     * @return array|bool|\Generator
+     * @return array|bool
      */
     public function findAll($table, $fields = [], $condition = [], $type = '')
     {
         try {
-            $collection = $this->_client->selectCollection($table);
-            if (isset($condition['query'])) {
-                $cursor = $collection->find($condition['query'], $fields);
-                if (isset($condition['sort'])) {
-                    $cursor = $cursor->sort($condition['sort']);
-                }
+            if (isset($condition['sort'])) {
+                $options = [
+                    'sort' => $condition['sort']
+                ];
+                $query = new MongoQuery($condition['query'], $options);
             } else {
-                $cursor = $collection->find($condition, $fields);
+                $options = [];
+                $query = new MongoQuery($condition, $options);
             }
+            $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
+            $cursor = $cursor->toArray();
+
             $rowsets = [];
-            while ($cursor->hasNext()) {
-                $row = $cursor->getNext();
-                $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
+            foreach ($cursor as $row) {
+                $row = (array)$row;
+                $row['_id'] = $row['nid'] = (string)$row['_id'];
                 $rowsets[] = $row;
             }
             return $rowsets;
@@ -277,28 +276,32 @@ class Mongo
     private function _page($table, $fields, $condition, $offset = 0, $length = 18, $type = '')
     {
         try {
-            $collection = $this->_client->selectCollection($table);
-            if ('fields' == $condition['type']) {
-                $cursor = $collection->find($condition['query'], $fields);
-                if (isset($condition['sort'])) {
-                    $cursor = $cursor->sort($condition['sort']);
-                }
-                $cursor = $cursor->limit($length)->skip($offset);
-                $rowsets = [];
-                while ($cursor->hasNext()) {
-                    $row = $cursor->getNext();
-                    $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
-                    $rowsets[] = $row;
-                }
-                return $rowsets;
+            if (isset($condition['sort'])) {
+                $options = [
+                    'sort' => $condition['sort'],
+                    'limit' => (int)$length,
+                    'skip' => (int)$offset
+                ];
+                $query = new MongoQuery($condition['query'], $options);
             } else {
-                //内镶文档查询
-                if (!$fields) {
-                    throw new \Xcs\Exception\DbException('fields is empty', 0);
-                }
-                $cursor = $collection->findOne($condition['query'], [$fields => ['$slice' => [$offset, $length]]]);
-                return $cursor[$fields];
+                $options = [
+                    'limit' => (int)$length,
+                    'skip' => (int)$offset
+                ];
+                $query = new MongoQuery($condition['query'], $options);
             }
+            $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
+            $cursor = $cursor->toArray();
+
+            $rowsets = [];
+            foreach ($cursor as $row) {
+                $row = (array)$row;
+                if (isset($row['_id'])) {
+                    $row['_id'] = $row['nid'] = (string)$row['_id'];
+                }
+                $rowsets[] = $row;
+            }
+            return $rowsets;
         } catch (\Exception $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
@@ -320,7 +323,7 @@ class Mongo
     {
         if (is_array($pageparm)) {
             //固定长度分页模式
-            $ret = ['rowsets' => [], 'pagebar' => ''];
+            $ret = array('rowsets' => array(), 'pagebar' => '');
             if ($pageparm['totals'] <= 0) {
                 return $ret;
             }
@@ -344,14 +347,14 @@ class Mongo
     public function count($table, $condition = [], $type = '')
     {
         try {
-            $collection = $this->_client->selectCollection($table);
             if (isset($condition['_id'])) {
-                if (!is_object($condition['_id'])) {
-                    $condition['_id'] = new \MongoId($condition['_id']);
-                }
+                $condition['_id'] = new ObjectID($condition['_id']);
             }
-            return $collection->count($condition);
-        } catch (\Exception $ex) {
+            $cmd = ['count' => $table, 'query' => $condition];
+            $cursor = $this->_link->executeCommand($this->_dbname, new Command($cmd), new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
+            $cursor = $cursor->toArray();
+            return $cursor[0]->n;
+        } catch (RuntimeException $ex) {
             if ('RETRY' !== $type) {
                 $this->reconnect();
                 return $this->count($table, $condition, 'RETRY');
@@ -370,7 +373,7 @@ class Mongo
     {
         if ($this->_config['rundev']) {
             $this->close();
-            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
+            $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             try {
                 throw new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');

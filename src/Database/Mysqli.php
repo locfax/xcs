@@ -6,7 +6,7 @@ class Mysqli
 {
 
     private $_config = null;
-    public $_link = null;
+    private $_link = null;
 
     public function __destruct()
     {
@@ -54,7 +54,7 @@ class Mysqli
      */
     public function __call($func, $args)
     {
-        return $this->_link && call_user_func_array(array($this->_link, $func), $args);
+        return $this->_link && call_user_func_array([$this->_link, $func], $args);
     }
 
     /**
@@ -123,7 +123,7 @@ class Mysqli
         if (empty($data)) {
             return false;
         }
-        $args = array();
+        $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
@@ -161,7 +161,7 @@ class Mysqli
         if (empty($data)) {
             return false;
         }
-        $args = array();
+        $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
@@ -403,7 +403,7 @@ class Mysqli
     {
         if (is_array($pageparm)) {
             //固定长度分页模式
-            $ret = array('rowsets' => array(), 'pagebar' => '');
+            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageparm['totals'] <= 0) {
                 return $ret;
             }
@@ -475,7 +475,7 @@ class Mysqli
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
-            $data = array();
+            $data = [];
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
@@ -617,7 +617,7 @@ class Mysqli
     {
         if (is_array($pageparm)) {
             //固定长度分页模式
-            $ret = array('rowsets' => array(), 'pagebar' => '');
+            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageparm['totals'] <= 0) {
                 return $ret;
             }
@@ -691,7 +691,7 @@ class Mysqli
             if (!$sth) {
                 throw new \Exception($this->_link->error, $this->_link->errno);
             }
-            $data = array();
+            $data = [];
             while ($col = $sth->fetch_row()) {
                 $data[] = $col[0];
             }
@@ -739,7 +739,7 @@ class Mysqli
     {
         if ($this->_config['rundev']) {
             $this->close();
-            $encode = mb_detect_encoding($message, array('ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5'));
+            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'MysqliDbException');
@@ -773,7 +773,7 @@ class Mysqli
         if (!is_array($arr)) {
             return $arr;
         }
-        $rows = array();
+        $rows = [];
         foreach ($arr as $row) {
             $rows[$row[$col]] = $row;
         }
