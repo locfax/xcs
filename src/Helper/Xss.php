@@ -222,8 +222,8 @@ class Xss
             return false;
         }
 
-        if (defined(MCRYPT_DEV_URANDOM) && false !== ($output = mcrypt_create_iv($length, MCRYPT_DEV_URANDOM))) {
-            return $output;
+        if (function_exists('openssl_random_pseudo_bytes')) {
+            return openssl_random_pseudo_bytes($length);
         }
 
         if (is_readable('/dev/urandom') && false !== ($fp = fopen('/dev/urandom', 'rb'))) {
@@ -232,10 +232,6 @@ class Xss
             if (false !== $output) {
                 return $output;
             }
-        }
-
-        if (function_exists('openssl_random_pseudo_bytes')) {
-            return openssl_random_pseudo_bytes($length);
         }
 
         return false;
