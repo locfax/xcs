@@ -34,6 +34,7 @@ class Mongo
             if ($repeat == false) {
                 $this->__construct($config, true);
             } else {
+                $this->close();
                 $this->_halt('client is not connected!');
             }
         }
@@ -48,8 +49,8 @@ class Mongo
     {
         if ($this->_link) {
             $this->_link->close();
-            $this->_link = $this->_client = null;
         }
+        $this->_link = $this->_client = null;
     }
 
     /**
@@ -229,6 +230,7 @@ class Mongo
                 $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
                 $rowsets[] = $row;
             }
+            $cursor = null;
             return $rowsets;
         } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
@@ -259,6 +261,7 @@ class Mongo
                     $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
                     $rowsets[] = $row;
                 }
+                $cursor = null;
                 return $rowsets;
             } else {
                 //内镶文档查询

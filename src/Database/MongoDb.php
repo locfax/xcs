@@ -202,6 +202,7 @@ class MongoDb
             if (isset($ret['_id'])) {
                 $ret['_id'] = $ret['nid'] = (string)$ret['_id'];
             }
+            $cursor = null;
             return $ret;
         } catch (RuntimeException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
@@ -237,6 +238,7 @@ class MongoDb
                 $row['_id'] = $row['nid'] = (string)$row['_id'];
                 $rowsets[] = $row;
             }
+            $cursor = null;
             return $rowsets;
         } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
@@ -281,6 +283,7 @@ class MongoDb
                 }
                 $rowsets[] = $row;
             }
+            $cursor = null;
             return $rowsets;
         } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
