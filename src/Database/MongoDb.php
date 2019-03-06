@@ -27,9 +27,11 @@ class MongoDb
     }
 
     /**
+     * MongoDb constructor.
      * @param $config
+     * @param bool $repeat
      */
-    public function __construct($config)
+    public function __construct($config, $repeat = false)
     {
         if (is_null($this->_config)) {
             $this->_config = $config;
@@ -40,15 +42,14 @@ class MongoDb
             $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 1000);
             $this->_dbname = $config['dbname'];
         } catch (ConnectionException $e) {
-            $this->_halt('client is not connected! ' . $e->getMessage());
+            if ($repeat == false) {
+                $this->__construct($config, true);
+            } else {
+                $this->close();
+                $this->_halt('client is not connected! ' . $e->getMessage());
+            }
         }
     }
-
-    public function reconnect()
-    {
-        $this->__construct($this->_config);
-    }
-
 
     public function info()
     {
@@ -57,7 +58,7 @@ class MongoDb
 
     public function close()
     {
-
+        $this->_link = $this->_writeConcern = null;
     }
 
     /**
@@ -74,10 +75,9 @@ class MongoDb
      * @param $table
      * @param array $document
      * @param bool $retid
-     * @param string $type
      * @return bool|string
      */
-    public function create($table, $document = [], $retid = false, $type = '')
+    public function create($table, $document = [], $retid = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -95,21 +95,17 @@ class MongoDb
             }
             return $ret->getInsertedCount();
         } catch (BulkWriteException $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->create($table, $document, $retid, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
 
+
     /**
      * @param $table
      * @param array $document
-     * @param string $type
-     * @return bool
+     * @throws \Xcs\Exception\DbException
      */
-    public function replace($table, $document = [], $type = '')
+    public function replace($table, $document = [])
     {
         throw new \Xcs\Exception\DbException('未实现', 404);
     }
@@ -119,10 +115,9 @@ class MongoDb
      * @param array $document
      * @param array $condition
      * @param mixed $options
-     * @param string $type
      * @return bool
      */
-    public function update($table, $document = [], $condition = [], $options = 'set', $type = '')
+    public function update($table, $document = [], $condition = [], $options = 'set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -154,10 +149,6 @@ class MongoDb
             $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
             return $ret->getModifiedCount();
         } catch (BulkWriteException $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->update($table, $document, $condition, $options, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -166,10 +157,9 @@ class MongoDb
      * @param $table
      * @param array $condition
      * @param bool $muti
-     * @param string $type
      * @return bool
      */
-    public function remove($table, $condition = [], $muti = false, $type = '')
+    public function remove($table, $condition = [], $muti = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -184,10 +174,6 @@ class MongoDb
             $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
             return $ret->getDeletedCount();
         } catch (BulkWriteException $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->remove($table, $condition, $muti, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -196,10 +182,10 @@ class MongoDb
      * @param $table
      * @param array $fields
      * @param array $condition
-     * @param string $type
-     * @return mixed
+     * @return array|bool
+     * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function findOne($table, $fields = [], $condition = [], $type = '')
+    public function findOne($table, $fields = [], $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -218,22 +204,19 @@ class MongoDb
             }
             return $ret;
         } catch (RuntimeException $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->findOne($table, $fields, $condition, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
 
+
     /**
      * @param $table
      * @param array $fields
-     * @param array $query
-     * @param string $type
+     * @param array $condition
      * @return array|bool
+     * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function findAll($table, $fields = [], $condition = [], $type = '')
+    public function findAll($table, $fields = [], $condition = [])
     {
         try {
             if (isset($condition['sort'])) {
@@ -256,13 +239,10 @@ class MongoDb
             }
             return $rowsets;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->findAll($table, $fields, $query, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
+
 
     /**
      * @param $table
@@ -270,10 +250,10 @@ class MongoDb
      * @param $condition
      * @param int $offset
      * @param int $length
-     * @param string $type
      * @return array|bool
+     * @throws \MongoDB\Driver\Exception\Exception
      */
-    private function _page($table, $fields, $condition, $offset = 0, $length = 18, $type = '')
+    private function _page($table, $fields, $condition, $offset = 0, $length = 18)
     {
         try {
             if (isset($condition['sort'])) {
@@ -303,10 +283,6 @@ class MongoDb
             }
             return $rowsets;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->_page($table, $fields, $condition, $offset, $length, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -318,6 +294,7 @@ class MongoDb
      * @param int $pageparm
      * @param int $length
      * @return array|bool
+     * @throws \MongoDB\Driver\Exception\Exception
      */
     function page($table, $field, $condition, $pageparm = 0, $length = 18)
     {
@@ -338,13 +315,14 @@ class MongoDb
         }
     }
 
+
     /**
      * @param $table
      * @param array $condition
-     * @param string $type
      * @return bool
+     * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function count($table, $condition = [], $type = '')
+    public function count($table, $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -355,10 +333,6 @@ class MongoDb
             $cursor = $cursor->toArray();
             return $cursor[0]->n;
         } catch (RuntimeException $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->count($table, $condition, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }

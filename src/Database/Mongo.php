@@ -15,9 +15,11 @@ class Mongo
     }
 
     /**
+     * Mongo constructor.
      * @param $config
+     * @param bool $repeat
      */
-    public function __construct($config)
+    public function __construct($config, $repeat = false)
     {
         if (is_null($this->_config)) {
             $this->_config = $config;
@@ -29,15 +31,13 @@ class Mongo
                 $this->_client->authenticate($config['login'], $config['secret']);
             }
         } catch (\MongoConnectionException $e) {
-            $this->_halt('client is not connected!');
+            if ($repeat == false) {
+                $this->__construct($config, true);
+            } else {
+                $this->_halt('client is not connected!');
+            }
         }
     }
-
-    public function reconnect()
-    {
-        $this->__construct($this->_config);
-    }
-
 
     public function info()
     {
@@ -48,7 +48,7 @@ class Mongo
     {
         if ($this->_link) {
             $this->_link->close();
-            $this->_client = null;
+            $this->_link = $this->_client = null;
         }
     }
 
@@ -66,10 +66,9 @@ class Mongo
      * @param $table
      * @param array $document
      * @param bool $retid
-     * @param string $type
      * @return bool|string
      */
-    public function create($table, $document = [], $retid = false, $type = '')
+    public function create($table, $document = [], $retid = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -87,10 +86,6 @@ class Mongo
             }
             return $ret['ok'];
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->create($table, $document, $retid, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -98,10 +93,9 @@ class Mongo
     /**
      * @param $table
      * @param array $document
-     * @param string $type
      * @return bool
      */
-    public function replace($table, $document = [], $type = '')
+    public function replace($table, $document = [])
     {
         try {
             if (isset($document['_id'])) {
@@ -113,10 +107,6 @@ class Mongo
             $ret = $collection->save($document);
             return $ret['ok'];
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->replace($table, $document, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -126,10 +116,9 @@ class Mongo
      * @param array $document
      * @param array $condition
      * @param string $options
-     * @param string $type
      * @return bool
      */
-    public function update($table, $document = [], $condition = [], $options = 'set', $type = '')
+    public function update($table, $document = [], $condition = [], $options = 'set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -161,10 +150,6 @@ class Mongo
             }
             return $ret;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->update($table, $document, $condition, $options, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -173,10 +158,9 @@ class Mongo
      * @param $table
      * @param array $condition
      * @param bool $muti
-     * @param string $type
      * @return bool
      */
-    public function remove($table, $condition = [], $muti = false, $type = '')
+    public function remove($table, $condition = [], $muti = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -192,10 +176,6 @@ class Mongo
             }
             return $ret;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->remove($table, $condition, $muti, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -204,10 +184,9 @@ class Mongo
      * @param $table
      * @param array $fields
      * @param array $condition
-     * @param string $type
      * @return mixed
      */
-    public function findOne($table, $fields = [], $condition = [], $type = '')
+    public function findOne($table, $fields = [], $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -222,10 +201,6 @@ class Mongo
             }
             return $cursor;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->findOne($table, $fields, $condition, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -234,10 +209,9 @@ class Mongo
      * @param $table
      * @param array $fields
      * @param array $condition
-     * @param string $type
      * @return array|bool|\Generator
      */
-    public function findAll($table, $fields = [], $condition = [], $type = '')
+    public function findAll($table, $fields = [], $condition = [])
     {
         try {
             $collection = $this->_client->selectCollection($table);
@@ -257,10 +231,6 @@ class Mongo
             }
             return $rowsets;
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->findAll($table, $fields, $query, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -271,10 +241,9 @@ class Mongo
      * @param $condition
      * @param int $offset
      * @param int $length
-     * @param string $type
      * @return array|bool
      */
-    private function _page($table, $fields, $condition, $offset = 0, $length = 18, $type = '')
+    private function _page($table, $fields, $condition, $offset = 0, $length = 18)
     {
         try {
             $collection = $this->_client->selectCollection($table);
@@ -300,10 +269,6 @@ class Mongo
                 return $cursor[$fields];
             }
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->_page($table, $fields, $condition, $offset, $length, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -338,10 +303,9 @@ class Mongo
     /**
      * @param $table
      * @param array $condition
-     * @param string $type
      * @return bool
      */
-    public function count($table, $condition = [], $type = '')
+    public function count($table, $condition = [])
     {
         try {
             $collection = $this->_client->selectCollection($table);
@@ -352,10 +316,6 @@ class Mongo
             }
             return $collection->count($condition);
         } catch (\Exception $ex) {
-            if ('RETRY' !== $type) {
-                $this->reconnect();
-                return $this->count($table, $condition, 'RETRY');
-            }
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }

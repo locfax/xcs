@@ -148,11 +148,8 @@ class App
                     $gourl = getini('site/no_role_url') ?: '/';
                     return call_user_func('no_role_redirect', $gourl);
                 } else {
-                    try {
-                        throw new Exception\ExException('未定义 no_role_redirect() 函数', 0);
-                    } catch (Exception\ExException $exception) {
-
-                    }
+                    $args = '未定义 no_role_redirect() 函数 : ' . $controllerName . ' - ' . $actionName;
+                    return self::errACL($args);
                 }
             }
         }

@@ -14,9 +14,11 @@ class Mysqli
     }
 
     /**
+     * Mysqli constructor.
      * @param $config
+     * @param bool $repeat
      */
-    public function __construct($config)
+    public function __construct($config, $repeat = false)
     {
         if (is_null($this->_config)) {
             $this->_config = $config;
@@ -25,13 +27,13 @@ class Mysqli
             $this->_link = new \mysqli($config['host'], $config['login'], $config['secret'], $config['dbname'], $config['port']);
             $this->_link->set_charset('UTF8');
         } catch (\Exception $exception) {
-            $this->_halt($exception->getMessage(), $exception->getCode(), 'connect_error');
+            if ($repeat == false) {
+                $this->__construct($config, true);
+            } else {
+                $this->close();
+                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect_error');
+            }
         }
-    }
-
-    public function reconnect()
-    {
-        $this->__construct($this->_config);
     }
 
     public function info()
@@ -43,8 +45,8 @@ class Mysqli
     {
         if ($this->_link) {
             $this->_link->close();
-            $this->_link = null;
         }
+        $this->_link = null;
     }
 
     /**
@@ -115,15 +117,10 @@ class Mysqli
      * @param $tableName
      * @param array $data
      * @param bool $retid
-     * @param string $type
      * @return mixed
      */
-    public function create($tableName, array $data, $retid = false, $type = '')
+    public function create($tableName, array $data, $retid = false)
     {
-        if (empty($data)) {
-            return false;
-        }
-        $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
@@ -141,10 +138,6 @@ class Mysqli
             }
             return $ret;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->create($tableName, $data, $retid, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -153,15 +146,10 @@ class Mysqli
      * @param $tableName
      * @param array $data
      * @param bool $retnum
-     * @param string $type
      * @return mixed
      */
-    public function replace($tableName, array $data, $retnum = false, $type = '')
+    public function replace($tableName, array $data, $retnum = false)
     {
-        if (empty($data)) {
-            return false;
-        }
-        $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
             $fields .= $comma . $this->qfield($field);
@@ -179,10 +167,6 @@ class Mysqli
             }
             return $ret;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->replace($tableName, $data, $retnum, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -192,14 +176,10 @@ class Mysqli
      * @param array $data
      * @param $condition
      * @param bool $retnum
-     * @param string $type
      * @return mixed
      */
-    public function update($tableName, $data, $condition, $retnum = false, $type = '')
+    public function update($tableName, $data, $condition, $retnum = false)
     {
-        if (empty($data)) {
-            return false;
-        }
         if (is_array($condition)) {
             if (!is_array($data)) {
                 $this->_halt('$data参数必须为数组', 0);
@@ -225,10 +205,6 @@ class Mysqli
             }
             return $ret;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->update($tableName, $data, $condition, $retnum, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -237,10 +213,9 @@ class Mysqli
      * @param $tableName
      * @param $condition
      * @param bool $muti
-     * @param string $type
      * @return mixed
      */
-    public function remove($tableName, $condition, $muti = true, $type = '')
+    public function remove($tableName, $condition, $muti = true)
     {
         if (empty($condition)) {
             return false;
@@ -260,23 +235,18 @@ class Mysqli
             $ret = $this->_link->affected_rows;
             return $ret;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->remove($tableName, $condition, $muti, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
     /**
      * @param $tableName
-     * @param string $field
+     * @param $field
      * @param $condition
-     * @param $retobj
-     * @param $type
-     * @return mixed
+     * @param bool $retobj
+     * @return array|bool|null|object|\stdClass
      */
-    public function findOne($tableName, $field, $condition, $retobj = false, $type = '')
+    public function findOne($tableName, $field, $condition, $retobj = false)
     {
         if (is_array($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
@@ -295,12 +265,9 @@ class Mysqli
                 $data = $sth->fetch_assoc();
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->findOne($tableName, $field, $condition, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -311,10 +278,9 @@ class Mysqli
      * @param string $condition
      * @param null $index
      * @param bool $retobj
-     * @param string $type
      * @return mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false, $type = '')
+    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
@@ -338,12 +304,9 @@ class Mysqli
                 $data = $this->array_index($data, $index);
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->findAll($tableName, $field, $condition, $index, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -355,10 +318,9 @@ class Mysqli
      * @param int $start
      * @param int $length
      * @param bool $retobj
-     * @param string $type
      * @return mixed
      */
-    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false, $type = '')
+    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false)
     {
         try {
             if (is_array($condition) && !empty($condition)) {
@@ -380,12 +342,9 @@ class Mysqli
                 $data = (array)$this->array_to_object($data);
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->_page($tableName, $field, $condition, $start, $length, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -422,10 +381,9 @@ class Mysqli
      * @param string $tableName
      * @param string $field
      * @param mixed $condition
-     * @param string $type
      * @return mixed
      */
-    public function resultFirst($tableName, $field, $condition, $type = '')
+    public function resultFirst($tableName, $field, $condition)
     {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
@@ -440,12 +398,9 @@ class Mysqli
             }
             $data = $sth->fetch_assoc();
             $sth->close();
+            $sth = null;
             return isset($data['result']) ? $data['result'] : null;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->resultFirst($tableName, $field, $condition, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -455,10 +410,9 @@ class Mysqli
      * @param $tableName
      * @param $field
      * @param $condition
-     * @param $type
      * @return mixed
      */
-    public function getCol($tableName, $field, $condition = '', $type = '')
+    public function getCol($tableName, $field, $condition = '')
     {
         if (is_array($condition) && !empty($condition)) {
             $_condition = $this->field_value($condition, ' AND ');
@@ -480,23 +434,20 @@ class Mysqli
                 $data[] = $col[0];
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->getCol($tableName, $field, $condition, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
 
+
     /**
-     * @param string $sql
-     * @param $args
-     * @param string $type
-     * @return mixed
+     * @param $sql
+     * @param null $args
+     * @return bool|int
      */
-    public function exec($sql, $args = null, $type = '')
+    public function exec($sql, $args = null)
     {
         try {
             $sth = $this->_link->query($sql);
@@ -506,10 +457,6 @@ class Mysqli
             $ret = $this->_link->affected_rows;
             return $ret;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->exec($sql, $args, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -518,10 +465,9 @@ class Mysqli
      * @param $sql
      * @param $args
      * @param $retobj
-     * @param $type
      * @return mixed
      */
-    public function row($sql, $args = null, $retobj = false, $type = '')
+    public function row($sql, $args = null, $retobj = false)
     {
         try {
             $sth = $this->_link->query($sql);
@@ -534,12 +480,9 @@ class Mysqli
                 $data = $sth->fetch_assoc();
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->row($sql, $args, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -549,10 +492,9 @@ class Mysqli
      * @param $args
      * @param $index
      * @param $retobj
-     * @param $type
      * @return mixed
      */
-    public function rowset($sql, $args = null, $index = null, $retobj = false, $type = '')
+    public function rowset($sql, $args = null, $index = null, $retobj = false)
     {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
@@ -566,12 +508,9 @@ class Mysqli
                 $data = $this->array_index($data, $index);
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->rowset($sql, $args, $index, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -580,10 +519,9 @@ class Mysqli
      * @param string $sql
      * @param array $args
      * @param bool $retobj
-     * @param string $type
      * @return mixed
      */
-    private function _pages($sql, $args = null, $retobj = false, $type = '')
+    private function _pages($sql, $args = null, $retobj = false)
     {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
@@ -595,12 +533,9 @@ class Mysqli
                 $data = (array)$this->array_to_object($data);
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->_pages($sql, $args, $retobj, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -656,10 +591,9 @@ class Mysqli
     /**
      * @param string $sql
      * @param null $args
-     * @param string $type
      * @return mixed
      */
-    public function firsts($sql, $args = null, $type = '')
+    public function firsts($sql, $args = null)
     {
         try {
             $sth = $this->_link->query($sql);
@@ -668,12 +602,9 @@ class Mysqli
             }
             $data = $sth->fetch_row();
             $sth->close();
+            $sth = null;
             return $data[0];
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->firsts($sql, $args, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -681,10 +612,9 @@ class Mysqli
     /**
      * @param string $sql
      * @param null $args
-     * @param string $type
      * @return mixed
      */
-    public function getCols($sql, $args = null, $type = '')
+    public function getCols($sql, $args = null)
     {
         try {
             $sth = $this->_link->query($sql, MYSQLI_STORE_RESULT);
@@ -696,12 +626,9 @@ class Mysqli
                 $data[] = $col[0];
             }
             $sth->close();
+            $sth = null;
             return $data;
         } catch (\Exception $e) {
-            if ('RETRY' != $type) {
-                $this->reconnect();
-                return $this->getcols($sql, $args, 'RETRY');
-            }
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
