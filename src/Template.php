@@ -137,15 +137,15 @@ class Template
         }
         if (!isset($langvar[$var])) {
             $lang = array();
-            include_once LIBPATH . 'lang/lang_template.php';
+            include_once $this->tpldir . 'lang/lang_template.php';
             $this->language['inner'] = $lang;
             if (!$isplugin) {
                 list($path) = explode('/', $this->file);
-                include_once LIBPATH . 'lang/' . $path . '/lang_template.php';
+                include_once $this->tpldir . 'lang/' . $path . '/lang_template.php';
                 $this->language['inner'] = array_merge($this->language['inner'], $lang);
             } else {
                 $templatelang = array();
-                include_once LIBPATH . 'lang/plugin/' . $vars[0] . '.lang.php';
+                include_once $this->tpldir . 'lang/plugin/' . $vars[0] . '.lang.php';
                 $this->language['plugin'][$vars[0]] = $templatelang[$vars[0]];
             }
         }
