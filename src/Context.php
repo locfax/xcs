@@ -6,26 +6,26 @@ class Context
 {
 
     /**
-     * @param $dsnid
+     * @param $dsnId
      * @return mixed
      */
-    public static function dsn($dsnid)
+    public static function dsn($dsnId)
     {
         static $_dsns = [];
-        $appkey = APPKEY;
-        if (!isset($_dsns[$appkey])) {
+        $appKey = APPKEY;
+        if (!isset($_dsns[$appKey])) {
             $dsns = App::mergeVars('dsn');
             foreach ($dsns as $key => $dsn) {
-                $dsns[$key]['dsnkey'] = md5($appkey . '_' . $key . '_' . $dsn['driver'] . '_' . $dsn['dsn']); //连接池key
+                $dsns[$key]['dsnkey'] = md5($appKey . '_' . $key . '_' . $dsn['driver'] . '_' . $dsn['dsn']); //连接池key
             }
-            $_dsns[$appkey] = $dsns;
-            if (!isset($_dsns[$appkey][$dsnid])) {
-                $_dsns[$appkey][$dsnid] = [];
+            $_dsns[$appKey] = $dsns;
+            if (!isset($_dsns[$appKey][$dsnId])) {
+                $_dsns[$appKey][$dsnId] = [];
             }
             $dsns = null;
         }
         //如果没配置$dsnid 会报错
-        return $_dsns[$appkey][$dsnid];
+        return $_dsns[$appKey][$dsnId];
     }
 
     /**

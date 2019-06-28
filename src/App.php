@@ -291,11 +291,11 @@ class App
     {
         $_GET[self::_dCTL] = array_shift($req);
         $_GET[self::_dACT] = array_shift($req);
-        $parmnum = count($req);
-        if (!$parmnum) {
+        $paramNum = count($req);
+        if (!$paramNum) {
             return;
         }
-        for ($i = 0; $i < $parmnum; $i++) {
+        for ($i = 0; $i < $paramNum; $i++) {
             $_GET[$req[$i]] = $req[$i + 1];
             $i++;
         }

@@ -16,15 +16,15 @@ class DB
     }
 
     /**
-     * @param string $dsnid
+     * @param string $dsnId
      * @return mixed
      */
-    public static function dbo($dsnid = 'portal')
+    public static function dbo($dsnId = 'portal')
     {
-        $_dsn = Context::dsn($dsnid);
-        $dsnkey = $_dsn['dsnkey']; //连接池key
-        if (isset(self::$used_dbo[$dsnkey])) {
-            return self::$used_dbo[$dsnkey];
+        $_dsn = Context::dsn($dsnId);
+        $dsnKey = $_dsn['dsnkey']; //连接池key
+        if (isset(self::$used_dbo[$dsnKey])) {
+            return self::$used_dbo[$dsnKey];
         } elseif ('mongo' == $_dsn['driver']) {
             $dbo = new Database\Mongo($_dsn);
         } elseif ('mongodb' == $_dsn['driver']) {
@@ -34,38 +34,38 @@ class DB
         } elseif ('mysqli' == $_dsn['driver']) {
             $dbo = new Database\Mysqli($_dsn);
         } else {
-            $dbo = new Database\Mysqli($_dsn);
+            $dbo = new Database\Pdo($_dsn);
         }
-        self::$used_dbo[$dsnkey] = $dbo;
+        self::$used_dbo[$dsnKey] = $dbo;
         return $dbo;
     }
 
     /**
-     * @param string $dsnid
+     * @param string $dsnId
      * @return Database\Pdo
      */
-    public static function dbm($dsnid = 'portal')
+    public static function dbm($dsnId = 'portal')
     {
-        $_dsn = Context::dsn($dsnid);
-        $dsnkey = $_dsn['dsnkey']; //连接池key
-        if (isset(self::$used_dbo[$dsnkey])) {
-            return self::$used_dbo[$dsnkey];
+        $_dsn = Context::dsn($dsnId);
+        $dsnKey = $_dsn['dsnkey']; //连接池key
+        if (isset(self::$used_dbo[$dsnKey])) {
+            return self::$used_dbo[$dsnKey];
         } elseif ('pdo' == $_dsn['driver']) {
             $dbo = new Database\Pdo($_dsn);
         } elseif ('mysqli' == $_dsn['driver']) {
             $dbo = new Database\Mysqli($_dsn);
         } else {
-            $dbo = new Database\Mysqli($_dsn);
+            $dbo = new Database\Pdo($_dsn);
         }
-        self::$used_dbo[$dsnkey] = $dbo;
+        self::$used_dbo[$dsnKey] = $dbo;
         return $dbo;
     }
 
     public static function close()
     {
-        $dbos = self::$used_dbo;
-        if (!empty($dbos)) {
-            foreach ($dbos as $dbo) {
+        $_dbo = self::$used_dbo;
+        if (!empty($_dbo)) {
+            foreach ($_dbo as $dbo) {
                 $dbo->close();
             }
         }
@@ -146,13 +146,13 @@ class DB
      * @param string $table
      * @param mixed $field
      * @param mixed $condition
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public static function findOne($table, $field, $condition, $retobj = false)
+    public static function findOne($table, $field, $condition, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findOne($table, $field, $condition, $retobj);
+        return $db->find_one($table, $field, $condition, $retObj);
     }
 
     /**
@@ -162,13 +162,13 @@ class DB
      * @param string $field
      * @param string $condition
      * @param string $index
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public static function findAll($table, $field = '*', $condition = '', $index = null, $retobj = false)
+    public static function findAll($table, $field = '*', $condition = '', $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findAll($table, $field, $condition, $index, $retobj);
+        return $db->find_all($table, $field, $condition, $index, $retObj);
     }
 
     /**
@@ -177,14 +177,42 @@ class DB
      * @param $field
      * @param mixed $condition
      * @param int $length
-     * @param int $pageparm
-     * @param bool $retobj
+     * @param int $pageParam
+     * @param bool $retObj
      * @return array
      */
-    public static function page($table, $field, $condition = '', $pageparm = 0, $length = 18, $retobj = false)
+    public static function page($table, $field, $condition = '', $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->page($table, $field, $condition, $pageparm, $length, $retobj);
+        return $db->page($table, $field, $condition, $pageParam, $length, $retObj);
+    }
+
+    /**
+     * sql专用
+     * 返回一条数据的第一栏
+     * $filed mix  需要返回的字段  或者sql语法
+     *
+     * @param string $table
+     * @param string $field
+     * @param mixed $condition
+     * @return mixed
+     */
+    public static function first($table, $field, $condition)
+    {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->result_first($table, $field, $condition);
+    }
+
+    /**
+     * @param $table
+     * @param $field
+     * @param $condition
+     * @return mixed
+     */
+    public static function col($table, $field, $condition = '')
+    {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->col($table, $field, $condition);
     }
 
     /**
@@ -204,36 +232,6 @@ class DB
     }
 
     /**
-     * sql专用
-     * 返回一条数据的第一栏
-     * $filed mix  需要返回的字段  或者sql语法
-     *
-     * @param string $table
-     * @param string $field
-     * @param mixed $condition
-     * @return mixed
-     */
-    public static function first($table, $field, $condition)
-    {
-        $db = self::Using(self::$using_dbo_id);
-        return $db->resultFirst($table, $field, $condition);
-    }
-
-    /**
-     * @param $table
-     * @param $field
-     * @param $condition
-     * @return mixed
-     */
-    public static function getCol($table, $field, $condition = '')
-    {
-        $db = self::Using(self::$using_dbo_id);
-        return $db->getCol($table, $field, $condition);
-    }
-
-    //--------------多表联合查询---start---------------//
-
-    /**
      * @param $sql
      * @param $args
      * @return mixed
@@ -244,43 +242,46 @@ class DB
         return $db->exec($sql, $args);
     }
 
+
+    //--------------多表查询---start---------------//
+
     /**
-     * @param $query
+     * @param $sql
      * @param $args
-     * @param $retobj
+     * @param $retObj
      * @return mixed
      */
-    public static function row($query, $args = null, $retobj = false)
+    public static function rows($sql, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->row($query, $args, $retobj);
+        return $db->row_sql($sql, $args, $retObj);
     }
 
     /**
-     * @param $query
+     * @param $sql
      * @param $args
      * @param null $index
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public static function rowset($query, $args = null, $index = null, $retobj = false)
+    public static function rowSets($sql, $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->rowset($query, $args, $index, $retobj);
+        return $db->rowset_sql($sql, $args, $index, $retObj);
     }
 
     /**
      * @param string $sql
      * @param array $args
-     * @param int $pageparm
+     * @param int $pageParam
      * @param int $length
-     * @param bool $retobj
+     * @param bool $retObj
      * @return array
      */
-    public static function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false)
+    public static function pages($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->pages($sql, $args, $pageparm, $length, $retobj);
+        return $db->page_sql($sql, $args, $pageParam, $length, $retObj);
     }
 
     /**
@@ -291,7 +292,7 @@ class DB
     public static function counts($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->counts($sql, $args);
+        return $db->count_sql($sql, $args);
     }
 
     /**
@@ -302,7 +303,7 @@ class DB
     public static function firsts($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->firsts($sql, $args);
+        return $db->first_sql($sql, $args);
     }
 
     /**
@@ -310,19 +311,19 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function getCols($sql, $args = null)
+    public static function cols($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->getCols($sql, $args);
+        return $db->col_sql($sql, $args);
     }
 
-    //--------------多表联合查询---end---------------//
+    //--------------多表查询---end---------------//
 
     /**
      * 开始事务
      * @return mixed
      */
-    public static function start_trans()
+    public static function startTrans()
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->start_trans();
@@ -333,7 +334,7 @@ class DB
      * @param bool $commit_no_errors
      * @return mixed
      */
-    public static function end_trans($commit_no_errors = true)
+    public static function endTrans($commit_no_errors = true)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->end_trans($commit_no_errors);
@@ -364,25 +365,25 @@ class DB
     /**
      * @param int $page
      * @param int $ppp
-     * @param int $totalnum
+     * @param int $totalNum
      * @return int
      */
-    public static function page_start($page, $ppp, $totalnum)
+    public static function pageStart($page, $ppp, $totalNum)
     {
-        $totalpage = ceil($totalnum / $ppp);
-        $_page = max(1, min($totalpage, intval($page)));
+        $totalPage = ceil($totalNum / $ppp);
+        $_page = max(1, min($totalPage, intval($page)));
         return ($_page - 1) * $ppp;
     }
 
     /**
-     * @param $pageparm
+     * @param $pageParam
      * @param $length
      * @return array
      */
-    public static function pagebar($pageparm, $length)
+    public static function pageBar($pageParam, $length)
     {
-        if (!isset($pageparm['type']) || 'pagebar' == $pageparm['type']) {
-            $defpageparm = [
+        if (!isset($pageParam['type']) || 'pagebar' == $pageParam['type']) {
+            $defPageParam = [
                 'curpage' => 1,
                 'maxpages' => 0,
                 'showpage' => 10,
@@ -391,28 +392,28 @@ class DB
                 'showkbd' => false,
                 'simple' => false
             ];
-            $pageparm = array_merge($defpageparm, $pageparm);
-            $pageparm['length'] = $length;
-            $pagebar = Helper\Pager::pagebar($pageparm);
-        } elseif ('simplepage' == $pageparm['type']) {
-            $defpageparm = [
+            $pageParam = array_merge($defPageParam, $pageParam);
+            $pageParam['length'] = $length;
+            $pageBar = Helper\Pager::pageBar($pageParam);
+        } elseif ('simplepage' == $pageParam['type']) {
+            $defPageParam = [
                 'curpage' => 1,
                 'udi' => ''
             ];
-            $pageparm = array_merge($defpageparm, $pageparm);
-            $pageparm['length'] = $length;
-            $pagebar = Helper\Pager::simplepage($pageparm);
+            $pageParam = array_merge($defPageParam, $pageParam);
+            $pageParam['length'] = $length;
+            $pageBar = Helper\Pager::simplePage($pageParam);
         } else {
-            $pages = ceil($pageparm['totals'] / $length);
-            $nextpage = ($pages > $pageparm['curpage']) ? $pageparm['curpage'] + 1 : $pages;
-            $pagebar = [
-                'totals' => $pageparm['totals'],
+            $pages = ceil($pageParam['totals'] / $length);
+            $nextPage = ($pages > $pageParam['curpage']) ? $pageParam['curpage'] + 1 : $pages;
+            $pageBar = [
+                'totals' => $pageParam['totals'],
                 'pagecount' => $pages,
-                'prepage' => $pageparm['curpage'] - 1 > 0 ? $pageparm['curpage'] - 1 : 1,
-                'curpage' => $pageparm['curpage'],
-                'nextpage' => $nextpage
+                'prepage' => $pageParam['curpage'] - 1 > 0 ? $pageParam['curpage'] - 1 : 1,
+                'curpage' => $pageParam['curpage'],
+                'nextpage' => $nextPage
             ];
         }
-        return $pagebar;
+        return $pageBar;
     }
 }

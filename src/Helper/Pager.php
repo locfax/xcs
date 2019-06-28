@@ -6,45 +6,45 @@ class Pager
 {
 
     /**
-     * @param $pageinfo
+     * @param $pageInfo
      * @return string
      */
-    public static function pagebar($pageinfo)
+    public static function pageBar($pageInfo)
     {
-        $totals = $pageinfo['totals'];
-        $perpage = $pageinfo['length'];
-        $curpage = $pageinfo['curpage'];
-        $mpurl = $pageinfo['udi'];
-        if (isset($pageinfo['param'])) {
-            $mpurl .= '?' . $pageinfo['param'];
+        $totals = $pageInfo['totals'];
+        $perPage = $pageInfo['length'];
+        $curPage = $pageInfo['curpage'];
+        $mpUrl = $pageInfo['udi'];
+        if (isset($pageInfo['param'])) {
+            $mpUrl .= '?' . $pageInfo['param'];
         }
-        $maxpages = isset($pageinfo['maxpages']) ? $pageinfo['maxpages'] : false; //最大页数限制
-        $page = isset($pageinfo['showpage']) ? $pageinfo['showpage'] : false; //一次显示多少页码
-        $shownum = isset($pageinfo['shownum']) ? $pageinfo['shownum'] : false;
-        $showkbd = isset($pageinfo['showkbd']) ? $pageinfo['showkbd'] : false;
-        $simple = isset($pageinfo['simple']) ? $pageinfo['simple'] : false;
-        $autogoto = true;
-        $ajaxtarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'input_char') . "\" " : '';
-        $aname = '';
-        if (self::strpos($mpurl, '#')) {
-            $astrs = explode('#', $mpurl);
-            $mpurl = $astrs[0];
-            $aname = '#' . $astrs[1];
+        $maxPages = isset($pageInfo['maxpages']) ? $pageInfo['maxpages'] : false; //最大页数限制
+        $page = isset($pageInfo['showpage']) ? $pageInfo['showpage'] : false; //一次显示多少页码
+        $showNum = isset($pageInfo['shownum']) ? $pageInfo['shownum'] : false;
+        $showKbd = isset($pageInfo['showkbd']) ? $pageInfo['showkbd'] : false;
+        $simple = isset($pageInfo['simple']) ? $pageInfo['simple'] : false;
+        $autoGoto = true;
+        $ajaxTarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'input_char') . "\" " : '';
+        $hrefName = '';
+        if (self::strPos($mpUrl, '#')) {
+            $asTrs = explode('#', $mpUrl);
+            $mpUrl = $asTrs[0];
+            $hrefName = '#' . $asTrs[1];
         }
         $lang['prev'] = '上一页';
         $lang['next'] = '下一页';
-        $mpurl .= self::strpos($mpurl, '?') ? '&' : '?';
+        $mpUrl .= self::strPos($mpUrl, '?') ? '&' : '?';
         $offset = floor($page * 0.5);
-        $realpages = ceil($totals / $perpage);
-        $pages = $maxpages && $maxpages < $realpages ? $maxpages : $realpages;
+        $realPages = ceil($totals / $perPage);
+        $pages = $maxPages && $maxPages < $realPages ? $maxPages : $realPages;
         if ($page > $pages) {
             $from = 1;
             $to = $pages;
         } else {
-            $from = $curpage - $offset;
+            $from = $curPage - $offset;
             $to = $from + $page - 1;
             if ($from < 1) {
-                $to = $curpage + 1 - $from;
+                $to = $curPage + 1 - $from;
                 $from = 1;
                 if ($to - $from < $page) {
                     $to = $page;
@@ -54,47 +54,43 @@ class Pager
                 $to = $pages;
             }
         }
-        $multipage = ($curpage - $offset > 1 && $pages > $page ? '<a href="' . $mpurl . 'page=1' . $aname . '" class="first"' . $ajaxtarget . '>1 ...</a>' : '') .
-            ($curpage > 1 && !$simple ? '<a href="' . $mpurl . 'page=' . ($curpage - 1) . $aname . '" class="prev"' . $ajaxtarget . '>' . $lang['prev'] . '</a>' : '');
+        $multiPage = ($curPage - $offset > 1 && $pages > $page ? '<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>1 ...</a>' : '') .
+            ($curPage > 1 && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage - 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>' . $lang['prev'] . '</a>' : '');
         for ($i = $from; $i <= $to; $i++) {
-            $multipage .= $i == $curpage ? '<strong>' . $i . '</strong>' :
-                '<a href="' . $mpurl . 'page=' . $i . ($ajaxtarget && $i == $pages && $autogoto ? '#' : $aname) . '"' . $ajaxtarget . '>' . $i . '</a>';
+            $multiPage .= $i == $curPage ? '<strong>' . $i . '</strong>' :
+                '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pages && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . '>' . $i . '</a>';
         }
-        $multipage .= ($to < $pages ? '<a href="' . $mpurl . 'page=' . $pages . $aname . '" class="last"' . $ajaxtarget . '>... ' . $realpages . '</a>' : '') .
-            ($curpage < $pages && !$simple ? '<a href="' . $mpurl . 'page=' . ($curpage + 1) . $aname . '" class="nxt"' . $ajaxtarget . '>' . $lang['next'] . '</a>' : '') .
-            ($showkbd && !$simple && $pages > $page && !$ajaxtarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(event.keyCode==13) {window.location=\'' . $mpurl . 'page=\'+this.value; doane(event);}" /></kbd>' : '');
-        $multipage = '<div class="pg">' . ($shownum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multipage . '</div>';
-        //$maxpage = $realpages;
-        return $multipage;
+        $multiPage .= ($to < $pages ? '<a href="' . $mpUrl . 'page=' . $pages . $hrefName . '" class="last"' . $ajaxTarget . '>... ' . $realPages . '</a>' : '') .
+            ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '') .
+            ($showKbd && !$simple && $pages > $page && !$ajaxTarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(event.keyCode==13) {window.location=\'' . $mpUrl . 'page=\'+this.value; doane(event);}" /></kbd>' : '');
+        $multiPage = '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
+        return $multiPage;
     }
 
     /**
-     * @param $pageinfo
+     * @param $pageInfo
      * @return string
      */
-    public static function simplepage($pageinfo)
+    public static function simplePage($pageInfo)
     {
-        //<ul class='pager'>
-        //<li class="previous"><a href="{SITEPATH}list/分享发现/page1/">上一页</a></li><li class="pager-nums">2 / 4</li><li class='next'><a href='{SITEPATH}list/分享发现/lastest/page3/'>下一页</a></li>
-        //</ul>
-        $totals = $pageinfo['totals'];
-        $perpage = $pageinfo['length'];
-        $curpage = $pageinfo['curpage'];
-        $mpurl = $pageinfo['udi'];
+        $totals = $pageInfo['totals'];
+        $perPage = $pageInfo['length'];
+        $curPage = $pageInfo['curpage'];
+        $mpUrl = $pageInfo['udi'];
         $return = "<ul class='pager'>";
         $lang['next'] = '下一页';
         $lang['prev'] = '上一页';
-        $realpages = ceil($totals / $perpage);
-        if ($curpage > $realpages) {
-            $curpage = $realpages;
+        $realPages = ceil($totals / $perPage);
+        if ($curPage > $realPages) {
+            $curPage = $realPages;
         }
-        $prev = $curpage > 1 ? '<li class="previous"><a href="' . $mpurl . '?page=' . ($curpage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
-        $next = $curpage < $realpages ? "<li class='next'><a href=\"" . $mpurl . '?page=' . ($curpage + 1) . '">' . $lang['next'] . '</a></li>' : '';
-        $pagenum = "<li class=\"pager-nums\">{$curpage} / {$realpages}</li>";
+        $prev = $curPage > 1 ? '<li class="previous"><a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
+        $next = $curPage < $realPages ? "<li class='next'><a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a></li>' : '';
+        $pageNum = "<li class=\"pager-nums\">{$curPage} / {$realPages}</li>";
         if ($next || $prev) {
-            $return .= $prev . $pagenum . $next;
+            $return .= $prev . $pageNum . $next;
         } else {
-            $return .= $pagenum;
+            $return .= $pageNum;
         }
         $return .= "</ul>";
         return $return;
@@ -105,7 +101,7 @@ class Pager
      * @param $needle
      * @return bool
      */
-    private static function strpos($str, $needle)
+    private static function strPos($str, $needle)
     {
         return !(false === strpos($str, $needle));
     }

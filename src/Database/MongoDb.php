@@ -185,7 +185,7 @@ class MongoDb
      * @return array|bool
      * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function findOne($table, $fields = [], $condition = [])
+    public function find_one($table, $fields = null, $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -217,7 +217,7 @@ class MongoDb
      * @return array|bool
      * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function findAll($table, $fields = [], $condition = [])
+    public function find_all($table, $fields = null, $condition = [])
     {
         try {
             if (isset($condition['sort'])) {
@@ -294,26 +294,26 @@ class MongoDb
      * @param $table
      * @param $field
      * @param $condition
-     * @param int $pageparm
+     * @param int $pageParam
      * @param int $length
      * @return array|bool
      * @throws \MongoDB\Driver\Exception\Exception
      */
-    function page($table, $field, $condition, $pageparm = 0, $length = 18)
+    function page($table, $field, $condition, $pageParam = 0, $length = 18)
     {
-        if (is_array($pageparm)) {
+        if (is_array($pageParam)) {
             //固定长度分页模式
             $ret = ['rowsets' => [], 'pagebar' => ''];
-            if ($pageparm['totals'] <= 0) {
+            if ($pageParam['totals'] <= 0) {
                 return $ret;
             }
-            $start = \Xcs\DB::page_start($pageparm['curpage'], $length, $pageparm['totals']);
+            $start = \Xcs\DB::pageStart($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);;
-            $ret['pagebar'] = \Xcs\DB::pagebar($pageparm, $length);
+            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
-            $start = $pageparm;
+            $start = $pageParam;
             return $this->_page($table, $field, $condition, $start, $length);
         }
     }
@@ -355,7 +355,7 @@ class MongoDb
             try {
                 throw new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
             } catch (\Xcs\Exception\DbException $e) {
-                exit;
+                return false;
             }
         }
         return false;

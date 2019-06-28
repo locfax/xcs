@@ -145,10 +145,10 @@ class Pdo
     /**
      * @param $tableName
      * @param array $data
-     * @param bool $retid
+     * @param bool $retId
      * @return mixed
      */
-    public function create($tableName, array $data, $retid = false)
+    public function create($tableName, array $data, $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -162,7 +162,7 @@ class Pdo
             $sql = 'INSERT INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
             $sth = $this->_link->prepare($sql);
             $ret = $sth->execute($args);
-            if ($retid) {
+            if ($retId) {
                 $ret = $this->_link->lastInsertId();
             }
             return $ret;
@@ -174,10 +174,10 @@ class Pdo
     /**
      * @param $tableName
      * @param array $data
-     * @param bool $retnum
+     * @param bool $retNum
      * @return mixed
      */
-    public function replace($tableName, array $data, $retnum = false)
+    public function replace($tableName, array $data, $retNum = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -191,7 +191,7 @@ class Pdo
             $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
             $sth = $this->_link->prepare($sql);
             $ret = $sth->execute($args);
-            if ($retnum) {
+            if ($retNum) {
                 $ret = $sth->rowCount();
             }
             return $ret;
@@ -204,10 +204,10 @@ class Pdo
      * @param $tableName
      * @param array $data
      * @param $condition
-     * @param bool $retnum
+     * @param bool $retNum
      * @return mixed
      */
-    public function update($tableName, $data, $condition, $retnum = false)
+    public function update($tableName, $data, $condition, $retNum = false)
     {
         try {
             if (is_array($condition)) {
@@ -220,7 +220,7 @@ class Pdo
                 $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
                 $sth = $this->_link->prepare($sql);
                 $ret = $sth->execute($args);
-                if ($retnum) {
+                if ($retNum) {
                     $ret = $sth->rowCount();
                 }
                 return $ret;
@@ -264,10 +264,10 @@ class Pdo
      * @param $tableName
      * @param string $field
      * @param $condition
-     * @param $retobj
+     * @param $retObj
      * @return mixed
      */
-    public function findOne($tableName, $field, $condition, $retobj = false)
+    public function find_one($tableName, $field, $condition, $retObj = false)
     {
         try {
             if (is_array($condition)) {
@@ -279,7 +279,7 @@ class Pdo
                 $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
                 $sth = $this->_link->query($sql);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetch();
@@ -297,10 +297,10 @@ class Pdo
      * @param string $field
      * @param string $condition
      * @param null $index
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retobj = false)
+    public function find_all($tableName, $field = '*', $condition = '', $index = null, $retObj = false)
     {
         try {
             if (is_array($condition) && !empty($condition)) {
@@ -316,7 +316,7 @@ class Pdo
                 }
                 $sth = $this->_link->query($sql);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetchAll();
@@ -338,10 +338,10 @@ class Pdo
      * @param $condition
      * @param int $start
      * @param int $length
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retobj = false)
+    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retObj = false)
     {
         try {
             if (is_array($condition) && !empty($condition)) {
@@ -359,7 +359,7 @@ class Pdo
                 }
                 $sth = $this->_link->query($sql);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetchAll();
@@ -376,27 +376,27 @@ class Pdo
      * @param $table
      * @param $field
      * @param $condition
-     * @param int $pageparm
+     * @param int $pageParam
      * @param int $length
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public function page($table, $field, $condition, $pageparm = 0, $length = 18, $retobj = false)
+    public function page($table, $field, $condition, $pageParam = 0, $length = 18, $retObj = false)
     {
-        if (is_array($pageparm)) {
+        if (is_array($pageParam)) {
             //固定长度分页模式
             $ret = ['rowsets' => [], 'pagebar' => ''];
-            if ($pageparm['totals'] <= 0) {
+            if ($pageParam['totals'] <= 0) {
                 return $ret;
             }
-            $start = $this->page_start($pageparm['curpage'], $length, $pageparm['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retobj);;
-            $ret['pagebar'] = \Xcs\DB::pagebar($pageparm, $length);
+            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retObj);;
+            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
-            $start = $pageparm;
-            return $this->_page($table, $field, $condition, $start, $length, $retobj);
+            $start = $pageParam;
+            return $this->_page($table, $field, $condition, $start, $length, $retObj);
         }
     }
 
@@ -406,7 +406,7 @@ class Pdo
      * @param mixed $condition
      * @return mixed
      */
-    public function resultFirst($tableName, $field, $condition)
+    public function result_first($tableName, $field, $condition)
     {
         try {
             if (is_array($condition)) {
@@ -433,7 +433,7 @@ class Pdo
      * @param $condition
      * @return mixed
      */
-    public function getCol($tableName, $field, $condition = '')
+    public function col($tableName, $field, $condition = '')
     {
         try {
             if (is_array($condition) && !empty($condition)) {
@@ -459,6 +459,17 @@ class Pdo
         } catch (\PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
+    }
+
+    /**
+     * @param $tableName
+     * @param mixed $condition
+     * @param string $field
+     * @return mixed
+     */
+    public function count($tableName, $condition, $field = '*')
+    {
+        return $this->result_first($tableName, "COUNT({$field})", $condition);
     }
 
     /**
@@ -488,10 +499,10 @@ class Pdo
     /**
      * @param $sql
      * @param $args
-     * @param $retobj
+     * @param $retObj
      * @return mixed
      */
-    public function row($sql, $args = null, $retobj = false)
+    public function row_sql($sql, $args = null, $retObj = false)
     {
         try {
             if (is_null($args)) {
@@ -501,7 +512,7 @@ class Pdo
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($_args);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetch();
@@ -518,10 +529,10 @@ class Pdo
      * @param $sql
      * @param $args
      * @param $index
-     * @param $retobj
+     * @param $retObj
      * @return mixed
      */
-    public function rowset($sql, $args = null, $index = null, $retobj = false)
+    public function rowset_sql($sql, $args = null, $index = null, $retObj = false)
     {
         try {
             if (is_null($args)) {
@@ -531,7 +542,7 @@ class Pdo
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($_args);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetchAll();
@@ -550,10 +561,10 @@ class Pdo
     /**
      * @param string $sql
      * @param array $args
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    private function _pages($sql, $args = null, $retobj = false)
+    private function _page_sql($sql, $args = null, $retObj = false)
     {
         try {
             if (is_null($args)) {
@@ -563,7 +574,7 @@ class Pdo
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($_args);
             }
-            if ($retobj) {
+            if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
                 $data = $sth->fetchAll();
@@ -579,39 +590,28 @@ class Pdo
     /**
      * @param string $sql
      * @param array $args
-     * @param mixed $pageparm
+     * @param mixed $pageParam
      * @param int $length
-     * @param bool $retobj
+     * @param bool $retObj
      * @return mixed
      */
-    public function pages($sql, $args = null, $pageparm = 0, $length = 18, $retobj = false)
+    public function page_sql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
-        if (is_array($pageparm)) {
+        if (is_array($pageParam)) {
             //固定长度分页模式
             $ret = ['rowsets' => [], 'pagebar' => ''];
-            if ($pageparm['totals'] <= 0) {
+            if ($pageParam['totals'] <= 0) {
                 return $ret;
             }
-            $start = $this->page_start($pageparm['curpage'], $length, $pageparm['totals']);
-            $ret['rowsets'] = $this->_pages($sql . " LIMIT {$start},{$length}", $args, $retobj);
-            $ret['pagebar'] = \Xcs\DB::pagebar($pageparm, $length);;
+            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $ret['rowsets'] = $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
+            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);;
             return $ret;
         } else {
             //任意长度模式
-            $start = $pageparm;
-            return $this->_pages($sql . " LIMIT {$start},{$length}", $args, $retobj);
+            $start = $pageParam;
+            return $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
         }
-    }
-
-    /**
-     * @param $tableName
-     * @param mixed $condition
-     * @param string $field
-     * @return mixed
-     */
-    public function count($tableName, $condition, $field = '*')
-    {
-        return $this->resultFirst($tableName, "COUNT({$field})", $condition);
     }
 
     /**
@@ -619,9 +619,9 @@ class Pdo
      * @param null $args
      * @return mixed
      */
-    public function counts($sql, $args = null)
+    public function count_sql($sql, $args = null)
     {
-        return $this->firsts($sql, $args);
+        return $this->first_sql($sql, $args);
     }
 
     /**
@@ -629,7 +629,7 @@ class Pdo
      * @param null $args
      * @return mixed
      */
-    public function firsts($sql, $args = null)
+    public function first_sql($sql, $args = null)
     {
         try {
             if (is_null($args)) {
@@ -652,7 +652,7 @@ class Pdo
      * @param null $args
      * @return mixed
      */
-    public function getCols($sql, $args = null)
+    public function col_sql($sql, $args = null)
     {
         try {
             if (is_null($args)) {
@@ -712,7 +712,7 @@ class Pdo
             try {
                 throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
             } catch (\Xcs\Exception\DbException $e) {
-                exit;
+                return false;
             }
         }
         return false;
@@ -721,13 +721,13 @@ class Pdo
     /**
      * @param int $page
      * @param int $ppp
-     * @param int $totalnum
+     * @param int $totalNum
      * @return int
      */
-    private function page_start($page, $ppp, $totalnum)
+    private function page_start($page, $ppp, $totalNum)
     {
-        $totalpage = ceil($totalnum / $ppp);
-        $_page = max(1, min($totalpage, intval($page)));
+        $totalPage = ceil($totalNum / $ppp);
+        $_page = max(1, min($totalPage, intval($page)));
         return ($_page - 1) * $ppp;
     }
 
