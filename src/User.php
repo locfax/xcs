@@ -173,7 +173,7 @@ class User
      * @param null $type
      * @return bool
      */
-    private static function _setData($key, array $val, $life = 0, $type = null)
+    private static function _setData($key, $val, $life = 0, $type = null)
     {
         $ret = false;
         if (is_null($type)) {
