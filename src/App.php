@@ -252,7 +252,7 @@ class App
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         };
-        $controllerFilename = APPPATH . 'Controller/' . APPKEY . '/' . $controllerName . '.php';
+        $controllerFilename = APPPATH . 'Controller/' . ucfirst(APPKEY) . '/' . $controllerName . '.php';
         return is_file($controllerFilename) && require $controllerFilename;
     }
 
@@ -269,7 +269,7 @@ class App
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
         if (!self::$routes) {
-            self::$routes = include(APPPATH . 'Controller/' . APPKEY . '.route.php');
+            self::$routes = include(PSROOT . '/route/' . APPKEY . '.php');
         }
         foreach (self::$routes as $key => $val) {
             $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);

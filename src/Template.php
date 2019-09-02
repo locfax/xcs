@@ -126,33 +126,25 @@ class Template
             if (!isset($this->language['inner'])) {
                 $this->language['inner'] = array();
             }
-            $langvar = $this->language['inner'];
-            $var = '';
         } else {
-            if (!isset($this->language['plugin'][$vars[0]])) {
-                $this->language['plugin'][$vars[0]] = array();
-            }
-            $langvar = $this->language['plugin'][$vars[0]];
-            $var = $vars[1];
-        }
-        if (!isset($langvar[$var])) {
-            $lang = array();
-            include_once $this->tpldir . 'lang/lang_template.php';
-            $this->language['inner'] = $lang;
-            if (!$isplugin) {
-                list($path) = explode('/', $this->file);
-                include_once $this->tpldir . 'lang/' . $path . '/lang_template.php';
-                $this->language['inner'] = array_merge($this->language['inner'], $lang);
-            } else {
-                $templatelang = array();
-                include_once $this->tpldir . 'lang/plugin/' . $vars[0] . '.lang.php';
-                $this->language['plugin'][$vars[0]] = $templatelang[$vars[0]];
+            if (!isset($this->language['plugin'])) {
+                $this->language['plugin'] = array();
             }
         }
-        if (isset($langvar[$var])) {
-            return $langvar[$var];
+        if (!$isplugin && !isset($this->language['inner'][$vars[0]])) {
+            $lang = include getini('data/lang') . getini('site/lang') . '/template.php';
+            $this->language['inner'] = array_merge($this->language['inner'], $lang);
+        }
+        if ($isplugin && !isset($this->language['plugin'][$vars[0]][$vars[1]])) {
+            $this->language['plugin'][$vars[0]] = include getini('data/lang') . getini('site/lang') . '/' . $vars[0] . '.php';
+        }
+
+        if (!$isplugin && isset($this->language['inner'][$vars[0]])) {
+            return $this->language['inner'][$vars[0]];
+        } elseif ($isplugin && isset($this->language['plugin'][$vars[0]][$vars[1]])) {
+            return $this->language['plugin'][$vars[0]][$vars[1]];
         } else {
-            return '!' . $var . '!';
+            return $isplugin ? '!' . $vars[1] . '!' : '!' . $vars[0] . '!';
         }
     }
 
