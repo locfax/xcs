@@ -251,7 +251,7 @@ class DB
      * @param $retObj
      * @return mixed
      */
-    public static function rows($sql, $args = null, $retObj = false)
+    public static function rowReq($sql, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->row_sql($sql, $args, $retObj);
@@ -264,7 +264,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function rowSets($sql, $args = null, $index = null, $retObj = false)
+    public static function rowSetReq($sql, $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowset_sql($sql, $args, $index, $retObj);
@@ -278,7 +278,7 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function pages($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public static function pageReq($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->page_sql($sql, $args, $pageParam, $length, $retObj);
@@ -289,7 +289,7 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function counts($sql, $args = null)
+    public static function countReq($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->count_sql($sql, $args);
@@ -300,7 +300,7 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function firsts($sql, $args = null)
+    public static function firstReq($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first_sql($sql, $args);
@@ -311,7 +311,7 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function cols($sql, $args = null)
+    public static function colReq($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->col_sql($sql, $args);
