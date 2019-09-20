@@ -109,9 +109,6 @@ class User
      */
     public static function setSession($sid, $data = null)
     {
-        if (is_null($data)) {
-            return false;
-        }
         return self::_setData('sid:' . $sid, $data, 0, 'SESSID');
     }
 
@@ -131,7 +128,7 @@ class User
      */
     private static function _getData($key, $type = null)
     {
-        $ret = '';
+        $ret = [];
         if (is_null($type)) {
             $type = getini('auth/method');
         }
@@ -144,19 +141,14 @@ class User
                 session_start();
             }
             $ret = isset($_SESSION[$key]) ? $_SESSION[$key] : null;
-            if ($ret) {
-                $ret = json_decode($ret, true);
-            }
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key], 'DECODE'), true) : null;
         } elseif ('SESSID' == $type) {
             static $handle = null;
             if (is_null($handle)) {
-                $config = Context::dsn('session');
-                $handle = getini('auth/session');
-                $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
-                $handle = $handle::getInstance()->init($config);
+                $handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
+                $handle = $handle::getInstance()->init(Context::dsn('session'));
             }
             $ret = $handle->get($key);
             if ($ret) {
@@ -188,7 +180,7 @@ class User
                 session_start();
             }
             if ($life >= 0) {
-                $_SESSION[$key] = json_encode($val);
+                $_SESSION[$key] = $val;
             } else {
                 unset($_SESSION[$key]);
             }
@@ -202,10 +194,8 @@ class User
         } elseif ('SESSID' == $type) {
             static $handle = null;
             if (is_null($handle)) {
-                $config = Context::dsn('session');
-                $handle = getini('auth/session');
-                $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
-                $handle = $handle::getInstance()->init($config);
+                $handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
+                $handle = $handle::getInstance()->init(Context::dsn('session'));
             }
             $ret = $handle->set($key, json_encode($val), $life);
         }

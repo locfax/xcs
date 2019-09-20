@@ -1,6 +1,6 @@
 <?php
 
-namespace Xcs\Helper;
+namespace Xcs;
 
 class Locker
 {
@@ -88,13 +88,13 @@ class Locker
         $ret = false;
         switch ($cmd) {
             case 'set':
-                $ret = \Xcs\Cache::set('process_' . $name, time(), $ttl);
+                $ret = Cache::set('process_' . $name, time(), $ttl);
                 break;
             case 'get':
-                $ret = \Xcs\Cache::get('process_' . $name);
+                $ret = Cache::get('process_' . $name);
                 break;
             case 'rm':
-                $ret = \Xcs\Cache::set('process_' . $name);
+                $ret = Cache::set('process_' . $name);
                 break;
         }
 
@@ -110,13 +110,13 @@ class Locker
     private static function dblock($cmd, $name, $ttl = 0)
     {
         $ret = '';
-        $db = \Xcs\DB::dbo(self::dsn);
+        $db = DB::dbo(self::dsn);
         switch ($cmd) {
             case 'set':
                 $ret = $db->replace('base_process', ['processid' => $name, 'expiry' => time() + $ttl]);
                 break;
             case 'get':
-                $ret = $db->findOne('base_process', '*', ['processid' => $name]);
+                $ret = $db->find_one('base_process', '*', ['processid' => $name]);
                 if (empty($ret) || $ret['expiry'] < time()) {
                     $ret = false;
                 } else {

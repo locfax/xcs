@@ -45,7 +45,7 @@ class SysCache
     public static function lost($cachename, $reset = false)
     {
         if (!$reset) { //允许从数据库直接获取
-            $syscache = DB::dbm(self::dsn)->findOne('base_syscache', '*', ['cname' => 'sys_' . $cachename]);
+            $syscache = DB::dbm(self::dsn)->find_one('base_syscache', '*', ['cname' => 'sys_' . $cachename]);
             if ($syscache) {
                 Cache::set($syscache['cname'], stripslashes($syscache['data']));
                 return $syscache['data'];

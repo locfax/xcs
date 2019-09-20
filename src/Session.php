@@ -12,7 +12,7 @@ class Session
     {
         $this->prefix = $prefix;
         $this->ttl = $time;
-        session_module_name('user'); //session保存方式, 也可以在Php.ini中设置
+        session_module_name(getini('auth/handle')); //session保存方式
         session_set_save_handler(
             [&$this, '_open'], //在运行session_start()时执行
             [&$this, '_close'], //在脚本执行完成或调用session_write_close() 或 session_destroy()时被执行,即在所有session操作完后被执行
@@ -21,51 +21,53 @@ class Session
             [&$this, '_destroy'], //在运行session_destroy()时执行
             [&$this, '_gc'] //redis 设置了ttl 会自动销毁, 所以gc里不做任何操作
         );
-        $this->connect();
     }
 
     private function connect()
     {
         if (!$this->handle) {
-            $config = Context::dsn('session');
-            $handle = getini('auth/handle');
-            $handle = '\\Xcs\\Cache\\' . ucfirst($handle);
-            $this->handle = $handle::getInstance()->init($config);
+            $_handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
+            $this->handle = $_handle::getInstance()->init(Context::dsn('session'));
         }
     }
 
     public function _open()
     {
-
+        $this->connect();
+        return true;
     }
 
     public function _close()
     {
-
+        return true;
     }
 
     public function _read($id)
     {
         $id = $this->prefix . $id;
-        $sessData = $this->handle->get($id);
-        $this->ttl && $this->handle->set($id, $sessData, $this->ttl); //重新设置ttl 防止超时
-        return $sessData;
+        $data = $this->handle->get($id);
+        if ($data !== false) {
+            $this->ttl && $this->handle->set($id, $data, $this->ttl); //重新设置ttl 防止超时
+            return $data;
+        }
+        return '';
     }
 
     public function _write($id, $data)
     {
-        $id = $this->prefix . $id;
-        $this->handle->set($id, $data, $this->ttl);
+        $this->handle->set($this->prefix . $id, $data, $this->ttl);
+        return true;
     }
 
     public function _destroy($id)
     {
         $this->handle->rm($this->prefix . $id);
+        return true;
     }
 
     public function _gc($max)
     {
-
+        return true;
     }
 
 }
