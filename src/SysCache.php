@@ -56,7 +56,7 @@ class SysCache
         $cachem = '\\Model\\Cache\\' . ucfirst($cachename);
         $tmp = $cachem::getInstance()->getdata();
         if (!empty($tmp) && is_array($tmp)) {
-            $data = Util::output_json($tmp);
+            $data = App::output_json($tmp);
         } else {
             $data = '[]'; //标识为空
         }
@@ -73,7 +73,7 @@ class SysCache
     public static function save($cachename, $data, $delcache = true)
     { //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
-            $data = Util::output_json($data);
+            $data = App::output_json($data);
         } else {
             $data = trim($data);
         }

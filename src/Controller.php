@@ -36,7 +36,7 @@ class Controller
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
             ];
-            return Util::repsend($retarr);
+            return App::repsend($retarr);
         }
         $args = 'Action:' . $name . "不存在";
         include template('404');
