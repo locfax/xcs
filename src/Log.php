@@ -11,7 +11,7 @@ class Log
 
     public function __construct()
     {
-        $logfile = DATAPATH . 'run.log';
+        $logfile = DATA_PATH . 'run.log';
         $this->log = new \Monolog\Logger('run');
         $this->log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, \Monolog\Logger::WARNING));
         return $this->log;

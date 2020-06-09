@@ -109,7 +109,7 @@ class HandleImagek
 
     public function text($text, $color, $size, $font = 'FetteSteinschrift')
     {
-        $font = APPPATH . "vendor/captcha/fonts/en/" . $font . ".ttf";
+        $font = LIB_PATH . "captcha/fonts/en/" . $font . ".ttf";
         $draw = new \ImagickDraw();
         $draw->setGravity(\Imagick::GRAVITY_CENTER);
         $draw->setFont($font);

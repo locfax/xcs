@@ -390,7 +390,7 @@ class Pdo
                 return $ret;
             }
             $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retObj);;
+            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retObj);
             $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
             return $ret;
         } else {
@@ -605,7 +605,7 @@ class Pdo
             }
             $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
-            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);;
+            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
@@ -709,11 +709,7 @@ class Pdo
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            try {
-                throw new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
-            } catch (\Xcs\Exception\DbException $e) {
-                return false;
-            }
+            new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
         }
         return false;
     }

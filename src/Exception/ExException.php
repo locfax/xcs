@@ -207,7 +207,7 @@ EOT;
                     $k++;
                     $str .= '<tr class="bg1">';
                     $str .= '<td>' . $k . '</td>';
-                    $str .= '<td>' . str_replace(dirname(PSROOT), '..', $msg['file']) . '</td>';
+                    $str .= '<td>' . str_replace(dirname(APP_ROOT), '..', $msg['file']) . '</td>';
                     $str .= '<td>' . $msg['line'] . '</td>';
                     $str .= '<td>' . $msg['function'] . '</td>';
                     $str .= '</tr>';

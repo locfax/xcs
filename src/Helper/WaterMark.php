@@ -72,7 +72,7 @@ class WaterMark
             $h = $water_h;
             $label = "图片的";
         } else { //文字水印
-            $temp = imagettfbbox(ceil($textFont * 2.5), 0, APPPATH . "vendor/captcha/fonts/en/PilsenPlakat.ttf", $waterText); //取得使用 TrueType 字体的文本的范围
+            $temp = imagettfbbox(ceil($textFont * 2.5), 0, LIB_PATH . "captcha/fonts/en/PilsenPlakat.ttf", $waterText); //取得使用 TrueType 字体的文本的范围
             $w = $temp[2] - $temp[6];
             $h = $temp[3] - $temp[7];
             unset($temp);

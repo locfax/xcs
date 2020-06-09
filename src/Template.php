@@ -30,7 +30,7 @@ class Template
 
         $this->subtemplates = array();
         for ($i = 1; $i <= 5; $i++) {
-            if (\Xcs\Util::strpos($template, '{subtemplate')) {
+            if (\Xcs\App::strpos($template, '{subtemplate')) {
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subtemplate'), $template);
             }
         }
@@ -73,7 +73,7 @@ class Template
             $headeradd .= "block_get('" . implode(',', $this->blocks) . "');" . PHP_EOL;
         }
 
-        $template = "<?php " . PHP_EOL . "if(!defined('PSROOT')) exit('Access Denied');" . PHP_EOL . " {$headeradd}?>" . PHP_EOL . "$template";
+        $template = "<?php " . PHP_EOL . "if(!defined('APP_ROOT')) exit('Access Denied');" . PHP_EOL . " {$headeradd}?>" . PHP_EOL . "$template";
 
         $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z0-9_:\/]+)\}[\n\r\t]*/", array($this, 'tag_template'), $template);
         $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", array($this, 'tag_echo'), $template);

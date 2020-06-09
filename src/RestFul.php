@@ -33,7 +33,7 @@ class RestFul extends \Xcs\Controller
             'errcode' => 1,
             'errmsg' => 'Action ' . $name . '不存在!',
         ];
-        Util::rep_send($retarr);
+        Util::repsend($retarr);
     }
 
     /**
@@ -116,7 +116,7 @@ class RestFul extends \Xcs\Controller
     protected function response($data, $code = 200, $type = "json")
     {
         $this->http_status($code);
-        Util::rep_send($data, $type);
+        Util::repsend($data, $type);
     }
 
     protected function request()

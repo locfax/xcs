@@ -161,7 +161,7 @@ function template($file, $gettplfile = false)
     if ($gettplfile) {
         return $tplfile;
     }
-    $cachefile = strtolower(APPKEY) . '_' . $_tplid . '_' . str_replace('/', '_', $file) . '_tpl.php';
+    $cachefile = strtolower(APP_KEY) . '_' . $_tplid . '_' . str_replace('/', '_', $file) . '_tpl.php';
     $cachetpl = getini('data/_view') . $cachefile;
     $cachetime = is_file($cachetpl) ? filemtime($cachetpl) : 0;
     checktplrefresh($tplfile, $tplfile, $cachetime, $cachefile, $file);
@@ -183,7 +183,7 @@ function url($udi, $param = [])
             $url .= '&' . $key . '=' . $val;
         }
     }
-    return SITEPATH . $url;
+    return $url;
 }
 
 /**

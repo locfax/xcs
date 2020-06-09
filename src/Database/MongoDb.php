@@ -308,7 +308,7 @@ class MongoDb
                 return $ret;
             }
             $start = \Xcs\DB::pageStart($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);;
+            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);
             $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
             return $ret;
         } else {
@@ -352,11 +352,7 @@ class MongoDb
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            try {
-                throw new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
-            } catch (\Xcs\Exception\DbException $e) {
-                return false;
-            }
+            new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
         }
         return false;
     }

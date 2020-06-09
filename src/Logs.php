@@ -14,7 +14,7 @@ class Logs
      */
     public static function writeLog($filename, $msg)
     {
-        $filename = DATAPATH . $filename;
+        $filename = DATA_PATH . $filename;
         $res = [];
         $res['msg'] = $msg;
         $res['logtime'] = date("Y-m-d H:i:s", time());
@@ -43,7 +43,7 @@ class Logs
      */
     public static function readLog($filename)
     {
-        $filename = DATAPATH . $filename;
+        $filename = DATA_PATH . $filename;
 
         if (file_exists($filename)) {
             $content = file_get_contents($filename);

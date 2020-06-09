@@ -20,7 +20,6 @@ class Controller
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
         $this->init_var();
-        //$this->init_timezone();
     }
 
     /**
@@ -37,7 +36,7 @@ class Controller
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
             ];
-            return Util::rep_send($retarr);
+            return Util::repsend($retarr);
         }
         $args = 'Action:' . $name . "不存在";
         include template('404');
@@ -67,7 +66,7 @@ class Controller
     /**
      * 权限验证
      */
-    final function checkacl($controllerName, $actionName, $auth = AUTH)
+    final function checkacl($controllerName, $actionName, $auth = AUTH_ROLE)
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

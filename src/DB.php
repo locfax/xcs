@@ -5,7 +5,7 @@ namespace Xcs;
 class DB
 {
 
-    private static $default_dbo_id = APPDSN;
+    private static $default_dbo_id = APP_DSN;
     private static $using_dbo_id = null;
     private static $used_dbo = [];
 

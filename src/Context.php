@@ -12,7 +12,7 @@ class Context
     public static function dsn($dsnId)
     {
         static $_dsns = [];
-        $appKey = APPKEY;
+        $appKey = APP_KEY;
         if (!isset($_dsns[$appKey])) {
             $dsns = App::mergeVars('dsn');
             foreach ($dsns as $key => $dsn) {
@@ -36,11 +36,11 @@ class Context
     public static function config($name, $type = 'inc')
     {
         static $_configs = [];
-        $key = APPKEY . '.' . $name . '.' . $type;
+        $key = APP_KEY . '.' . $name . '.' . $type;
         if (isset($_configs[$key])) {
             return $_configs[$key];
         }
-        $file = PSROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
+        $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
             $_configs[$key] = [];
             return [];
