@@ -1,3 +1,3 @@
 # xcs
 
-php framework
+php mini framework
