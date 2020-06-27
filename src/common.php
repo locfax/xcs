@@ -136,7 +136,7 @@ function getini($key)
  */
 function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file)
 {
-    $tpldir = getini('data/tpldir');
+    $tpldir = DATA_TPLDIR;
     if (is_file($tpldir . $subtpl)) {
         $tpltime = filemtime($tpldir . $subtpl);
     } else {
@@ -146,7 +146,7 @@ function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file)
         return;
     }
     $template = new Xcs\Template();
-    $template->parse(getini('data/_view'), $tpldir, $maintpl, $cachefile, $file);
+    $template->parse(DATA_VIEW, $tpldir, $maintpl, $cachefile, $file);
 }
 
 /**
@@ -162,7 +162,7 @@ function template($file, $gettplfile = false)
         return $tplfile;
     }
     $cachefile = APP_KEY . '_' . $_tplid . '_' . str_replace('/', '_', $file) . '_tpl.php';
-    $cachetpl = getini('data/_view') . $cachefile;
+    $cachetpl = DATA_VIEW . $cachefile;
     $cachetime = is_file($cachetpl) ? filemtime($cachetpl) : 0;
     checktplrefresh($tplfile, $tplfile, $cachetime, $cachefile, $file);
     return $cachetpl;
@@ -417,7 +417,7 @@ function dump($var, $halt = 0, $func = 'p')
  * @param bool $table
  * @param bool $stop
  */
-function post($table = false, $stop = false)
+function post($stop = false)
 {
     $str = '';
     $post = $_POST;
@@ -425,22 +425,14 @@ function post($table = false, $stop = false)
         $str .= "\$" . $k . "= getgpc('p." . $k . "');\n";
     }
     dump($str);
-    if (!$table) {
-        $str = "\$post = array(\n";
-        foreach ($post as $k => $v) {
-            $str .= "'" . $k . "'=> \$" . $k . ",\n";
-        }
-        $str .= "\n)";
-        dump($str);
-    } else {
-        $tablecols = include getini('data/_fields') . $table . '.php';
-        $str = "\$post = array(\n";
-        foreach ($tablecols as $col => $arr) {
-            $str .= "'" . $col . "'=> \$" . $arr . ",\n";
-        }
-        $str .= "\n);";
-        dump($str);
+
+    $str = "\$post = array(\n";
+    foreach ($post as $k => $v) {
+        $str .= "'" . $k . "'=> \$" . $k . ",\n";
     }
+    $str .= "\n)";
+    dump($str);
+
     if ($stop) {
         exit;
     }

@@ -15,8 +15,8 @@ class File
      */
     public function init()
     {
-        if (!is_dir(getini('data/_cache'))) {
-            throw new \Xcs\Exception\ExException('路径:' . getini('data/_cache') . ' 不可写');
+        if (!is_dir(DATA_CACHE)) {
+            throw new \Xcs\Exception\ExException('路径:' . DATA_CACHE . ' 不可写');
         }
         $this->enable = true;
         return $this;
@@ -33,7 +33,7 @@ class File
      */
     public function get($key)
     {
-        $cachefile = getini('data/_cache') . $key . '.php';
+        $cachefile = DATA_CACHE . $key . '.php';
         if (is_file($cachefile)) {
             $data = include $cachefile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
@@ -59,7 +59,7 @@ class File
             $timeout = 0;
         }
 
-        $cachefile = getini('data/_cache') . $key . '.php';
+        $cachefile = DATA_CACHE . $key . '.php';
         $cachedata = "return array('data' => '{$val}', 'timeout' => {$timeout});";
         $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n{$cachedata}";
         return $this->save($cachefile, $content, FILE_WRITE_MODE);
@@ -81,7 +81,7 @@ class File
      */
     public function rm($key)
     {
-        $cachefile = getini('data/_cache') . $key . '.php';
+        $cachefile = DATA_CACHE . $key . '.php';
         if (file_exists($cachefile)) {
             unlink($cachefile);
         }
@@ -93,7 +93,7 @@ class File
      */
     public function clear()
     {
-        $cachedir = getini('data/_cache');
+        $cachedir = DATA_CACHE;
         $files = \Xcs\Helper\File::list_files($cachedir);
         foreach ($files as $file) {
             unlink($cachedir . $file);

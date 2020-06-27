@@ -37,9 +37,7 @@ class App
     public static function runFile($preload, $refresh = false)
     {
         $dfiles = [
-            APP_ROOT . '/config/base.inc.php', //全局配置
-            APP_ROOT . '/config/' . APP_KEY . '.dsn.php', //数据库配置
-            APP_ROOT . '/config/' . APP_KEY . '.inc.php', //应用配置
+            APP_ROOT . '/config/database.php', //数据库配置
             BASE_PATH . 'common.php'
         ];
         if (defined('DEBUG') && DEBUG) {
@@ -546,7 +544,7 @@ class App
         if ('html' == $type) {
             header("Content-type: text/html; charset=UTF-8");
         } elseif ('json' == $type) {
-            header('Content-type: application/json; charset=UTF-8');
+            header('Content-type: text/json; charset=UTF-8');
             $res = self::output_json($res);
         } elseif ('xml' == $type) {
             header("Content-type: text/xml");
