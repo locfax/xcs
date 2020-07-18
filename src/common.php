@@ -157,7 +157,7 @@ function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file)
 function template($file, $gettplfile = false)
 {
     $_tplid = getini('site/themes');
-    $tplfile = $_tplid . '/' . $file . '.htm';
+    $tplfile = $_tplid ? $_tplid . '/' . $file . '.htm' : $file . '.htm';
     if ($gettplfile) {
         return $tplfile;
     }
