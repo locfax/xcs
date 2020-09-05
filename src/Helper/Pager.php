@@ -16,7 +16,11 @@ class Pager
         $curPage = $pageInfo['curpage'];
         $mpUrl = $pageInfo['udi'];
         if (isset($pageInfo['param'])) {
-            $mpUrl .= '?' . $pageInfo['param'];
+            if (self::strPos($mpUrl, '?')) {
+                $mpUrl .= $pageInfo['param'];
+            } else {
+                $mpUrl .= '?' . $pageInfo['param'];
+            }
         }
         $maxPages = isset($pageInfo['maxpages']) ? $pageInfo['maxpages'] : false; //最大页数限制
         $page = isset($pageInfo['showpage']) ? $pageInfo['showpage'] : false; //一次显示多少页码
