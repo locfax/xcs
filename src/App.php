@@ -37,7 +37,6 @@ class App
     public static function runFile($preload, $refresh = false)
     {
         $files = [
-            APP_ROOT . '/config/database.php', //数据库配置
             BASE_PATH . 'common.php'
         ];
         if (defined('DEBUG') && DEBUG) {
