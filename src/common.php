@@ -386,6 +386,100 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
 }
 
 /**
+ * @return bool|null
+ */
+function isRobot()
+{
+    static $is_robot = null;
+    if (isset($is_robot)) {
+        return $is_robot;
+    }
+    $kw_spiders = 'Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla';
+    $kw_browsers = 'MSIE|Netscape|Opera|Konqueror|Mozilla';
+    if (strpos($_SERVER['HTTP_USER_AGENT'], 'http://') !== false && preg_match("/($kw_browsers)/i", $_SERVER['HTTP_USER_AGENT'])) {
+        $is_robot = false;
+    } elseif (preg_match("/($kw_spiders)/i", $_SERVER['HTTP_USER_AGENT'])) {
+        $is_robot = true;
+    } else {
+        $is_robot = false;
+    }
+    return $is_robot;
+}
+
+/**
+ * @return bool|null
+ */
+function isMobile()
+{
+    static $is_mobile = null;
+    if (isset($is_mobile)) {
+        return $is_mobile;
+    }
+    $ua = $_SERVER['HTTP_USER_AGENT'];
+    if (empty($ua)) {
+        $is_mobile = false;
+    } elseif (strpos($ua, 'Mobile') !== false || strpos($ua, 'Android') !== false || strpos($ua, 'Silk/') !== false || strpos($ua, 'Kindle') !== false || strpos($ua, 'BlackBerry') !== false || strpos($ua, 'Opera Mini') !== false || strpos($ua, 'Opera Mobi') !== false) {
+        $is_mobile = true;
+    } else {
+        $is_mobile = false;
+    }
+    return $is_mobile;
+}
+
+/**
+ * 数组 转 对象
+ *
+ * @param array $arr 数组
+ * @return object|mixed
+ */
+function array_to_object($arr)
+{
+    if (gettype($arr) != 'array') {
+        return $arr;
+    }
+    foreach ($arr as $k => $v) {
+        if (gettype($v) == 'array' || getType($v) == 'object') {
+            $arr[$k] = array_to_object($v);
+        }
+    }
+    return (object)$arr;
+}
+
+/**
+ * 对象 转 数组
+ *
+ * @param object $obj 对象
+ * @return array
+ */
+function object_to_array($obj)
+{
+    $obj = (array)$obj;
+    foreach ($obj as $k => $v) {
+        if (gettype($v) == 'object' || gettype($v) == 'array') {
+            $obj[$k] = object_to_array($v);
+        }
+    }
+    return $obj;
+}
+
+/**
+ * @param $arr
+ * @param $col
+ * @return array
+ */
+function array_index($arr, $col)
+{
+    if (!is_array($arr)) {
+        return $arr;
+    }
+    $rows = [];
+    foreach ($arr as $row) {
+        $rows[$row[$col]] = $row;
+    }
+    return $rows;
+}
+
+/**
  * @param $var
  * @param int $halt
  * @param string $func

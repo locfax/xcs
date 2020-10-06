@@ -13,14 +13,14 @@ class App
     static $routes = null;
 
     /**
-     * @param array $preload
      * @param bool $refresh
      */
-    public static function run($preload, $refresh = false)
+    public static function run($refresh = false)
     {
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
         }
+        $preload = [APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
         self::runFile($preload, $refresh);
         if (isset($_GET['s'])) {
             $uri = trim(str_replace(['.htm', '.html'], '', $_GET['s']), '/');
@@ -36,15 +36,15 @@ class App
      */
     public static function runFile($preload, $refresh = false)
     {
-        $dfiles = [
+        $files = [
             APP_ROOT . '/config/database.php', //数据库配置
             BASE_PATH . 'common.php'
         ];
         if (defined('DEBUG') && DEBUG) {
             //测试模式
-            set_error_handler(function ($errno, $errstr, $errfile = null, $errline = null) {
+            set_error_handler(function ($errno, $errStr, $errFile = null, $errLine = null) {
                 try {
-                    throw new Exception\ExException($errstr, $errno);
+                    throw new Exception\ExException($errStr, $errno);
                 } catch (Exception\ExException $exception) {
 
                 }
@@ -55,66 +55,66 @@ class App
                 $error = error_get_last();
                 if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
                     $errno = $error["type"];
-                    $errstr = $error["message"];
+                    $errStr = $error["message"];
                     try {
-                        throw new Exception\ExException($errstr, $errno, 'systemError');
+                        throw new Exception\ExException($errStr, $errno, 'systemError');
                     } catch (Exception\ExException $exception) {
 
                     }
                 }
             });
 
-            $files = array_merge($dfiles, $preload);
+            $files = array_merge($files, $preload);
             foreach ($files as $file) {
                 include($file);
             }
         } else {
             //部署模式
-            self::_runFile($preload, $dfiles, $refresh);
+            self::_runFile($preload, $files, $refresh);
         }
         self::rootNamespace('\\', APP_PATH);
     }
 
     /**
      * @param array $preload
-     * @param array $dfiles
+     * @param array $files
      * @param bool $refresh
      */
-    public static function _runFile($preload, $dfiles, $refresh = false)
+    public static function _runFile($preload, $files, $refresh = false)
     {
-        $preloadfile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
-        if (!is_file($preloadfile) || $refresh) {
-            $files = array_merge($dfiles, $preload);
-            $preloadfile = self::makeRunFile($files, $preloadfile);
+        $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
+        if (!is_file($preloadFile) || $refresh) {
+            $files = array_merge($files, $preload);
+            $preloadFile = self::makeRunFile($files, $preloadFile);
         }
-        $preloadfile && require($preloadfile);
+        $preloadFile && require($preloadFile);
     }
 
     /**
-     * @param $runtimefiles
-     * @param $runfile
+     * @param $runtimeFiles
+     * @param $runFile
      * @return bool
      */
-    public static function makeRunFile($runtimefiles, $runfile)
+    public static function makeRunFile($runtimeFiles, $runFile)
     {
         $content = '';
-        foreach ($runtimefiles as $filename) {
+        foreach ($runtimeFiles as $filename) {
             $data = php_strip_whitespace($filename);
             $content .= str_replace(['<?php', '?>', '<php_', '_php>'], ['', '', '<?php', '?>'], $data);
         }
-        $filedir = dirname($runfile);
-        if (!is_dir($filedir)) {
-            mkdir($filedir, FILE_WRITE_MODE);
+        $fileDir = dirname($runFile);
+        if (!is_dir($fileDir)) {
+            mkdir($fileDir, FILE_WRITE_MODE);
         }
-        if (!is_file($runfile)) {
-            file_exists($runfile) && unlink($runfile); //可能是异常文件 删除
-            touch($runfile) && chmod($runfile, 0777); //生成全读写空文件
-        } elseif (!is_writable($runfile)) {
-            chmod($runfile, FILE_WRITE_MODE); //全读写
+        if (!is_file($runFile)) {
+            file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
+            touch($runFile) && chmod($runFile, 0777); //生成全读写空文件
+        } elseif (!is_writable($runFile)) {
+            chmod($runFile, FILE_WRITE_MODE); //全读写
         }
-        $ret = file_put_contents($runfile, '<?php ' . $content, LOCK_EX);
+        $ret = file_put_contents($runFile, '<?php ' . $content, LOCK_EX);
         if ($ret) {
-            return $runfile;
+            return $runFile;
         }
         return false;
     }
@@ -180,14 +180,14 @@ class App
     public static function mergeVars($group, $vars = null)
     {
         static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
-        $appkey = APP_KEY;
+        $appKey = APP_KEY;
         if (is_null($vars)) {
-            return $_CDATA[$appkey][$group];
+            return $_CDATA[$appKey][$group];
         }
-        if (is_null($_CDATA[$appkey][$group])) {
-            $_CDATA[$appkey][$group] = $vars;
+        if (is_null($_CDATA[$appKey][$group])) {
+            $_CDATA[$appKey][$group] = $vars;
         } else {
-            $_CDATA[$appkey][$group] = array_merge($_CDATA[$appkey][$group], $vars);
+            $_CDATA[$appKey][$group] = array_merge($_CDATA[$appKey][$group], $vars);
         }
         return true;
     }
@@ -199,12 +199,12 @@ class App
     private static function errACT($args)
     {
         if (self::isAjax(true)) {
-            $retarr = [
+            $res = [
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             ];
-            return \Xcs\App::repsend($retarr, 'json');
+            return \Xcs\App::response($res, 'json');
         }
         $args = '出错了！' . $args;
         include template('404');
@@ -217,12 +217,12 @@ class App
     private static function errACL($args)
     {
         if (self::isAjax(true)) {
-            $retarr = [
+            $res = [
                 'errcode' => 1,
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             ];
-            return \Xcs\App::repsend($retarr, 'json');
+            return \Xcs\App::response($res, 'json');
         }
         $args = '出错了！' . $args;
         include template('403');
@@ -239,7 +239,7 @@ class App
             return true;
         };
         $controllerFilename = APP_PATH . 'Controller/' . ucfirst(APP_KEY) . '/' . $controllerName . '.php';
-        return is_file($controllerFilename) && require $controllerFilename;
+        return is_file($controllerFilename) && include $controllerFilename;
     }
 
     /**
@@ -301,10 +301,7 @@ class App
             }
             $file = trim(substr($classname, strlen($namespace)), '\\');
             $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
-            if (!is_file($file)) {
-                throw new Exception\ExException($file . '不存在');
-            }
-            require $file;
+            include $file;
         };
         spl_autoload_register($loader);
     }
@@ -334,150 +331,11 @@ class App
             if (defined('DEBUG') && DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 return false;
             }
-            include($filename);
+            include $filename;
             $_file[$key] = true;
             return true;
         }
         return false;
-    }
-
-    /**
-     * @param bool $retbool
-     * @return bool
-     */
-    public static function isPost($retbool = true)
-    {
-        if ('POST' == getgpc('s.REQUEST_METHOD')) {
-            return $retbool;
-        }
-        return !$retbool;
-    }
-
-    /**
-     * @param bool $retbool
-     * @return bool
-     */
-    public static function isAjax($retbool = true)
-    {
-        if ('XMLHttpRequest' == getgpc('s.HTTP_X_REQUESTED_WITH')) {
-            return $retbool;
-        }
-        return !$retbool;
-    }
-
-    /**
-     * @param $_string
-     * @param bool $replace
-     * @param int $http_response_code
-     * @return bool
-     */
-    public static function header($_string, $replace = true, $http_response_code = 0)
-    {
-        $string = str_replace(["\r", "\n"], ['', ''], $_string);
-        if (!$http_response_code) {
-            header($string, $replace);
-        } else {
-            header($string, $replace, $http_response_code);
-        }
-        return true;
-    }
-
-
-    /**
-     * @param $arr
-     * @return string
-     */
-    public static function implode($arr)
-    {
-        return "'" . implode("','", (array)$arr) . "'";
-    }
-
-    /**
-     * @param $str
-     * @param $needle
-     * @return bool
-     */
-    public static function strpos($str, $needle)
-    {
-        return !(false === strpos($str, $needle));
-    }
-
-    /**
-     * @param $arr
-     * @param $col
-     * @return array
-     */
-    public static function array_index($arr, $col)
-    {
-        if (!is_array($arr)) {
-            return $arr;
-        }
-        $rows = [];
-        foreach ($arr as $row) {
-            $rows[$row[$col]] = $row;
-        }
-        return $rows;
-    }
-
-    /**
-     * 数组 转 对象
-     *
-     * @param array $arr 数组
-     * @return object|mixed
-     */
-    public static function array_to_object($arr)
-    {
-        if (gettype($arr) != 'array') {
-            return $arr;
-        }
-        foreach ($arr as $k => $v) {
-            if (gettype($v) == 'array' || getType($v) == 'object') {
-                $arr[$k] = self::array_to_object($v);
-            }
-        }
-        return (object)$arr;
-    }
-
-    /**
-     * 对象 转 数组
-     *
-     * @param object $obj 对象
-     * @return array
-     */
-    public static function object_to_array($obj)
-    {
-        $obj = (array)$obj;
-        foreach ($obj as $k => $v) {
-            if (gettype($v) == 'object' || gettype($v) == 'array') {
-                $obj[$k] = self::object_to_array($v);
-            }
-        }
-        return $obj;
-    }
-
-    /**
-     * @param string $default
-     * @return string
-     */
-    public static function referer($default = '')
-    {
-        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        if (empty($referer)) {
-            $referer = $default;
-        }
-        return strip_tags($referer);
-    }
-
-    /**
-     * @param $value
-     * @return array|string
-     */
-    public static function urlencode($value)
-    {
-        if (is_array($value)) {
-            return array_map('self::urlencode', $value);
-        }
-        return $value ? urlencode($value) : $value;
     }
 
     /**
@@ -538,7 +396,7 @@ class App
      * @param string $type
      * @return bool
      */
-    public static function repsend($res, $type = 'json')
+    public static function response($res, $type = 'json')
     {
         self::output_start();
         if ('html' == $type) {
@@ -560,6 +418,92 @@ class App
             echo ']]></root>';
         }
         return true;
+    }
+
+
+    /**
+     * @param bool $retBool
+     * @return bool
+     */
+    public static function isPost($retBool = true)
+    {
+        if ('POST' == getgpc('s.REQUEST_METHOD')) {
+            return $retBool;
+        }
+        return !$retBool;
+    }
+
+    /**
+     * @param bool $retBool
+     * @return bool
+     */
+    public static function isAjax($retBool = true)
+    {
+        if ('XMLHttpRequest' == getgpc('s.HTTP_X_REQUESTED_WITH')) {
+            return $retBool;
+        }
+        return !$retBool;
+    }
+
+    /**
+     * @param $_string
+     * @param bool $replace
+     * @param int $http_response_code
+     * @return bool
+     */
+    public static function header($_string, $replace = true, $http_response_code = 0)
+    {
+        $string = str_replace(["\r", "\n"], ['', ''], $_string);
+        if (!$http_response_code) {
+            header($string, $replace);
+        } else {
+            header($string, $replace, $http_response_code);
+        }
+        return true;
+    }
+
+    /**
+     * @param $arr
+     * @return string
+     */
+    public static function implode($arr)
+    {
+        return "'" . implode("','", (array)$arr) . "'";
+    }
+
+    /**
+     * @param $str
+     * @param $needle
+     * @return bool
+     */
+    public static function strPos($str, $needle)
+    {
+        return !(false === strpos($str, $needle));
+    }
+
+    /**
+     * @param string $default
+     * @return string
+     */
+    public static function referer($default = '')
+    {
+        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+        if (empty($referer)) {
+            $referer = $default;
+        }
+        return strip_tags($referer);
+    }
+
+    /**
+     * @param $value
+     * @return array|string
+     */
+    public static function urlencode($value)
+    {
+        if (is_array($value)) {
+            return array_map('self::urlencode', $value);
+        }
+        return $value ? urlencode($value) : $value;
     }
 
     /**
@@ -635,62 +579,21 @@ EOT;
     }
 
     /**
-     * @return bool|null
-     */
-    public static function isrobot()
-    {
-        static $is_robot = null;
-        if (isset($is_robot)) {
-            return $is_robot;
-        }
-        $kw_spiders = 'Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla';
-        $kw_browsers = 'MSIE|Netscape|Opera|Konqueror|Mozilla';
-        if (!self::strpos($_SERVER['HTTP_USER_AGENT'], 'http://') && preg_match("/($kw_browsers)/i", $_SERVER['HTTP_USER_AGENT'])) {
-            $is_robot = false;
-        } elseif (preg_match("/($kw_spiders)/i", $_SERVER['HTTP_USER_AGENT'])) {
-            $is_robot = true;
-        } else {
-            $is_robot = false;
-        }
-        return $is_robot;
-    }
-
-    /**
-     * @return bool|null
-     */
-    public static function ismobile()
-    {
-        static $is_mobile = null;
-        if (isset($is_mobile)) {
-            return $is_mobile;
-        }
-        $ua = $_SERVER['HTTP_USER_AGENT'];
-        if (empty($ua)) {
-            $is_mobile = false;
-        } elseif (strpos($ua, 'Mobile') !== false || strpos($ua, 'Android') !== false || strpos($ua, 'Silk/') !== false || strpos($ua, 'Kindle') !== false || strpos($ua, 'BlackBerry') !== false || strpos($ua, 'Opera Mini') !== false || strpos($ua, 'Opera Mobi') !== false) {
-            $is_mobile = true;
-        } else {
-            $is_mobile = false;
-        }
-        return $is_mobile;
-    }
-
-    /**
      * @return null
      */
-    public static function clientip()
+    public static function clientIp()
     {
-        $onlineip = '';
+        $onlineIp = '';
         if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $onlineip = getenv('HTTP_CLIENT_IP');
+            $onlineIp = getenv('HTTP_CLIENT_IP');
         } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $onlineip = getenv('HTTP_X_FORWARDED_FOR');
+            $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
         } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-            $onlineip = getenv('REMOTE_ADDR');
+            $onlineIp = getenv('REMOTE_ADDR');
         } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $onlineip = $_SERVER['REMOTE_ADDR'];
+            $onlineIp = $_SERVER['REMOTE_ADDR'];
         }
-        return $onlineip;
+        return $onlineIp;
     }
 
     /**
@@ -698,16 +601,16 @@ EOT;
      */
     public static function client_ip()
     {
-        $onlineip = '';
+        $onlineIp = '';
         if (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-            $onlineip = getenv('REMOTE_ADDR');
+            $onlineIp = getenv('REMOTE_ADDR');
         } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $onlineip = $_SERVER['REMOTE_ADDR'];
+            $onlineIp = $_SERVER['REMOTE_ADDR'];
         } elseif (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $onlineip = getenv('HTTP_CLIENT_IP');
+            $onlineIp = getenv('HTTP_CLIENT_IP');
         } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $onlineip = getenv('HTTP_X_FORWARDED_FOR');
+            $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
         }
-        return $onlineip;
+        return $onlineIp;
     }
 }
