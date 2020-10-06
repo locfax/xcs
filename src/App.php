@@ -37,8 +37,11 @@ class App
     public static function runFile($preload, $refresh = false)
     {
         $files = [
-            BASE_PATH . 'common.php'
+            BASE_PATH . 'common.php',
+            APP_ROOT . '/config/base.inc.php',
         ];
+        $files = array_merge($files, $preload);
+
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $errStr, $errFile = null, $errLine = null) {
@@ -63,27 +66,24 @@ class App
                 }
             });
 
-            $files = array_merge($files, $preload);
             foreach ($files as $file) {
                 include $file;
             }
         } else {
             //部署模式
-            self::_runFile($preload, $files, $refresh);
+            self::_runFile($files, $refresh);
         }
         self::rootNamespace('\\', APP_PATH);
     }
 
     /**
-     * @param array $preload
      * @param array $files
      * @param bool $refresh
      */
-    public static function _runFile($preload, $files, $refresh = false)
+    public static function _runFile($files, $refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
-            $files = array_merge($files, $preload);
             $preloadFile = self::makeRunFile($files, $preloadFile);
         }
         $preloadFile && include $preloadFile;
@@ -101,13 +101,14 @@ class App
             $data = php_strip_whitespace($filename);
             $content .= str_replace(['<?php', '?>', '<php_', '_php>'], ['', '', '<?php', '?>'], $data);
         }
+
         $fileDir = dirname($runFile);
         if (!is_dir($fileDir)) {
             mkdir($fileDir, FILE_WRITE_MODE);
         }
         if (!is_file($runFile)) {
             file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
-            touch($runFile) && chmod($runFile, 0777); //生成全读写空文件
+            touch($runFile) && chmod($runFile, FILE_WRITE_MODE); //生成全读写空文件
         } elseif (!is_writable($runFile)) {
             chmod($runFile, FILE_WRITE_MODE); //全读写
         }
