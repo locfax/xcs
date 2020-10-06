@@ -2,7 +2,7 @@
 
 namespace Xcs;
 
-class RestFul extends \Xcs\Controller
+class RestFul extends Controller
 {
     // 当前请求类型
     private $_method = null;
@@ -33,13 +33,13 @@ class RestFul extends \Xcs\Controller
             'errcode' => 1,
             'errmsg' => 'Action ' . $name . '不存在!',
         ];
-        App::repsend($retarr);
+        App::response($retarr);
     }
 
     /**
      * @return mixed|null
      */
-    protected function rawdata()
+    protected function rawData()
     {
         return file_get_contents('php://input');
     }
@@ -116,7 +116,7 @@ class RestFul extends \Xcs\Controller
     protected function response($data, $code = 200, $type = "json")
     {
         $this->http_status($code);
-        App::repsend($data, $type);
+        App::response($data, $type);
     }
 
     protected function request()
