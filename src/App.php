@@ -66,7 +66,7 @@ class App
 
             $files = array_merge($files, $preload);
             foreach ($files as $file) {
-                include($file);
+                include $file;
             }
         } else {
             //部署模式
@@ -87,7 +87,7 @@ class App
             $files = array_merge($files, $preload);
             $preloadFile = self::makeRunFile($files, $preloadFile);
         }
-        $preloadFile && require($preloadFile);
+        $preloadFile && include $preloadFile;
     }
 
     /**
