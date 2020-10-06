@@ -38,9 +38,7 @@ class App
     {
         $files = [
             BASE_PATH . 'common.php',
-            APP_ROOT . '/config/base.inc.php',
         ];
-        $files = array_merge($files, $preload);
 
         if (defined('DEBUG') && DEBUG) {
             //测试模式
@@ -66,24 +64,43 @@ class App
                 }
             });
 
-            foreach ($files as $file) {
-                include $file;
+            if (is_file(LIB_PATH . APP_KEY . '.php')) {
+                array_push($files, LIB_PATH . APP_KEY . '.php');
+            } else {
+                is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             }
+            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
+            is_file(APP_ROOT . '/config/base.inc.php') && array_push($files, APP_ROOT . '/config/base.inc.php');
+
+            $files = array_merge($files, $preload);
+            array_walk($files, function ($file, $key) {
+                include $file;
+            });
         } else {
             //部署模式
-            self::_runFile($files, $refresh);
+            self::_runFile($files, $preload, $refresh);
         }
         self::rootNamespace('\\', APP_PATH);
     }
 
     /**
      * @param array $files
+     * @param array $preload
      * @param bool $refresh
      */
-    public static function _runFile($files, $refresh = false)
+    public static function _runFile($files, $preload, $refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
+            if (is_file(LIB_PATH . APP_KEY . '.php')) {
+                array_push($files, LIB_PATH . APP_KEY . '.php');
+            } else {
+                is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
+            }
+            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
+            is_file(APP_ROOT . '/config/base.inc.php') && array_push($files, APP_ROOT . '/config/base.inc.php');
+
+            $files = array_merge($files, $preload);
             $preloadFile = self::makeRunFile($files, $preloadFile);
         }
         $preloadFile && include $preloadFile;
