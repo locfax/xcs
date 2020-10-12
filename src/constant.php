@@ -3,7 +3,7 @@
 define('BASE_PATH', __DIR__ . '/');
 define('APP_PATH', APP_ROOT . '/app/'); //app controller应用路径
 define('DATA_PATH', APP_ROOT . '/gdata/'); //全局数据路径
-define('LIB_PATH', APP_PATH . 'library/'); //module路径
+define('LIB_PATH', APP_PATH . 'Library/'); //module路径
 
 define('DATA_CACHE', DATA_PATH . 'cache/');
 define('DATA_VIEW', DATA_PATH . 'tplcache/');
