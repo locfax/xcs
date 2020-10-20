@@ -34,7 +34,7 @@ class Rbac
         }
 
         // get user rolearray
-        $roles = User::getRolesArray();
+        $roles = UID::getRolesArray();
 
         // 1, check user's role whether allow to call controller
         if (!self::_check($roles, $ACL)) {
