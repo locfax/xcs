@@ -29,8 +29,8 @@ class Template
         $const_regexp = "([A-Z_\x7f-\xff][A-Z0-9_\x7f-\xff]*)";
 
         $this->subtemplates = array();
-        for ($i = 1; $i <= 5; $i++) {
-            if (\Xcs\App::strPos($template, '{subtemplate')) {
+        for ($i = 1; $i <= 10; $i++) {
+            if (!(false === strpos($template, '{subtemplate'))) {
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subtemplate'), $template);
             }
         }
