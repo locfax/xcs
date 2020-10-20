@@ -20,8 +20,7 @@ class App
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
         }
-        $preload = [APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
-        self::runFile($preload, $refresh);
+        self::runFile($refresh);
         if (isset($_GET['s'])) {
             $uri = trim(str_replace(['.htm', '.html'], '', $_GET['s']), '/');
         } else {
@@ -31,14 +30,12 @@ class App
     }
 
     /**
-     * @param $preload
      * @param bool $refresh
      */
-    public static function runFile($preload, $refresh = false)
+    public static function runFile($refresh = false)
     {
-        $files = [
-            BASE_PATH . 'common.php',
-        ];
+        $files = [BASE_PATH . 'common.php',];
+        $preload = [APP_ROOT . '/config/' . APP_KEY . '.inc.php',]; //应用配置
 
         if (defined('DEBUG') && DEBUG) {
             //测试模式
