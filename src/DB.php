@@ -416,4 +416,13 @@ class DB
         }
         return $pageBar;
     }
+
+    /**
+     * @param $arr
+     * @return string
+     */
+    public static function implode($arr)
+    {
+        return "'" . implode("','", (array)$arr) . "'";
+    }
 }

@@ -87,7 +87,7 @@ function gpc_val($val, $runfunc, $emptyrun)
         $funcs = explode('|', $runfunc);
         foreach ($funcs as $run) {
             if ('xss' == $run) {
-                $val = \Xcs\Helper\Xss::getInstance()->clean($val);
+                $val = Xcs\Helper\Xss::getInstance()->clean($val);
             } else {
                 $val = $run($val);
             }
@@ -95,7 +95,7 @@ function gpc_val($val, $runfunc, $emptyrun)
         return $val;
     }
     if ('xss' == $runfunc) {
-        return \Xcs\Helper\Xss::getInstance()->clean($val);
+        return Xcs\Helper\Xss::getInstance()->clean($val);
     }
     if ($runfunc) {
         return $runfunc($val);
@@ -291,28 +291,6 @@ function output_char($text)
 }
 
 /**
- * @param $str
- * @param bool $url_encoded
- * @return null|string|string[]
- */
-function remove_invisible_characters($str, $url_encoded = TRUE)
-{
-    $non_displayables = [];
-    // every control character except newline (dec 10),
-    // carriage return (dec 13) and horizontal tab (dec 09)
-    if ($url_encoded) {
-        $non_displayables[] = '/%0[0-8bcef]/i';    // url encoded 00-08, 11, 12, 14, 15
-        $non_displayables[] = '/%1[0-9a-f]/i';    // url encoded 16-31
-        $non_displayables[] = '/%7f/i';    // url encoded 127
-    }
-    $non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';    // 00-08, 11, 12, 14-31, 127
-    do {
-        $str = preg_replace($non_displayables, '', $str, -1, $count);
-    } while ($count);
-    return $str;
-}
-
-/**
  * @param $utimeoffset
  * @return array
  */
@@ -386,97 +364,31 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
 }
 
 /**
- * @return bool|null
+ * @param $str
+ * @param $needle
+ * @return bool
  */
-function isRobot()
+function dstrpos($str, $needle)
 {
-    static $is_robot = null;
-    if (isset($is_robot)) {
-        return $is_robot;
-    }
-    $kw_spiders = 'Bot|Crawl|Spider|slurp|sohu-search|lycos|robozilla';
-    $kw_browsers = 'MSIE|Netscape|Opera|Konqueror|Mozilla';
-    if (strpos($_SERVER['HTTP_USER_AGENT'], 'http://') !== false && preg_match("/($kw_browsers)/i", $_SERVER['HTTP_USER_AGENT'])) {
-        $is_robot = false;
-    } elseif (preg_match("/($kw_spiders)/i", $_SERVER['HTTP_USER_AGENT'])) {
-        $is_robot = true;
-    } else {
-        $is_robot = false;
-    }
-    return $is_robot;
+    return !(false === strpos($str, $needle));
 }
 
 /**
- * @return bool|null
+ * @return null
  */
-function isMobile()
+function clientIp()
 {
-    static $is_mobile = null;
-    if (isset($is_mobile)) {
-        return $is_mobile;
+    $onlineIp = '';
+    if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+        $onlineIp = getenv('HTTP_CLIENT_IP');
+    } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
+        $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
+    } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+        $onlineIp = getenv('REMOTE_ADDR');
+    } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+        $onlineIp = $_SERVER['REMOTE_ADDR'];
     }
-    $ua = $_SERVER['HTTP_USER_AGENT'];
-    if (empty($ua)) {
-        $is_mobile = false;
-    } elseif (strpos($ua, 'Mobile') !== false || strpos($ua, 'Android') !== false || strpos($ua, 'Silk/') !== false || strpos($ua, 'Kindle') !== false || strpos($ua, 'BlackBerry') !== false || strpos($ua, 'Opera Mini') !== false || strpos($ua, 'Opera Mobi') !== false) {
-        $is_mobile = true;
-    } else {
-        $is_mobile = false;
-    }
-    return $is_mobile;
-}
-
-/**
- * 数组 转 对象
- *
- * @param array $arr 数组
- * @return object|mixed
- */
-function array_to_object($arr)
-{
-    if (gettype($arr) != 'array') {
-        return $arr;
-    }
-    foreach ($arr as $k => $v) {
-        if (gettype($v) == 'array' || getType($v) == 'object') {
-            $arr[$k] = array_to_object($v);
-        }
-    }
-    return (object)$arr;
-}
-
-/**
- * 对象 转 数组
- *
- * @param object $obj 对象
- * @return array
- */
-function object_to_array($obj)
-{
-    $obj = (array)$obj;
-    foreach ($obj as $k => $v) {
-        if (gettype($v) == 'object' || gettype($v) == 'array') {
-            $obj[$k] = object_to_array($v);
-        }
-    }
-    return $obj;
-}
-
-/**
- * @param $arr
- * @param $col
- * @return array
- */
-function array_index($arr, $col)
-{
-    if (!is_array($arr)) {
-        return $arr;
-    }
-    $rows = [];
-    foreach ($arr as $row) {
-        $rows[$row[$col]] = $row;
-    }
-    return $rows;
+    return $onlineIp;
 }
 
 /**
@@ -508,7 +420,6 @@ function dump($var, $halt = 0, $func = 'p')
 }
 
 /**
- * @param bool $table
  * @param bool $stop
  */
 function post($stop = false)

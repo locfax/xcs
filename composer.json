@@ -1,14 +1,14 @@
 {
-  "name": "locphp/xcs",
+  "name": "locfax/xcs",
   "description": "PHP Web Framework",
   "keywords": ["framework","php", "xcs"],
-  "homepage": "https://github.com/locphp/xcs",
+  "homepage": "https://github.com/locfax/xcs",
   "license": "MIT",
   "authors": [
     {
-      "name": "ktang",
+      "name": "locfax",
       "email": "hellophp@qq.com",
-      "homepage": "https://github.com/locphp"
+      "homepage": "https://github.com/locfax"
     }
   ],
   "require": {

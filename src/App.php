@@ -64,13 +64,11 @@ class App
                 }
             });
 
-            if (is_file(LIB_PATH . APP_KEY . '.php')) {
-                array_push($files, LIB_PATH . APP_KEY . '.php');
-            } else {
-                is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
-            }
+            is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
+            is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
+
             is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
-            is_file(APP_ROOT . '/config/base.inc.php') && array_push($files, APP_ROOT . '/config/base.inc.php');
+            is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
 
             $files = array_merge($files, $preload);
             array_walk($files, function ($file, $key) {
@@ -92,13 +90,11 @@ class App
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
-            if (is_file(LIB_PATH . APP_KEY . '.php')) {
-                array_push($files, LIB_PATH . APP_KEY . '.php');
-            } else {
-                is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
-            }
+            is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
+            is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
+
             is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
-            is_file(APP_ROOT . '/config/base.inc.php') && array_push($files, APP_ROOT . '/config/base.inc.php');
+            is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
 
             $files = array_merge($files, $preload);
             $preloadFile = self::makeRunFile($files, $preloadFile);
@@ -186,7 +182,7 @@ class App
             return true;
         } while (false);
         //控制器加载失败
-        self::errACT("The controller '" . $controllerName . '\' is not exists!');
+        self::errACT("控制器 '" . $controllerName . '\' 不存在!');
     }
 
     /**
@@ -437,6 +433,17 @@ class App
         return true;
     }
 
+    /**
+     * @param bool $retBool
+     * @return bool
+     */
+    public static function isGet($retBool = true)
+    {
+        if ('GET' == getgpc('s.REQUEST_METHOD')) {
+            return $retBool;
+        }
+        return !$retBool;
+    }
 
     /**
      * @param bool $retBool
@@ -460,67 +467,6 @@ class App
             return $retBool;
         }
         return !$retBool;
-    }
-
-    /**
-     * @param $_string
-     * @param bool $replace
-     * @param int $http_response_code
-     * @return bool
-     */
-    public static function header($_string, $replace = true, $http_response_code = 0)
-    {
-        $string = str_replace(["\r", "\n"], ['', ''], $_string);
-        if (!$http_response_code) {
-            header($string, $replace);
-        } else {
-            header($string, $replace, $http_response_code);
-        }
-        return true;
-    }
-
-    /**
-     * @param $arr
-     * @return string
-     */
-    public static function implode($arr)
-    {
-        return "'" . implode("','", (array)$arr) . "'";
-    }
-
-    /**
-     * @param $str
-     * @param $needle
-     * @return bool
-     */
-    public static function strPos($str, $needle)
-    {
-        return !(false === strpos($str, $needle));
-    }
-
-    /**
-     * @param string $default
-     * @return string
-     */
-    public static function referer($default = '')
-    {
-        $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
-        if (empty($referer)) {
-            $referer = $default;
-        }
-        return strip_tags($referer);
-    }
-
-    /**
-     * @param $value
-     * @return array|string
-     */
-    public static function urlencode($value)
-    {
-        if (is_array($value)) {
-            return array_map('self::urlencode', $value);
-        }
-        return $value ? urlencode($value) : $value;
     }
 
     /**
@@ -595,39 +541,4 @@ EOT;
         return true;
     }
 
-    /**
-     * @return null
-     */
-    public static function clientIp()
-    {
-        $onlineIp = '';
-        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $onlineIp = getenv('HTTP_CLIENT_IP');
-        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
-        } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-            $onlineIp = getenv('REMOTE_ADDR');
-        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $onlineIp = $_SERVER['REMOTE_ADDR'];
-        }
-        return $onlineIp;
-    }
-
-    /**
-     * @return array|false|string
-     */
-    public static function client_ip()
-    {
-        $onlineIp = '';
-        if (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-            $onlineIp = getenv('REMOTE_ADDR');
-        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-            $onlineIp = $_SERVER['REMOTE_ADDR'];
-        } elseif (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-            $onlineIp = getenv('HTTP_CLIENT_IP');
-        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-            $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
-        }
-        return $onlineIp;
-    }
 }
