@@ -2,25 +2,24 @@
 
 namespace Xcs;
 
-class User
+class UID
 {
-    const _USERKEY = 'TATA';
-    const _ROLEKEY = 'ROLE';
+    const _UREY = 'ur';
+    const _ROLEY = 'ro';
 
     /**
      * @param array $userData
      * @param null $rolesData
-     * @param int $left
+     * @param int $life
      * @return bool
      */
-    public static function setUser(array $userData, $rolesData = null, $left = 0)
+    public static function setUser(array $userData, $rolesData = null, $life = 0)
     {
         if (!is_null($rolesData)) {
-            $userData[self::_ROLEKEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
+            $userData[self::_ROLEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
         }
-        $datakey = getini('auth/prefix') . self::_USERKEY;
-        $ret = self::_setData($datakey, $userData, $left);
-        return $ret;
+        $dataKey = getini('auth/prefix') . self::_UREY;
+        return self::_setData($dataKey, $userData, $life);
     }
 
     /**
@@ -28,15 +27,14 @@ class User
      */
     public static function getUser()
     {
-        $datakey = getini('auth/prefix') . self::_USERKEY;
-        $ret = self::_getData($datakey);
-        return $ret;
+        $dataKey = getini('auth/prefix') . self::_UREY;
+        return self::_getData($dataKey);
     }
 
     public static function clearUser()
     {
-        $datakey = getini('auth/prefix') . self::_USERKEY;
-        self::_setData($datakey, '', -86400 * 365);
+        $dataKey = getini('auth/prefix') . self::_UREY;
+        self::_setData($dataKey, null, -86400 * 365);
     }
 
     /**
@@ -44,8 +42,8 @@ class User
      */
     public static function getRoles()
     {
-        $user = self::getUser();
-        return isset($user[self::_ROLEKEY]) ? $user[self::_ROLEKEY] : null;
+        $data = self::getUser();
+        return isset($data[self::_ROLEY]) ? $data[self::_ROLEY] : null;
     }
 
     /**
@@ -67,58 +65,22 @@ class User
      * @param $key
      * @param array $data
      * @param int $ttl
+     * @param null $type
      * @return bool
      */
-    public static function setData($key, array $data, $ttl = 0)
+    public static function setData($key, array $data, $ttl = 0, $type = null)
     {
-        return self::_setData($key, $data, $ttl);
+        return self::_setData('data:' . $key, $data, $ttl, $type);
     }
 
     /**
      * @param string $key
+     * @param null $type
      * @return array
      */
-    public static function getData($key)
+    public static function getData($key, $type = null)
     {
-        return self::_getData($key);
-    }
-
-    /**
-     * @return null|string
-     */
-    public static function getSid()
-    {
-        $type = getini('auth/method');
-        if ('SESSION' == $type) {
-            if (PHP_SESSION_NONE == session_status()) {
-                $handle = getini('auth/handle');
-                if ($handle) {
-                    (new Session())->start();
-                }
-                session_start();
-            }
-            return session_id();
-        }
-        return null;
-    }
-
-    /**
-     * @param $sid
-     * @param $data
-     * @return bool
-     */
-    public static function setSession($sid, $data = null)
-    {
-        return self::_setData('sid:' . $sid, $data, 0, 'SESSID');
-    }
-
-    /**
-     * @param $sid
-     * @return array
-     */
-    public static function getSession($sid)
-    {
-        return self::_getData('sid:' . $sid, 'SESSID');
+        return self::_getData('data:' . $key, $type);
     }
 
     /**
@@ -144,23 +106,13 @@ class User
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key], 'DECODE'), true) : null;
-        } elseif ('SESSID' == $type) {
-            static $handle = null;
-            if (is_null($handle)) {
-                $handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
-                $handle = $handle::getInstance()->init(Context::dsn('session'));
-            }
-            $ret = $handle->get($key);
-            if ($ret) {
-                $ret = json_decode($ret, true);
-            }
         }
         return $ret;
     }
 
     /**
      * @param string $key
-     * @param array $val
+     * @param array|null $val
      * @param int $life
      * @param null $type
      * @return bool
@@ -191,13 +143,6 @@ class User
             $key = self::getCookieKey($key);
             $val = $val ? self::authCode(json_encode($val), 'ENCODE') : '';
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
-        } elseif ('SESSID' == $type) {
-            static $handle = null;
-            if (is_null($handle)) {
-                $handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
-                $handle = $handle::getInstance()->init(Context::dsn('session'));
-            }
-            $ret = $handle->set($key, json_encode($val), $life);
         }
         return $ret;
     }
@@ -212,7 +157,7 @@ class User
     {
         if ($prefix) {
             if (is_null($key)) {
-                $var = substr(md5(getini('auth/key')), -7, 7) . '_' . $var;
+                $var = substr(md5(getini('auth/key')), -7) . '_' . $var;
             } else {
                 $var = $key . '_' . $var;
             }
@@ -235,28 +180,28 @@ class User
             $hash_auth = md5($hash_key . PHP_VERSION);
         }
         $timestamp = time();
-        $ckey_length = 4;
+        $cKey_length = 4;
         $_key = md5($key ?: $hash_auth);
         $keya = md5(substr($_key, 0, 16));
         $keyb = md5(substr($_key, 16, 16));
-        $keyc = $ckey_length ? ('DECODE' == $operation ? substr($string, 0, $ckey_length) : substr(md5(microtime()), -$ckey_length)) : '';
+        $keyc = $cKey_length ? ('DECODE' == $operation ? substr($string, 0, $cKey_length) : substr(md5(microtime()), -$cKey_length)) : '';
 
-        $cryptkey = $keya . md5($keya . $keyc);
-        $key_length = strlen($cryptkey);
+        $cryptKey = $keya . md5($keya . $keyc);
+        $key_length = strlen($cryptKey);
 
-        $_string = 'DECODE' == $operation ? base64_decode(substr($string, $ckey_length)) : sprintf('%010d', $expiry ? $expiry + $timestamp : 0) . substr(md5($string . $keyb), 0, 16) . $string;
+        $_string = 'DECODE' == $operation ? base64_decode(substr($string, $cKey_length)) : sprintf('%010d', $expiry ? $expiry + $timestamp : 0) . substr(md5($string . $keyb), 0, 16) . $string;
         $string_length = strlen($_string);
 
         $result = '';
         $box = range(0, 255);
 
-        $rndkey = [];
+        $rndKey = [];
         for ($i = 0; $i <= 255; $i++) {
-            $rndkey[$i] = ord($cryptkey[$i % $key_length]);
+            $rndKey[$i] = ord($cryptKey[$i % $key_length]);
         }
 
         for ($j = $i = 0; $i < 256; $i++) {
-            $j = ($j + $box[$i] + $rndkey[$i]) % 256;
+            $j = ($j + $box[$i] + $rndKey[$i]) % 256;
             $tmp = $box[$i];
             $box[$i] = $box[$j];
             $box[$j] = $tmp;

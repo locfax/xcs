@@ -1,9 +1,4 @@
 {
-  "name": "locfax/xcs",
-  "description": "PHP Web Framework",
-  "keywords": ["framework","php", "xcs"],
-  "homepage": "https://github.com/locfax/xcs",
-  "license": "MIT",
   "authors": [
     {
       "name": "locfax",
@@ -11,15 +6,28 @@
       "homepage": "https://github.com/locfax"
     }
   ],
+  "autoload": {
+    "psr-4": {
+      "Xcs\\": "src"
+    },
+    "files": [
+      "src/constant.php"
+    ]
+  },
+  "description": "PHP Web Framework",
+  "homepage": "https://github.com/locfax/xcs",
+  "keywords": [
+    "framework",
+    "php",
+    "xcs"
+  ],
+  "license": "MIT",
+  "name": "locfax/xcs",
   "require": {
     "php": ">=5.4.0",
     "monolog/monolog": "^1.17"
   },
   "suggest": {
     "monolog/monolog": "Allows more advanced logging of the application flow"
-  },
-  "autoload": {
-    "psr-4": {"Xcs\\": "src"},
-    "files": ["src/constant.php"]
   }
 }
