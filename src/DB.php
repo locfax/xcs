@@ -2,7 +2,7 @@
 
 namespace Xcs;
 
-use Xcs\Db\Pdo;
+use Xcs\Db\PdoDb;
 use Xcs\Db\Mongo;
 use Xcs\Db\MongoDb;
 use Xcs\Exception\ExException;
@@ -16,7 +16,7 @@ class DB
 
     /**
      * @param string $dsnId
-     * @return Mongo|MongoDb|Pdo
+     * @return Mongo|MongoDb|PdoDb
      * @throws ExException
      */
     public static function dbo($dsnId = 'portal')
@@ -27,7 +27,7 @@ class DB
         }
 
         $driver = $dsn['driver'];
-        if (!in_array($driver, ['Pdo', 'Mongo', 'MongoDb'])) {
+        if (!in_array($driver, ['PdoDb', 'Mongo', 'MongoDb'])) {
             throw new ExException("dsn driver error");
         }
 
@@ -39,7 +39,7 @@ class DB
 
     /**
      * @param string $dsnId
-     * @return mixed|Pdo
+     * @return mixed|PdoDb
      * @throws ExException
      */
     public static function dbm($dsnId = 'portal')
@@ -49,8 +49,8 @@ class DB
             return self::$used_dbo[$dsn['dsnkey']];
         }
 
-        if ('Pdo' == $dsn['driver']) {
-            $dbo = new Pdo(['dsn' => $dsn]);
+        if ('PdoDb' == $dsn['driver']) {
+            $dbo = new PdoDb(['dsn' => $dsn]);
         } else {
             throw new ExException("dsn driver must be pdo");
         }
@@ -348,7 +348,7 @@ class DB
      * 切换数据源对象
      *
      * @param null $id
-     * @return Pdo|Mongo|MongoDb
+     * @return PdoDb|Mongo|MongoDb
      */
     public static function Using($id = null)
     {

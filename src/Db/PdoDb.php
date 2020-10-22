@@ -6,7 +6,7 @@ use Xcs\BaseObject;
 use Xcs\DB;
 use Xcs\Exception\DbException;
 
-class Pdo extends BaseObject
+class PdoDb extends BaseObject
 {
 
     private $_link = null;
@@ -19,7 +19,7 @@ class Pdo extends BaseObject
     }
 
     /**
-     * Pdo constructor.
+     * PdoDb constructor.
      * @param array|null $config
      */
     public function __construct(array $config = null)
@@ -27,7 +27,7 @@ class Pdo extends BaseObject
         $this->dsn = $config['dsn'];
 
         if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoDbException');
+            new DbException('dsn is empty', 404, 'PdoException');
             return;
         }
 
@@ -718,7 +718,7 @@ class Pdo extends BaseObject
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
+            new DbException($message . ' SQL: ' . $sql, intval($code), 'PdoException');
         }
         return false;
     }

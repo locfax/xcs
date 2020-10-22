@@ -51,7 +51,7 @@ class MongoDb extends BaseObject
         $this->dsn = $config['dsn'];
 
         if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoDbException');
+            new DbException('dsn is empty', 404, 'PdoException');
             return;
         }
 

@@ -38,7 +38,7 @@ class Mongo extends BaseObject
         $this->dsn = $config['dsn'];
 
         if (empty($this->dsn)) {
-            new DbException('config is empty', 404, 'PdoDbException');
+            new DbException('config is empty', 404, 'PdoException');
             return;
         }
 
