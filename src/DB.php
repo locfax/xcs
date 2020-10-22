@@ -2,9 +2,9 @@
 
 namespace Xcs;
 
-use Xcs\Database\Pdo;
-use Xcs\Database\Mongo;
-use Xcs\Database\MongoDb;
+use Xcs\Db\Pdo;
+use Xcs\Db\Mongo;
+use Xcs\Db\MongoDb;
 use Xcs\Exception\ExException;
 
 class DB
@@ -29,7 +29,6 @@ class DB
         $driver = $dsn['driver'];
         if(!in_array($driver, ['Pdo', 'Mongo', 'MongoDb'])) {
             throw new ExException("dsn driver error");
-            return;
         }
 
         $dbo = new $driver($dsn);
@@ -41,6 +40,7 @@ class DB
     /**
      * @param string $dsnId
      * @return mixed|Pdo
+     * @throws ExException
      */
     public static function dbm($dsnId = 'portal')
     {

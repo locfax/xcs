@@ -24,7 +24,7 @@ class RestFul extends Controller
     /**
      * @param $name
      * @param $arguments
-     * @return bool
+     * @return void
      */
     public function __call($name, $arguments)
     {

@@ -2,6 +2,8 @@
 
 namespace Xcs;
 
+use Monolog\Logger;
+
 class Log
 {
 
@@ -12,8 +14,8 @@ class Log
     public function __construct()
     {
         $logfile = DATA_PATH . 'debug.log';
-        $this->log = new \Monolog\Logger('run');
-        $this->log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, \Monolog\Logger::WARNING));
+        $this->log = new Logger('run');
+        $this->log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, Logger::WARNING));
         return $this->log;
     }
 

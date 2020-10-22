@@ -1,6 +1,6 @@
 <?php
 
-namespace Xcs\Database;
+namespace Xcs\Db;
 
 use \MongoDB\BSON\ObjectID;
 use \MongoDB\Driver\BulkWrite;
@@ -11,13 +11,16 @@ use \MongoDB\Driver\Query as MongoQuery;
 use \MongoDB\Driver\Command;
 use \MongoDB\Driver\ReadPreference;
 use \MongoDB\Driver\WriteConcern;
+use Xcs\BaseObject;
+use Xcs\DB;
+use Xcs\Exception\DbException;
 
-class MongoDb
+class MongoDb extends BaseObject
 {
     /**
      * @var array
      */
-    private $_config = [];
+    private $config = [];
 
     /**
      * @var Manager
@@ -50,7 +53,7 @@ class MongoDb
         $this->config = $config;
 
         if (empty($this->config)) {
-            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            new DbException('config is empty', 404, 'PdoDbException');
             return;
         }
 
@@ -63,7 +66,7 @@ class MongoDb
 
     public function info()
     {
-        return $this->_config;
+        return $this->config;
     }
 
     public function close()
@@ -113,11 +116,11 @@ class MongoDb
     /**
      * @param $table
      * @param array $document
-     * @throws \Xcs\Exception\DbException
+     * @return null
      */
     public function replace($table, $document = [])
     {
-        throw new \Xcs\Exception\DbException('未实现', 404);
+        return null;
     }
 
     /**
@@ -304,7 +307,6 @@ class MongoDb
      * @param int $pageParam
      * @param int $length
      * @return array|bool
-     * @throws \MongoDB\Driver\Exception\Exception
      */
     function page($table, $field, $condition, $pageParam = 0, $length = 18)
     {
@@ -314,9 +316,9 @@ class MongoDb
             if ($pageParam['totals'] <= 0) {
                 return $ret;
             }
-            $start = \Xcs\DB::pageStart($pageParam['curpage'], $length, $pageParam['totals']);
+            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);
-            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
+            $ret['pagebar'] = DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
@@ -347,6 +349,19 @@ class MongoDb
     }
 
     /**
+     * @param int $page
+     * @param int $ppp
+     * @param int $totalNum
+     * @return int
+     */
+    private function page_start($page, $ppp, $totalNum)
+    {
+        $totalPage = ceil($totalNum / $ppp);
+        $_page = max(1, min($totalPage, intval($page)));
+        return ($_page - 1) * $ppp;
+    }
+
+    /**
      * @param string $message
      * @param int $code
      * @param string $sql
@@ -354,11 +369,11 @@ class MongoDb
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->_config['rundev']) {
+        if ($this->config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
+            new DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
         }
         return false;
     }

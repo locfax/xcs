@@ -1,20 +1,16 @@
 <?php
 
-namespace Xcs\Database;
+namespace Xcs\Db;
 
-class Pdo
+use Xcs\BaseObject;
+use Xcs\DB;
+use Xcs\Exception\DbException;
+
+class Pdo extends BaseObject
 {
 
     private $_link = null;
     private $config = [];
-
-    /**
-     * @return false|string
-     */
-    public static function className()
-    {
-        return get_called_class();
-    }
 
     public function __destruct()
     {
@@ -31,7 +27,7 @@ class Pdo
         $this->config = $config;
 
         if (empty($this->config)) {
-            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            new DbException('config is empty', 404, 'PdoDbException');
             return;
         }
 
@@ -107,8 +103,7 @@ class Pdo
     public function qfield($fieldName)
     {
         $_fieldName = trim($fieldName);
-        $ret = ($_fieldName == '*') ? '*' : "`{$_fieldName}`";
-        return $ret;
+        return ($_fieldName == '*') ? '*' : "`{$_fieldName}`";
     }
 
     /**
@@ -404,7 +399,7 @@ class Pdo
             }
             $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retObj);
-            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
+            $ret['pagebar'] = DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
@@ -618,7 +613,7 @@ class Pdo
             }
             $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
-            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
+            $ret['pagebar'] = DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
@@ -722,7 +717,7 @@ class Pdo
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new \Xcs\Exception\DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
+            new DbException($message . ' SQL: ' . $sql, intval($code), 'PdoDbException');
         }
         return false;
     }

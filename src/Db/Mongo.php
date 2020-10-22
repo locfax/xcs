@@ -1,14 +1,18 @@
 <?php
 
-namespace Xcs\Database;
+namespace Xcs\Db;
 
-class Mongo
+use Xcs\BaseObject;
+use Xcs\DB;
+use Xcs\Exception\DbException;
+
+class Mongo extends BaseObject
 {
 
     /**
      * @var array
      */
-    private $_config = [];
+    private $config = [];
     /**
      * @var \MongoClient
      */
@@ -33,7 +37,7 @@ class Mongo
         $this->config = $config;
 
         if (empty($this->config)) {
-            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            new DbException('config is empty', 404, 'PdoDbException');
             return;
         }
 
@@ -55,7 +59,7 @@ class Mongo
 
     public function info()
     {
-        return $this->_config;
+        return $this->config;
     }
 
     public function close()
@@ -101,6 +105,8 @@ class Mongo
             return $ret['ok'];
         } catch (\MongoException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $ex) {
+            return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
 
@@ -121,6 +127,8 @@ class Mongo
             $ret = $collection->save($document);
             return $ret['ok'];
         } catch (\MongoException $ex) {
+            return $this->_halt($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -165,6 +173,8 @@ class Mongo
             return $ret;
         } catch (\MongoCursorException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $ex) {
+            return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
 
@@ -190,6 +200,8 @@ class Mongo
             }
             return $ret;
         } catch (\MongoCursorException $ex) {
+            return $this->_halt($ex->getMessage(), $ex->getCode());
+        } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -279,7 +291,7 @@ class Mongo
             } else {
                 //内镶文档查询
                 if (!$fields) {
-                    throw new \Xcs\Exception\DbException('fields is empty', 0);
+                    throw new DbException('fields is empty', 0);
                 }
                 $cursor = $collection->findOne($condition['query'], [$fields => ['$slice' => [$offset, $length]]]);
                 return $cursor[$fields];
@@ -305,9 +317,9 @@ class Mongo
             if ($pageParam['totals'] <= 0) {
                 return $ret;
             }
-            $start = \Xcs\DB::pageStart($pageParam['curpage'], $length, $pageParam['totals']);
+            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
             $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);
-            $ret['pagebar'] = \Xcs\DB::pageBar($pageParam, $length);
+            $ret['pagebar'] = DB::pageBar($pageParam, $length);
             return $ret;
         } else {
             //任意长度模式
@@ -337,6 +349,19 @@ class Mongo
     }
 
     /**
+     * @param int $page
+     * @param int $ppp
+     * @param int $totalNum
+     * @return int
+     */
+    private function page_start($page, $ppp, $totalNum)
+    {
+        $totalPage = ceil($totalNum / $ppp);
+        $_page = max(1, min($totalPage, intval($page)));
+        return ($_page - 1) * $ppp;
+    }
+
+    /**
      * @param string $message
      * @param int $code
      * @param string $sql
@@ -344,11 +369,11 @@ class Mongo
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->_config['rundev']) {
+        if ($this->config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new \Xcs\Exception\DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
+            new DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
         }
         return false;
     }
