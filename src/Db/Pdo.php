@@ -10,7 +10,8 @@ class Pdo extends BaseObject
 {
 
     private $_link = null;
-    private $config = [];
+    private $dsn = [];
+    private $repeat = false;
 
     public function __destruct()
     {
@@ -19,15 +20,14 @@ class Pdo extends BaseObject
 
     /**
      * Pdo constructor.
-     * @param array $config
-     * @param bool $repeat
+     * @param array|null $config
      */
-    public function __construct(array $config, $repeat = false)
+    public function __construct(array $config = null)
     {
-        $this->config = $config;
+        $this->dsn = $config['dsn'];
 
-        if (empty($this->config)) {
-            new DbException('config is empty', 404, 'PdoDbException');
+        if (empty($this->dsn)) {
+            new DbException('dsn is empty', 404, 'PdoDbException');
             return;
         }
 
@@ -39,20 +39,21 @@ class Pdo extends BaseObject
         ];
 
         $mysql = false;
-        if (strpos($this->config['dsn'], 'mysql') !== false) {
+        if (strpos($this->dsn['dsn'], 'mysql') !== false) {
             $opt[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
             $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
             $mysql = true;
         }
 
         try {
-            $this->_link = new \PDO($this->config['dsn'], $this->config['login'], $this->config['secret'], $opt);
+            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $opt);
             if (!$mysql) {
                 $this->_link->exec('SET NAMES utf8');
             }
         } catch (\PDOException $exception) {
-            if ($repeat == false) {
-                $this->__construct($this->config, true);
+            if (!$this->repeat) {
+                $this->repeat = true;
+                $this->__construct($config);
             } else {
                 $this->close();
                 $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
@@ -62,7 +63,7 @@ class Pdo extends BaseObject
 
     public function info()
     {
-        return $this->config;
+        return $this->dsn;
     }
 
     public function close()
@@ -713,7 +714,7 @@ class Pdo extends BaseObject
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->config['rundev']) {
+        if ($this->dsn['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);

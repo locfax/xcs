@@ -12,7 +12,7 @@ class Mongo extends BaseObject
     /**
      * @var array
      */
-    private $config = [];
+    private $dsn = [];
     /**
      * @var \MongoClient
      */
@@ -22,6 +22,8 @@ class Mongo extends BaseObject
      */
     private $_client = null;
 
+    private $repeat = false;
+
     public function __destruct()
     {
         $this->close();
@@ -29,27 +31,27 @@ class Mongo extends BaseObject
 
     /**
      * Mongo constructor.
-     * @param $config
-     * @param bool $repeat
+     * @param array|null $config
      */
-    public function __construct($config, $repeat = false)
+    public function __construct(array $config = null)
     {
-        $this->config = $config;
+        $this->dsn = $config['dsn'];
 
-        if (empty($this->config)) {
+        if (empty($this->dsn)) {
             new DbException('config is empty', 404, 'PdoDbException');
             return;
         }
 
         try {
-            $this->_link = new \MongoClient($config['dsn'], ["connect" => true]);
-            $this->_client = $this->_link->selectDB($config['dbname']);
-            if (isset($config['login']) && $config['login']) {
-                $this->_client->authenticate($config['login'], $config['secret']);
+            $this->_link = new \MongoClient($this->dsn['dsn'], ["connect" => true]);
+            $this->_client = $this->_link->selectDB($this->dsn['dbname']);
+            if (isset($this->dsn['login']) && $this->dsn['login']) {
+                $this->_client->authenticate($this->dsn['login'], $this->dsn['secret']);
             }
         } catch (\MongoConnectionException $e) {
-            if ($repeat == false) {
-                $this->__construct($config, true);
+            if (!$this->repeat) {
+                $this->repeat = true;
+                $this->__construct($config);
             } else {
                 $this->close();
                 $this->_halt('client is not connected!');
@@ -59,7 +61,7 @@ class Mongo extends BaseObject
 
     public function info()
     {
-        return $this->config;
+        return $this->dsn;
     }
 
     public function close()
@@ -369,7 +371,7 @@ class Mongo extends BaseObject
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->config['rundev']) {
+        if ($this->dsn['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);

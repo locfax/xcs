@@ -20,7 +20,7 @@ class MongoDb extends BaseObject
     /**
      * @var array
      */
-    private $config = [];
+    private $dsn = [];
 
     /**
      * @var Manager
@@ -37,7 +37,6 @@ class MongoDb extends BaseObject
      */
     private $_dbname = null;
 
-
     public function __destruct()
     {
         $this->close();
@@ -45,28 +44,27 @@ class MongoDb extends BaseObject
 
     /**
      * MongoDb constructor.
-     * @param $config
-     * @param bool $repeat
+     * @param array|null $config
      */
-    public function __construct(array $config, $repeat = false)
+    public function __construct(array $config = null)
     {
-        $this->config = $config;
+        $this->dsn = $config['dsn'];
 
-        if (empty($this->config)) {
-            new DbException('config is empty', 404, 'PdoDbException');
+        if (empty($this->dsn)) {
+            new DbException('dsn is empty', 404, 'PdoDbException');
             return;
         }
 
-        $uri = 'mongodb://' . ($config['login'] ? "{$config['login']}" : '') . ($config['secret'] ? ":{$config['secret']}@" : '') . $config['host'] . ($config['port'] ? ":{$config['port']}" : '') . '/' . ($config['dbname'] ? "{$config['dbname']}" : '');
+        $uri = 'mongodb://' . ($this->dsn['login'] ? "{$this->dsn['login']}" : '') . ($this->dsn['secret'] ? ":{$this->dsn['secret']}@" : '') . $this->dsn['host'] . ($this->dsn['port'] ? ":{$this->dsn['port']}" : '') . '/' . ($this->dsn['dbname'] ? "{$this->dsn['dbname']}" : '');
         $this->_link = new Manager($uri);
         $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
-        $this->_dbname = $config['dbname'];
+        $this->_dbname = $this->dsn['dbname'];
 
     }
 
     public function info()
     {
-        return $this->config;
+        return $this->dsn;
     }
 
     public function close()
@@ -369,7 +367,7 @@ class MongoDb extends BaseObject
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->config['rundev']) {
+        if ($this->dsn['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
