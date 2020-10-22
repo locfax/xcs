@@ -25,11 +25,7 @@
   "name": "locfax/xcs",
   "require": {
     "php": ">=5.4.0",
-    "monolog/monolog": "^2.1.1",
-    "ext-mongodb": "*",
-    "ext-mbstring": "*",
-    "ext-mongo": "*",
-    "ext-pdo": "*"
+    "monolog/monolog": "^2.1.1"
   },
   "suggest": {}
 }
