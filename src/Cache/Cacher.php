@@ -2,6 +2,8 @@
 
 namespace Xcs\Cache;
 
+use \Xcs\Exception\ExException;
+
 class Cacher
 {
 
@@ -16,7 +18,7 @@ class Cacher
     /**
      * Cacher constructor.
      * @param null $cacher
-     * @throws \Exception
+     * @throws ExException
      */
     public function __construct($cacher = null)
     {
@@ -38,11 +40,18 @@ class Cacher
         }
     }
 
+    /**
+     * @return bool
+     */
     public function close()
     {
         return $this->enable && $this->cacher->close();
     }
 
+    /**
+     * @param $key
+     * @return mixed|null
+     */
     public function get($key)
     {
         $ret = null;
@@ -58,6 +67,12 @@ class Cacher
         return $ret;
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @param int $ttl
+     * @return bool
+     */
     public function set($key, $value, $ttl = 0)
     {
         $ret = false;
@@ -68,6 +83,10 @@ class Cacher
         return $ret;
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     public function rm($key)
     {
         $ret = false;
@@ -77,6 +96,9 @@ class Cacher
         return $ret;
     }
 
+    /**
+     * @return bool
+     */
     public function clear()
     {
         $ret = false;
@@ -86,6 +108,10 @@ class Cacher
         return $ret;
     }
 
+    /**
+     * @param $str
+     * @return string
+     */
     private function _key($str)
     {
         return $this->prefix . $str;

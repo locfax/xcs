@@ -9,7 +9,7 @@ class Context
      * @param $dsnId
      * @return mixed
      */
-    public static function dsn($dsnId)
+    public static function dsn($dsnId = 'portal')
     {
         static $_dsns = [];
         $appKey = APP_KEY;

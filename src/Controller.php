@@ -54,16 +54,6 @@ class Controller
     }
 
     /**
-     * 时区
-     */
-    private function init_timezone()
-    {
-        //php > 5.1
-        $timeoffset = getini('settings/timezone');
-        $timeoffset && date_default_timezone_set('Etc/GMT' . ($timeoffset > 0 ? '-' : '+') . abs($timeoffset));
-    }
-
-    /**
      * 权限验证
      */
     final function checkacl($controllerName, $actionName, $auth = AUTH_ROLE)

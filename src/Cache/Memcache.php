@@ -14,7 +14,7 @@ class Memcache
     /**
      * @param $config
      * @return $this
-     * @throws \Exception
+     * @throws \Xcs\Exception\ExException
      */
     public function init($config)
     {

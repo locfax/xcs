@@ -5,8 +5,17 @@ namespace Xcs\Database;
 class Mongo
 {
 
-    private $_config = null;
+    /**
+     * @var array
+     */
+    private $_config = [];
+    /**
+     * @var \MongoClient
+     */
     private $_link = null;
+    /**
+     * @var \MongoDB
+     */
     private $_client = null;
 
     public function __destruct()
@@ -21,9 +30,13 @@ class Mongo
      */
     public function __construct($config, $repeat = false)
     {
-        if (is_null($this->_config)) {
-            $this->_config = $config;
+        $this->config = $config;
+
+        if (empty($this->config)) {
+            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            return;
         }
+
         try {
             $this->_link = new \MongoClient($config['dsn'], ["connect" => true]);
             $this->_client = $this->_link->selectDB($config['dbname']);
@@ -67,7 +80,7 @@ class Mongo
      * @param $table
      * @param array $document
      * @param bool $retid
-     * @return bool|string
+     * @return bool|mixed|string
      */
     public function create($table, $document = [], $retid = false)
     {
@@ -86,7 +99,7 @@ class Mongo
                 return $insert_id;
             }
             return $ret['ok'];
-        } catch (\Exception $ex) {
+        } catch (\MongoException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -107,7 +120,7 @@ class Mongo
             $collection = $this->_client->selectCollection($table);
             $ret = $collection->save($document);
             return $ret['ok'];
-        } catch (\Exception $ex) {
+        } catch (\MongoException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -150,7 +163,7 @@ class Mongo
                 $ret = $collection->update($condition, ['$addToSet' => $document], ['multi' => false, 'upsert' => false]);
             }
             return $ret;
-        } catch (\Exception $ex) {
+        } catch (\MongoCursorException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -176,7 +189,7 @@ class Mongo
                 $ret = $collection->remove($condition, ['justOne' => true]);
             }
             return $ret;
-        } catch (\Exception $ex) {
+        } catch (\MongoCursorException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -185,9 +198,9 @@ class Mongo
      * @param $table
      * @param array $fields
      * @param array $condition
-     * @return mixed
+     * @return array|bool|null
      */
-    public function find_one($table, $fields = [], $condition = [])
+    public function findOne($table, $fields = [], $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -212,7 +225,7 @@ class Mongo
      * @param array $condition
      * @return array|bool|\Generator
      */
-    public function find_all($table, $fields = [], $condition = [])
+    public function findAll($table, $fields = [], $condition = [])
     {
         try {
             $collection = $this->_client->selectCollection($table);

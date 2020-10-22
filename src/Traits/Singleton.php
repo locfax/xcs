@@ -7,6 +7,9 @@ Trait Singleton
 
     protected static $singleton_instances = [];
 
+    /**
+     * @throws \Xcs\Exception\ExException
+     */
     public function __clone()
     {
         throw new \Xcs\Exception\ExException('Cloning ' . __CLASS__ . ' is not allowed');

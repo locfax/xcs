@@ -14,7 +14,7 @@ class Redis
     /**
      * @param $config
      * @return $this
-     * @throws \Exception
+     * @throws \Xcs\Exception\ExException
      */
     public function init($config)
     {
@@ -82,7 +82,7 @@ class Redis
     /**
      * @param $key
      * @param int $ttl
-     * @return mixed
+     * @return bool
      */
     public function expire($key, $ttl = 0)
     {

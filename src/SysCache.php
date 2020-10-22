@@ -5,7 +5,7 @@ namespace Xcs;
 class SysCache
 {
 
-    const dsn = 'general';
+    public static $dsn = 'general';
 
     //加载系统级别缓存
     public static function loadcache($cachename, $reset = false)
@@ -13,7 +13,9 @@ class SysCache
         if (!$cachename) {
             return null;
         }
+
         $data = self::data($cachename, $reset);
+
         return json_decode($data, true);
     }
 
@@ -36,16 +38,18 @@ class SysCache
                 $lost = $cachename;  //未取到数据
             }
         }
+
         if (is_null($lost)) {
             return $data; //取到全部数据 则返回
         }
+
         return self::lost($lost, $reset);
     }
 
     public static function lost($cachename, $reset = false)
     {
         if (!$reset) { //允许从数据库直接获取
-            $syscache = DB::dbm(self::dsn)->find_one('syscache', '*', ['cname' => 'sys_' . strtolower($cachename)]);
+            $syscache = DB::dbm(self::$dsn)->findOne('syscache', '*', ['cname' => 'sys_' . strtolower($cachename)]);
             if ($syscache) {
                 Cache::set($syscache['cname'], stripslashes($syscache['data']));
                 return $syscache['data'];
@@ -71,18 +75,19 @@ class SysCache
     }
 
     public static function save($cachename, $data, $delcache = true)
-    { //$delcache true 会清理该缓存，在下次需要时自动载入缓存
+    {
+        //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
             $data = App::output_json($data);
-        } else {
-            $data = trim($data);
         }
+
         //缓存入库
         $post = ['cname' => $cachename, 'ctype' => 1, 'dateline' => time(), 'data' => $data];
-        DB::dbm(self::dsn)->replace('syscache', $post);
+        DB::dbm(self::$dsn)->replace('syscache', $post);
         if (!$delcache) {
             return;
         }
+
         Cache::rm($cachename);
     }
 }

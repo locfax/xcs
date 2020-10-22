@@ -5,8 +5,7 @@ namespace Xcs\Database;
 use \MongoDB\BSON\ObjectID;
 use \MongoDB\Driver\BulkWrite;
 use \MongoDB\Driver\Exception\BulkWriteException;
-use \MongoDB\Driver\Exception\ConnectionException;
-use \MongoDB\Driver\Exception\RuntimeException;
+use \MongoDB\Driver\Exception\Exception;
 use \MongoDB\Driver\Manager;
 use \MongoDB\Driver\Query as MongoQuery;
 use \MongoDB\Driver\Command;
@@ -15,9 +14,24 @@ use \MongoDB\Driver\WriteConcern;
 
 class MongoDb
 {
-    private $_config = null;
+    /**
+     * @var array
+     */
+    private $_config = [];
+
+    /**
+     * @var Manager
+     */
     private $_link = null;
+
+    /**
+     * @var WriteConcern|null
+     */
     private $_writeConcern = null;
+
+    /**
+     * @var mixed|null
+     */
     private $_dbname = null;
 
 
@@ -31,24 +45,20 @@ class MongoDb
      * @param $config
      * @param bool $repeat
      */
-    public function __construct($config, $repeat = false)
+    public function __construct(array $config, $repeat = false)
     {
-        if (is_null($this->_config)) {
-            $this->_config = $config;
+        $this->config = $config;
+
+        if (empty($this->config)) {
+            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            return;
         }
-        try {
-            $uri = 'mongodb://' . ($config['login'] ? "{$config['login']}" : '') . ($config['secret'] ? ":{$config['secret']}@" : '') . $config['host'] . ($config['port'] ? ":{$config['port']}" : '') . '/' . ($config['dbname'] ? "{$config['dbname']}" : '');
-            $this->_link = new Manager($uri);
-            $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 1000);
-            $this->_dbname = $config['dbname'];
-        } catch (ConnectionException $e) {
-            if ($repeat == false) {
-                $this->__construct($config, true);
-            } else {
-                $this->close();
-                $this->_halt('client is not connected! ' . $e->getMessage());
-            }
-        }
+
+        $uri = 'mongodb://' . ($config['login'] ? "{$config['login']}" : '') . ($config['secret'] ? ":{$config['secret']}@" : '') . $config['host'] . ($config['port'] ? ":{$config['port']}" : '') . '/' . ($config['dbname'] ? "{$config['dbname']}" : '');
+        $this->_link = new Manager($uri);
+        $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
+        $this->_dbname = $config['dbname'];
+
     }
 
     public function info()
@@ -114,8 +124,8 @@ class MongoDb
      * @param $table
      * @param array $document
      * @param array $condition
-     * @param mixed $options
-     * @return bool
+     * @param string $options
+     * @return bool|int|null
      */
     public function update($table, $document = [], $condition = [], $options = 'set')
     {
@@ -157,7 +167,7 @@ class MongoDb
      * @param $table
      * @param array $condition
      * @param bool $muti
-     * @return bool
+     * @return bool|int|null
      */
     public function remove($table, $condition = [], $muti = false)
     {
@@ -180,12 +190,11 @@ class MongoDb
 
     /**
      * @param $table
-     * @param array $fields
+     * @param null $fields
      * @param array $condition
      * @return array|bool
-     * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function find_one($table, $fields = null, $condition = [])
+    public function findOne($table, $fields = null, $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -204,7 +213,7 @@ class MongoDb
             }
             $cursor = null;
             return $ret;
-        } catch (RuntimeException $ex) {
+        } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -215,9 +224,8 @@ class MongoDb
      * @param array $fields
      * @param array $condition
      * @return array|bool
-     * @throws \MongoDB\Driver\Exception\Exception
      */
-    public function find_all($table, $fields = null, $condition = [])
+    public function findAll($table, $fields = null, $condition = [])
     {
         try {
             if (isset($condition['sort'])) {
@@ -240,7 +248,7 @@ class MongoDb
             }
             $cursor = null;
             return $rowsets;
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -253,7 +261,6 @@ class MongoDb
      * @param int $offset
      * @param int $length
      * @return array|bool
-     * @throws \MongoDB\Driver\Exception\Exception
      */
     private function _page($table, $fields, $condition, $offset = 0, $length = 18)
     {
@@ -285,7 +292,7 @@ class MongoDb
             }
             $cursor = null;
             return $rowsets;
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }
@@ -323,7 +330,6 @@ class MongoDb
      * @param $table
      * @param array $condition
      * @return bool
-     * @throws \MongoDB\Driver\Exception\Exception
      */
     public function count($table, $condition = [])
     {
@@ -335,7 +341,7 @@ class MongoDb
             $cursor = $this->_link->executeCommand($this->_dbname, new Command($cmd), new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
             return $cursor[0]->n;
-        } catch (RuntimeException $ex) {
+        } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
     }

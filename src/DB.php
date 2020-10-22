@@ -2,6 +2,11 @@
 
 namespace Xcs;
 
+use Xcs\Database\Pdo;
+use Xcs\Database\Mongo;
+use Xcs\Database\MongoDb;
+use Xcs\Exception\ExException;
+
 class DB
 {
 
@@ -9,63 +14,54 @@ class DB
     private static $using_dbo_id = null;
     private static $used_dbo = [];
 
-    public static function info()
-    {
-        $db = self::Using(self::$using_dbo_id);
-        return $db->info();
-    }
-
     /**
      * @param string $dsnId
-     * @return mixed
+     * @return Mongo|MongoDb|Pdo
+     * @throws ExException
      */
     public static function dbo($dsnId = 'portal')
     {
-        $_dsn = Context::dsn($dsnId);
-        $dsnKey = $_dsn['dsnkey']; //连接池key
-        if (isset(self::$used_dbo[$dsnKey])) {
-            return self::$used_dbo[$dsnKey];
-        } elseif ('mongo' == $_dsn['driver']) {
-            $dbo = new Database\Mongo($_dsn);
-        } elseif ('mongodb' == $_dsn['driver']) {
-            $dbo = new Database\MongoDb($_dsn);
-        } elseif ('pdo' == $_dsn['driver']) {
-            $dbo = new Database\Pdo($_dsn);
-        } elseif ('mysqli' == $_dsn['driver']) {
-            $dbo = new Database\Mysqli($_dsn);
-        } else {
-            $dbo = new Database\Pdo($_dsn);
+        $dsn = Context::dsn($dsnId);
+        if (isset(self::$used_dbo[$dsn['dsnkey']])) {
+            return self::$used_dbo[$dsn['dsnkey']];
         }
-        self::$used_dbo[$dsnKey] = $dbo;
+
+        $driver = $dsn['driver'];
+        if(!in_array($driver, ['Pdo', 'Mongo', 'MongoDb'])) {
+            throw new ExException("dsn driver error");
+            return;
+        }
+
+        $dbo = new $driver($dsn);
+
+        self::$used_dbo[$dsn['dsnkey']] = $dbo;
         return $dbo;
     }
 
     /**
      * @param string $dsnId
-     * @return Database\Pdo
+     * @return mixed|Pdo
      */
     public static function dbm($dsnId = 'portal')
     {
-        $_dsn = Context::dsn($dsnId);
-        $dsnKey = $_dsn['dsnkey']; //连接池key
-        if (isset(self::$used_dbo[$dsnKey])) {
-            return self::$used_dbo[$dsnKey];
-        } elseif ('pdo' == $_dsn['driver']) {
-            $dbo = new Database\Pdo($_dsn);
-        } elseif ('mysqli' == $_dsn['driver']) {
-            $dbo = new Database\Mysqli($_dsn);
-        } else {
-            $dbo = new Database\Pdo($_dsn);
+        $dsn = Context::dsn($dsnId);
+        if (isset(self::$used_dbo[$dsn['dsnkey']])) {
+            return self::$used_dbo[$dsn['dsnkey']];
         }
-        self::$used_dbo[$dsnKey] = $dbo;
+
+        if ('Pdo' == $dsn['driver']) {
+            $dbo = new Pdo($dsn);
+        } else {
+            throw new ExException("dsn driver must be pdo");
+        }
+        self::$used_dbo[$dsn['dsnkey']] = $dbo;
         return $dbo;
     }
 
     public static function close()
     {
-        $_dbo = self::$used_dbo;
-        if (!empty($_dbo)) {
-            foreach ($_dbo as $dbo) {
+        if (!empty(self::$used_dbo)) {
+            foreach (self::$used_dbo as $dbo) {
                 $dbo->close();
             }
         }
@@ -77,6 +73,12 @@ class DB
     public static function resume()
     {
         self::$using_dbo_id = self::$default_dbo_id;
+    }
+
+    public static function info()
+    {
+        $db = self::Using(self::$using_dbo_id);
+        return $db->info();
     }
 
     /**
@@ -152,7 +154,7 @@ class DB
     public static function findOne($table, $field, $condition, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->find_one($table, $field, $condition, $retObj);
+        return $db->findOne($table, $field, $condition, $retObj);
     }
 
     /**
@@ -168,7 +170,7 @@ class DB
     public static function findAll($table, $field = '*', $condition = '', $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->find_all($table, $field, $condition, $index, $retObj);
+        return $db->findAll($table, $field, $condition, $index, $retObj);
     }
 
     /**
@@ -346,7 +348,7 @@ class DB
      * 切换数据源对象
      *
      * @param null $id
-     * @return mixed
+     * @return Pdo|Mongo|MongoDb
      */
     public static function Using($id = null)
     {

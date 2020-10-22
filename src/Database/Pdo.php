@@ -5,8 +5,16 @@ namespace Xcs\Database;
 class Pdo
 {
 
-    private $_config = null;
     private $_link = null;
+    private $config = [];
+
+    /**
+     * @return false|string
+     */
+    public static function className()
+    {
+        return get_called_class();
+    }
 
     public function __destruct()
     {
@@ -15,13 +23,16 @@ class Pdo
 
     /**
      * Pdo constructor.
-     * @param $config
+     * @param array $config
      * @param bool $repeat
      */
-    public function __construct($config, $repeat = false)
+    public function __construct(array $config, $repeat = false)
     {
-        if (is_null($this->_config)) {
-            $this->_config = $config;
+        $this->config = $config;
+
+        if (empty($this->config)) {
+            new \Xcs\Exception\DbException('config is empty', 404, 'PdoDbException');
+            return;
         }
 
         $opt = [
@@ -30,30 +41,32 @@ class Pdo
             \PDO::ATTR_EMULATE_PREPARES => false,
             \PDO::ATTR_PERSISTENT => false
         ];
+
+        $mysql = false;
+        if (strpos($this->config['dsn'], 'mysql') !== false) {
+            $opt[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
+            $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
+            $mysql = true;
+        }
+
         try {
-            $mysql = false;
-            if (strpos($config['dsn'], 'mysql') !== false) {
-                $opt[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
-                $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
-                $mysql = true;
-            }
-            $this->_link = new \PDO($config['dsn'], $config['login'], $config['secret'], $opt);
+            $this->_link = new \PDO($this->config['dsn'], $this->config['login'], $this->config['secret'], $opt);
             if (!$mysql) {
                 $this->_link->exec('SET NAMES utf8');
             }
         } catch (\PDOException $exception) {
             if ($repeat == false) {
-                $this->__construct($config, true);
+                $this->__construct($this->config, true);
             } else {
                 $this->close();
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect_error');
+                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }
     }
 
     public function info()
     {
-        return $this->_config;
+        return $this->config;
     }
 
     public function close()
@@ -267,7 +280,7 @@ class Pdo
      * @param $retObj
      * @return mixed
      */
-    public function find_one($tableName, $field, $condition, $retObj = false)
+    public function findOne($tableName, $field, $condition, $retObj = false)
     {
         try {
             if (is_array($condition)) {
@@ -300,7 +313,7 @@ class Pdo
      * @param bool $retObj
      * @return mixed
      */
-    public function find_all($tableName, $field = '*', $condition = '', $index = null, $retObj = false)
+    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retObj = false)
     {
         try {
             if (is_array($condition) && !empty($condition)) {
@@ -705,7 +718,7 @@ class Pdo
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->_config['rundev']) {
+        if ($this->config['rundev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);

@@ -11,7 +11,7 @@ class File
 
     /**
      * @return $this
-     * @throws \Exception
+     * @throws \Xcs\Exception\ExException
      */
     public function init()
     {
@@ -29,7 +29,7 @@ class File
 
     /**
      * @param $key
-     * @return null
+     * @return mixed|null
      */
     public function get($key)
     {
@@ -105,7 +105,7 @@ class File
      * @param $filename
      * @param $content
      * @param $mode
-     * @return bool|int
+     * @return false|int
      */
     public function save($filename, $content, $mode)
     {
