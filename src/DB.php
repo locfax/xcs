@@ -26,11 +26,11 @@ class DB
             return self::$used_dbo[$dsn['dsnkey']];
         }
 
-        $driver = $dsn['driver'];
-        if (!in_array($driver, ['PdoDb', 'Mongo', 'MongoDb'])) {
+        if (!in_array($dsn['driver'], ['PdoDb', 'Mongo', 'MongoDb'])) {
             throw new ExException("dsn driver error");
         }
 
+        $driver = '\\Xcs\\Db\\' . $dsn['driver'];
         $dbo = new $driver(['dsn' => $dsn]);
 
         self::$used_dbo[$dsn['dsnkey']] = $dbo;
@@ -54,6 +54,7 @@ class DB
         } else {
             throw new ExException("dsn driver must be pdo");
         }
+
         self::$used_dbo[$dsn['dsnkey']] = $dbo;
         return $dbo;
     }
