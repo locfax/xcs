@@ -31,25 +31,10 @@ class PdoDb extends BaseObject
             return;
         }
 
-        $opt = [
-            \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-            \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-            \PDO::ATTR_EMULATE_PREPARES => false,
-            \PDO::ATTR_PERSISTENT => false
-        ];
-
-        $mysql = false;
-        if (strpos($this->dsn['dsn'], 'mysql') !== false) {
-            $opt[\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY] = true;
-            $opt[\PDO::MYSQL_ATTR_INIT_COMMAND] = 'SET NAMES utf8';
-            $mysql = true;
-        }
-
         try {
-            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $opt);
-            if (!$mysql) {
-                $this->_link->exec('SET NAMES utf8');
-            }
+            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret']);
+            $this->_link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+            $this->_link->exec('SET NAMES utf8');
         } catch (\PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
@@ -291,7 +276,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetch();
+                $data = $sth->fetch(\PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
@@ -328,7 +313,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetchAll();
+                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
                     $data = $this->array_index($data, $index);
                 }
@@ -371,7 +356,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetchAll();
+                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
@@ -524,7 +509,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetch();
+                $data = $sth->fetch(\PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
@@ -554,7 +539,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetchAll();
+                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
                     $data = $this->array_index($data, $index);
                 }
@@ -586,7 +571,7 @@ class PdoDb extends BaseObject
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetchAll();
+                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
