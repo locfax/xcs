@@ -12,7 +12,6 @@ use \MongoDB\Driver\Command;
 use \MongoDB\Driver\ReadPreference;
 use \MongoDB\Driver\WriteConcern;
 use Xcs\BaseObject;
-use Xcs\DB;
 use Xcs\Exception\DbException;
 
 class MongoDb extends BaseObject
@@ -241,14 +240,14 @@ class MongoDb extends BaseObject
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
 
-            $rowsets = [];
+            $rowSets = [];
             foreach ($cursor as $row) {
                 $row = (array)$row;
                 $row['_id'] = $row['nid'] = (string)$row['_id'];
-                $rowsets[] = $row;
+                $rowSets[] = $row;
             }
             $cursor = null;
-            return $rowsets;
+            return $rowSets;
         } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
@@ -283,16 +282,16 @@ class MongoDb extends BaseObject
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
 
-            $rowsets = [];
+            $rowSets = [];
             foreach ($cursor as $row) {
                 $row = (array)$row;
                 if (isset($row['_id'])) {
                     $row['_id'] = $row['nid'] = (string)$row['_id'];
                 }
-                $rowsets[] = $row;
+                $rowSets[] = $row;
             }
             $cursor = null;
-            return $rowsets;
+            return $rowSets;
         } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
@@ -310,19 +309,15 @@ class MongoDb extends BaseObject
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
-            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageParam['totals'] <= 0) {
-                return $ret;
+                return null;
             }
-            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);
-            $ret['pagebar'] = DB::pageBar($pageParam, $length);
-            return $ret;
+            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
         } else {
             //任意长度模式
             $start = $pageParam;
-            return $this->_page($table, $field, $condition, $start, $length);
         }
+        return $this->_page($table, $field, $condition, $start, $length);
     }
 
 
@@ -352,7 +347,7 @@ class MongoDb extends BaseObject
      * @param int $totalNum
      * @return int
      */
-    private function page_start($page, $ppp, $totalNum)
+    private function _page_start($page, $ppp, $totalNum)
     {
         $totalPage = ceil($totalNum / $ppp);
         $_page = max(1, min($totalPage, intval($page)));

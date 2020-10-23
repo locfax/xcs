@@ -3,7 +3,6 @@
 namespace Xcs\Db;
 
 use Xcs\BaseObject;
-use Xcs\DB;
 use Xcs\Exception\DbException;
 
 class Mongo extends BaseObject
@@ -101,8 +100,7 @@ class Mongo extends BaseObject
             $collection = $this->_client->selectCollection($table);
             $ret = $collection->insert($document, ['w' => 1]);
             if ($retid && $ret) {
-                $insert_id = (string)$document['_id'];
-                return $insert_id;
+                return (string)$document['_id'];
             }
             return $ret['ok'];
         } catch (\MongoException $ex) {
@@ -183,10 +181,10 @@ class Mongo extends BaseObject
     /**
      * @param $table
      * @param array $condition
-     * @param bool $muti
+     * @param bool $multi
      * @return bool
      */
-    public function remove($table, $condition = [], $muti = false)
+    public function remove($table, $condition = [], $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -195,7 +193,7 @@ class Mongo extends BaseObject
                 }
             }
             $collection = $this->_client->selectCollection($table);
-            if ($muti) {
+            if ($multi) {
                 $ret = $collection->remove($condition);
             } else {
                 $ret = $collection->remove($condition, ['justOne' => true]);
@@ -237,7 +235,7 @@ class Mongo extends BaseObject
      * @param $table
      * @param array $fields
      * @param array $condition
-     * @return array|bool|\Generator
+     * @return array|bool
      */
     public function findAll($table, $fields = [], $condition = [])
     {
@@ -251,14 +249,14 @@ class Mongo extends BaseObject
             } else {
                 $cursor = $collection->find($condition, $fields);
             }
-            $rowsets = [];
+            $rowSets = [];
             while ($cursor->hasNext()) {
                 $row = $cursor->getNext();
                 $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
-                $rowsets[] = $row;
+                $rowSets[] = $row;
             }
             $cursor = null;
-            return $rowsets;
+            return $rowSets;
         } catch (\Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
@@ -282,14 +280,14 @@ class Mongo extends BaseObject
                     $cursor = $cursor->sort($condition['sort']);
                 }
                 $cursor = $cursor->limit($length)->skip($offset);
-                $rowsets = [];
+                $rowSets = [];
                 while ($cursor->hasNext()) {
                     $row = $cursor->getNext();
                     $row['_id'] = $row['nid'] = $row['_id']->{'$id'};
-                    $rowsets[] = $row;
+                    $rowSets[] = $row;
                 }
                 $cursor = null;
-                return $rowsets;
+                return $rowSets;
             } else {
                 //内镶文档查询
                 if (!$fields) {
@@ -315,19 +313,15 @@ class Mongo extends BaseObject
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
-            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageParam['totals'] <= 0) {
-                return $ret;
+                return null;
             }
-            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length);
-            $ret['pagebar'] = DB::pageBar($pageParam, $length);
-            return $ret;
+            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
         } else {
             //任意长度模式
             $start = $pageParam;
-            return $this->_page($table, $field, $condition, $start, $length);
         }
+        return $this->_page($table, $field, $condition, $start, $length);
     }
 
     /**
@@ -356,7 +350,7 @@ class Mongo extends BaseObject
      * @param int $totalNum
      * @return int
      */
-    private function page_start($page, $ppp, $totalNum)
+    private function _page_start($page, $ppp, $totalNum)
     {
         $totalPage = ceil($totalNum / $ppp);
         $_page = max(1, min($totalPage, intval($page)));

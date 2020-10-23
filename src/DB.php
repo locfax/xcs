@@ -22,8 +22,8 @@ class DB
     public static function dbo($dsnId = 'portal')
     {
         $dsn = Context::dsn($dsnId);
-        if (isset(self::$used_dbo[$dsn['dsnkey']])) {
-            return self::$used_dbo[$dsn['dsnkey']];
+        if (isset(self::$used_dbo[$dsnId])) {
+            return self::$used_dbo[$dsnId];
         }
 
         if (!in_array($dsn['driver'], ['PdoDb', 'Mongo', 'MongoDb'])) {
@@ -33,20 +33,20 @@ class DB
         $driver = '\\Xcs\\Db\\' . $dsn['driver'];
         $dbo = new $driver(['dsn' => $dsn]);
 
-        self::$used_dbo[$dsn['dsnkey']] = $dbo;
+        self::$used_dbo[$dsnId] = $dbo;
         return $dbo;
     }
 
     /**
      * @param string $dsnId
-     * @return mixed|PdoDb
+     * @return PdoDb
      * @throws ExException
      */
     public static function dbm($dsnId = 'portal')
     {
         $dsn = Context::dsn($dsnId);
-        if (isset(self::$used_dbo[$dsn['dsnkey']])) {
-            return self::$used_dbo[$dsn['dsnkey']];
+        if (isset(self::$used_dbo[$dsnId])) {
+            return self::$used_dbo[$dsnId];
         }
 
         if ('PdoDb' == $dsn['driver']) {
@@ -55,7 +55,7 @@ class DB
             throw new ExException("dsn driver must be pdo");
         }
 
-        self::$used_dbo[$dsn['dsnkey']] = $dbo;
+        self::$used_dbo[$dsnId] = $dbo;
         return $dbo;
     }
 
@@ -187,7 +187,11 @@ class DB
     public static function page($table, $field, $condition = '', $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->page($table, $field, $condition, $pageParam, $length, $retObj);
+        $data = $db->page($table, $field, $condition, $pageParam, $length, $retObj);
+        if (is_array($pageParam)) {
+            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $length) : ''];
+        }
+        return $data;
     }
 
     /**
@@ -203,7 +207,7 @@ class DB
     public static function first($table, $field, $condition)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->result_first($table, $field, $condition);
+        return $db->first($table, $field, $condition);
     }
 
     /**
@@ -254,10 +258,10 @@ class DB
      * @param $retObj
      * @return mixed
      */
-    public static function rowReq($sql, $args = null, $retObj = false)
+    public static function rowSql($sql, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->row_sql($sql, $args, $retObj);
+        return $db->rowSql($sql, $args, $retObj);
     }
 
     /**
@@ -267,10 +271,10 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function rowSetReq($sql, $args = null, $index = null, $retObj = false)
+    public static function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->rowset_sql($sql, $args, $index, $retObj);
+        return $db->rowSetSql($sql, $args, $index, $retObj);
     }
 
     /**
@@ -281,10 +285,14 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function pageReq($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public static function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->page_sql($sql, $args, $pageParam, $length, $retObj);
+        $data = $db->pageSql($sql, $args, $pageParam, $length, $retObj);
+        if (is_array($pageParam)) {
+            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $length) : ''];
+        }
+        return $data;
     }
 
     /**
@@ -292,10 +300,10 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function countReq($sql, $args = null)
+    public static function countSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->count_sql($sql, $args);
+        return $db->countSql($sql, $args);
     }
 
     /**
@@ -303,10 +311,10 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function firstReq($sql, $args = null)
+    public static function firstSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->first_sql($sql, $args);
+        return $db->firstSql($sql, $args);
     }
 
     /**
@@ -314,10 +322,10 @@ class DB
      * @param null $args
      * @return mixed
      */
-    public static function colReq($sql, $args = null)
+    public static function colSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->col_sql($sql, $args);
+        return $db->colSql($sql, $args);
     }
 
     //--------------多表查询---end---------------//
@@ -329,7 +337,7 @@ class DB
     public static function startTrans()
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->start_trans();
+        return $db->startTrans();
     }
 
     /**
@@ -340,7 +348,7 @@ class DB
     public static function endTrans($commit_no_errors = true)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->end_trans($commit_no_errors);
+        return $db->endTrans($commit_no_errors);
     }
 
     //----------------------事务END-------------------//

@@ -3,7 +3,6 @@
 namespace Xcs\Db;
 
 use Xcs\BaseObject;
-use Xcs\DB;
 use Xcs\Exception\DbException;
 
 class PdoDb extends BaseObject
@@ -315,7 +314,7 @@ class PdoDb extends BaseObject
             } else {
                 $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
-                    $data = $this->array_index($data, $index);
+                    $data = $this->_array_index($data, $index);
                 }
             }
             $sth->closeCursor();
@@ -379,19 +378,15 @@ class PdoDb extends BaseObject
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
-            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageParam['totals'] <= 0) {
-                return $ret;
+                return null;
             }
-            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page($table, $field, $condition, $start, $length, $retObj);
-            $ret['pagebar'] = DB::pageBar($pageParam, $length);
-            return $ret;
+            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
         } else {
             //任意长度模式
             $start = $pageParam;
-            return $this->_page($table, $field, $condition, $start, $length, $retObj);
         }
+        return $this->_page($table, $field, $condition, $start, $length, $retObj);
     }
 
     /**
@@ -400,7 +395,7 @@ class PdoDb extends BaseObject
      * @param mixed $condition
      * @return mixed
      */
-    public function result_first($tableName, $field, $condition)
+    public function first($tableName, $field, $condition)
     {
         try {
             if (is_array($condition)) {
@@ -496,7 +491,7 @@ class PdoDb extends BaseObject
      * @param $retObj
      * @return mixed
      */
-    public function row_sql($sql, $args = null, $retObj = false)
+    public function rowSql($sql, $args = null, $retObj = false)
     {
         try {
             if (is_null($args)) {
@@ -526,7 +521,7 @@ class PdoDb extends BaseObject
      * @param $retObj
      * @return mixed
      */
-    public function rowset_sql($sql, $args = null, $index = null, $retObj = false)
+    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         try {
             if (is_null($args)) {
@@ -541,7 +536,7 @@ class PdoDb extends BaseObject
             } else {
                 $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
-                    $data = $this->array_index($data, $index);
+                    $data = $this->_array_index($data, $index);
                 }
             }
             $sth->closeCursor();
@@ -589,23 +584,19 @@ class PdoDb extends BaseObject
      * @param bool $retObj
      * @return mixed
      */
-    public function page_sql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
-            $ret = ['rowsets' => [], 'pagebar' => ''];
             if ($pageParam['totals'] <= 0) {
-                return $ret;
+                return null;
             }
-            $start = $this->page_start($pageParam['curpage'], $length, $pageParam['totals']);
-            $ret['rowsets'] = $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
-            $ret['pagebar'] = DB::pageBar($pageParam, $length);
-            return $ret;
+            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
         } else {
             //任意长度模式
             $start = $pageParam;
-            return $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
         }
+        return $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
     }
 
     /**
@@ -613,9 +604,9 @@ class PdoDb extends BaseObject
      * @param null $args
      * @return mixed
      */
-    public function count_sql($sql, $args = null)
+    public function countSql($sql, $args = null)
     {
-        return $this->first_sql($sql, $args);
+        return $this->firstSql($sql, $args);
     }
 
     /**
@@ -623,7 +614,7 @@ class PdoDb extends BaseObject
      * @param null $args
      * @return mixed
      */
-    public function first_sql($sql, $args = null)
+    public function firstSql($sql, $args = null)
     {
         try {
             if (is_null($args)) {
@@ -646,7 +637,7 @@ class PdoDb extends BaseObject
      * @param null $args
      * @return mixed
      */
-    public function col_sql($sql, $args = null)
+    public function colSql($sql, $args = null)
     {
         try {
             if (is_null($args)) {
@@ -670,7 +661,7 @@ class PdoDb extends BaseObject
     /**
      * @return mixed
      */
-    public function start_trans()
+    public function startTrans()
     {
         return $this->_link->beginTransaction();
     }
@@ -678,7 +669,7 @@ class PdoDb extends BaseObject
     /**
      * @param bool $commit_no_errors
      */
-    public function end_trans($commit_no_errors = true)
+    public function endTrans($commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -714,7 +705,7 @@ class PdoDb extends BaseObject
      * @param int $totalNum
      * @return int
      */
-    private function page_start($page, $ppp, $totalNum)
+    private function _page_start($page, $ppp, $totalNum)
     {
         $totalPage = ceil($totalNum / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -726,7 +717,7 @@ class PdoDb extends BaseObject
      * @param $col
      * @return array
      */
-    private function array_index($arr, $col)
+    private function _array_index($arr, $col)
     {
         if (!is_array($arr)) {
             return $arr;

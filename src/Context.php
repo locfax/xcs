@@ -2,29 +2,30 @@
 
 namespace Xcs;
 
+use Xcs\Exception\ExException;
+
 class Context
 {
 
     /**
-     * @param $dsnId
-     * @return mixed
+     * @param string $dsnId
+     * @return mixed|null
+     * @throws ExException
      */
     public static function dsn($dsnId = 'portal')
     {
         static $_dsns = [];
         $appKey = APP_KEY;
         if (!isset($_dsns[$appKey])) {
-            $dsns = App::mergeVars('dsn');
-            foreach ($dsns as $key => $dsn) {
-                $dsns[$key]['dsnkey'] = md5($appKey . '_' . $key . '_' . $dsn['driver'] . '_' . $dsn['dsn']); //连接池key
-            }
-            $_dsns[$appKey] = $dsns;
+            $_dsns[$appKey] = App::mergeVars('dsn');
             if (!isset($_dsns[$appKey][$dsnId])) {
-                $_dsns[$appKey][$dsnId] = [];
+                throw new ExException("$dsnId is not setting 1");
             }
-            $dsns = null;
         }
         //如果没配置$dsnid 会报错
+        if (!isset($_dsns[$appKey][$dsnId])) {
+            throw new ExException("$dsnId is not setting 2");
+        }
         return $_dsns[$appKey][$dsnId];
     }
 
