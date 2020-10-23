@@ -458,7 +458,7 @@ class PdoDb extends BaseObject
      */
     public function count($tableName, $condition, $field = '*')
     {
-        return $this->result_first($tableName, "COUNT({$field})", $condition);
+        return $this->first($tableName, "COUNT({$field})", $condition);
     }
 
     /**
