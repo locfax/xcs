@@ -1,5 +1,9 @@
 <?php
 
+defined('APP_ROOT') or define('APP_ROOT', '');
+defined('APP_KEY') or define('APP_KEY', 'web');
+defined('AUTH_ROLE') or define('AUTH_ROLE', false);
+
 define('BASE_PATH', __DIR__ . '/');
 define('APP_PATH', APP_ROOT . '/app/'); //app controller应用路径
 define('DATA_PATH', APP_ROOT . '/gdata/'); //全局数据路径

@@ -91,7 +91,7 @@ class App
      * @param array $preload
      * @param bool $refresh
      */
-    public static function _runFile($files, $preload, $refresh = false)
+    private static function _runFile($files, $preload, $refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
@@ -112,7 +112,7 @@ class App
      * @param $runFile
      * @return bool
      */
-    public static function makeRunFile($runtimeFiles, $runFile)
+    private static function makeRunFile($runtimeFiles, $runFile)
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -141,7 +141,7 @@ class App
      * @param string $uri
      * @return bool
      */
-    public static function dispatching($uri)
+    private static function dispatching($uri)
     {
         if (defined('ROUTE') && ROUTE) {
             self::router($uri);
@@ -168,7 +168,7 @@ class App
      * @param $actionName
      * @return bool
      */
-    public static function executeAction($controllerName, $actionName)
+    private static function executeAction($controllerName, $actionName)
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::_actionPrefix . $actionName;
@@ -255,7 +255,7 @@ class App
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
-        };
+        }
         $controllerFilename = APP_PATH . 'Controller/' . ucfirst(APP_KEY) . '/' . $controllerName . '.php';
         return is_file($controllerFilename) && include $controllerFilename;
     }
@@ -264,7 +264,7 @@ class App
      * @param $uri
      * @return bool|void
      */
-    public static function router($uri)
+    private static function router($uri)
     {
         if (!$uri) {
             return;
@@ -309,7 +309,7 @@ class App
      * @param $namespace
      * @param $path
      */
-    public static function rootNamespace($namespace, $path)
+    private static function rootNamespace($namespace, $path)
     {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
@@ -362,11 +362,7 @@ class App
      */
     public static function output_json($arr)
     {
-        if (version_compare(PHP_VERSION, '5.4', '>=')) {
-            return json_encode($arr, JSON_UNESCAPED_UNICODE);
-        }
-        $json = json_encode(self::urlencode($arr));
-        return urldecode($json);
+        return json_encode($arr, JSON_UNESCAPED_UNICODE);
     }
 
     public static function output_nocache()
@@ -402,11 +398,11 @@ class App
         ob_get_length() && ob_end_clean();
         $content = preg_replace("/([\\x01-\\x08\\x0b-\\x0c\\x0e-\\x1f])+/", ' ', $content);
         $content = str_replace([chr(0), ']]>'], [' ', ']]&gt;'], $content);
-        if ($echo) {
-            echo $content;
-        } else {
+        if (!$echo) {
             return $content;
+
         }
+        echo $content;
     }
 
     /**
@@ -516,8 +512,9 @@ class App
      * @param string $url
      * @return bool
      */
-    public static function js_alert($message = '', $after_action = '', $url = '')
-    { //php turn to alert
+    public static function jsAlert($message = '', $after_action = '', $url = '')
+    {
+        //php turn to alert
         $out = "<script language=\"javascript\" type=\"text/javascript\">\n";
         if (!empty($message)) {
             $out .= "alert(\"";

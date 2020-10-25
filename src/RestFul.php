@@ -29,11 +29,11 @@ class RestFul extends Controller
     public function __call($name, $arguments)
     {
         //动作不存在
-        $retarr = [
+        $res = [
             'errcode' => 1,
             'errmsg' => 'Action ' . $name . '不存在!',
         ];
-        App::response($retarr);
+        App::response($res);
     }
 
     /**

@@ -14,6 +14,8 @@ class Controller
 
     /**
      * 初始执行
+     * @param $controllerName
+     * @param $actionName
      */
     public function __construct($controllerName, $actionName)
     {
@@ -31,12 +33,12 @@ class Controller
     {
         //动作不存在
         if (App::isAjax(true)) {
-            $retarr = [
+            $res= [
                 'errcode' => 1,
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
             ];
-            return App::response($retarr);
+            return App::response($res);
         }
         $args = 'Action:' . $name . "不存在";
         include template('404');
@@ -55,6 +57,10 @@ class Controller
 
     /**
      * 权限验证
+     * @param $controllerName
+     * @param $actionName
+     * @param $auth
+     * @return bool
      */
     final function checkacl($controllerName, $actionName, $auth = AUTH_ROLE)
     {

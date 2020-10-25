@@ -8,34 +8,34 @@ class SysCache
     public static $dsn = 'general';
 
     //加载系统级别缓存
-    public static function loadcache($cachename, $reset = false)
+    public static function loadcache($cacheName, $reset = false)
     {
-        if (!$cachename) {
+        if (!$cacheName) {
             return null;
         }
 
-        $data = self::data($cachename, $reset);
+        $data = self::data($cacheName, $reset);
 
         return json_decode($data, true);
     }
 
     /**
      * 系统级别缓存数据
-     * @param $cachename
+     * @param $cacheName
      * @param $reset
      * @return array|string
      */
 
-    public static function data($cachename, $reset = false)
+    public static function data($cacheName, $reset = false)
     {
         $lost = null;
         if ($reset) {
-            $lost = $cachename; //强制设置为没取到
+            $lost = $cacheName; //强制设置为没取到
             $data = '[]';
         } else {
-            $data = Cache::get('sys_' . strtolower($cachename));
+            $data = Cache::get('sys_' . strtolower($cacheName));
             if (!$data) {
-                $lost = $cachename;  //未取到数据
+                $lost = $cacheName;  //未取到数据
             }
         }
 
@@ -46,10 +46,10 @@ class SysCache
         return self::lost($lost, $reset);
     }
 
-    public static function lost($cachename, $reset = false)
+    public static function lost($cacheName, $reset = false)
     {
         if (!$reset) { //允许从数据库直接获取
-            $syscache = DB::dbm(self::$dsn)->findOne('syscache', '*', ['cname' => 'sys_' . strtolower($cachename)]);
+            $syscache = DB::dbm(self::$dsn)->findOne('syscache', '*', ['cname' => 'sys_' . strtolower($cacheName)]);
             if ($syscache) {
                 Cache::set($syscache['cname'], stripslashes($syscache['data']));
                 return $syscache['data'];
@@ -57,7 +57,7 @@ class SysCache
         }
 
         //开始由缓存原始文件直接生成数据
-        $cachem = '\\Model\\Cache\\' . ucfirst($cachename);
+        $cachem = '\\Model\\Cache\\' . ucfirst($cacheName);
         $tmp = $cachem::getInstance()->getdata();
         if (!empty($tmp) && is_array($tmp)) {
             $data = App::output_json($tmp);
@@ -66,15 +66,15 @@ class SysCache
         }
 
         //保存到缓存mysql
-        self::save('sys_' . strtolower($cachename), $data, false);
+        self::save('sys_' . strtolower($cacheName), $data, false);
 
         //保存缓存到cacher
-        Cache::set('sys_' . strtolower($cachename), $data);
+        Cache::set('sys_' . strtolower($cacheName), $data);
 
         return $data;
     }
 
-    public static function save($cachename, $data, $delcache = true)
+    public static function save($cacheName, $data, $delCache = true)
     {
         //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
@@ -82,12 +82,12 @@ class SysCache
         }
 
         //缓存入库
-        $post = ['cname' => $cachename, 'ctype' => 1, 'dateline' => time(), 'data' => $data];
+        $post = ['cname' => $cacheName, 'ctype' => 1, 'dateline' => time(), 'data' => $data];
         DB::dbm(self::$dsn)->replace('syscache', $post);
-        if (!$delcache) {
+        if (!$delCache) {
             return;
         }
 
-        Cache::rm($cachename);
+        Cache::rm($cacheName);
     }
 }
