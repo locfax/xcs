@@ -13,11 +13,10 @@ class App
     const _actionPrefix = 'act_';
 
     private static $routes;
-
     /**
-     * @var Di\Container the dependency injection (DI) container used by [[createObject()]].
+     * @var Di\Container
      */
-    public static $container;
+    private static $container;
 
     /**
      * @param bool $refresh
@@ -33,7 +32,6 @@ class App
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
-        self::$container = new Di\Container();
         self::dispatching($uri);
     }
 
@@ -471,6 +469,18 @@ class App
     }
 
     /**
+     * @return Di\Container
+     */
+    public static function container()
+    {
+        if (self::$container) {
+            return self::$container;
+        }
+
+        self::$container = new Di\Container();
+    }
+
+    /**
      * @param $type
      * @param array $params
      * @return mixed|object
@@ -480,11 +490,11 @@ class App
     {
 
         if (is_string($type)) {
-            return static::$container->get($type, $params);
+            return self::container()->get($type, $params);
         }
 
         if (is_callable($type, true)) {
-            return static::$container->invoke($type, $params);
+            return self::container()->invoke($type, $params);
         }
 
         if (!is_array($type)) {
@@ -494,13 +504,13 @@ class App
         if (isset($type['__class'])) {
             $class = $type['__class'];
             unset($type['__class'], $type['class']);
-            return static::$container->get($class, $params, $type);
+            return self::container()->get($class, $params, $type);
         }
 
         if (isset($type['class'])) {
             $class = $type['class'];
             unset($type['class']);
-            return static::$container->get($class, $params, $type);
+            return self::container()->get($class, $params, $type);
         }
 
         throw new ExException('Object configuration must be an array containing a "class" or "__class" element.');
