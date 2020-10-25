@@ -478,6 +478,7 @@ class App
         }
 
         self::$container = new Di\Container();
+        return self::$container;
     }
 
     /**

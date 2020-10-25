@@ -6,7 +6,8 @@ use ReflectionClass;
 use Xcs\Exception\ExException;
 
 /**
- * Container implements a [dependency injection](http://en.wikipedia.org/wiki/Dependency_injection) container.
+ * Class Container
+ * @package Xcs\Di
  */
 class Container
 {
