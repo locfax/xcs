@@ -403,9 +403,8 @@ class PdoDb extends BaseObject
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
             } else {
-                list($_, $_args) = $this->field_param($args);
                 $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+                $sth->execute($args);
             }
             $ret = $sth->rowCount();
             $sth->closeCursor();
@@ -428,9 +427,8 @@ class PdoDb extends BaseObject
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
             } else {
-                list($_, $_args) = $this->field_param($args);
                 $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+                $sth->execute($args);
             }
             if ($retObj) {
                 $data = $sth->fetch(\PDO::FETCH_OBJ);
@@ -458,9 +456,8 @@ class PdoDb extends BaseObject
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
             } else {
-                list($_, $_args) = $this->field_param($args);
                 $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+                $sth->execute($args);
             }
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
@@ -490,9 +487,8 @@ class PdoDb extends BaseObject
             if (is_null($args)) {
                 $sth = $this->_link->query($sql);
             } else {
-                list($_, $_args) = $this->field_param($args);
                 $sth = $this->_link->prepare($sql);
-                $sth->execute($_args);
+                $sth->execute($args);
             }
             if ($retObj) {
                 $data = $sth->fetchAll(\PDO::FETCH_OBJ);
@@ -528,8 +524,8 @@ class PdoDb extends BaseObject
             $start = $pageParam;
         }
         $_args = [
-            'start' => $start,
-            'length' => $length
+            ':start' => $start,
+            ':length' => $length
         ];
         if (is_null($args)) {
             $args = $_args;
