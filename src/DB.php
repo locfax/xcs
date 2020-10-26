@@ -187,17 +187,17 @@ class DB
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param int $pageParam
-     * @param int $length
+     * @param int $limit
      * @param bool $retObj
      * @return array
      * @throws ExException
      */
-    public static function page($table, $field, $condition = '', $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public static function page($table, $field, $condition = '', $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        $data = $db->page($table, $field, $condition, $args, $pageParam, $length, $retObj);
+        $data = $db->page($table, $field, $condition, $args, $pageParam, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $length) : ''];
+            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $limit) : ''];
         }
         return $data;
     }
@@ -298,17 +298,17 @@ class DB
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param int $pageParam
-     * @param int $length
+     * @param int $limit
      * @param bool $retObj
      * @return array
      * @throws ExException
      */
-    public static function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public static function pageSql($sql, $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        $data = $db->pageSql($sql, $args, $pageParam, $length, $retObj);
+        $data = $db->pageSql($sql, $args, $pageParam, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $length) : ''];
+            return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $limit) : ''];
         }
         return $data;
     }
@@ -411,10 +411,10 @@ class DB
 
     /**
      * @param $pageParam
-     * @param $length
+     * @param $limit
      * @return array
      */
-    public static function pageBar($pageParam, $length)
+    public static function pageBar($pageParam, $limit)
     {
         if (!isset($pageParam['type']) || 'pagebar' == $pageParam['type']) {
             $defPageParam = [
@@ -427,7 +427,7 @@ class DB
                 'simple' => false
             ];
             $pageParam = array_merge($defPageParam, $pageParam);
-            $pageParam['length'] = $length;
+            $pageParam['length'] = $limit;
             $pageBar = Helper\Pager::pageBar($pageParam);
         } elseif ('simplepage' == $pageParam['type']) {
             $defPageParam = [
@@ -435,10 +435,10 @@ class DB
                 'udi' => ''
             ];
             $pageParam = array_merge($defPageParam, $pageParam);
-            $pageParam['length'] = $length;
+            $pageParam['length'] = $limit;
             $pageBar = Helper\Pager::simplePage($pageParam);
         } else {
-            $pages = ceil($pageParam['totals'] / $length);
+            $pages = ceil($pageParam['totals'] / $limit);
             $nextPage = ($pages > $pageParam['curpage']) ? $pageParam['curpage'] + 1 : $pages;
             $pageBar = [
                 'totals' => $pageParam['totals'],

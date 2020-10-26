@@ -270,10 +270,10 @@ class Mongo extends BaseObject
      * @param $fields
      * @param $condition
      * @param int $offset
-     * @param int $length
+     * @param int $limit
      * @return array|bool
      */
-    private function _page($table, $fields, $condition, $offset = 0, $length = 18)
+    private function _page($table, $fields, $condition, $offset = 0, $limit = 18)
     {
         try {
             $collection = $this->_client->selectCollection($table);
@@ -282,7 +282,7 @@ class Mongo extends BaseObject
                 if (isset($condition['sort'])) {
                     $cursor = $cursor->sort($condition['sort']);
                 }
-                $cursor = $cursor->limit($length)->skip($offset);
+                $cursor = $cursor->limit($limit)->skip($offset);
                 $rowSets = [];
                 while ($cursor->hasNext()) {
                     $row = $cursor->getNext();
@@ -296,7 +296,7 @@ class Mongo extends BaseObject
                 if (!$fields) {
                     throw new DbException('fields is empty', 0);
                 }
-                $cursor = $collection->findOne($condition['query'], [$fields => ['$slice' => [$offset, $length]]]);
+                $cursor = $collection->findOne($condition['query'], [$fields => ['$slice' => [$offset, $limit]]]);
                 return $cursor[$fields];
             }
         } catch (\Exception $ex) {
@@ -310,22 +310,22 @@ class Mongo extends BaseObject
      * @param $condition
      * @param null $args
      * @param int $pageParam
-     * @param int $length
+     * @param int $limit
      * @return array|bool
      */
-    function page($table, $field, $condition, $args = null, $pageParam = 0, $length = 18)
+    function page($table, $field, $condition, $args = null, $pageParam = 0, $limit = 18)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
             if ($pageParam['totals'] <= 0) {
                 return null;
             }
-            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
         } else {
             //任意长度模式
-            $start = $pageParam;
+            $offset = $pageParam;
         }
-        return $this->_page($table, $field, $condition, $start, $length);
+        return $this->_page($table, $field, $condition, $offset, $limit);
     }
 
     /**

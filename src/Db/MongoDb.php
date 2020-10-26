@@ -262,22 +262,22 @@ class MongoDb extends BaseObject
      * @param $fields
      * @param $condition
      * @param int $offset
-     * @param int $length
+     * @param int $limit
      * @return array|bool
      */
-    private function _page($table, $fields = null, $condition = [], $offset = 0, $length = 18)
+    private function _page($table, $fields = null, $condition = [], $offset = 0, $limit = 18)
     {
         try {
             if (isset($condition['sort'])) {
                 $options = [
                     'sort' => $condition['sort'],
-                    'limit' => (int)$length,
+                    'limit' => (int)$limit,
                     'skip' => (int)$offset
                 ];
                 $query = new MongoQuery($condition['query'], $options);
             } else {
                 $options = [
-                    'limit' => (int)$length,
+                    'limit' => (int)$limit,
                     'skip' => (int)$offset
                 ];
                 $query = new MongoQuery($condition['query'], $options);
@@ -306,22 +306,22 @@ class MongoDb extends BaseObject
      * @param $condition
      * @param null $args
      * @param int $pageParam
-     * @param int $length
+     * @param int $limit
      * @return array|bool
      */
-    function page($table, $field, $condition, $args = null, $pageParam = 0, $length = 18)
+    function page($table, $field, $condition, $args = null, $pageParam = 0, $limit = 18)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
             if ($pageParam['totals'] <= 0) {
                 return null;
             }
-            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
         } else {
             //任意长度模式
-            $start = $pageParam;
+            $offset = $pageParam;
         }
-        return $this->_page($table, $field, $condition, $start, $length);
+        return $this->_page($table, $field, $condition, $offset, $limit);
     }
 
 

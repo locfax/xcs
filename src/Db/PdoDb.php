@@ -230,7 +230,7 @@ class PdoDb extends BaseObject
         } else {
             $_condition = $condition;
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 0,1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -264,44 +264,33 @@ class PdoDb extends BaseObject
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param int|array $pageParam
-     * @param int $length
+     * @param int $limit
      * @param bool $retObj
      * @return bool|mixed|null
      */
-    public function page($tableName, $field, $condition, array $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public function page($tableName, $field, $condition, array $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
             if ($pageParam['totals'] <= 0) {
                 return null;
             }
-            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
         } else {
             //任意长度模式
-            $start = $pageParam;
+            $offset = $pageParam;
         }
 
         if (is_array($condition) && !empty($condition)) {
             list($_condition, $args) = $this->field_param($condition, ' AND ');
-            $args[':start'] = $start;
-            $args[':length'] = $length;
             $_condition = ' WHERE ' . $_condition;
         } else {
             $_condition = '';
             if (!empty($condition)) {
                 $_condition = ' WHERE ' . $condition;
             }
-            $_args = [
-                ':start' => $start,
-                ':length' => $length
-            ];
-            if (is_null($args)) {
-                $args = $_args;
-            } else {
-                $args = array_merge($args, $_args);
-            }
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition . " LIMIT :start,:length";
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition . " LIMIT {$limit} OFFSET {$offset}";
         return $this->_page_sql($sql, $args, $retObj);
     }
 
@@ -317,11 +306,11 @@ class PdoDb extends BaseObject
         try {
             if (is_array($condition)) {
                 list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition} LIMIT 0,1";
+                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition} LIMIT 1";
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             } else {
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
+                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 1";
                 if (is_null($args)) {
                     $sth = $this->_link->query($sql);
                 } else {
@@ -507,32 +496,23 @@ class PdoDb extends BaseObject
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param mixed $pageParam
-     * @param int $length
+     * @param int $limit
      * @param bool $retObj
      * @return array|bool|null
      */
-    public function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
+    public function pageSql($sql, $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
             if ($pageParam['totals'] <= 0) {
                 return null;
             }
-            $start = $this->_page_start($pageParam['curpage'], $length, $pageParam['totals']);
+            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
         } else {
             //任意长度模式
-            $start = $pageParam;
+            $offset = $pageParam;
         }
-        $_args = [
-            ':start' => $start,
-            ':length' => $length
-        ];
-        if (is_null($args)) {
-            $args = $_args;
-        } else {
-            $args = array_merge($args, $_args);
-        }
-        return $this->_page_sql($sql . " LIMIT :start, :length", $args, $retObj);
+        return $this->_page_sql($sql . " LIMIT {$limit} OFFSET {$offset}", $args, $retObj);
     }
 
     /**
@@ -637,15 +617,15 @@ class PdoDb extends BaseObject
 
     /**
      * @param int $page
-     * @param int $ppp
+     * @param int $limit
      * @param int $totalNum
      * @return int
      */
-    private function _page_start($page, $ppp, $totalNum)
+    private function _page_start($page, $limit, $totalNum)
     {
-        $totalPage = ceil($totalNum / $ppp);
+        $totalPage = ceil($totalNum / $limit);
         $_page = max(1, min($totalPage, intval($page)));
-        return ($_page - 1) * $ppp;
+        return ($_page - 1) * $limit;
     }
 
     /**
