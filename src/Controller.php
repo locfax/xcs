@@ -33,7 +33,7 @@ class Controller
     {
         //动作不存在
         if (App::isAjax(true)) {
-            $res= [
+            $res = [
                 'errcode' => 1,
                 'errmsg' => 'Action ' . $name . '不存在!',
                 'data' => ''
@@ -51,7 +51,7 @@ class Controller
     {
         $this->timestamp = getgpc('s.REQUEST_TIME') ?: time();
         if (filter_input(INPUT_GET, 'page')) {
-            $_GET['page'] = max(1, filter_input(INPUT_GET, 'page'));
+            $_GET['page'] = max(1, intval(filter_input(INPUT_GET, 'page')));
         }
     }
 

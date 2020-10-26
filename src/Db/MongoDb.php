@@ -166,17 +166,18 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $condition
-     * @param bool $muti
+     * @param null $args
+     * @param bool $multi
      * @return bool|int|null
      */
-    public function remove($table, $condition = [], $muti = false)
+    public function remove($table, $condition = [], $args = null, $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new ObjectID($condition['_id']);
             }
             $bulk = new BulkWrite();
-            if ($muti) {
+            if ($multi) {
                 $bulk->delete($condition, ['limit' => 0]);
             } else {
                 $bulk->delete($condition, ['limit' => 1]);
@@ -192,9 +193,10 @@ class MongoDb extends BaseObject
      * @param $table
      * @param null $fields
      * @param array $condition
+     * @param null $args
      * @return array|bool
      */
-    public function findOne($table, $fields = null, $condition = [])
+    public function findOne($table, $fields = null, $condition = [], $args = null)
     {
         try {
             if (isset($condition['_id'])) {
@@ -223,9 +225,10 @@ class MongoDb extends BaseObject
      * @param $table
      * @param array $fields
      * @param array $condition
+     * @param null $args
      * @return array|bool
      */
-    public function findAll($table, $fields = null, $condition = [])
+    public function findAll($table, $fields = null, $condition = [], $args = null)
     {
         try {
             if (isset($condition['sort'])) {
@@ -262,7 +265,7 @@ class MongoDb extends BaseObject
      * @param int $length
      * @return array|bool
      */
-    private function _page($table, $fields, $condition, $offset = 0, $length = 18)
+    private function _page($table, $fields = null, $condition = [], $offset = 0, $length = 18)
     {
         try {
             if (isset($condition['sort'])) {
@@ -301,11 +304,12 @@ class MongoDb extends BaseObject
      * @param $table
      * @param $field
      * @param $condition
+     * @param null $args
      * @param int $pageParam
      * @param int $length
      * @return array|bool
      */
-    function page($table, $field, $condition, $pageParam = 0, $length = 18)
+    function page($table, $field, $condition, $args = null, $pageParam = 0, $length = 18)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
@@ -324,9 +328,11 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $condition
+     * @param null $args
+     * @param null $field
      * @return bool
      */
-    public function count($table, $condition = [])
+    public function count($table, $condition = [], $args = null, $field = null)
     {
         try {
             if (isset($condition['_id'])) {

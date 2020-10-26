@@ -92,18 +92,6 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param $value
-     * @return string
-     */
-    public function qvalue($value)
-    {
-        if (gettype($value) === 'string') {
-            return $this->_link->quote($value);
-        }
-        return $value;
-    }
-
-    /**
      * @param array $fields
      * @param string $glue
      * @return array
@@ -118,21 +106,6 @@ class PdoDb extends BaseObject
             $comma = $glue;
         }
         return [$sql, $args];
-    }
-
-    /**
-     * @param array $fields
-     * @param string $glue
-     * @return string
-     */
-    public function field_value(array $fields, $glue = ',')
-    {
-        $addsql = $comma = '';
-        foreach ($fields as $field => $value) {
-            $addsql .= $comma . $this->qfield($field) . " = " . $this->qvalue($value);
-            $comma = $glue;
-        }
-        return $addsql;
     }
 
     /**
@@ -165,12 +138,11 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
-     * @param bool $retNum
-     * @return mixed
+     * @return bool|int
      */
-    public function replace($tableName, array $data, $retNum = false)
+    public function replace($tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -180,201 +152,123 @@ class PdoDb extends BaseObject
             $args[':' . $field] = $value;
             $comma = ',';
         }
-        try {
-            $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-            $sth = $this->_link->prepare($sql);
-            $ret = $sth->execute($args);
-            if ($retNum) {
-                $ret = $sth->rowCount();
-            }
-            return $ret;
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
-        }
+
+        $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
+        return $this->exec($sql, $args);
     }
 
     /**
-     * @param $tableName
-     * @param array $data
-     * @param $condition
-     * @param bool $retNum
-     * @return mixed
+     * @param string $tableName
+     * @param string|array $data
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @return bool|int
      */
-    public function update($tableName, $data, $condition, $retNum = false)
-    {
-        try {
-            if (is_array($condition)) {
-                if (!is_array($data)) {
-                    $this->_halt('$data参数必须为数组', 0);
-                }
-                list($_data, $argsf) = $this->field_param($data, ',');
-                list($_condition, $argsw) = $this->field_param($condition, ' AND ');
-                $args = array_merge($argsf, $argsw);
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
-                $sth = $this->_link->prepare($sql);
-                $ret = $sth->execute($args);
-                if ($retNum) {
-                    $ret = $sth->rowCount();
-                }
-                return $ret;
-            } else {
-                if (is_array($data)) {
-                    $_data = $this->field_value($data, ',');
-                } else {
-                    $_data = $data;
-                }
-                $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$condition}";
-                return $this->_link->exec($sql);
-            }
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
-        }
-    }
-
-    /**
-     * @param $tableName
-     * @param $condition
-     * @param bool $muti
-     * @return mixed
-     */
-    public function remove($tableName, $condition, $muti = true)
+    public function update($tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
-            $_condition = $this->field_value($condition, ' AND ');
+            list($_condition, $argsc) = $this->field_param($condition, ' AND ');
+            if (is_array($data)) {
+                list($_data, $argsf) = $this->field_param($data, ',');
+                $args = array_merge($argsf, $argsc);
+            } else {
+                if (is_null($args)) {
+                    $args = $argsc;
+                } else {
+                    $args = array_merge($args, $argsc);
+                }
+                $_data = $data;
+            }
+        } else {
+            if (is_array($data)) {
+                list($_data, $argsf) = $this->field_param($data, ',');
+                if (is_null($args)) {
+                    $args = $argsf;
+                } else {
+                    $args = array_merge($argsf, $args);
+                }
+            } else {
+                $_data = $data;
+            }
+            $_condition = $condition;
+        }
+        $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
+        return $this->exec($sql, $args);
+    }
+
+    /**
+     * @param string $tableName
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param bool $multi
+     * @return bool|int
+     */
+    public function remove($tableName, $condition, $args = null, $multi = false)
+    {
+        if (is_array($condition)) {
+            list($_condition, $args) = $this->field_param($condition, ',');
         } else {
             $_condition = $condition;
         }
-        $limit = $muti ? '' : ' LIMIT 1';
-        try {
-            $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
-            return $this->_link->exec($sql);
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
-        }
+        $limit = $multi ? '' : ' LIMIT 1';
+        $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
+        return $this->exec($sql, $args);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param string $field
-     * @param $condition
-     * @param $retObj
-     * @return mixed
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param bool $retObj
+     * @return bool|mixed
      */
-    public function findOne($tableName, $field, $condition, $retObj = false)
+    public function findOne($tableName, $field, $condition, array $args = null, $retObj = false)
     {
-        try {
-            if (is_array($condition)) {
-                list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 0,1';
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . ' LIMIT 0,1';
-                $sth = $this->_link->query($sql);
-            }
-            if ($retObj) {
-                $data = $sth->fetch(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetch(\PDO::FETCH_ASSOC);
-            }
-            $sth->closeCursor();
-            $sth = null;
-            return $data;
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
+        if (is_array($condition)) {
+            list($_condition, $args) = $this->field_param($condition, ' AND ');
+        } else {
+            $_condition = $condition;
         }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 0,1';
+        return $this->rowSql($sql, $args, $retObj);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param string $field
-     * @param string $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param null $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool|mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $index = null, $retObj = false)
+    public function findAll($tableName, $field = '*', $condition = '', array $args = null, $index = null, $retObj = false)
     {
-        try {
-            if (is_array($condition) && !empty($condition)) {
-                list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition;
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                if (empty($condition)) {
-                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName);
-                } else {
-                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition;
-                }
-                $sth = $this->_link->query($sql);
+        if (is_array($condition) && !empty($condition)) {
+            list($condition, $args) = $this->field_param($condition, ' AND ');
+            $_condition = ' WHERE ' . $condition;
+        } else {
+            $_condition = '';
+            if (!empty($condition)) {
+                $_condition = ' WHERE ' . $condition;
             }
-            if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
-                if (!is_null($index)) {
-                    $data = $this->_array_index($data, $index);
-                }
-            }
-            $sth->closeCursor();
-            $sth = null;
-            return $data;
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition;
+        return $this->rowSetSql($sql, $args, $index, $retObj);
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param string $field
-     * @param $condition
-     * @param int $start
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param int|array $pageParam
      * @param int $length
      * @param bool $retObj
-     * @return mixed
+     * @return bool|mixed|null
      */
-    private function _page($tableName, $field, $condition = '', $start = 0, $length = 20, $retObj = false)
-    {
-        try {
-            if (is_array($condition) && !empty($condition)) {
-                list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $args[':start'] = $start;
-                $args[':length'] = $length;
-                $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT :start,:length';
-                $sth = $this->_link->prepare($sql);
-                $sth->execute($args);
-            } else {
-                if (empty($condition)) {
-                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . " LIMIT {$start},{$length}";
-                } else {
-                    $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $condition . " LIMIT {$start},{$length}";
-                }
-                $sth = $this->_link->query($sql);
-            }
-            if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
-            } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
-            }
-            $sth->closeCursor();
-            $sth = null;
-            return $data;
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
-        }
-    }
-
-    /**
-     * @param $table
-     * @param $field
-     * @param $condition
-     * @param int $pageParam
-     * @param int $length
-     * @param bool $retObj
-     * @return mixed
-     */
-    public function page($table, $field, $condition, $pageParam = 0, $length = 18, $retObj = false)
+    public function page($tableName, $field, $condition, array $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
@@ -386,16 +280,39 @@ class PdoDb extends BaseObject
             //任意长度模式
             $start = $pageParam;
         }
-        return $this->_page($table, $field, $condition, $start, $length, $retObj);
+
+        if (is_array($condition) && !empty($condition)) {
+            list($_condition, $args) = $this->field_param($condition, ' AND ');
+            $args[':start'] = $start;
+            $args[':length'] = $length;
+            $_condition = ' WHERE ' . $_condition;
+        } else {
+            $_condition = '';
+            if (!empty($condition)) {
+                $_condition = ' WHERE ' . $condition;
+            }
+            $_args = [
+                ':start' => $start,
+                ':length' => $length
+            ];
+            if (is_null($args)) {
+                $args = $_args;
+            } else {
+                $args = array_merge($args, $_args);
+            }
+        }
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition . " LIMIT :start,:length";
+        return $this->_page_sql($sql, $args, $retObj);
     }
 
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
      */
-    public function first($tableName, $field, $condition)
+    public function first($tableName, $field, $condition, array $args = null)
     {
         try {
             if (is_array($condition)) {
@@ -405,7 +322,12 @@ class PdoDb extends BaseObject
                 $sth->execute($args);
             } else {
                 $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 0,1";
-                $sth = $this->_link->query($sql);
+                if (is_null($args)) {
+                    $sth = $this->_link->query($sql);
+                } else {
+                    $sth = $this->_link->prepare($sql);
+                    $sth->execute($args);
+                }
             }
             $data = $sth->fetchColumn();
             $sth->closeCursor();
@@ -417,15 +339,16 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param $tableName
-     * @param $field
-     * @param $condition
+     * @param string $tableName
+     * @param string $field
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
      */
-    public function col($tableName, $field, $condition = '')
+    public function col($tableName, $field, $condition = null, array $args = null)
     {
         try {
-            if (is_array($condition) && !empty($condition)) {
+            if (is_array($condition)) {
                 list($_condition, $args) = $this->field_param($condition, ' AND ');
                 $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition}";
                 $sth = $this->_link->prepare($sql);
@@ -433,10 +356,17 @@ class PdoDb extends BaseObject
             } else {
                 if (empty($condition)) {
                     $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName);
+                    $sth = $this->_link->query($sql);
                 } else {
-                    $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+                    if (is_null($args)) {
+                        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+                        $sth = $this->_link->query($sql);
+                    } else {
+                        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
+                        $sth = $this->_link->prepare($sql);
+                        $sth->execute($args);
+                    }
                 }
-                $sth = $this->_link->query($sql);
             }
             $data = [];
             while ($col = $sth->fetchColumn()) {
@@ -452,19 +382,20 @@ class PdoDb extends BaseObject
 
     /**
      * @param $tableName
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $field = '*')
+    public function count($tableName, $condition, array $args = null, $field = '*')
     {
-        return $this->first($tableName, "COUNT({$field})", $condition);
+        return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
 
     /**
-     * @param string $sql
-     * @param $args
-     * @return mixed
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @return bool|int
      */
     public function exec($sql, $args = null)
     {
@@ -486,9 +417,9 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param $sql
-     * @param $args
-     * @param $retObj
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param bool $retObj
      * @return mixed
      */
     public function rowSql($sql, $args = null, $retObj = false)
@@ -515,8 +446,8 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param $sql
-     * @param $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param $index
      * @param $retObj
      * @return mixed
@@ -548,10 +479,10 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param string $sql
-     * @param array $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     private function _page_sql($sql, $args = null, $retObj = false)
     {
@@ -577,12 +508,12 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param string $sql
-     * @param array $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param mixed $pageParam
      * @param int $length
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool|null
      */
     public function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
@@ -596,13 +527,22 @@ class PdoDb extends BaseObject
             //任意长度模式
             $start = $pageParam;
         }
-        return $this->_page_sql($sql . " LIMIT {$start},{$length}", $args, $retObj);
+        $_args = [
+            'start' => $start,
+            'length' => $length
+        ];
+        if (is_null($args)) {
+            $args = $_args;
+        } else {
+            $args = array_merge($args, $_args);
+        }
+        return $this->_page_sql($sql . " LIMIT :start, :length", $args, $retObj);
     }
 
     /**
-     * @param $sql
-     * @param null $args
-     * @return mixed
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @return bool|mixed
      */
     public function countSql($sql, $args = null)
     {
@@ -610,9 +550,9 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param string $sql
-     * @param null $args
-     * @return mixed
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @return bool|mixed
      */
     public function firstSql($sql, $args = null)
     {
@@ -633,9 +573,9 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @param string $sql
-     * @param null $args
-     * @return mixed
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @return array|bool
      */
     public function colSql($sql, $args = null)
     {
@@ -659,7 +599,7 @@ class PdoDb extends BaseObject
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
     public function startTrans()
     {

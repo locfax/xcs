@@ -181,10 +181,11 @@ class Mongo extends BaseObject
     /**
      * @param $table
      * @param array $condition
+     * @param null $args
      * @param bool $multi
      * @return bool
      */
-    public function remove($table, $condition = [], $multi = false)
+    public function remove($table, $condition = [], $args = null, $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -210,9 +211,10 @@ class Mongo extends BaseObject
      * @param $table
      * @param array $fields
      * @param array $condition
+     * @param null $args
      * @return array|bool|null
      */
-    public function findOne($table, $fields = [], $condition = [])
+    public function findOne($table, $fields = [], $condition = [], $args = null)
     {
         try {
             if (isset($condition['_id'])) {
@@ -235,9 +237,10 @@ class Mongo extends BaseObject
      * @param $table
      * @param array $fields
      * @param array $condition
+     * @param null $args
      * @return array|bool
      */
-    public function findAll($table, $fields = [], $condition = [])
+    public function findAll($table, $fields = [], $condition = [], $args = null)
     {
         try {
             $collection = $this->_client->selectCollection($table);
@@ -305,11 +308,12 @@ class Mongo extends BaseObject
      * @param $table
      * @param $field
      * @param $condition
+     * @param null $args
      * @param int $pageParam
      * @param int $length
      * @return array|bool
      */
-    function page($table, $field, $condition, $pageParam = 0, $length = 18)
+    function page($table, $field, $condition, $args = null, $pageParam = 0, $length = 18)
     {
         if (is_array($pageParam)) {
             //固定长度分页模式
@@ -327,9 +331,11 @@ class Mongo extends BaseObject
     /**
      * @param $table
      * @param array $condition
+     * @param null $args
+     * @param null $field
      * @return bool
      */
-    public function count($table, $condition = [])
+    public function count($table, $condition = [], $args = null, $field = null)
     {
         try {
             $collection = $this->_client->selectCollection($table);

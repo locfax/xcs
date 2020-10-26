@@ -5,7 +5,7 @@ namespace Xcs;
 class SysCache
 {
 
-    public static $dsn = 'general';
+    public static $dsn = 'portal';
 
     //加载系统级别缓存
     public static function loadcache($cacheName, $reset = false)

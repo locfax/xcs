@@ -89,7 +89,8 @@ class DB
      * @param string $table
      * @param array $data
      * @param bool $option
-     * @return bool/int
+     * @return bool|int
+     * @throws ExException
      */
     public static function create($table, $data, $option = false)
     {
@@ -103,7 +104,8 @@ class DB
      *
      * @param string $table
      * @param array $data
-     * @return bool
+     * @return bool|int|null
+     * @throws ExException
      */
     public static function replace($table, $data)
     {
@@ -113,33 +115,33 @@ class DB
 
     /**
      * 更新符合条件的数据
-     * @param mixed $option 是个多用途参数
-     *  - mysql的情况: bool : true 返回影响数,如果是0表示无修改  false: 执行情况 返回 bool
-     *
      * @param string $table
      * @param mixed $data (array string)
-     * @param mixed $condition (array string)
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return bool/int
+     * @throws ExException
      */
-    public static function update($table, $data, $condition, $option = false)
+    public static function update($table, $data, $condition, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->update($table, $data, $condition, $option);
+        return $db->update($table, $data, $condition, $args);
     }
 
     /**
      * 删除符合条件的项
-     * @param mixed $muti
-     *  - mysql的情况: bool true 删除多条 返回影响数 false: 只能删除一条
-     *
      * @param string $table
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param mixed $multi
+     *  - mysql的情况: bool true 删除多条 返回影响数 false: 只能删除一条
      * @return bool/int
+     * @throws ExException
      */
-    public static function remove($table, $condition, $muti = true)
+    public static function remove($table, $condition, $args = null, $multi = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->remove($table, $condition, $muti);
+        return $db->remove($table, $condition, $args, $multi);
     }
 
     /**
@@ -148,14 +150,16 @@ class DB
      *
      * @param string $table
      * @param mixed $field
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
-    public static function findOne($table, $field, $condition, $retObj = false)
+    public static function findOne($table, $field, $condition, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findOne($table, $field, $condition, $retObj);
+        return $db->findOne($table, $field, $condition, $args, $retObj);
     }
 
     /**
@@ -163,31 +167,35 @@ class DB
      *
      * @param string $table
      * @param string $field
-     * @param string $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param string $index
      * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
-    public static function findAll($table, $field = '*', $condition = '', $index = null, $retObj = false)
+    public static function findAll($table, $field = '*', $condition = '', $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findAll($table, $field, $condition, $index, $retObj);
+        return $db->findAll($table, $field, $condition, $args, $index, $retObj);
     }
 
     /**
      * 带分页数据的DB::page
      * @param string $table
      * @param $field
-     * @param mixed $condition
-     * @param int $length
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param int $pageParam
+     * @param int $length
      * @param bool $retObj
      * @return array
+     * @throws ExException
      */
-    public static function page($table, $field, $condition = '', $pageParam = 0, $length = 18, $retObj = false)
+    public static function page($table, $field, $condition = '', $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        $data = $db->page($table, $field, $condition, $pageParam, $length, $retObj);
+        $data = $db->page($table, $field, $condition, $args, $pageParam, $length, $retObj);
         if (is_array($pageParam)) {
             return ['rowsets' => $data, 'pagebar' => $data ? self::pageBar($pageParam, $length) : ''];
         }
@@ -201,25 +209,29 @@ class DB
      *
      * @param string $table
      * @param string $field
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
-    public static function first($table, $field, $condition)
+    public static function first($table, $field, $condition, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->first($table, $field, $condition);
+        return $db->first($table, $field, $condition, $args);
     }
 
     /**
      * @param $table
      * @param $field
-     * @param $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
-    public static function col($table, $field, $condition = '')
+    public static function col($table, $field, $condition = '', $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->col($table, $field, $condition);
+        return $db->col($table, $field, $condition, $args);
     }
 
     /**
@@ -228,20 +240,23 @@ class DB
      * $field count($field)
      *
      * @param string $table
-     * @param mixed $condition
+     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param string $field
      * @return mixed
+     * @throws ExException
      */
-    public static function count($table, $condition, $field = '1')
+    public static function count($table, $condition, $args = null, $field = '*')
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->count($table, $condition, $field);
+        return $db->count($table, $condition, $args, $field);
     }
 
     /**
-     * @param $sql
-     * @param $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
     public static function exec($sql, $args = null)
     {
@@ -253,10 +268,11 @@ class DB
     //--------------多表查询---start---------------//
 
     /**
-     * @param $sql
-     * @param $args
-     * @param $retObj
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
+     * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
     public static function rowSql($sql, $args = null, $retObj = false)
     {
@@ -265,11 +281,12 @@ class DB
     }
 
     /**
-     * @param $sql
-     * @param $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param null $index
      * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
     public static function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
@@ -278,12 +295,13 @@ class DB
     }
 
     /**
-     * @param string $sql
-     * @param array $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @param int $pageParam
      * @param int $length
      * @param bool $retObj
      * @return array
+     * @throws ExException
      */
     public static function pageSql($sql, $args = null, $pageParam = 0, $length = 18, $retObj = false)
     {
@@ -296,9 +314,10 @@ class DB
     }
 
     /**
-     * @param $sql
-     * @param null $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
     public static function countSql($sql, $args = null)
     {
@@ -307,9 +326,10 @@ class DB
     }
 
     /**
-     * @param $sql
-     * @param null $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
     public static function firstSql($sql, $args = null)
     {
@@ -318,9 +338,10 @@ class DB
     }
 
     /**
-     * @param $sql
-     * @param null $args
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
     public static function colSql($sql, $args = null)
     {
@@ -333,6 +354,7 @@ class DB
     /**
      * 开始事务
      * @return mixed
+     * @throws ExException
      */
     public static function startTrans()
     {
@@ -344,6 +366,7 @@ class DB
      * 事务提交或者回滚
      * @param bool $commit_no_errors
      * @return mixed
+     * @throws ExException
      */
     public static function endTrans($commit_no_errors = true)
     {
@@ -355,9 +378,9 @@ class DB
 
     /**
      * 切换数据源对象
-     *
      * @param null $id
      * @return PdoDb|Mongo|MongoDb
+     * @throws ExException
      */
     public static function Using($id = null)
     {
