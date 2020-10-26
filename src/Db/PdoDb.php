@@ -172,7 +172,7 @@ class PdoDb extends BaseObject
                 list($_data, $argsf) = $this->field_param($data, ',');
                 $args = array_merge($argsf, $argsc);
             } else {
-                if (is_null($args)) {
+                if (empty($args)) {
                     $args = $argsc;
                 } else {
                     $args = array_merge($args, $argsc);
@@ -182,7 +182,7 @@ class PdoDb extends BaseObject
         } else {
             if (is_array($data)) {
                 list($_data, $argsf) = $this->field_param($data, ',');
-                if (is_null($args)) {
+                if (empty($args)) {
                     $args = $argsf;
                 } else {
                     $args = array_merge($argsf, $args);
@@ -311,7 +311,7 @@ class PdoDb extends BaseObject
                 $sth->execute($args);
             } else {
                 $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 1";
-                if (is_null($args)) {
+                if (empty($args)) {
                     $sth = $this->_link->query($sql);
                 } else {
                     $sth = $this->_link->prepare($sql);
@@ -347,7 +347,7 @@ class PdoDb extends BaseObject
                     $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName);
                     $sth = $this->_link->query($sql);
                 } else {
-                    if (is_null($args)) {
+                    if (empty($args)) {
                         $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
                         $sth = $this->_link->query($sql);
                     } else {
@@ -389,7 +389,7 @@ class PdoDb extends BaseObject
     public function exec($sql, $args = null)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
@@ -413,7 +413,7 @@ class PdoDb extends BaseObject
     public function rowSql($sql, $args = null, $retObj = false)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
@@ -442,7 +442,7 @@ class PdoDb extends BaseObject
     public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
@@ -473,7 +473,7 @@ class PdoDb extends BaseObject
     private function _page_sql($sql, $args = null, $retObj = false)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
@@ -533,7 +533,7 @@ class PdoDb extends BaseObject
     public function firstSql($sql, $args = null)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
@@ -556,7 +556,7 @@ class PdoDb extends BaseObject
     public function colSql($sql, $args = null)
     {
         try {
-            if (is_null($args)) {
+            if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
                 $sth = $this->_link->prepare($sql);
