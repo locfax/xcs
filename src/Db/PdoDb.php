@@ -69,7 +69,7 @@ class PdoDb extends BaseObject
      * @param $tableName
      * @return string
      */
-    public function qtable($tableName)
+    public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
             return "`{$tableName}`";
@@ -85,10 +85,9 @@ class PdoDb extends BaseObject
      * @param $fieldName
      * @return string
      */
-    public function qfield($fieldName)
+    public function qField($fieldName)
     {
-        $_fieldName = trim($fieldName);
-        return ($_fieldName == '*') ? '*' : "`{$_fieldName}`";
+        return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
 
     /**
@@ -101,7 +100,7 @@ class PdoDb extends BaseObject
         $args = [];
         $sql = $comma = '';
         foreach ($fields as $field => $value) {
-            $sql .= $comma . $this->qfield($field) . ' = :' . $field;
+            $sql .= $comma . $this->qField($field) . ' = :' . $field;
             $args[':' . $field] = $value;
             $comma = $glue;
         }
@@ -119,13 +118,13 @@ class PdoDb extends BaseObject
         $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
-            $fields .= $comma . $this->qfield($field);
+            $fields .= $comma . $this->qField($field);
             $values .= $comma . ':' . $field;
             $args[':' . $field] = $value;
             $comma = ',';
         }
+        $sql = 'INSERT INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
         try {
-            $sql = 'INSERT INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
             $sth = $this->_link->prepare($sql);
             $ret = $sth->execute($args);
             if ($retId) {
@@ -147,13 +146,13 @@ class PdoDb extends BaseObject
         $args = [];
         $fields = $values = $comma = '';
         foreach ($data as $field => $value) {
-            $fields .= $comma . $this->qfield($field);
+            $fields .= $comma . $this->qField($field);
             $values .= $comma . ':' . $field;
             $args[':' . $field] = $value;
             $comma = ',';
         }
 
-        $sql = 'REPLACE INTO ' . $this->qtable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
+        $sql = 'REPLACE INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
         return $this->exec($sql, $args);
     }
 
@@ -167,32 +166,20 @@ class PdoDb extends BaseObject
     public function update($tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
-            list($_condition, $argsc) = $this->field_param($condition, ' AND ');
+            list($condition, $args1) = $this->field_param($condition, ' AND ');
             if (is_array($data)) {
-                list($_data, $argsf) = $this->field_param($data, ',');
-                $args = array_merge($argsf, $argsc);
+                list($data, $args2) = $this->field_param($data, ',');
+                $args = array_merge($args2, $args1);
             } else {
-                if (empty($args)) {
-                    $args = $argsc;
-                } else {
-                    $args = array_merge($args, $argsc);
-                }
-                $_data = $data;
+                $args = empty($args) ? $args1 : array_merge($args, $args1);
             }
         } else {
             if (is_array($data)) {
-                list($_data, $argsf) = $this->field_param($data, ',');
-                if (empty($args)) {
-                    $args = $argsf;
-                } else {
-                    $args = array_merge($argsf, $args);
-                }
-            } else {
-                $_data = $data;
+                list($data, $args1) = $this->field_param($data, ',');
+                $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
-            $_condition = $condition;
         }
-        $sql = 'UPDATE ' . $this->qtable($tableName) . " SET {$_data} WHERE {$_condition}";
+        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} WHERE {$condition}";
         return $this->exec($sql, $args);
     }
 
@@ -206,12 +193,10 @@ class PdoDb extends BaseObject
     public function remove($tableName, $condition, $args = null, $multi = false)
     {
         if (is_array($condition)) {
-            list($_condition, $args) = $this->field_param($condition, ',');
-        } else {
-            $_condition = $condition;
+            list($condition, $args) = $this->field_param($condition, ',');
         }
         $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . $limit;
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
         return $this->exec($sql, $args);
     }
 
@@ -226,11 +211,9 @@ class PdoDb extends BaseObject
     public function findOne($tableName, $field, $condition, array $args = null, $retObj = false)
     {
         if (is_array($condition)) {
-            list($_condition, $args) = $this->field_param($condition, ' AND ');
-        } else {
-            $_condition = $condition;
+            list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . ' WHERE ' . $_condition . ' LIMIT 1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -247,14 +230,9 @@ class PdoDb extends BaseObject
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
-            $_condition = ' WHERE ' . $condition;
-        } else {
-            $_condition = '';
-            if (!empty($condition)) {
-                $_condition = ' WHERE ' . $condition;
-            }
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
 
@@ -280,17 +258,11 @@ class PdoDb extends BaseObject
             //任意长度模式
             $offset = $pageParam;
         }
-
         if (is_array($condition) && !empty($condition)) {
-            list($_condition, $args) = $this->field_param($condition, ' AND ');
-            $_condition = ' WHERE ' . $_condition;
-        } else {
-            $_condition = '';
-            if (!empty($condition)) {
-                $_condition = ' WHERE ' . $condition;
-            }
+            list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qtable($tableName) . $_condition . " LIMIT {$limit} OFFSET {$offset}";
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . " LIMIT {$limit} OFFSET {$offset}";
         return $this->_page_sql($sql, $args, $retObj);
     }
 
@@ -303,20 +275,17 @@ class PdoDb extends BaseObject
      */
     public function first($tableName, $field, $condition, array $args = null)
     {
+        if (is_array($condition)) {
+            list($condition, $args) = $this->field_param($condition, ' AND ');
+        }
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition} LIMIT 1";
+
         try {
-            if (is_array($condition)) {
-                list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition} LIMIT 1";
+            if (empty($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
-            } else {
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition} LIMIT 1";
-                if (empty($args)) {
-                    $sth = $this->_link->query($sql);
-                } else {
-                    $sth = $this->_link->prepare($sql);
-                    $sth->execute($args);
-                }
             }
             $data = $sth->fetchColumn();
             $sth->closeCursor();
@@ -334,29 +303,22 @@ class PdoDb extends BaseObject
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public function col($tableName, $field, $condition = null, array $args = null)
+    public function col($tableName, $field, $condition, array $args = null)
     {
+
+        if (is_array($condition)) {
+            list($condition, $args) = $this->field_param($condition, ' AND ');
+        }
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}";
+
         try {
-            if (is_array($condition)) {
-                list($_condition, $args) = $this->field_param($condition, ' AND ');
-                $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$_condition}";
+            if (empty($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
-            } else {
-                if (empty($condition)) {
-                    $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName);
-                    $sth = $this->_link->query($sql);
-                } else {
-                    if (empty($args)) {
-                        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
-                        $sth = $this->_link->query($sql);
-                    } else {
-                        $sql = "SELECT {$field} AS result FROM " . $this->qtable($tableName) . " WHERE  {$condition}";
-                        $sth = $this->_link->prepare($sql);
-                        $sth->execute($args);
-                    }
-                }
             }
+
             $data = [];
             while ($col = $sth->fetchColumn()) {
                 $data[] = $col;
@@ -512,7 +474,9 @@ class PdoDb extends BaseObject
             //任意长度模式
             $offset = $pageParam;
         }
-        return $this->_page_sql($sql . " LIMIT {$limit} OFFSET {$offset}", $args, $retObj);
+        $sql .= " LIMIT {$limit} OFFSET {$offset}";
+
+        return $this->_page_sql($sql, $args, $retObj);
     }
 
     /**
