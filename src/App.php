@@ -16,7 +16,7 @@ class App
     /**
      * @var Di\Container
      */
-    private static $container;
+    public static $container;
 
     /**
      * @param bool $refresh
@@ -46,24 +46,14 @@ class App
         if (defined('DEBUG') && DEBUG) {
             //测试模式
             set_error_handler(function ($errno, $errStr, $errFile = null, $errLine = null) {
-                try {
-                    throw new ExException($errStr, $errno);
-                } catch (ExException $exception) {
-
-                }
+                throw new ExException($errStr, $errno);
             });
 
             define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
             register_shutdown_function(function () {
                 $error = error_get_last();
                 if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                    $errno = $error["type"];
-                    $errStr = $error["message"];
-                    try {
-                        throw new ExException($errStr, $errno, 'systemError');
-                    } catch (ExException $exception) {
-
-                    }
+                    throw new ExException($error["message"], $error["type"], 'systemError');
                 }
             });
 
@@ -220,7 +210,7 @@ class App
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             ];
-            return \Xcs\App::response($res, 'json');
+            return self::response($res, 'json');
         }
         $args = '出错了！' . $args;
         include template('404');
@@ -238,7 +228,7 @@ class App
                 'errmsg' => '出错了！' . $args,
                 'data' => ''
             ];
-            return \Xcs\App::response($res, 'json');
+            return self::response($res, 'json');
         }
         $args = '出错了！' . $args;
         include template('403');
@@ -485,7 +475,7 @@ class App
      * @param $type
      * @param array $params
      * @return mixed|object
-     * @throws ExException
+     * @throws \ReflectionException|ExException
      */
     public static function createObject($type, array $params = [])
     {

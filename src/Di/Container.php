@@ -3,6 +3,9 @@
 namespace Xcs\Di;
 
 use ReflectionClass;
+use ReflectionException;
+use ReflectionFunction;
+use ReflectionMethod;
 use Xcs\Exception\ExException;
 
 /**
@@ -342,7 +345,7 @@ class Container
      * Returns the dependencies of the specified class.
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
-     * @throws ExException|\ReflectionException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
+     * @throws ExException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
      */
     protected function getDependencies($class)
     {
@@ -353,7 +356,7 @@ class Container
         $dependencies = [];
         try {
             $reflection = new ReflectionClass($class);
-        } catch (\ReflectionException $e) {
+        } catch (ReflectionException $e) {
             throw new ExException('Failed to instantiate component or class "' . $class . '".', 0, $e);
         }
 
@@ -446,21 +449,20 @@ class Container
      * @param array $params The array of parameters for the function, can be either numeric or associative.
      * @return array The resolved dependencies.
      * @throws ExException
-     * @throws \ReflectionException
      */
     public function resolveCallableDependencies(callable $callback, $params = [])
     {
         if (is_array($callback)) {
-            $reflection = new \ReflectionMethod($callback[0], $callback[1]);
+            $reflection = new ReflectionMethod($callback[0], $callback[1]);
         } elseif (is_object($callback) && !$callback instanceof \Closure) {
-            $reflection = new \ReflectionMethod($callback, '__invoke');
+            $reflection = new ReflectionMethod($callback, '__invoke');
         } else {
-            $reflection = new \ReflectionFunction($callback);
+            $reflection = new ReflectionFunction($callback);
         }
 
         $args = [];
 
-        $associative = ArrayHelper::isAssociative($params);
+        $associative = $this->isAssociative($params);
 
         foreach ($reflection->getParameters() as $param) {
             $name = $param->getName();
@@ -504,6 +506,42 @@ class Container
         }
 
         return $args;
+    }
+
+    /**
+     * Returns a value indicating whether the given array is an associative array.
+     *
+     * An array is associative if all its keys are strings. If `$allStrings` is false,
+     * then an array will be treated as associative if at least one of its keys is a string.
+     *
+     * Note that an empty array will NOT be considered associative.
+     *
+     * @param array $array the array being checked
+     * @param bool $allStrings whether the array keys must be all strings in order for
+     * the array to be treated as associative.
+     * @return bool whether the array is associative
+     */
+    public static function isAssociative($array, $allStrings = true)
+    {
+        if (!is_array($array) || empty($array)) {
+            return false;
+        }
+
+        if ($allStrings) {
+            foreach ($array as $key => $value) {
+                if (!is_string($key)) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        foreach ($array as $key => $value) {
+            if (is_string($key)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -559,7 +597,6 @@ class Container
                 $this->set($class, $definition[0], $definition[1]);
                 continue;
             }
-
             $this->set($class, $definition);
         }
     }
@@ -581,7 +618,6 @@ class Container
                 $this->setSingleton($class, $definition[0], $definition[1]);
                 continue;
             }
-
             $this->setSingleton($class, $definition);
         }
     }

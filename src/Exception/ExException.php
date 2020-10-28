@@ -8,59 +8,10 @@ class ExException extends \Exception
     public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null)
     {
         parent::__construct($message, $code, $previous);
-        $this->exceptionError($this, $type);
+        $this->exception($this, $type);
         set_exception_handler(function () {
             //不用自带的显示异常
         });
-    }
-
-    public function systemError($exception)
-    {
-        $this->exceptionError($exception, 'SystemError');
-    }
-
-    /**
-     * 代码执行过程回溯信息
-     *
-     * @static
-     * @access public
-     */
-    public function debugBacktrace()
-    {
-        $skipFunc[] = 'handle_exception';
-        $skipFunc[] = 'handle_error';
-        $skipFunc[] = 'ErrorFunc::systemError';
-        $skipFunc[] = 'ErrorFunc::debugBacktrace';
-        $debugBacktrace = debug_backtrace();
-        ksort($debugBacktrace);
-        $phpMsg = [];
-        foreach ($debugBacktrace as $error) {
-            if (!isset($error['file'])) {
-                // 利用反射API来获取方法/函数所在的文件和行数
-                try {
-                    if (isset($error['class'])) {
-                        $reflection = new \ReflectionMethod($error['class'], $error['function']);
-                    } else {
-                        $reflection = new \ReflectionFunction($error['function']);
-                    }
-                    $error['file'] = $reflection->getFileName();
-                    $error['line'] = $reflection->getStartLine();
-                } catch (\ReflectionException $e) {
-                    //$e->getCode();
-                    continue;
-                }
-            }
-            $func = isset($error['class']) ? $error['class'] : '';
-            $func .= isset($error['type']) ? $error['type'] : '';
-            $func .= isset($error['function']) ? $error['function'] : '';
-
-            if (in_array($func, $skipFunc)) {
-                continue;
-            }
-            $error['line'] = sprintf('%04d', $error['line']);
-            $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $func];
-        }
-        return $phpMsg;
     }
 
     /**
@@ -69,9 +20,9 @@ class ExException extends \Exception
      * @static
      * @access public
      * @param $type
-     * @param mixed $exception
+     * @param \Exception $exception
      */
-    public function exceptionError($exception, $type = 'Exception')
+    public function exception($exception, $type = 'Exception')
     {
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
@@ -142,6 +93,7 @@ class ExException extends \Exception
         ob_get_length() && ob_end_clean();
 
         $title = $type ? $type : 'System';
+
         echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html>
@@ -150,7 +102,7 @@ class ExException extends \Exception
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
  <meta name="ROBOTS" content="NOINDEX,NOFOLLOW,NOARCHIVE" />
  <style type="text/css">
- body { background-color: white; color: black; font-size: 9pt/11pt; font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", "Helvetica Neue", Helvetica, "Lucida Grande", "Hiragino Sans GB", "Microsoft YaHei", \5fae\8f6f\96c5\9ed1, "WenQuanYi Micro Hei", sans-serif;}
+ body { background-color: white; color: black; font-size: 9pt; font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", "Helvetica Neue", Helvetica, "Lucida Grande", "Hiragino Sans GB", "Microsoft YaHei", \5fae\8f6f\96c5\9ed1, "WenQuanYi Micro Hei", sans-serif;}
  #container {margin: 10px;}
  #message {width: 1024px; color: black;}
  .red {color: red;}
@@ -195,7 +147,7 @@ class ExException extends \Exception
 <body>
 <div id="container">
 <h1>$title</h1>
-<div class='info'>$errorMsg</div>
+<div class='info'><pre>$errorMsg</pre></div>
 EOT;
         if (!empty($phpMsg)) {
             $str = '<div class="info">';

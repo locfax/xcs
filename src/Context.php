@@ -10,23 +10,24 @@ class Context
     /**
      * @param string $dsnId
      * @return mixed|null
-     * @throws ExException
      */
     public static function dsn($dsnId = 'portal')
     {
-        static $_dsns = [];
+        static $cacheDsn = [];
         $appKey = APP_KEY;
-        if (!isset($_dsns[$appKey])) {
-            $_dsns[$appKey] = App::mergeVars('dsn');
-            if (!isset($_dsns[$appKey][$dsnId])) {
-                throw new ExException("$dsnId is not setting 1");
+        if (!isset($cacheDsn[$appKey])) {
+            $cacheDsn[$appKey] = App::mergeVars('dsn');
+            if (!isset($cacheDsn[$appKey][$dsnId])) {
+                new ExException("$dsnId is not setting 1");
+                return null;
             }
         }
         //如果没配置$dsnid 会报错
-        if (!isset($_dsns[$appKey][$dsnId])) {
-            throw new ExException("$dsnId is not setting 2");
+        if (!isset($cacheDsn[$appKey][$dsnId])) {
+            new ExException("$dsnId is not setting 2");
+            return null;
         }
-        return $_dsns[$appKey][$dsnId];
+        return $cacheDsn[$appKey][$dsnId];
     }
 
     /**
@@ -36,18 +37,18 @@ class Context
      */
     public static function config($name, $type = 'inc')
     {
-        static $_configs = [];
+        static $CacheConfig = [];
         $key = APP_KEY . '.' . $name . '.' . $type;
-        if (isset($_configs[$key])) {
-            return $_configs[$key];
+        if (isset($CacheConfig[$key])) {
+            return $CacheConfig[$key];
         }
         $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            $_configs[$key] = [];
+            $CacheConfig[$key] = [];
             return [];
         }
-        $_configs[$key] = include $file;
-        return $_configs[$key];
+        $CacheConfig[$key] = include $file;
+        return $CacheConfig[$key];
     }
 
 }

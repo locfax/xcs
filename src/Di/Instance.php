@@ -2,6 +2,7 @@
 
 namespace Xcs\Di;
 
+use Xcs\App;
 use Xcs\Exception\ExException;
 
 /**
@@ -97,13 +98,14 @@ class Instance
      * @param string $type the class/interface name to be checked. If null, type check will not be performed.
      * @param Container $container the container. This will be passed to [[get()]].
      * @return object the object referenced by the Instance, or `$reference` itself if it is an object.
+     * @throws ExException
      */
     public static function ensure($reference, $type = null, $container = null)
     {
         if (is_array($reference)) {
             $class = isset($reference['class']) ? $reference['class'] : $type;
             if (!$container instanceof Container) {
-                $container = \Xcs\App::$container;
+                $container = App::$container;
             }
             unset($reference['class']);
             $component = $container->get($class, [], $reference);
@@ -143,14 +145,14 @@ class Instance
      * Returns the actual object referenced by this Instance object.
      * @param Container $container the container used to locate the referenced object.
      * @return object the actual object referenced by this Instance object.
+     * @throws ExException
      */
     public function get($container)
     {
         if ($container) {
             return $container->get($this->id);
         }
-        
-        return \Xcs\App::$container->get($this->id);
+        return App::$container->get($this->id);
     }
 
     /**
@@ -158,6 +160,7 @@ class Instance
      *
      * @param array $state
      * @return Instance
+     * @throws ExException
      * @see var_export()
      */
     public static function __set_state($state)
@@ -165,7 +168,6 @@ class Instance
         if (!isset($state['id'])) {
             throw new ExException('Failed to instantiate class "Instance". Required parameter "id" is missing');
         }
-
         return new self($state['id']);
     }
 }
