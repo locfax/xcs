@@ -1,6 +1,8 @@
 <?php
 
-namespace Xcs;
+namespace Xcs\Helper;
+
+use Xcs\Cache\Cache;
 
 class Locker
 {

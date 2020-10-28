@@ -2,8 +2,8 @@
 
 namespace Xcs\Db;
 
-use Xcs\BaseObject;
-use Xcs\Exception\DbException;
+use Xcs\Di\BaseObject;
+use Xcs\Ex\DbException;
 
 class Mongo extends BaseObject
 {

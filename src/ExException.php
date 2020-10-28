@@ -1,6 +1,6 @@
 <?php
 
-namespace Xcs\Exception;
+namespace Xcs;
 
 class ExException extends \Exception
 {
@@ -154,7 +154,7 @@ EOT;
             $str .= '<p><strong>tracing</strong></p>';
             if (is_array($phpMsg)) {
                 $str .= '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
-                $str .= '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
+                $str .= '<tr class="bg2"><td>No.</td><td>FileList</td><td>Line</td><td>Code</td></tr>';
                 foreach ($phpMsg as $k => $msg) {
                     $k++;
                     $str .= '<tr class="bg1">';

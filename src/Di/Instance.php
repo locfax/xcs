@@ -3,7 +3,7 @@
 namespace Xcs\Di;
 
 use Xcs\App;
-use Xcs\Exception\ExException;
+use Xcs\ExException;
 
 /**
  * Instance represents a reference to a named object in a dependency injection (DI) container or a service locator.
@@ -125,11 +125,7 @@ class Instance
         }
 
         if ($reference instanceof self) {
-            try {
-                $component = $reference->get($container);
-            } catch (\ReflectionException $e) {
-                throw new ExException('Failed to instantiate component or class "' . $reference->id . '".', 0, $e);
-            }
+            $component = $reference->get($container);
             if ($type === null || $component instanceof $type) {
                 return $component;
             }

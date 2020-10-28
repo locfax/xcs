@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-class CurlMuti
+class CurlMulti
 {
 
     /**

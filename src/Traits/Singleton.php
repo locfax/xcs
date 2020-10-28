@@ -2,28 +2,29 @@
 
 namespace Xcs\Traits;
 
-Trait Singleton
+use Xcs\ExException;
+
+trait Singleton
 {
 
     protected static $singleton_instances = [];
 
     /**
-     * @throws \Xcs\Exception\ExException
+     * @throws ExException
      */
     public function __clone()
     {
-        throw new \Xcs\Exception\ExException('Cloning ' . __CLASS__ . ' is not allowed');
+        throw new ExException('Cloning ' . __CLASS__ . ' is not allowed');
     }
 
     /**
-     * @param null $param
      * @return mixed
      */
-    public static function getInstance($param = null)
+    public static function getInstance()
     {
         $class = get_called_class();
         if (!isset(static::$singleton_instances[$class])) {
-            static::$singleton_instances[$class] = new static($param);
+            static::$singleton_instances[$class] = new static();
         }
         return static::$singleton_instances[$class];
     }

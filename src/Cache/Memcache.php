@@ -2,45 +2,39 @@
 
 namespace Xcs\Cache;
 
+use Xcs\ExException;
+use Xcs\Traits\Singleton;
+
 class Memcache
 {
 
-    use \Xcs\Traits\Singleton;
+    use Singleton;
 
     public $enable = false;
     private $_link = null;
-    private $_plink = false;
 
     /**
      * @param $config
      * @return $this
-     * @throws \Xcs\Exception\ExException
+     * @throws ExException
      */
     public function init($config)
     {
         try {
             $this->_link = new \Memcache();
-            if ($config['pconnect']) {
-                $this->_plink = true;
-                $server = 'pconnect';
-            } else {
-                $server = 'connect';
-            }
-            $connect = $this->_link->$server($config['host'], $config['port'], $config['timeout']);
+            $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
             if ($connect) {
                 $this->enable = true;
             }
         } catch (\MemcachedException $e) {
-            throw new \Xcs\Exception\ExException('memcache初始化错误');
+            throw new ExException('memcache初始化错误');
         }
         return $this;
     }
 
     public function close()
     {
-        if (!$this->_plink) {
-            $this->_link && $this->_link->close();
-        }
+        $this->_link && $this->_link->close();
     }
 
     /**

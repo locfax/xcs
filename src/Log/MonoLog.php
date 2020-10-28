@@ -1,13 +1,15 @@
 <?php
 
-namespace Xcs;
+namespace Xcs\Log;
 
+use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
+use Xcs\Traits\Singleton;
 
-class Log
+class MonoLog
 {
 
-    use \Xcs\Traits\Singleton;
+    use Singleton;
 
     public $log = null;
 
@@ -15,7 +17,7 @@ class Log
     {
         $logfile = DATA_PATH . 'debug.log';
         $this->log = new Logger('run');
-        $this->log->pushHandler(new \Monolog\Handler\StreamHandler($logfile, Logger::WARNING));
+        $this->log->pushHandler(new StreamHandler($logfile, Logger::WARNING));
         return $this->log;
     }
 

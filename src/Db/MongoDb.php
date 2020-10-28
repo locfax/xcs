@@ -11,8 +11,8 @@ use \MongoDB\Driver\Query as MongoQuery;
 use \MongoDB\Driver\Command;
 use \MongoDB\Driver\ReadPreference;
 use \MongoDB\Driver\WriteConcern;
-use Xcs\BaseObject;
-use Xcs\Exception\DbException;
+use Xcs\Di\BaseObject;
+use Xcs\Ex\DbException;
 
 class MongoDb extends BaseObject
 {

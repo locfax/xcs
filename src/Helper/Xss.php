@@ -2,10 +2,12 @@
 
 namespace Xcs\Helper;
 
+use Xcs\Traits\Singleton;
+
 class Xss
 {
 
-    use \Xcs\Traits\Singleton;
+    use Singleton;
 
     /**
      * 非法文件名字符

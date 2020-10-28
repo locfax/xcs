@@ -2,8 +2,6 @@
 
 namespace Xcs;
 
-use Xcs\Exception\ExException;
-
 class Context
 {
 

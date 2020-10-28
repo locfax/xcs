@@ -1,8 +1,8 @@
 <?php
 
-namespace Xcs;
+namespace Xcs\Log;
 
-class Logs
+class FileLog
 {
 
     const maxsize = 1024000; //最大文件大小1M
@@ -12,7 +12,7 @@ class Logs
      * @param $filename
      * @param $msg
      */
-    public static function writeLog($filename, $msg)
+    public static function write($filename, $msg)
     {
         $filename = DATA_PATH . $filename;
         $res = [];
@@ -21,8 +21,8 @@ class Logs
 
         //如果日志文件超过了指定大小则备份日志文件
         if (file_exists($filename) && (abs(filesize($filename)) > self::maxsize)) {
-            $newfilename = dirname($filename) . '/' . time() . '-' . basename($filename);
-            rename($filename, $newfilename);
+            $newFileName = dirname($filename) . '/' . time() . '-' . basename($filename);
+            rename($filename, $newFileName);
         }
 
         //如果是新建的日志文件，去掉内容中的第一个字符逗号
@@ -41,7 +41,7 @@ class Logs
      * @param $filename
      * @return mixed|string
      */
-    public static function readLog($filename)
+    public static function read($filename)
     {
         $filename = DATA_PATH . $filename;
 

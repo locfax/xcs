@@ -2,8 +2,6 @@
 
 namespace Xcs;
 
-use Xcs\Exception\ExException;
-
 class App
 {
 
@@ -13,6 +11,7 @@ class App
     const _actionPrefix = 'act_';
 
     private static $routes;
+
     /**
      * @var Di\Container
      */
@@ -45,15 +44,21 @@ class App
 
         if (defined('DEBUG') && DEBUG) {
             //测试模式
-            set_error_handler(function ($errno, $errStr, $errFile = null, $errLine = null) {
-                throw new ExException($errStr, $errno);
+            set_error_handler(function ($errno, $errStr) {
+                try {
+                    throw new ExException($errStr, $errno);
+                } catch (ExException $ex) {
+                }
             });
 
             define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
             register_shutdown_function(function () {
                 $error = error_get_last();
                 if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                    throw new ExException($error["message"], $error["type"], 'systemError');
+                    try {
+                        throw new ExException($error["message"], $error["type"], 'systemError');
+                    } catch (ExException $ex) {
+                    }
                 }
             });
 
@@ -475,7 +480,7 @@ class App
      * @param $type
      * @param array $params
      * @return mixed|object
-     * @throws \ReflectionException|ExException
+     * @throws ExException
      */
     public static function createObject($type, array $params = [])
     {

@@ -5,7 +5,6 @@ namespace Xcs;
 use Xcs\Db\PdoDb;
 use Xcs\Db\Mongo;
 use Xcs\Db\MongoDb;
-use Xcs\Exception\ExException;
 
 class DB
 {

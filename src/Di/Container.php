@@ -6,7 +6,7 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionFunction;
 use ReflectionMethod;
-use Xcs\Exception\ExException;
+use Xcs\ExException;
 
 /**
  * Class Container
@@ -253,7 +253,6 @@ class Container
                     throw new ExException('A class definition requires a "class" member.');
                 }
             }
-
             return $definition;
         }
 
@@ -345,7 +344,7 @@ class Container
      * Returns the dependencies of the specified class.
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
-     * @throws ExException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
+     * @throws ExException|ReflectionException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
      */
     protected function getDependencies($class)
     {

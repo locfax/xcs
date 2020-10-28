@@ -109,7 +109,7 @@ function gpc_val($val, $runfunc, $emptyrun)
  */
 function getini($key)
 {
-    $_CFG = \Xcs\App::mergeVars('cfg');
+    $_CFG = Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
     switch (count($k)) {
         case 1:
@@ -176,7 +176,7 @@ function template($file, $gettplfile = false)
 function url($udi, $param = [])
 {
     $_udi = explode('/', $udi);
-    $url = '?' . \Xcs\App::_dCTL . '=' . $_udi[0] . '&' . \Xcs\App::_dACT . '=' . $_udi[1];
+    $url = '?' . Xcs\App::_dCTL . '=' . $_udi[0] . '&' . Xcs\App::_dACT . '=' . $_udi[1];
 
     if (!empty($param)) {
         foreach ($param as $key => $val) {

@@ -1,6 +1,8 @@
 <?php
 
-namespace Xcs;
+namespace Xcs\Cache;
+
+use Xcs\DB;
 
 class SysCache
 {
@@ -8,14 +10,12 @@ class SysCache
     public static $dsn = 'portal';
 
     //加载系统级别缓存
-    public static function loadcache($cacheName, $reset = false)
+    public static function loadCache($cacheName, $reset = false)
     {
         if (!$cacheName) {
             return null;
         }
-
         $data = self::data($cacheName, $reset);
-
         return json_decode($data, true);
     }
 
@@ -49,10 +49,10 @@ class SysCache
     public static function lost($cacheName, $reset = false)
     {
         if (!$reset) { //允许从数据库直接获取
-            $syscache = DB::dbm(self::$dsn)->findOne('syscache', '*', ['cname' => 'sys_' . strtolower($cacheName)]);
-            if ($syscache) {
-                Cache::set($syscache['cname'], stripslashes($syscache['data']));
-                return $syscache['data'];
+            $sysCache = DB::dbm(self::$dsn)->findOne('syscache', '*', ['cname' => 'sys_' . strtolower($cacheName)]);
+            if ($sysCache) {
+                Cache::set($sysCache['cname'], stripslashes($sysCache['data']));
+                return $sysCache['data'];
             }
         }
 
@@ -60,7 +60,7 @@ class SysCache
         $cachem = '\\Model\\Cache\\' . ucfirst($cacheName);
         $tmp = $cachem::getInstance()->getdata();
         if (!empty($tmp) && is_array($tmp)) {
-            $data = App::output_json($tmp);
+            $data = json_encode($tmp);
         } else {
             $data = '[]'; //标识为空
         }
@@ -78,7 +78,7 @@ class SysCache
     {
         //$delcache true 会清理该缓存，在下次需要时自动载入缓存
         if (is_array($data)) {
-            $data = App::output_json($data);
+            $data = json_encode($data);
         }
 
         //缓存入库
