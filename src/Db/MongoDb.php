@@ -136,25 +136,12 @@ class MongoDb extends BaseObject
                 }
             }
             $bulk = new BulkWrite();
-            if (is_bool($options)) {
-                $options = 'set';
-            }
-            if ('muti' == $options) {
+            if ('multi' == $options) {
                 $bulk->update($condition, $document, ['multi' => false, 'upsert' => false]);
-            } elseif ('set' == $options) { //更新 字段
-                $bulk->update($condition, ['$set' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('inc' == $options) { //递增 字段
-                $bulk->update($condition, ['$inc' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('unset' == $options) { //删除 字段
-                $bulk->update($condition, ['$unset' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('push' == $options) { //推入内镶文档
-                $bulk->update($condition, ['$push' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('pop' == $options) { //删除内镶文档最后一个或者第一个
-                $bulk->update($condition, ['$pop' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('pull' == $options) { //删除内镶文档某个值得项
-                $bulk->update($condition, ['$pull' => $document], ['multi' => false, 'upsert' => false]);
-            } elseif ('addToSet' == $options) { //追加到内镶文档
-                $bulk->update($condition, ['$addToSet' => $document], ['multi' => false, 'upsert' => false]);
+            } elseif (in_array($options, ['$set', '$inc', '$unset', '$push', '$pop', '$pull', '$addToSet'])) { //更新 字段
+                $bulk->update($condition, [$options => $document], ['multi' => false, 'upsert' => false]);
+            } else {
+                return $this->_halt('the option is not support', 0);
             }
             $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
             return $ret->getModifiedCount();
@@ -191,30 +178,30 @@ class MongoDb extends BaseObject
 
     /**
      * @param $table
-     * @param null $fields
+     * @param array $options
      * @param array $condition
      * @param null $args
      * @return array|bool
      */
-    public function findOne($table, $fields = null, $condition = [], $args = null)
+    public function findOne($table, $options = [], $condition = [], $args = null)
     {
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new ObjectID($condition['_id']);
             }
-            $options = [];
             $query = new MongoQuery($condition, $options);
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
             if (empty($cursor)) {
                 return false;
             }
-            $ret = (array)$cursor[0];
-            if (isset($ret['_id'])) {
-                $ret['_id'] = $ret['nid'] = (string)$ret['_id'];
+
+            $data = $cursor[0];
+            if (isset($data['_id'])) {
+                $data['_id'] = (string)$data['_id'];
             }
             $cursor = null;
-            return $ret;
+            return $data;
         } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
@@ -223,30 +210,21 @@ class MongoDb extends BaseObject
 
     /**
      * @param $table
-     * @param array $fields
+     * @param array $options
      * @param array $condition
      * @param null $args
      * @return array|bool
      */
-    public function findAll($table, $fields = null, $condition = [], $args = null)
+    public function findAll($table, $options = [], $condition = [], $args = null)
     {
         try {
-            if (isset($condition['sort'])) {
-                $options = [
-                    'sort' => $condition['sort']
-                ];
-                $query = new MongoQuery($condition['query'], $options);
-            } else {
-                $options = [];
-                $query = new MongoQuery($condition, $options);
-            }
+            $query = new MongoQuery($condition, $options);
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
 
             $rowSets = [];
             foreach ($cursor as $row) {
-                $row = (array)$row;
-                $row['_id'] = $row['nid'] = (string)$row['_id'];
+                $row['_id'] = (string)$row['_id'];
                 $rowSets[] = $row;
             }
             $cursor = null;
@@ -259,37 +237,39 @@ class MongoDb extends BaseObject
 
     /**
      * @param $table
-     * @param $fields
-     * @param $condition
-     * @param int $offset
+     * @param array $options
+     * @param array $condition
+     * @param array|int $pageParam
      * @param int $limit
      * @return array|bool
      */
-    private function _page($table, $fields = null, $condition = [], $offset = 0, $limit = 18)
+    public function page($table, $options = [], $condition = [], $pageParam = null, $limit = 18)
     {
-        try {
-            if (isset($condition['sort'])) {
-                $options = [
-                    'sort' => $condition['sort'],
-                    'limit' => (int)$limit,
-                    'skip' => (int)$offset
-                ];
-                $query = new MongoQuery($condition['query'], $options);
-            } else {
-                $options = [
-                    'limit' => (int)$limit,
-                    'skip' => (int)$offset
-                ];
-                $query = new MongoQuery($condition['query'], $options);
+        if (is_array($pageParam)) {
+            //固定长度分页模式
+            if ($pageParam['totals'] <= 0) {
+                return [];
             }
+            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
+        } else {
+            //任意长度模式
+            $offset = $pageParam;
+        }
+
+        $options = array_merge($options, [
+            'limit' => $limit,
+            'skip' => $offset
+        ]);
+
+        try {
+            $query = new MongoQuery($condition['query'], $options);
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
 
             $rowSets = [];
             foreach ($cursor as $row) {
-                $row = (array)$row;
                 if (isset($row['_id'])) {
-                    $row['_id'] = $row['nid'] = (string)$row['_id'];
+                    $row['_id'] = (string)$row['_id'];
                 }
                 $rowSets[] = $row;
             }
@@ -298,30 +278,6 @@ class MongoDb extends BaseObject
         } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
-    }
-
-    /**
-     * @param $table
-     * @param $field
-     * @param $condition
-     * @param null $args
-     * @param int $pageParam
-     * @param int $limit
-     * @return array|bool
-     */
-    function page($table, $field, $condition, $args = null, $pageParam = 0, $limit = 18)
-    {
-        if (is_array($pageParam)) {
-            //固定长度分页模式
-            if ($pageParam['totals'] <= 0) {
-                return null;
-            }
-            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
-        } else {
-            //任意长度模式
-            $offset = $pageParam;
-        }
-        return $this->_page($table, $field, $condition, $offset, $limit);
     }
 
 
@@ -341,6 +297,9 @@ class MongoDb extends BaseObject
             $cmd = ['count' => $table, 'query' => $condition];
             $cursor = $this->_link->executeCommand($this->_dbname, new Command($cmd), new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
+            if (empty($cursor)) {
+                return 0;
+            }
             return $cursor[0]->n;
         } catch (Exception $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());

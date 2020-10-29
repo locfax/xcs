@@ -15,7 +15,7 @@ class DB
 
     /**
      * @param string $dsnId
-     * @return Mongo|MongoDb|PdoDb
+     * @return MongoDb|PdoDb
      */
     public static function dbo($dsnId = 'portal')
     {
@@ -24,7 +24,7 @@ class DB
             return self::$used_dbo[$dsnId];
         }
 
-        if (!in_array($dsn['driver'], ['PdoDb', 'Mongo', 'MongoDb'])) {
+        if (!in_array($dsn['driver'], ['PdoDb', 'MongoDb'])) {
             new ExException("the driver error, PdoDb|Mongo|MongoDb");
             return null;
         }
