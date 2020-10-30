@@ -78,7 +78,7 @@ class Cache
 
     /**
      * @param string $key
-     * @param string $value
+     * @param array|string $value
      * @param int $ttl
      * @return mixed
      */
@@ -89,7 +89,7 @@ class Cache
 
     /**
      * @param string $key
-     * @param string $value
+     * @param array|string $value
      * @param int $ttl
      * @return bool
      */
