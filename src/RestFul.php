@@ -5,7 +5,7 @@ namespace Xcs;
 class RestFul extends Controller
 {
     // 当前请求类型
-    private $method = null;
+    private $method;
     // REST允许的请求类型列表
     private $allow_method = ['get', 'post', 'put', 'delete'];
 

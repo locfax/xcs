@@ -157,7 +157,7 @@ class Xss
         do {
             $count = 0;
             $attribs = [];
-            preg_match_all('/(?<!\w)(' . implode('|', $evil_attributes) . ')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', $str, $matches, PREG_SET_ORDER);
+            preg_match_all('/(?<!\w)(' . implode('|', $evil_attributes) . ')\s*=\s*(\042|\047)([^\\\2]*?)(\\2)/is', $str, $matches, PREG_SET_ORDER);
             foreach ($matches as $attr) {
                 $attribs[] = preg_quote($attr[0], '/');
             }
@@ -201,7 +201,7 @@ class Xss
     protected function _filter_attributes($str)
     {
         $out = '';
-        if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\1]*?)\\1#is', $str, $matches)) {
+        if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\\1]*?)\\1#is', $str, $matches)) {
             foreach ($matches[0] as $match) {
                 $out .= preg_replace('#/\*.*?\*/#s', '', $match);
             }

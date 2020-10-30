@@ -8,14 +8,14 @@ class Curl
     /**
      * @param $url
      * @param string $data
-     * @param array $httphead
-     * @param bool $retgzip
-     * @param string $retcharset
-     * @param bool $rethead
-     * @param bool $retsession
+     * @param array $httpHead
+     * @param bool $retGzip
+     * @param string $retCharset
+     * @param bool $retHead
+     * @param bool $retSession
      * @return array
      */
-    public static function send($url, $data = '', $httphead = [], $retgzip = false, $retcharset = 'UTF-8', $rethead = false, $retsession = false)
+    public static function send($url, $data = '', $httpHead = [], $retGzip = false, $retCharset = 'UTF-8', $retHead = false, $retSession = false)
     {
         $ch = curl_init();
         if (!$ch) {
@@ -26,11 +26,11 @@ class Curl
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
         /* 结果中是否包含头部信息 */
-        curl_setopt($ch, CURLOPT_HEADER, $rethead);
+        curl_setopt($ch, CURLOPT_HEADER, $retHead);
         /* 把结果返回，而非直接输出 */
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         /* 返回SESSION COOKIE */
-        curl_setopt($ch, CURLOPT_COOKIESESSION, $retsession);
+        curl_setopt($ch, CURLOPT_COOKIESESSION, $retSession);
         /* http 定向级别 */
         curl_setopt($ch, CURLOPT_MAXREDIRS, 7);
         /* 使用0层自动跳转 */
@@ -42,7 +42,9 @@ class Curl
         /* HTTP Basic Authentication */
         //curl_setopt($ch,CURLOPT_USERPWD,"username:password");
 
-        $fopen = null;
+        $reqHead = $httpHead;
+
+        $fOpen = null;
 
         /* 设置请求头部 */
         if (!empty($data)) {
@@ -50,62 +52,62 @@ class Curl
                 if (isset($data['__formfile'])) {
                     $data[$data['__formfile']] = class_exists('\CURLFile', false) ? new \CURLFile($data[$data['__formfile']]) : '@' . $data[$data['__formfile']];
                     unset($data['__formfile']);
-                    $poststr = $data;
-                } elseif (!isset($data['__putfile'])) {
-                    $poststr = http_build_query($data);
+                    $postStr = $data;
+                } else {
+                    $postStr = http_build_query($data);
                 }
             } else {
-                $poststr = trim($data);
+                $postStr = trim($data);
             }
-            if (isset($httphead['Method'])) {
-                if ($httphead['Method'] == 'PUT') {
+            if (isset($httpHead['Method'])) {
+                if ($httpHead['Method'] == 'PUT') {
                     curl_setopt($ch, CURLOPT_PUT, true);
-                    $fopen = fopen($data[$data['__putfile']], 'r');
-                    curl_setopt($ch, CURLOPT_INFILE, $fopen);//设置上传文件的FILE指针
+                    $fOpen = fopen($data[$data['__putfile']], 'r');
+                    curl_setopt($ch, CURLOPT_INFILE, $fOpen);//设置上传文件的FILE指针
                     curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data[$data['__putfile']]));//设置上传文件的大小
                 } else {
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
-                    unset($httphead['Method']);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
+                    unset($httpHead['Method']);
+                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
                 }
             } else {
                 curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $poststr);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
             }
         } else {
-            if (isset($httphead['Method'])) {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httphead['Method']);
-                unset($httphead['Method']);
+            if (isset($httpHead['Method'])) {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
+                unset($httpHead['Method']);
             } else {
                 curl_setopt($ch, CURLOPT_HTTPGET, true);
             }
         }
 
-        if (!isset($httphead['Host'])) {
+        if (!isset($httpHead['Host'])) {
             $url_parts = self::raw_url($url);
-            $httphead['Host'] = $url_parts['host'];
+            $httpHead['Host'] = $url_parts['host'];
         }
-        if (isset($httphead['Set-Cookie'])) {
-            curl_setopt($ch, CURLOPT_COOKIE, $httphead['Set-Cookie']);
-            unset($httphead['Set-Cookie']);
+        if (isset($httpHead['Set-Cookie'])) {
+            curl_setopt($ch, CURLOPT_COOKIE, $httpHead['Set-Cookie']);
+            unset($httpHead['Set-Cookie']);
         }
-        if (isset($httphead['Referer'])) {
-            curl_setopt($ch, CURLOPT_REFERER, $httphead['Referer']);
-            unset($httphead['Referer']);
+        if (isset($httpHead['Referer'])) {
+            curl_setopt($ch, CURLOPT_REFERER, $httpHead['Referer']);
+            unset($httpHead['Referer']);
         }
-        if (isset($httphead['User-Agent'])) {
-            curl_setopt($ch, CURLOPT_USERAGENT, $httphead['User-Agent']);
-            unset($httphead['User-Agent']);
+        if (isset($httpHead['User-Agent'])) {
+            curl_setopt($ch, CURLOPT_USERAGENT, $httpHead['User-Agent']);
+            unset($httpHead['User-Agent']);
         } else {
             curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
         }
 
         /* 构造头部 */
-        $httpheads = [];
-        foreach ($httphead as $k => $v) {
-            $httpheads[] = $k . ': ' . $v;
+        $_httpHead = [];
+        foreach ($httpHead as $k => $v) {
+            $_httpHead[] = $k . ': ' . $v;
         }
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $httpheads);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $_httpHead);
 
         /* 执行CURL */
         $http_response = curl_exec($ch);
@@ -121,12 +123,11 @@ class Curl
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         /* 结果头部分析 */
-        $http_header = '';
-        if ($rethead) {
+        $http_header = [];
+        if ($retHead) {
             $separator = '/\r\n\r\n|\n\n|\r\r/';
             list($_http_header, $http_body) = preg_split($separator, $http_response, 2);
             $http_headers = explode("\n", $_http_header);
-            $http_header = [];
             foreach ($http_headers as $header) {
                 $spits = explode(':', $header);
                 if (count($spits) > 1) {
@@ -148,20 +149,20 @@ class Curl
             $http_body = $http_response;
         }
 
-        $fopen && fclose($fopen);
+        $fOpen && fclose($fOpen);
 
         /* 关闭资源 */
         curl_close($ch);
 
         if (!empty($http_body)) {
-            if ($retgzip) {
-                $http_body = self::gzip_decode($http_body, $retgzip);
+            if ($retGzip) {
+                $http_body = self::gzip_decode($http_body, $retGzip);
             }
-            if ('UTF-8' != $retcharset) {
-                $http_body = self::convert_encode(strtoupper($retcharset), 'UTF-8', $http_body);
+            if ('UTF-8' != $retCharset) {
+                $http_body = self::convert_encode(strtoupper($retCharset), 'UTF-8', $http_body);
             }
         }
-        return ['header' => $http_header, 'body' => $http_body, 'http_code' => $http_code, 'http_info' => $http_info, 'reqheader' => $httpheads];
+        return ['http_head' => $http_header, 'body' => $http_body, 'http_code' => $http_code, 'http_info' => $http_info, 'req_head' => $reqHead];
     }
 
     /**

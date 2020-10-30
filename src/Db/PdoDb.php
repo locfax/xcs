@@ -8,8 +8,8 @@ use Xcs\Ex\DbException;
 class PdoDb extends BaseObject
 {
 
+    private $dsn;
     private $_link = null;
-    private $dsn = [];
     private $repeat = false;
 
     public function __destruct()

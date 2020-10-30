@@ -5,7 +5,7 @@ namespace Xcs\Helper;
 class HandleFile
 {
 
-    private $_file = [];
+    private $_file;
     private $_name;
 
     public function __construct($struct, $name, $ix = false)

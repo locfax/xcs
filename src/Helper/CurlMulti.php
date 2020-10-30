@@ -8,14 +8,16 @@ class CurlMulti
     /**
      * @param $urls
      * @param string $data
-     * @param array $httphead
+     * @param array $httpHead
      * @param string $charset
      * @return array
      */
-    public static function send($urls, $data = '', $httphead = [], $charset = 'UTF-8')
+    public static function send($urls, $data = '', $httpHead = [], $charset = 'UTF-8')
     {
         //创建多个curl语柄
-        $mhandle = curl_multi_init();
+        $mHandle = curl_multi_init();
+
+        $conn = [];
 
         foreach ($urls as $key => $url) {
             $conn[$key] = curl_init($url);
@@ -33,27 +35,27 @@ class CurlMulti
             curl_setopt($conn[$key], CURLOPT_FOLLOWLOCATION, 1);
             curl_setopt($conn[$key], CURLOPT_RETURNTRANSFER, 1);
 
-            if (!isset($httphead['Host'])) {
+            if (!isset($httpHead['Host'])) {
                 $url_parts = self::raw_url($url);
-                $httphead['Host'] = $url_parts['host'];
+                $httpHead['Host'] = $url_parts['host'];
             }
-            if (isset($httphead['Set-Cookie'])) {
-                curl_setopt($conn[$key], CURLOPT_COOKIE, $httphead['Set-Cookie']);
-                unset($httphead['Set-Cookie']);
+            if (isset($httpHead['Set-Cookie'])) {
+                curl_setopt($conn[$key], CURLOPT_COOKIE, $httpHead['Set-Cookie']);
+                unset($httpHead['Set-Cookie']);
             }
-            if (isset($httphead['Referer'])) {
-                curl_setopt($conn[$key], CURLOPT_REFERER, $httphead['Referer']);
-                unset($httphead['Referer']);
+            if (isset($httpHead['Referer'])) {
+                curl_setopt($conn[$key], CURLOPT_REFERER, $httpHead['Referer']);
+                unset($httpHead['Referer']);
             }
-            if (isset($httphead['User-Agent'])) {
-                curl_setopt($conn[$key], CURLOPT_USERAGENT, $httphead['User-Agent']);
-                unset($httphead['User-Agent']);
+            if (isset($httpHead['User-Agent'])) {
+                curl_setopt($conn[$key], CURLOPT_USERAGENT, $httpHead['User-Agent']);
+                unset($httpHead['User-Agent']);
             } else {
                 curl_setopt($conn[$key], CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
             }
 
             $heads = [];
-            foreach ($httphead as $k => $v) {
+            foreach ($httpHead as $k => $v) {
                 $heads[] = $k . ': ' . $v;
             }
             unset($k);
@@ -71,27 +73,27 @@ class CurlMulti
                     }
                 } else {
                     $poststr = trim($data);
-                    $httphead['Content-Length'] = strlen($poststr);
+                    $httpHead['Content-Length'] = strlen($poststr);
                 }
                 curl_setopt($conn[$key], CURLOPT_POST, true);
                 curl_setopt($conn[$key], CURLOPT_POSTFIELDS, $poststr);
             } else {
                 curl_setopt($conn[$key], CURLOPT_HTTPGET, true);
             }
-            curl_multi_add_handle($mhandle, $conn[$key]);
+            curl_multi_add_handle($mHandle, $conn[$key]);
         }
 
         // 执行批处理句柄
         $active = null;
         do {
             //当无数据，active=true
-            $mrc = curl_multi_exec($mhandle, $active);
+            $mrc = curl_multi_exec($mHandle, $active);
         } while ($mrc == CURLM_CALL_MULTI_PERFORM);//当正在接受数据时
 
         //当无数据时或请求暂停时，active=true
         while ($active && $mrc == CURLM_OK) {
             do {
-                $mrc = curl_multi_exec($mhandle, $active);
+                $mrc = curl_multi_exec($mHandle, $active);
             } while ($mrc == CURLM_CALL_MULTI_PERFORM);
         }
 
@@ -115,10 +117,10 @@ class CurlMulti
             //关闭语柄
             curl_close($conn[$key]);
             //释放资源
-            curl_multi_remove_handle($mhandle, $conn[$key]);
+            curl_multi_remove_handle($mHandle, $conn[$key]);
         }
 
-        curl_multi_close($mhandle);
+        curl_multi_close($mHandle);
         return $res;
     }
 

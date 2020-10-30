@@ -3,7 +3,6 @@
 namespace Xcs;
 
 use Xcs\Db\PdoDb;
-use Xcs\Db\Mongo;
 use Xcs\Db\MongoDb;
 
 class DB

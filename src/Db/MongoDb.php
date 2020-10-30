@@ -19,7 +19,7 @@ class MongoDb extends BaseObject
     /**
      * @var array
      */
-    private $dsn = [];
+    private $dsn;
 
     /**
      * @var Manager
@@ -27,14 +27,14 @@ class MongoDb extends BaseObject
     private $_link = null;
 
     /**
-     * @var WriteConcern|null
+     * @var WriteConcern
      */
-    private $_writeConcern = null;
+    private $_writeConcern;
 
     /**
      * @var mixed|null
      */
-    private $_dbname = null;
+    private $_dbname;
 
     public function __destruct()
     {
