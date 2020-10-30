@@ -2,7 +2,7 @@
 
 namespace Xcs;
 
-use Xcs\Cache\SysCache;
+use Xcs\Cache\Cache;
 
 class Rbac
 {
@@ -170,7 +170,7 @@ class Rbac
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {
-            $globalAcl = SysCache::loadCache('Acl' . ucfirst(APP_KEY));
+            $globalAcl = Cache::get('Acl' . ucfirst(APP_KEY));
             if (empty($globalAcl)) {
                 return [];
             }
