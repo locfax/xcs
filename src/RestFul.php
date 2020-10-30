@@ -5,19 +5,14 @@ namespace Xcs;
 class RestFul extends Controller
 {
     // 当前请求类型
-    private $_method = null;
+    private $method = null;
     // REST允许的请求类型列表
     private $allow_method = ['get', 'post', 'put', 'delete'];
 
     public function __construct($controllerName, $actionName)
     {
         parent::__construct($controllerName, $actionName);
-        // 请求方式检测
-        $method = strtolower(getgpc('s.REQUEST_METHOD', 'get'));
-        if (!in_array($method, $this->allow_method)) {
-            $method = 'get';
-        }
-        $this->_method = $method;
+        $this->method = strtolower(getgpc('s.REQUEST_METHOD'));
         $this->request();
     }
 
@@ -47,7 +42,7 @@ class RestFul extends Controller
     /**
      * @param $code
      */
-    private function http_status($code)
+    private function status($code)
     {
         static $_status = [
             // Informational 1xx
@@ -115,20 +110,14 @@ class RestFul extends Controller
      */
     protected function response($data, $code = 200, $type = "json")
     {
-        $this->http_status($code);
+        $this->status($code);
         App::response($data, $type);
     }
 
     protected function request()
     {
-        if ('get' == $this->_method) {
-            call_user_func([$this, '_' . $this->_act . '_get']);
-        } elseif ('post' == $this->_method) {
-            call_user_func([$this, '_' . $this->_act . '_post']);
-        } elseif ('put' == $this->_method) {
-            call_user_func([$this, '_' . $this->_act . '_put']);
-        } elseif ('delete' == $this->_method) {
-            call_user_func([$this, '_' . $this->_act . '_delete']);
+        if (in_array($this->method, $this->allow_method)) {
+            call_user_func([$this, $this->_act . '_' . $this->method]);
         }
     }
 }

@@ -4,7 +4,6 @@ namespace Xcs;
 
 class Template
 {
-
     private $subTemplates = array();
     private $replaceCode = array('search' => array(), 'replace' => array());
     private $blocks = array();
@@ -27,7 +26,7 @@ class Template
         $this->subTemplates = array();
         for ($i = 1; $i <= 10; $i++) {
             if (!(false === strpos($template, '{subtemplate'))) {
-                $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subtemplate'), $template);
+                $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subTemplate'), $template);
             }
         }
         $template = preg_replace("/([\n\r]+)\t+/s", "\\1", $template);
@@ -56,20 +55,20 @@ class Template
         $template = preg_replace_callback("/$var_regexp/s", array($this, 'add_quote'), $template);
         $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", array($this, 'add_quote'), $template);
 
-        $headeradd = '';
+        $headerAdd = '';
         if (!empty($this->subTemplates)) {
             $first = true;
-            foreach ($this->subTemplates as $fname) {
-                $headeradd .= ($first ? "0 " : PHP_EOL) . "|| checktplrefresh('$tplFile', '$fname', " . time() . ", '$cacheFile', '$file')";
+            foreach ($this->subTemplates as $fName) {
+                $headerAdd .= ($first ? "0 " : PHP_EOL) . "|| checkTplRefresh('$tplFile', '$fName', " . time() . ", '$cacheFile', '$file')";
                 $first = false;
             }
-            $headeradd .= ';' . PHP_EOL;
+            $headerAdd .= ';' . PHP_EOL;
         }
         if (!empty($this->blocks)) {
-            $headeradd .= "block_get('" . implode(',', $this->blocks) . "');" . PHP_EOL;
+            $headerAdd .= "block_get('" . implode(',', $this->blocks) . "');" . PHP_EOL;
         }
 
-        $template = "<?php " . PHP_EOL . "if(!defined('APP_ROOT')) exit('Access Denied');" . PHP_EOL . " {$headeradd}?>" . PHP_EOL . "$template";
+        $template = "<?php " . PHP_EOL . "if(!defined('APP_ROOT')) exit('Access Denied');" . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
 
         $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z0-9_:\/]+)\}[\n\r\t]*/", array($this, 'tag_template'), $template);
         $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", array($this, 'tag_echo'), $template);
@@ -222,7 +221,7 @@ class Template
         return $search;
     }
 
-    private function tag_subtemplate($file)
+    private function tag_subTemplate($file)
     {
         $tplFile = template($file[2], true);
         $content = implode('', file($this->tplDir . $tplFile));

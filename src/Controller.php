@@ -62,7 +62,7 @@ class Controller
      * @param $auth
      * @return bool
      */
-    final function checkacl($controllerName, $actionName, $auth = AUTH_ROLE)
+    final function checkAcl($controllerName, $actionName, $auth = AUTH_ROLE)
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

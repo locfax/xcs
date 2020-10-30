@@ -15,12 +15,8 @@ class ExException extends \Exception
     }
 
     /**
-     * 异常处理
-     *
-     * @static
-     * @access public
-     * @param $type
      * @param \Exception $exception
+     * @param string $type
      */
     public function exception($exception, $type = 'Exception')
     {
@@ -74,9 +70,8 @@ class ExException extends \Exception
     {
         if (defined('DEBUG') && DEBUG) {
             return $message;
-        } else {
-            return htmlspecialchars(substr(str_replace(["t", "r", "n"], " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
         }
+        return htmlspecialchars(substr(str_replace(["t", "r", "n"], " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
     }
 
     /**

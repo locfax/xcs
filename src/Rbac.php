@@ -12,7 +12,6 @@ class Rbac
     const ACL_NO_ROLE = 'ACL_NO_ROLE';
     const ACL_NULL = 'ACL_NULL';
 
-
     /**
      * @param $controllerName
      * @param null $actionName

@@ -138,44 +138,44 @@ function getini($key)
 }
 
 /**
- * @param $maintpl
- * @param $subtpl
- * @param $cachetime
- * @param $cachefile
+ * @param $mainTpl
+ * @param $subTpl
+ * @param $cacheTime
+ * @param $cacheFile
  * @param $file
  */
-function checktplrefresh($maintpl, $subtpl, $cachetime, $cachefile, $file)
+function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
 {
-    $tpldir = DATA_TPLDIR;
-    if (is_file($tpldir . $subtpl)) {
-        $tpltime = filemtime($tpldir . $subtpl);
+    $tplDir = DATA_TPLDIR;
+    if (is_file($tplDir . $subTpl)) {
+        $tplTime = filemtime($tplDir . $subTpl);
     } else {
-        $tpltime = 0;
+        $tplTime = 0;
     }
-    if ($tpltime < intval($cachetime)) {
+    if ($tplTime < intval($cacheTime)) {
         return;
     }
     $template = new Xcs\Template();
-    $template->parse(DATA_VIEW, $tpldir, $maintpl, $cachefile, $file);
+    $template->parse(DATA_VIEW, $tplDir, $mainTpl, $cacheFile, $file);
 }
 
 /**
  * @param $file
- * @param bool $gettplfile
+ * @param bool $getTplFile
  * @return string
  */
-function template($file, $gettplfile = false)
+function template($file, $getTplFile = false)
 {
-    $_tplid = getini('site/themes');
-    $tplfile = $_tplid ? $_tplid . '/' . $file . '.htm' : $file . '.htm';
-    if ($gettplfile) {
-        return $tplfile;
+    $_tplId = getini('site/themes');
+    $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
+    if ($getTplFile) {
+        return $tplFile;
     }
-    $cachefile = APP_KEY . '_' . $_tplid . '_' . str_replace('/', '_', $file) . '_tpl.php';
-    $cachetpl = DATA_VIEW . $cachefile;
-    $cachetime = is_file($cachetpl) ? filemtime($cachetpl) : 0;
-    checktplrefresh($tplfile, $tplfile, $cachetime, $cachefile, $file);
-    return $cachetpl;
+    $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
+    $cacheTpl = DATA_VIEW . $cacheFile;
+    $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
+    checkTplRefresh($tplFile, $tplFile, $cacheTime, $cacheFile, $file);
+    return $cacheTpl;
 }
 
 /**
@@ -202,14 +202,14 @@ function url($udi, $param = [])
  * @param array $arr 数组
  * @return object|mixed
  */
-function array_to_object($arr)
+function array2object($arr)
 {
     if (gettype($arr) != 'array') {
         return $arr;
     }
     foreach ($arr as $k => $v) {
         if (gettype($v) == 'array' || getType($v) == 'object') {
-            $arr[$k] = array_to_object($v);
+            $arr[$k] = array2object($v);
         }
     }
     return (object)$arr;
@@ -221,12 +221,12 @@ function array_to_object($arr)
  * @param object $obj 对象
  * @return array
  */
-function object_to_array($obj)
+function object2array($obj)
 {
     $obj = (array)$obj;
     foreach ($obj as $k => $v) {
         if (gettype($v) == 'object' || gettype($v) == 'array') {
-            $obj[$k] = object_to_array($v);
+            $obj[$k] = object2array($v);
         }
     }
     return $obj;
@@ -310,7 +310,7 @@ function dstripcslashes($value)
  * @param $text
  * @return string
  */
-function input_char($text)
+function char_input($text)
 {
     if (empty($text)) {
         return $text;
@@ -318,14 +318,14 @@ function input_char($text)
     if (is_numeric($text)) {
         return $text;
     }
-    return htmlspecialchars(addslashes($text), ENT_QUOTES, 'UTF-8');
+    return htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
 }
 
 /**
  * @param $text
  * @return string
  */
-function output_char($text)
+function char_output($text)
 {
     if (empty($text)) {
         return $text;
@@ -337,22 +337,22 @@ function output_char($text)
 }
 
 /**
- * @param $utimeoffset
+ * @param $uTimeOffset
  * @return array
  */
-function loctime($utimeoffset)
+function locTime($uTimeOffset)
 {
-    static $dtformat = null, $timeoffset = 8;
-    if (is_null($dtformat)) {
-        $dtformat = [
+    static $dtFormat = null, $timeOffset = 8;
+    if (is_null($dtFormat)) {
+        $dtFormat = [
             'd' => getini('settings/dateformat') ?: 'Y-m-d',
             't' => getini('settings/timeformat') ?: 'H:i:s'
         ];
-        $dtformat['dt'] = $dtformat['d'] . ' ' . $dtformat['t'];
-        $timeoffset = getini('settings/timezone') ?: $timeoffset; //defualt is Asia/Shanghai
+        $dtFormat['dt'] = $dtFormat['d'] . ' ' . $dtFormat['t'];
+        $timeOffset = getini('settings/timezone') ?: $timeOffset; //defualt is Asia/Shanghai
     }
-    $offset = $utimeoffset == 999 ? $timeoffset : $utimeoffset;
-    return [$offset, $dtformat];
+    $offset = $uTimeOffset == 999 ? $timeOffset : $uTimeOffset;
+    return [$offset, $dtFormat];
 }
 
 /**
@@ -367,17 +367,17 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
     if (!$timestamp) {
         return '';
     }
-    $loctime = loctime($utimeoffset);
-    $offset = $loctime[0];
-    $dtformat = $loctime[1];
+    $locTime = locTime($utimeoffset);
+    $offset = $locTime[0];
+    $dtFormat = $locTime[1];
     $timestamp += $offset * 3600;
     if ('u' == $format) {
-        $nowtime = time() + $offset * 3600;
-        $todaytimestamp = $nowtime - $nowtime % 86400;
-        $format = !$uformat ? $dtformat['dt'] : $uformat;
+        $nowTime = time() + $offset * 3600;
+        $todayTimestamp = $nowTime - $nowTime % 86400;
+        $format = !$uformat ? $dtFormat['dt'] : $uformat;
         $s = gmdate($format, $timestamp);
-        $time = $nowtime - $timestamp;
-        if ($timestamp >= $todaytimestamp) {
+        $time = $nowTime - $timestamp;
+        if ($timestamp >= $todayTimestamp) {
             if ($time > 3600) {
                 return '<span title="' . $s . '">' . intval($time / 3600) . '&nbsp;小时前</span>';
             } elseif ($time > 1800) {
@@ -391,7 +391,7 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
             } else {
                 return $s;
             }
-        } elseif (($days = intval(($todaytimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
+        } elseif (($days = intval(($todayTimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
             if (0 == $days) {
                 return '<span title="' . $s . '">昨天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
             } elseif (1 == $days) {
@@ -399,13 +399,13 @@ function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
             } else {
                 return '<span title="' . $s . '">' . ($days + 1) . '&nbsp;天前</span>';
             }
-        } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowtime)) {
+        } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowTime)) {
             return '<span title="' . $s . '">' . gmdate('m-d H:i', $timestamp) . '</span>';
         } else {
             return $s;
         }
     }
-    $format = isset($dtformat[$format]) ? $dtformat[$format] : $format;
+    $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
     return gmdate($format, $timestamp);
 }
 
