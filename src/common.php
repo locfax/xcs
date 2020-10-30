@@ -63,7 +63,11 @@ function getgpc($variable, $defVal = null, $runFunc = '')
         }
     }
     if (in_array($type, ['GET', 'POST', 'COOKIE'])) {
-        array_walk_recursive($value, 'gpc_value', $runFunc);
+        if (is_array($value)) {
+            array_walk_recursive($value, 'gpc_value', $runFunc);
+        } else {
+            gpc_value($value, 0, $runFunc);
+        }
         return $value;
     } elseif ('SERVER' == $type) {
         return isset($_SERVER[$var]) ? $_SERVER[$var] : $defVal;
@@ -94,9 +98,10 @@ function gpc_value(&$value, $key, $runFunc)
             } elseif ('addslashes' == $run) {
                 $value = is_numeric($value) ? $value : addslashes($value);
             } else {
-                $value = call_user_func($runFunc, $value);
+                $value = call_user_func($run, $value);
             }
         }
+        return;
     }
 
     if ('xss' == $runFunc) {
