@@ -11,6 +11,9 @@ class Redis
     use Singleton;
 
     public $enable = false;
+    /**
+     * @var \Redis
+     */
     private $_link = null;
 
     /**
@@ -38,7 +41,7 @@ class Redis
 
     public function close()
     {
-        $this->_link && $this->_link->close();
+        $this->_link && $this->_link = null;
     }
 
     /**

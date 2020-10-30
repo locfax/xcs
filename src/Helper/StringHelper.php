@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-class Strs
+class StringHelper
 {
 
     /**
@@ -12,13 +12,13 @@ class Strs
      */
     public static function random($length = 4)
     {
-        $reqid = '';
+        $reqId = '';
         $characters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "2", "3", "4", "5", "6", "7", "8", "9"];
         shuffle($characters);
-        for (; strlen($reqid) < $length;) {
-            $reqid .= $characters[rand(0, count($characters) - 1)];
+        for (; strlen($reqId) < $length;) {
+            $reqId .= $characters[rand(0, count($characters) - 1)];
         }
-        return $reqid;
+        return $reqId;
     }
 
     /**
@@ -32,15 +32,15 @@ class Strs
      * @param string $dot
      * @return mixed|string
      */
-    public static function cutstr($string, $length, $suffix = true, $charset = "utf-8", $start = 0, $dot = ' ...')
+    public static function cutStr($string, $length, $suffix = true, $charset = "utf-8", $start = 0, $dot = ' ...')
     {
         $str = str_replace(['&amp;', '&quot;', '&lt;', '&gt;'], ['&', '"', '<', '>'], $string);
         if (function_exists("mb_substr")) {
-            $strcut = mb_substr($str, $start, $length, $charset);
+            $strCut = mb_substr($str, $start, $length, $charset);
             if (mb_strlen($str, $charset) > $length) {
-                return $suffix ? $strcut . $dot : $strcut;
+                return $suffix ? $strCut . $dot : $strCut;
             }
-            return $strcut;
+            return $strCut;
         }
         $re = [];
         $match = [''];
@@ -50,8 +50,8 @@ class Strs
         $re['big5'] = "/[\x01-\x7f]|[\x81-\xfe]([\x40-\x7e]|\xa1-\xfe])/";
         preg_match_all($re[$charset], $str, $match);
         $slice = join("", array_slice($match[0], $start, $length));
-        $strcut = str_replace(['&', '"', '<', '>'], ['&amp;', '&quot;', '&lt;', '&gt;'], $slice);
-        return $suffix ? $strcut . $dot : $strcut;
+        $strCut = str_replace(['&', '"', '<', '>'], ['&amp;', '&quot;', '&lt;', '&gt;'], $slice);
+        return $suffix ? $strCut . $dot : $strCut;
     }
 
     /**
@@ -61,7 +61,7 @@ class Strs
      * @param int $html
      * @return mixed|string
      */
-    public static function getstr($string, $length, $out_slashes = 0, $html = 0)
+    public static function getStr($string, $length, $out_slashes = 0, $html = 0)
     {
         $string = stripslashes($string);
         if ($html < 0) {
@@ -70,7 +70,7 @@ class Strs
             $string = htmlspecialchars($string, ENT_QUOTES);
         }
         if ($length) {
-            $string = self::cutstr($string, $length, '');
+            $string = self::cutStr($string, $length, '');
         }
         if ($out_slashes) {
             $string = addslashes($string);

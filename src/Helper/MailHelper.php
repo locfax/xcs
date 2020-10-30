@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-class Mail
+class MailHelper
 {
 
     public $debug = true;
@@ -10,14 +10,14 @@ class Mail
     public $mail = [
         'version' => '1.0',
         'maildelimiter' => 1,
-        'sitename' => 'uvtodo.com',
-        'from' => 'uvtodo.com<admin@uvtodo.com>',
-        'server' => 'ssl://smtp.qq.com',
-        'port' => 465,
+        'sitename' => 'host',
+        'from' => 'name<email>',
+        'server' => 'ssl://host',
+        'port' => 'port',
         'mailsend' => 2,
         'auth' => true,
-        'auth_username' => 'admin@uvtodo.com',
-        'auth_password' => '12345678',
+        'auth_username' => '',
+        'auth_password' => '',
     ];
 
     function send($email_to, $subject, $message)

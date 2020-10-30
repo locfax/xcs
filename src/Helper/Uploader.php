@@ -9,18 +9,18 @@ class Uploader
     private $_count = 0;
 
     /**
-     * @param $tempfiles
+     * @param $tempFiles
      * @param bool $cascade
      * @return $this|null
      */
-    public function init($tempfiles, $cascade = true)
+    public function init($tempFiles, $cascade = true)
     {
         $this->reset();
 
-        if (!is_array($tempfiles)) {
+        if (!is_array($tempFiles)) {
             return null;
         }
-        foreach ($tempfiles as $field => $struct) {
+        foreach ($tempFiles as $field => $struct) {
             if (!isset($struct['error'])) {
                 continue;
             }
@@ -28,7 +28,7 @@ class Uploader
                 $arr = [];
                 for ($i = 0; $i < count($struct['error']); $i++) {
                     if ($struct['error'][$i] != UPLOAD_ERR_NO_FILE) {
-                        $arr[] = new HandleUpload($struct, $field, $i);
+                        $arr[] = new HandleFile($struct, $field, $i);
                         if (!$cascade) {
                             $this->_files["{$field}{$i}"] = $arr[count($arr) - 1];
                         }
@@ -39,7 +39,7 @@ class Uploader
                 }
             } else {
                 if ($struct['error'] != UPLOAD_ERR_NO_FILE) {
-                    $this->_files[$field] = new HandleUpload($struct, $field);
+                    $this->_files[$field] = new HandleFile($struct, $field);
                 }
             }
         }
@@ -75,7 +75,7 @@ class Uploader
 
     /**
      * @param $name
-     * @return bool
+     * @return HandleFile|bool
      */
     public function getFile($name)
     {

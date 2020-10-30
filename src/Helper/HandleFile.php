@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-class HandleUpload
+class HandleFile
 {
 
     private $_file = [];
@@ -154,28 +154,28 @@ class HandleUpload
         }
 
         if ($allowExts) {
-            if ($this->strpos($allowExts, ',')) {
-                $exts = explode(',', $allowExts);
-            } elseif ($this->strpos($allowExts, '/')) {
-                $exts = explode('/', $allowExts);
-            } elseif ($this->strpos($allowExts, '|')) {
-                $exts = explode('|', $allowExts);
+            if ($this->strPos($allowExts, ',')) {
+                $ext = explode(',', $allowExts);
+            } elseif ($this->strPos($allowExts, '/')) {
+                $ext = explode('/', $allowExts);
+            } elseif ($this->strPos($allowExts, '|')) {
+                $ext = explode('|', $allowExts);
             } else {
-                $exts = [$allowExts];
+                $ext = [$allowExts];
             }
 
             $filename = $this->getFilename();
-            $fileexts = explode('.', $filename);
-            array_shift($fileexts);
-            $count = count($fileexts);
+            $fileExt = explode('.', $filename);
+            array_shift($fileExt);
+            $count = count($fileExt);
             $passed = false;
-            $exts = array_filter(array_map('trim', $exts), 'trim');
-            foreach ($exts as $ext) {
-                if ('.' == substr($ext, 0, 1)) {
-                    $ext = substr($ext, 1);
+            $ext = array_filter(array_map('trim', $ext), 'trim');
+            foreach ($ext as $_ext) {
+                if ('.' == substr($_ext, 0, 1)) {
+                    $_ext = substr($_ext, 1);
                 }
-                $fileExt = implode('.', array_slice($fileexts, $count - count(explode('.', $ext))));
-                if (strtolower($fileExt) == strtolower($ext)) {
+                $_fileExt = implode('.', array_slice($fileExt, $count - count(explode('.', $_ext))));
+                if (strtolower($_fileExt) == strtolower($_ext)) {
                     $passed = true;
                     break;
                 }
@@ -232,7 +232,7 @@ class HandleUpload
      * @param $needle
      * @return bool
      */
-    private function strpos($str, $needle)
+    private function strPos($str, $needle)
     {
         return !(false === strpos($str, $needle));
     }

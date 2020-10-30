@@ -51,7 +51,7 @@ class Cache
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
     public static function get($key)
@@ -60,26 +60,25 @@ class Cache
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed|null
      */
     private function _get($key)
     {
         if ($this->enable) {
-            $json = $this->handle->get($this->_key($key));
-            if (!$json) {
+            $data = $this->handle->get($this->_key($key));
+            if (!$data) {
                 return null;
             } else {
-                $ret = json_decode($json, true);
-                return array_shift($ret);
+                return $data;
             }
         }
         return null;
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param string $value
      * @param int $ttl
      * @return mixed
      */
@@ -89,8 +88,8 @@ class Cache
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param string $value
      * @param int $ttl
      * @return bool
      */
@@ -98,14 +97,13 @@ class Cache
     {
         $ret = false;
         if ($this->enable) {
-            $data = [$value];
-            $ret = $this->handle->set($this->_key($key), json_encode($data), $ttl);
+            $ret = $this->handle->set($this->_key($key), $value, $ttl);
         }
         return $ret;
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return mixed
      */
     public static function rm($key)

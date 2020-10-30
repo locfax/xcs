@@ -17,7 +17,7 @@ class DB
      * @param string $dsnId
      * @return MongoDb|PdoDb
      */
-    public static function dbo($dsnId = 'portal')
+    public static function dbo($dsnId = 'default')
     {
         $dsn = Context::dsn($dsnId);
         if (isset(self::$used_dbo[$dsnId])) {
@@ -40,7 +40,7 @@ class DB
      * @param string $dsnId
      * @return PdoDb
      */
-    public static function dbm($dsnId = 'portal')
+    public static function dbm($dsnId = 'default')
     {
         $dsn = Context::dsn($dsnId);
         if (isset(self::$used_dbo[$dsnId])) {

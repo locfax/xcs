@@ -11,6 +11,9 @@ class Memcache
     use Singleton;
 
     public $enable = false;
+    /**
+     * @var \Memcache
+     */
     private $_link = null;
 
     /**

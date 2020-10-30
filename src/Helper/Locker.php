@@ -90,7 +90,7 @@ class Locker
                 $ret = Cache::get('process_' . $name);
                 break;
             case 'rm':
-                $ret = Cache::set('process_' . $name);
+                $ret = Cache::rm('process_' . $name);
                 break;
         }
         return $ret;

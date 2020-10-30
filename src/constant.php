@@ -3,7 +3,7 @@
 defined('APP_ROOT') or define('APP_ROOT', '');
 defined('APP_KEY') or define('APP_KEY', 'web');
 defined('AUTH_ROLE') or define('AUTH_ROLE', false);
-defined('APP_DSN') or define('APP_DSN', 'portal');
+defined('APP_DSN') or define('APP_DSN', 'default');
 
 define('BASE_PATH', __DIR__ . '/');
 define('APP_PATH', APP_ROOT . '/app/'); //app controller应用路径

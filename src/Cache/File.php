@@ -3,7 +3,7 @@
 namespace Xcs\Cache;
 
 use Xcs\ExException;
-use Xcs\Helper\FileList;
+use Xcs\Helper\FileHelper;
 use Xcs\Traits\Singleton;
 
 class File
@@ -19,7 +19,7 @@ class File
      */
     public function init()
     {
-        if (!is_dir(DATA_CACHE)) {
+        if (!is_writeable(DATA_CACHE)) {
             throw new ExException('路径:' . DATA_CACHE . ' 不可写');
         }
         $this->enable = true;
@@ -41,6 +41,9 @@ class File
         if (is_file($cacheFile)) {
             $data = include $cacheFile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
+                if ('json' == $data['type']) {
+                    return json_decode($data['data'], true);
+                }
                 return $data['data'];
             }
             unlink($cacheFile);
@@ -63,8 +66,14 @@ class File
             $timeout = 0;
         }
 
+        $type = 'string';
+        if (is_array($val)) {
+            $val = json_encode($val, JSON_UNESCAPED_UNICODE);
+            $type = 'json';
+        }
+
         $cacheFile = DATA_CACHE . $key . '.php';
-        $cacheData = "return array('data' => '{$val}', 'timeout' => {$timeout});";
+        $cacheData = "return array('data' => '{$val}', 'type'=>'{$type}', 'timeout' => {$timeout});";
         $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n{$cacheData}";
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
     }
@@ -98,7 +107,7 @@ class File
     public function clear()
     {
         $cacheDir = DATA_CACHE;
-        $files = FileList::list_files($cacheDir);
+        $files = FileHelper::list_files($cacheDir);
         foreach ($files as $file) {
             unlink($cacheDir . $file);
         }

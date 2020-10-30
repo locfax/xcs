@@ -16,7 +16,6 @@ class WaterMark
      */
     public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000")
     {
-        $isWaterImage = false;
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
 
         //读取水印文件
@@ -83,10 +82,6 @@ class WaterMark
             return $formatMsg;
         }
         switch ($waterPos) {
-            case 0: //随机
-                $posX = rand(0, ($ground_w - $w));
-                $posY = rand(0, ($ground_h - $h));
-                break;
             case 1: //1为顶端居左
                 $posX = 0;
                 $posY = 0;

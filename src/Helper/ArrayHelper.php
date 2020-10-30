@@ -2,31 +2,31 @@
 
 namespace Xcs\Helper;
 
-class Arrmap
+class ArrayHelper
 {
 
     /**
      * php5.5+自带这个函数 但是只能处理二维
      * 取出数组的指定列值
      * @param array $array
-     * @param $column_key
+     * @param string $column_key
      * @return array
      */
     public static function column(array $array, $column_key)
     {
-        $retarr = [];
+        $data = [];
         foreach ($array as $arr) {
             if (is_array($column_key)) {
                 $ret = [];
                 foreach ($column_key as $key) {
                     $ret[] = isset($arr[$key]) ? $arr[$key] : null;
                 }
-                $retarr[] = $ret;
+                $data[] = $ret;
             } else {
-                $retarr[] = $arr[$column_key];
+                $data[] = $arr[$column_key];
             }
         }
-        return $retarr;
+        return $data;
     }
 
     /**
@@ -86,10 +86,10 @@ class Arrmap
             } else {
                 $val = $function($value);
                 if ($apply_keys) {
-                    $newkey = $function($key);
-                    if ($key !== $newkey) {
+                    $newKey = $function($key);
+                    if ($key !== $newKey) {
                         unset($arr[$key]); //删除原来的key=>$val
-                        $key = $newkey;
+                        $key = $newKey;
                     }
                 }
                 $arr[$key] = $val; //原来的KEY 或者新的KEY 赋值
@@ -101,20 +101,20 @@ class Arrmap
     /**
      *  多维
      * 移除val为指定值的项目
-     * @param $arr
-     * @param string $delval
+     * @param array $arr
+     * @param string $delVal
      * @return array
      */
-    public static function remove_value($arr, $delval = '')
+    public static function remove_value($arr, $delVal = '')
     {
         if (empty($arr)) {
             return null;
         }
         foreach ($arr as $key => $value) {
             if (is_array($value)) {
-                $arr[$key] = self::remove_value($value, $delval);
+                $arr[$key] = self::remove_value($value, $delVal);
             } else {
-                if ($delval === $value) {
+                if ($delVal === $value) {
                     unset($arr[$key]);
                 } else {
                     $arr[$key] = $value;
@@ -127,7 +127,7 @@ class Arrmap
     /**
      *  多维
      * 移除val为空的项
-     * @param $arr
+     * @param array $arr
      * @return array
      */
     public static function remove_empty($arr)

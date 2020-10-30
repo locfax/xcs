@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-class FileList
+class FileHelper
 {
 
     /**
