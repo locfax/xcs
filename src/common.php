@@ -1,13 +1,12 @@
 <?php
 
 /**
- * @param $variable
- * @param null $defval
- * @param string $runfunc
- * @param bool $emptyrun
- * @return null
+ * @param mixed $variable
+ * @param mixed $defVal
+ * @param string $runFunc
+ * @return mixed
  */
-function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun = false)
+function getgpc($variable, $defVal = null, $runFunc = '')
 {
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
@@ -22,21 +21,21 @@ function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun =
             case 'G':
                 $type = 'GET';
                 if (!isset($_GET[$var])) {
-                    return $defval;
+                    return $defVal;
                 }
                 $value = $_GET[$var];
                 break;
             case 'P':
                 $type = 'POST';
                 if (!isset($_POST[$var])) {
-                    return $defval;
+                    return $defVal;
                 }
                 $value = $_POST[$var];
                 break;
             case 'C':
                 $type = 'COOKIE';
                 if (!isset($_COOKIE[$var])) {
-                    return $defval;
+                    return $defVal;
                 }
                 $value = $_COOKIE[$var];
                 break;
@@ -44,63 +43,69 @@ function getgpc($variable, $defval = null, $runfunc = 'daddslashes', $emptyrun =
                 $type = 'SERVER';
                 break;
             default:
-                return $defval;
+                return $defVal;
         }
     } else {
         if (isset($_GET[$var])) {
             $type = 'GET';
             if (!isset($_GET[$var])) {
-                return $defval;
+                return $defVal;
             }
             $value = $_GET[$var];
         } elseif (isset($_POST[$var])) {
             $type = 'POST';
             if (!isset($_POST[$var])) {
-                return $defval;
+                return $defVal;
             }
             $value = $_POST[$var];
         } else {
-            return $defval;
+            return $defVal;
         }
     }
     if (in_array($type, ['GET', 'POST', 'COOKIE'])) {
-        return gpc_val($value, $runfunc, $emptyrun);
+        array_walk_recursive($value, 'gpc_value', $runFunc);
+        return $value;
     } elseif ('SERVER' == $type) {
-        return isset($_SERVER[$var]) ? $_SERVER[$var] : $defval;
+        return isset($_SERVER[$var]) ? $_SERVER[$var] : $defVal;
     } else {
-        return $defval;
+        return $defVal;
     }
 }
 
 /**
- * @param $val
- * @param $runfunc
- * @param $emptyrun
- * @return string
+ * private
+ * @param $value
+ * @param $key
+ * @param $runFunc
+ * @return array|bool|int|mixed|string|void
  */
-function gpc_val($val, $runfunc, $emptyrun)
+function gpc_value(&$value, $key, $runFunc)
 {
-    if ('' == $val) {
-        return $emptyrun ? $runfunc($val) : '';
+    if (empty($value)) {
+        return;
     }
-    if ($runfunc && strpos($runfunc, '|')) {
-        $funcs = explode('|', $runfunc);
-        foreach ($funcs as $run) {
+
+    if ($runFunc && strpos($runFunc, '|')) {
+        $funds = explode('|', $runFunc);
+        array_push($funds, 'addslashes');
+        foreach ($funds as $run) {
             if ('xss' == $run) {
-                $val = Xcs\Helper\Xss::getInstance()->clean($val);
+                $value = is_numeric($value) ? $value : Xcs\Helper\Xss::getInstance()->clean($value);
+            } elseif ('addslashes' == $run) {
+                $value = is_numeric($value) ? $value : addslashes($value);
             } else {
-                $val = $run($val);
+                $value = call_user_func($runFunc, $value);
             }
         }
-        return $val;
     }
-    if ('xss' == $runfunc) {
-        return Xcs\Helper\Xss::getInstance()->clean($val);
+
+    if ('xss' == $runFunc) {
+        $value = is_numeric($value) ? $value : Xcs\Helper\Xss::getInstance()->clean($value);
+    } elseif ($runFunc) {
+        $value = call_user_func($runFunc, $value);
     }
-    if ($runfunc) {
-        return $runfunc($val);
-    }
-    return $val;
+
+    $value = is_numeric($value) ? $value : addslashes($value);
 }
 
 /**

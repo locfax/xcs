@@ -25,7 +25,7 @@ class DB
         }
 
         if (!in_array($dsn['driver'], ['PdoDb', 'MongoDb'])) {
-            new ExException("the driver error, PdoDb|Mongo|MongoDb");
+            new ExException("the driver error, PdoDb|MongoDb");
             return null;
         }
 
@@ -361,7 +361,7 @@ class DB
     /**
      * 切换数据源对象
      * @param null $id
-     * @return PdoDb|Mongo|MongoDb
+     * @return PdoDb|MongoDb
      */
     public static function Using($id = null)
     {
