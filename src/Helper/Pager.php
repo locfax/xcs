@@ -28,7 +28,7 @@ class Pager
         $showKbd = isset($pageInfo['showkbd']) ? $pageInfo['showkbd'] : false;
         $simple = isset($pageInfo['simple']) ? $pageInfo['simple'] : false;
         $autoGoto = true;
-        $ajaxTarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'char_input') . "\" " : '';
+        $ajaxTarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'char_output') . "\" " : '';
         $hrefName = '';
         if (self::strPos($mpUrl, '#')) {
             $asTrs = explode('#', $mpUrl);
