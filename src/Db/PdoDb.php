@@ -252,7 +252,7 @@ class PdoDb extends BaseObject
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . " LIMIT {$limit} OFFSET {$offset}";
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
 
