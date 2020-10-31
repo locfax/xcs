@@ -4,16 +4,15 @@ namespace Xcs\Helper;
 
 class Pager
 {
-
     /**
      * @param $pageInfo
      * @return string
      */
     public static function pageBar($pageInfo)
     {
-        $totals = $pageInfo['totals'];
+        $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
-        $curPage = $pageInfo['curpage'];
+        $curPage = $pageInfo['page'];
         $mpUrl = $pageInfo['udi'];
         if (isset($pageInfo['param'])) {
             if (self::strPos($mpUrl, '?')) {
@@ -28,7 +27,7 @@ class Pager
         $showKbd = isset($pageInfo['showkbd']) ? $pageInfo['showkbd'] : false;
         $simple = isset($pageInfo['simple']) ? $pageInfo['simple'] : false;
         $autoGoto = true;
-        $ajaxTarget = getgpc('g.ajaxtarget') ? " ajaxtarget=\"" . getgpc('g.ajaxtarget', '', 'char_output') . "\" " : '';
+        $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
         $hrefName = '';
         if (self::strPos($mpUrl, '#')) {
             $asTrs = explode('#', $mpUrl);
@@ -66,7 +65,7 @@ class Pager
         }
         $multiPage .= ($to < $pages ? '<a href="' . $mpUrl . 'page=' . $pages . $hrefName . '" class="last"' . $ajaxTarget . '>... ' . $realPages . '</a>' : '') .
             ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '') .
-            ($showKbd && !$simple && $pages > $page && !$ajaxTarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(event.keyCode==13) {window.location=\'' . $mpUrl . 'page=\'+this.value; doane(event);}" /></kbd>' : '');
+            ($showKbd && !$simple && $pages > $page && !$ajaxTarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(KeyboardEvent.keyCode===13) {window.location=\'' . $mpUrl . 'page=\'+this.value; doane(Event);}" /></kbd>' : '');
         $multiPage = '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
         return $multiPage;
     }
@@ -77,17 +76,17 @@ class Pager
      */
     public static function simplePage($pageInfo)
     {
-        $totals = $pageInfo['totals'];
+        $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
-        $curPage = $pageInfo['curpage'];
+        $curPage = $pageInfo['page'];
         $mpUrl = $pageInfo['udi'];
         $return = "<ul class='pager'>";
         $lang['next'] = '下一页';
         $lang['prev'] = '上一页';
         $realPages = ceil($totals / $perPage);
-        if ($curPage > $realPages) {
-            $curPage = $realPages;
-        }
+
+        $curPage = $pageInfo['maxpages'] ? max(1, min(min($curPage, $realPages), $pageInfo['maxpages'])) : max(1, min($curPage, $realPages));
+
         $prev = $curPage > 1 ? '<li class="previous"><a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
         $next = $curPage < $realPages ? "<li class='next'><a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a></li>' : '';
         $pageNum = "<li class=\"pager-nums\">{$curPage} / {$realPages}</li>";

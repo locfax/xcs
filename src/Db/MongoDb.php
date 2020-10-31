@@ -54,8 +54,7 @@ class MongoDb extends BaseObject
             return;
         }
 
-        $uri = 'mongodb://' . ($this->dsn['login'] ? "{$this->dsn['login']}" : '') . ($this->dsn['secret'] ? ":{$this->dsn['secret']}@" : '') . $this->dsn['host'] . ($this->dsn['port'] ? ":{$this->dsn['port']}" : '') . '/' . ($this->dsn['dbname'] ? "{$this->dsn['dbname']}" : '');
-        $this->_link = new Manager($uri);
+        $this->_link = new Manager($this->dsn['dsn']);
         $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
         $this->_dbname = $this->dsn['dbname'];
 
@@ -84,10 +83,10 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $document
-     * @param bool $retid
+     * @param bool $retId
      * @return bool|string
      */
-    public function create($table, $document = [], $retid = false)
+    public function create($table, $document = [], $retId = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -100,24 +99,13 @@ class MongoDb extends BaseObject
             $bulk = new BulkWrite();
             $_id = $bulk->insert($document);
             $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
-            if ($retid) {
+            if ($retId) {
                 return (string)$_id;
             }
             return $ret->getInsertedCount();
         } catch (BulkWriteException $ex) {
             return $this->_halt($ex->getMessage(), $ex->getCode());
         }
-    }
-
-
-    /**
-     * @param $table
-     * @param array $document
-     * @return null
-     */
-    public function replace($table, $document = [])
-    {
-        return null;
     }
 
     /**
@@ -127,7 +115,7 @@ class MongoDb extends BaseObject
      * @param string $options
      * @return bool|int|null
      */
-    public function update($table, $document = [], $condition = [], $options = 'set')
+    public function update($table, $document = [], $condition = [], $options = '$set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -153,11 +141,10 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $condition
-     * @param null $args
      * @param bool $multi
      * @return bool|int|null
      */
-    public function remove($table, $condition = [], $args = null, $multi = false)
+    public function remove($table, $condition = [], $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -180,10 +167,9 @@ class MongoDb extends BaseObject
      * @param $table
      * @param array $options
      * @param array $condition
-     * @param null $args
      * @return array|bool
      */
-    public function findOne($table, $options = [], $condition = [], $args = null)
+    public function findOne($table, $options = [], $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -196,7 +182,7 @@ class MongoDb extends BaseObject
                 return false;
             }
 
-            $data = $cursor[0];
+            $data = (array)$cursor[0];
             if (isset($data['_id'])) {
                 $data['_id'] = (string)$data['_id'];
             }
@@ -212,10 +198,9 @@ class MongoDb extends BaseObject
      * @param $table
      * @param array $options
      * @param array $condition
-     * @param null $args
      * @return array|bool
      */
-    public function findAll($table, $options = [], $condition = [], $args = null)
+    public function findAll($table, $options = [], $condition = [])
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -224,6 +209,7 @@ class MongoDb extends BaseObject
 
             $rowSets = [];
             foreach ($cursor as $row) {
+                $row = (array)$row;
                 $row['_id'] = (string)$row['_id'];
                 $rowSets[] = $row;
             }
@@ -239,35 +225,25 @@ class MongoDb extends BaseObject
      * @param $table
      * @param array $options
      * @param array $condition
-     * @param array|int $pageParam
+     * @param int $offset
      * @param int $limit
      * @return array|bool
      */
-    public function page($table, $options = [], $condition = [], $pageParam = null, $limit = 18)
+    public function page($table, $options = [], $condition = [], $offset = 0, $limit = 18)
     {
-        if (is_array($pageParam)) {
-            //固定长度分页模式
-            if ($pageParam['totals'] <= 0) {
-                return [];
-            }
-            $offset = $this->_page_start($pageParam['curpage'], $limit, $pageParam['totals']);
-        } else {
-            //任意长度模式
-            $offset = $pageParam;
-        }
-
         $options = array_merge($options, [
             'limit' => $limit,
             'skip' => $offset
         ]);
 
         try {
-            $query = new MongoQuery($condition['query'], $options);
+            $query = new MongoQuery($condition, $options);
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
 
             $rowSets = [];
             foreach ($cursor as $row) {
+                $row = (array)$row;
                 if (isset($row['_id'])) {
                     $row['_id'] = (string)$row['_id'];
                 }
@@ -284,17 +260,18 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $condition
-     * @param null $args
-     * @param null $field
      * @return bool
      */
-    public function count($table, $condition = [], $args = null, $field = null)
+    public function count($table, $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
                 $condition['_id'] = new ObjectID($condition['_id']);
             }
-            $cmd = ['count' => $table, 'query' => $condition];
+            $cmd = ['count' => $table];
+            if (!empty($condition)) {
+                $cmd['query'] = $condition;
+            }
             $cursor = $this->_link->executeCommand($this->_dbname, new Command($cmd), new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
             if (empty($cursor)) {
@@ -309,12 +286,12 @@ class MongoDb extends BaseObject
     /**
      * @param int $page
      * @param int $ppp
-     * @param int $totalNum
+     * @param $total
      * @return int
      */
-    private function _page_start($page, $ppp, $totalNum)
+    public function pageStart($page, $ppp, $total)
     {
-        $totalPage = ceil($totalNum / $ppp);
+        $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
         return ($_page - 1) * $ppp;
     }
