@@ -12,20 +12,14 @@ class Context
     public static function dsn($dsnId = 'default')
     {
         static $cacheDsn = [];
-        $appKey = APP_KEY;
-        if (!isset($cacheDsn[$appKey])) {
-            $cacheDsn[$appKey] = App::mergeVars('dsn');
-            if (!isset($cacheDsn[$appKey][$dsnId])) {
-                new ExException("$dsnId is not setting 1");
+        if (empty($cacheDsn)) {
+            $cacheDsn = App::mergeVars('dsn');
+            if (!isset($cacheDsn[$dsnId])) {
+                new ExException("{$dsnId} is not setting");
                 return null;
             }
         }
-        //如果没配置$dsnid 会报错
-        if (!isset($cacheDsn[$appKey][$dsnId])) {
-            new ExException("$dsnId is not setting 2");
-            return null;
-        }
-        return $cacheDsn[$appKey][$dsnId];
+        return $cacheDsn[$dsnId];
     }
 
     /**
@@ -36,13 +30,13 @@ class Context
     public static function config($name, $type = 'inc')
     {
         static $CacheConfig = [];
-        $key = APP_KEY . '.' . $name . '.' . $type;
+        $key = $name . '.' . $type;
         if (isset($CacheConfig[$key])) {
             return $CacheConfig[$key];
         }
         $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            $CacheConfig[$key] = [];
+            new ExException("{$name}.inc.php is not exists");
             return [];
         }
         $CacheConfig[$key] = include $file;

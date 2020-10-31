@@ -2,6 +2,7 @@
 
 namespace Xcs;
 
+use Xcs\Db\MongoDb;
 use Xcs\Db\PdoDb;
 
 class DB
@@ -12,6 +13,9 @@ class DB
     private static $used_dbo = [];
 
     /**
+     * 返回 mysql 对象
+     * 通常用 DB::find*  DB::row* DB::page* ...
+     * 只有在切换不同数据库可能会用到
      * @param string $dsnId
      * @return PdoDb
      */
@@ -27,11 +31,36 @@ class DB
             return null;
         }
 
-        $dbo = new PdoDb(['dsn' => $dsn]);
-        self::$used_dbo[$dsnId] = $dbo;
-        return $dbo;
+        $object = new PdoDb(['dsn' => $dsn]);
+        self::$used_dbo[$dsnId] = $object;
+        return $object;
     }
 
+    /**
+     * 返回 mongodb 对象
+     * @param string $dsnId
+     * @return MongoDb
+     */
+    public static function mgo($dsnId = 'default')
+    {
+        $dsn = Context::dsn($dsnId);
+        if (isset(self::$used_dbo[$dsnId])) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        if ('MongoDb' != $dsn['driver']) {
+            new ExException("the driver error: MongoDb");
+            return null;
+        }
+
+        $object = new MongoDb(['dsn' => $dsn]);
+        self::$used_dbo[$dsnId] = $object;
+        return $object;
+    }
+
+    /**
+     * 关闭数据库  通常不用调用
+     */
     public static function close()
     {
         if (!empty(self::$used_dbo)) {
@@ -42,6 +71,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 还原默认数据源对象
      */
     public static function resume()
@@ -50,6 +80,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @return array|mixed
      */
     public static function info()
@@ -59,6 +90,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 插入一条数据
      * $option bool 是否返回插入的ID
      *
@@ -74,6 +106,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 替换一条数据
      * PS:需要设置主键值
      *
@@ -88,6 +121,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 更新符合条件的数据
      * @param string $table
      * @param string|array $data
@@ -102,6 +136,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 删除符合条件的项
      * @param string $table
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -116,8 +151,8 @@ class DB
     }
 
     /**
+     * mysql专用
      * 查找一条数据
-     * 如果要链表 使用 DB::row
      * @param string $table
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -132,8 +167,8 @@ class DB
     }
 
     /**
-     * 通用取多条数据的简洁方式 如果要链表 使用 DB::rowset
-     *
+     * mysql专用
+     * 查找多条数据
      * @param string $table
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -149,6 +184,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 带分页数据的DB::page
      * @param string $table
      * @param $field
@@ -175,7 +211,7 @@ class DB
     }
 
     /**
-     * sql专用
+     * mysql专用
      * 返回一条数据的第一栏
      * $filed mix  需要返回的字段  或者sql语法
      *
@@ -192,6 +228,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param $table
      * @param $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -205,10 +242,8 @@ class DB
     }
 
     /**
+     * mysql专用
      * 单表符合条件的数量
-     * - mysql:
-     * $field count($field)
-     *
      * @param string $table
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
@@ -222,6 +257,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
@@ -236,6 +272,7 @@ class DB
     //--------------sql查询---start---------------//
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param bool $retObj
@@ -248,6 +285,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param null $index
@@ -261,6 +299,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param int $pageParam
@@ -284,6 +323,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
@@ -295,6 +335,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
@@ -306,6 +347,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
@@ -319,6 +361,7 @@ class DB
     //--------------多表查询---end---------------//
 
     /**
+     * mysql专用
      * 开始事务
      * @return mixed
      */
@@ -329,6 +372,7 @@ class DB
     }
 
     /**
+     * mysql专用
      * 事务提交或者回滚
      * @param bool $commit_no_errors
      * @return mixed
@@ -342,6 +386,7 @@ class DB
     //----------------------事务END-------------------//
 
     /**
+     * mysql专用
      * 切换数据源对象
      * @param null $id
      * @return PdoDb
