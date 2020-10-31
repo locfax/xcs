@@ -49,7 +49,6 @@ class Container
      * ones with the integers that represent their positions in the constructor parameter list.
      * @param array $config a list of name-value pairs that will be used to initialize the object properties.
      * @return object an instance of the requested class.
-     * @throws ExException
      */
     public function get($class, $params = [], $config = [])
     {
@@ -88,7 +87,8 @@ class Container
             //dump('is_object');
             return $this->_singletons[$class] = $definition;
         } else {
-            throw new ExException('Unexpected object definition type: ' . gettype($definition));
+            new ExException('Unexpected object definition type: ' . gettype($definition));
+            return null;
         }
 
         if (array_key_exists($class, $this->_singletons)) {
@@ -160,7 +160,6 @@ class Container
      * @param array $params the list of constructor parameters. The parameters will be passed to the class
      * constructor when [[get()]] is called.
      * @return $this the container itself
-     * @throws ExException
      */
     public function set($class, $definition = [], array $params = [])
     {
@@ -181,7 +180,6 @@ class Container
      * @param array $params the list of constructor parameters. The parameters will be passed to the class
      * constructor when [[get()]] is called.
      * @return $this the container itself
-     * @throws ExException
      * @see set()
      */
     public function setSingleton($class, $definition = [], array $params = [])
@@ -229,7 +227,6 @@ class Container
      * @param string $class class name
      * @param string|array|callable $definition the class definition
      * @return array the normalized class definition
-     * @throws ExException
      */
     protected function normalizeDefinition($class, $definition)
     {
@@ -250,13 +247,14 @@ class Container
                 if (strpos($class, '\\') !== false) {
                     $definition['class'] = $class;
                 } else {
-                    throw new ExException('A class definition requires a "class" member.');
+                    new ExException('A class definition requires a "class" member.');
+                    return [];
                 }
             }
             return $definition;
         }
 
-        throw new ExException("Unsupported definition type for \"$class\": " . gettype($definition));
+        new ExException("Unsupported definition type for \"$class\": " . gettype($definition));
     }
 
     /**
@@ -276,7 +274,6 @@ class Container
      * @param array $params constructor parameters
      * @param array $config configurations to be applied to the new instance
      * @return object the newly created instance of the specified class
-     * @throws ExException
      */
     protected function build($class, $params, $config)
     {
@@ -296,7 +293,8 @@ class Container
 
         $dependencies = $this->resolveDependencies($dependencies, $reflection);
         if (!$reflection->isInstantiable()) {
-            throw new ExException($reflection->name);
+            new ExException($reflection->name);
+            return null;
         }
         if (empty($config)) {
             return $reflection->newInstanceArgs($dependencies);
@@ -344,7 +342,6 @@ class Container
      * Returns the dependencies of the specified class.
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
-     * @throws ExException|ReflectionException if a dependency cannot be resolved or if a dependency cannot be fulfilled.
      */
     protected function getDependencies($class)
     {
@@ -356,7 +353,8 @@ class Container
         try {
             $reflection = new ReflectionClass($class);
         } catch (ReflectionException $e) {
-            throw new ExException('Failed to instantiate component or class "' . $class . '".', 0, $e);
+            new ExException('Failed to instantiate class "' . $class . '".', 0, $e);
+            return [];
         }
 
         $constructor = $reflection->getConstructor();
@@ -367,7 +365,7 @@ class Container
                 } elseif ($param->isDefaultValueAvailable()) {
                     $dependencies[] = $param->getDefaultValue();
                 } else {
-                    if (PHP_VERSION_ID >= 80000) {
+                    if (PHP_VERSION_ID >= 70000) {
                         $c = $param->getType();
                     } else {
                         $c = $param->getClass();
@@ -388,7 +386,6 @@ class Container
      * @param array $dependencies the dependencies
      * @param ReflectionClass $reflection the class reflection associated with the dependencies
      * @return array the resolved dependencies
-     * @throws ExException
      */
     protected function resolveDependencies($dependencies, $reflection = null)
     {
@@ -399,7 +396,8 @@ class Container
                 } elseif ($reflection !== null) {
                     $name = $reflection->getConstructor()->getParameters()[$index]->getName();
                     $class = $reflection->getName();
-                    throw new ExException("Missing required parameter \"$name\" when instantiating \"$class\".");
+                    new ExException("Missing required parameter \"$name\" when instantiating \"$class\".");
+                    return [];
                 }
             } elseif ($this->_resolveArrays && is_array($dependency)) {
                 $dependencies[$index] = $this->resolveDependencies($dependency, $reflection);
@@ -431,7 +429,6 @@ class Container
      * @param array $params The array of parameters for the function.
      * This can be either a list of parameters, or an associative array representing named function parameters.
      * @return mixed the callback return value.
-     * @throws ExException
      */
     public function invoke(callable $callback, $params = [])
     {
@@ -447,7 +444,6 @@ class Container
      * @param callable $callback callable to be invoked.
      * @param array $params The array of parameters for the function, can be either numeric or associative.
      * @return array The resolved dependencies.
-     * @throws ExException
      */
     public function resolveCallableDependencies(callable $callback, $params = [])
     {
@@ -477,15 +473,7 @@ class Container
                     $args[] = array_shift($params);
                 } else {
                     // If the argument is optional we catch not instantiable exceptions
-                    try {
-                        $args[] = $this->get($className);
-                    } catch (ExException $e) {
-                        if ($param->isDefaultValueAvailable()) {
-                            $args[] = $param->getDefaultValue();
-                        } else {
-                            throw $e;
-                        }
-                    }
+                    $args[] = $this->get($className);
                 }
             } elseif ($associative && isset($params[$name])) {
                 $args[] = $params[$name];
@@ -496,7 +484,8 @@ class Container
                 $args[] = $param->getDefaultValue();
             } elseif (!$param->isOptional()) {
                 $funcName = $reflection->getName();
-                throw new ExException("Missing required parameter \"$name\" when calling \"$funcName\".");
+                new ExException("Missing required parameter \"$name\" when calling \"$funcName\".");
+                return [];
             }
         }
 
@@ -585,8 +574,6 @@ class Container
      *      ]
      * ]);
      * ```
-     *
-     * @throws ExException
      * @see set() to know more about possible values of definitions
      */
     public function setDefinitions(array $definitions)
@@ -605,8 +592,6 @@ class Container
      *
      * @param array $singletons array of singleton definitions. See [[setDefinitions()]]
      * for allowed formats of array.
-     *
-     * @throws ExException
      * @see setSingleton() to know more about possible values of definitions
      * @see setDefinitions() for allowed formats of $singletons parameter
      */

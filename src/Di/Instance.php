@@ -98,7 +98,6 @@ class Instance
      * @param string $type the class/interface name to be checked. If null, type check will not be performed.
      * @param Container $container the container. This will be passed to [[get()]].
      * @return object the object referenced by the Instance, or `$reference` itself if it is an object.
-     * @throws ExException
      */
     public static function ensure($reference, $type = null, $container = null)
     {
@@ -113,9 +112,11 @@ class Instance
                 return $component;
             }
 
-            throw new ExException('Invalid data type: ' . $class . '. ' . $type . ' is expected.');
+            new ExException('Invalid data type: ' . $class . '. ' . $type . ' is expected.');
+            return null;
         } elseif (empty($reference)) {
-            throw new ExException('The required component is not specified.');
+            new ExException('The required component is not specified.');
+            return null;
         }
 
         if (is_string($reference)) {
@@ -130,18 +131,18 @@ class Instance
                 return $component;
             }
 
-            throw new ExException('"' . $reference->id . '" refers to a ' . get_class($component) . " component. $type is expected.");
+            new ExException('"' . $reference->id . '" refers to a ' . get_class($component) . " component. $type is expected.");
+            return null;
         }
 
         $valueType = is_object($reference) ? get_class($reference) : gettype($reference);
-        throw new ExException("Invalid data type: $valueType. $type is expected.");
+        new ExException("Invalid data type: $valueType. $type is expected.");
     }
 
     /**
      * Returns the actual object referenced by this Instance object.
      * @param Container $container the container used to locate the referenced object.
      * @return object the actual object referenced by this Instance object.
-     * @throws ExException
      */
     public function get($container)
     {
@@ -156,13 +157,13 @@ class Instance
      *
      * @param array $state
      * @return Instance
-     * @throws ExException
      * @see var_export()
      */
     public static function __set_state($state)
     {
         if (!isset($state['id'])) {
-            throw new ExException('Failed to instantiate class "Instance". Required parameter "id" is missing');
+            new ExException('Failed to instantiate class "Instance". Required parameter "id" is missing');
+            return null;
         }
         return new self($state['id']);
     }
