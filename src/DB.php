@@ -13,11 +13,12 @@ class DB
     private static $used_dbo = [];
 
     /**
-     * 返回 mysql 对象
+     * 返回 PDO 对象
      * 通常用 DB::find*  DB::row* DB::page* ...
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
      * @return PdoDb
+     * @see PdoDb
      */
     public static function dbm($dsnId = 'default')
     {
@@ -40,6 +41,7 @@ class DB
      * 返回 mongodb 对象
      * @param string $dsnId
      * @return MongoDb
+     * @see MongoDb
      */
     public static function mgo($dsnId = 'default')
     {
@@ -398,9 +400,7 @@ class DB
             self::$using_dbo_id = self::$default_dbo_id;
         } else {
             //切换dbo id
-            if ($id != self::$using_dbo_id) {
-                self::$using_dbo_id = $id;
-            }
+            self::$using_dbo_id = $id;
         }
         return self::dbm(self::$using_dbo_id);
     }

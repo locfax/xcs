@@ -30,10 +30,13 @@ class PdoDb extends BaseObject
             return;
         }
 
+        $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+        if (isset($this->dsn['options'])) {
+            $options = array_merge($options, $this->dsn['options']);
+        }
+
         try {
-            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret']);
-            $this->_link->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-            $this->_link->exec('SET NAMES utf8');
+            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
         } catch (\PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;

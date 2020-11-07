@@ -115,16 +115,17 @@ class App
 
         $fileDir = dirname($runFile);
         if (!is_dir($fileDir)) {
-            mkdir($fileDir, FILE_WRITE_MODE);
+            mkdir($fileDir, DIR_READ_MODE);
         }
         if (!is_file($runFile)) {
             file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
-            touch($runFile) && chmod($runFile, FILE_WRITE_MODE); //生成全读写空文件
+            touch($runFile) && chmod($runFile, FILE_READ_MODE); //读写空文件
         } elseif (!is_writable($runFile)) {
-            chmod($runFile, FILE_WRITE_MODE); //全读写
+            chmod($runFile, FILE_READ_MODE); //读写
         }
         $ret = file_put_contents($runFile, '<?php ' . $content, LOCK_EX);
         if ($ret) {
+            chmod($runFile, FILE_READ_MODE); //只读
             return $runFile;
         }
         return false;

@@ -124,7 +124,7 @@ class File
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
-            touch($filename) && chmod($filename, FILE_WRITE_MODE); //全读写
+            touch($filename) && chmod($filename, FILE_WRITE_MODE); //读写执行
         }
         $ret = file_put_contents($filename, $content, LOCK_EX);
         if ($ret && FILE_WRITE_MODE != $mode) {

@@ -54,7 +54,15 @@ class MongoDb extends BaseObject
             return;
         }
 
-        $this->_link = new Manager($this->dsn['dsn']);
+        $options = [
+            'connect' => true,
+            'persist' => false
+        ];
+        if (isset($this->dsn['options'])) {
+            $options = array_merge($options, $this->dsn['options']);
+        }
+
+        $this->_link = new Manager($this->dsn['dsn'], $options);
         $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
         $this->_dbname = $this->dsn['dbname'];
 
