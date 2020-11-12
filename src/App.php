@@ -5,10 +5,11 @@ namespace Xcs;
 class App
 {
 
-    const _dCTL = 'c';
-    const _dACT = 'a';
+    public static $_dCTL = 'c';
+    public static $_dACT = 'a';
+    public static $_actionPrefix = 'act_';
+
     const _controllerPrefix = 'Controller\\';
-    const _actionPrefix = 'act_';
 
     private static $routes;
 
@@ -25,66 +26,24 @@ class App
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
         }
-        self::runFile($refresh);
+
         if (isset($_GET['s'])) {
             $uri = trim(str_replace(['.htm', '.html'], '', $_GET['s']), '/');
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
-        self::dispatching($uri);
-    }
 
-    /**
-     * @param bool $refresh
-     */
-    public static function runFile($refresh = false)
-    {
-        $files = [BASE_PATH . 'common.php',];
-        $preload = [APP_ROOT . '/config/' . APP_KEY . '.inc.php',]; //应用配置
-
-        if (defined('DEBUG') && DEBUG) {
-            //测试模式
-            set_error_handler(function ($errno, $errStr) {
-                try {
-                    throw new ExException($errStr, $errno);
-                } catch (ExException $ex) {
-                }
-            });
-
-            define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
-            register_shutdown_function(function () {
-                $error = error_get_last();
-                if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                    try {
-                        throw new ExException($error["message"], $error["type"], 'systemError');
-                    } catch (ExException $ex) {
-                    }
-                }
-            });
-
-            is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
-            is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
-
-            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
-            is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
-
-            $files = array_merge($files, $preload);
-            array_walk($files, function ($file, $key) {
-                include $file;
-            });
-        } else {
-            //部署模式
-            self::_runFile($files, $preload, $refresh);
-        }
-        self::rootNamespace('\\', APP_PATH);
+        $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
+        self::_runFile($files, $refresh);
+        self::_rootNamespace('\\', APP_PATH);
+        self::_dispatching($uri);
     }
 
     /**
      * @param array $files
-     * @param array $preload
      * @param bool $refresh
      */
-    private static function _runFile($files, $preload, $refresh = false)
+    private static function _runFile($files, $refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
@@ -94,8 +53,15 @@ class App
             is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
 
-            $files = array_merge($files, $preload);
-            $preloadFile = self::makeRunFile($files, $preloadFile);
+            $files = array_merge($files);
+
+            if (defined('DEBUG') && DEBUG) {
+                array_walk($files, function ($file, $key) {
+                    include $file;
+                });
+                return;
+            }
+            $preloadFile = self::_makeRunFile($files, $preloadFile);
         }
         $preloadFile && include $preloadFile;
     }
@@ -105,7 +71,7 @@ class App
      * @param $runFile
      * @return bool
      */
-    private static function makeRunFile($runtimeFiles, $runFile)
+    private static function _makeRunFile($runtimeFiles, $runFile)
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -135,23 +101,24 @@ class App
      * @param string $uri
      * @return bool
      */
-    private static function dispatching($uri)
+    private static function _dispatching($uri)
     {
         if (defined('ROUTE') && ROUTE) {
-            self::router($uri);
+            self::_router($uri);
         }
-        $_controllerName = getgpc('g.' . self::_dCTL, getini('site/defaultController'), 'strtolower');
-        $_actionName = getgpc('g.' . self::_dACT, getini('site/defaultAction'), 'strtolower');
-        $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $_controllerName);
-        $actionName = preg_replace('/[^a-z0-9_]+/i', '', $_actionName);
+        $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'), 'strtolower');
+        $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'), 'strtolower');
+        $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $controllerName);
+        $actionName = preg_replace('/[^a-z0-9_]+/i', '', $actionName);
         if (defined('AUTH_ROLE') && AUTH_ROLE) {
             $ret = Rbac::check($controllerName, $actionName, AUTH_ROLE);
             if (!$ret) {
                 $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
-                return self::errACL($args);
+                return self::_errACL($args);
             }
         }
-        self::executeAction($controllerName, $actionName);
+        self::_execute($controllerName, $actionName);
+
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
         }
@@ -162,10 +129,10 @@ class App
      * @param $actionName
      * @return bool
      */
-    private static function executeAction($controllerName, $actionName)
+    private static function _execute($controllerName, $actionName)
     {
         $controllerName = ucfirst($controllerName);
-        $actionMethod = self::_actionPrefix . $actionName;
+        $actionMethod = self::$_actionPrefix . $actionName;
         do {
             $controllerClass = self::_controllerPrefix . $controllerName;
             //主动载入controller
@@ -180,41 +147,21 @@ class App
             $controller = null;
             return true;
         } while (false);
-        //控制器加载失败
-        self::errACT("控制器 '" . $controllerName . '\' 不存在!');
-    }
 
-    /**
-     * @param $group
-     * @param null $vars
-     * @return mixed
-     */
-    public static function mergeVars($group, $vars = null)
-    {
-        static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
-        $appKey = APP_KEY;
-        if (is_null($vars)) {
-            return $_CDATA[$appKey][$group];
-        }
-        if (is_null($_CDATA[$appKey][$group])) {
-            $_CDATA[$appKey][$group] = $vars;
-        } else {
-            $_CDATA[$appKey][$group] = array_merge($_CDATA[$appKey][$group], $vars);
-        }
-        return true;
+        //控制器加载失败
+        self::_errACT("控制器 '" . $controllerName . '\' 不存在!');
     }
 
     /**
      * @param $args
      * @return bool
      */
-    private static function errACT($args)
+    private static function _errACT($args)
     {
         if (self::isAjax(true)) {
             $res = [
-                'errcode' => 1,
-                'errmsg' => '出错了！' . $args,
-                'data' => ''
+                'code' => 1,
+                'msg' => '出错了！' . $args,
             ];
             return self::response($res, 'json');
         }
@@ -226,13 +173,12 @@ class App
      * @param $args
      * @return bool
      */
-    private static function errACL($args)
+    private static function _errACL($args)
     {
         if (self::isAjax(true)) {
             $res = [
-                'errcode' => 1,
-                'errmsg' => '出错了！' . $args,
-                'data' => ''
+                'code' => 1,
+                'msg' => '出错了！' . $args,
             ];
             return self::response($res, 'json');
         }
@@ -258,7 +204,7 @@ class App
      * @param $uri
      * @return bool|void
      */
-    private static function router($uri)
+    private static function _router($uri)
     {
         if (!$uri) {
             return;
@@ -276,7 +222,7 @@ class App
                     $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }
                 $req = explode('/', $val);
-                self::setRequest($req);
+                self::_setRequest($req);
                 break;
             }
         }
@@ -285,10 +231,10 @@ class App
     /**
      * @param $req
      */
-    private static function setRequest($req)
+    private static function _setRequest($req)
     {
-        $_GET[self::_dCTL] = array_shift($req);
-        $_GET[self::_dACT] = array_shift($req);
+        $_GET[self::$_dCTL] = array_shift($req);
+        $_GET[self::$_dACT] = array_shift($req);
         $paramNum = count($req);
         if (!$paramNum) {
             return;
@@ -303,10 +249,11 @@ class App
      * @param $namespace
      * @param $path
      */
-    private static function rootNamespace($namespace, $path)
+    private static function _rootNamespace($namespace, $path)
     {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
+
         $loader = function ($classname) use ($namespace, $path) {
             if ($namespace && stripos($classname, $namespace) !== 0) {
                 return;
@@ -315,7 +262,28 @@ class App
             $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
             include $file;
         };
+
         spl_autoload_register($loader);
+    }
+
+    /**
+     * @param $group
+     * @param null $vars
+     * @return mixed
+     */
+    public static function mergeVars($group, $vars = null)
+    {
+        static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
+        $appKey = APP_KEY;
+        if (is_null($vars)) {
+            return $_CDATA[$appKey][$group];
+        }
+        if (is_null($_CDATA[$appKey][$group])) {
+            $_CDATA[$appKey][$group] = $vars;
+        } else {
+            $_CDATA[$appKey][$group] = array_merge($_CDATA[$appKey][$group], $vars);
+        }
+        return true;
     }
 
     /**
