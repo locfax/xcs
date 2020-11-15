@@ -186,7 +186,7 @@ function template($file, $getTplFile = false)
 function url($udi, $param = [])
 {
     $_udi = explode('/', $udi);
-    $url = '?' . Xcs\App::_dCTL . '=' . $_udi[0] . '&' . Xcs\App::_dACT . '=' . $_udi[1];
+    $url = '?' . Xcs\App::$_dCTL . '=' . $_udi[0] . '&' . Xcs\App::$_dACT . '=' . $_udi[1];
 
     if (!empty($param)) {
         foreach ($param as $key => $val) {
@@ -349,7 +349,7 @@ function locTime($uTimeOffset)
             't' => getini('settings/timeformat') ?: 'H:i:s'
         ];
         $dtFormat['dt'] = $dtFormat['d'] . ' ' . $dtFormat['t'];
-        $timeOffset = getini('settings/timezone') ?: $timeOffset; //defualt is Asia/Shanghai
+        $timeOffset = getini('settings/timezone') ?: $timeOffset; //default is Asia/Shanghai
     }
     $offset = $uTimeOffset == 999 ? $timeOffset : $uTimeOffset;
     return [$offset, $dtFormat];
@@ -358,23 +358,23 @@ function locTime($uTimeOffset)
 /**
  * @param $timestamp
  * @param string $format
- * @param int $utimeoffset
- * @param string $uformat
+ * @param int $uTimeOffset
+ * @param string $uFormat
  * @return string
  */
-function dgmdate($timestamp, $format = 'dt', $utimeoffset = 999, $uformat = '')
+function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
 {
     if (!$timestamp) {
         return '';
     }
-    $locTime = locTime($utimeoffset);
+    $locTime = locTime($uTimeOffset);
     $offset = $locTime[0];
     $dtFormat = $locTime[1];
     $timestamp += $offset * 3600;
     if ('u' == $format) {
         $nowTime = time() + $offset * 3600;
         $todayTimestamp = $nowTime - $nowTime % 86400;
-        $format = !$uformat ? $dtFormat['dt'] : $uformat;
+        $format = !$uFormat ? $dtFormat['dt'] : $uFormat;
         $s = gmdate($format, $timestamp);
         $time = $nowTime - $timestamp;
         if ($timestamp >= $todayTimestamp) {
