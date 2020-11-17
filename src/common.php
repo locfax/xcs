@@ -179,24 +179,6 @@ function template($file, $getTplFile = false)
 }
 
 /**
- * @param $udi
- * @param $param
- * @return string
- */
-function url($udi, $param = [])
-{
-    $_udi = explode('/', $udi);
-    $url = '?' . Xcs\App::$_dCTL . '=' . $_udi[0] . '&' . Xcs\App::$_dACT . '=' . $_udi[1];
-
-    if (!empty($param)) {
-        foreach ($param as $key => $val) {
-            $url .= '&' . $key . '=' . $val;
-        }
-    }
-    return $url;
-}
-
-/**
  * 数组 转 对象
  *
  * @param array $arr 数组
@@ -388,9 +370,8 @@ function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
                 return '<span title="' . $s . '">' . $time . '&nbsp;秒前</span>';
             } elseif (0 == $time) {
                 return '<span title="' . $s . '">刚才</span>';
-            } else {
-                return $s;
             }
+            return $s;
         } elseif (($days = intval(($todayTimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
             if (0 == $days) {
                 return '<span title="' . $s . '">昨天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
@@ -401,9 +382,8 @@ function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
             }
         } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowTime)) {
             return '<span title="' . $s . '">' . gmdate('m-d H:i', $timestamp) . '</span>';
-        } else {
-            return $s;
         }
+        return $s;
     }
     $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
     return gmdate($format, $timestamp);

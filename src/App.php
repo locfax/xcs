@@ -40,6 +40,28 @@ class App
     }
 
     /**
+     * @param $udi
+     * @param $param
+     * @return string
+     */
+    public static function url($udi, $param = [])
+    {
+        $_udi = explode('/', $udi);
+        if (count($_udi) < 2) {
+            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=index';
+        } else {
+            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=' . $_udi[1];
+        }
+
+        if (!empty($param)) {
+            foreach ($param as $key => $val) {
+                $url .= '&' . $key . '=' . $val;
+            }
+        }
+        return $url;
+    }
+
+    /**
      * @param array $files
      * @param bool $refresh
      */

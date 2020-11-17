@@ -4,10 +4,9 @@ namespace Xcs;
 
 class Template
 {
-    private $subTemplates = array();
-    private $replaceCode = array('search' => array(), 'replace' => array());
-    private $blocks = array();
-    private $language = array();
+    private $subTemplates = [];
+    private $replaceCode = ['search' => [], 'replace' => []];
+    private $language = [];
     private $tplDir = '';
 
     public function parse($cacheDir, $tplDir, $tplFile, $cacheFile, $file)
@@ -23,37 +22,34 @@ class Template
         $var_regexp = "((\\\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(\-\>)?[a-zA-Z0-9_\x7f-\xff]*)(\[[a-zA-Z0-9_\-\.\"\'\[\]\$\x7f-\xff]+\])*)";
         $const_regexp = "([A-Z_\x7f-\xff][A-Z0-9_\x7f-\xff]*)";
 
-        $this->subTemplates = array();
+        $this->subTemplates = [];
         for ($i = 1; $i <= 10; $i++) {
             if (!(false === strpos($template, '{subtemplate'))) {
-                $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", array($this, 'tag_subTemplate'), $template);
+                $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z0-9_:\/]+)\}(\-\-\>)?[\n\r\t]*/", [$this, 'tag_subTemplate'], $template);
             }
         }
         $template = preg_replace("/([\n\r]+)\t+/s", "\\1", $template);
         $template = preg_replace("/\<\!\-\-\{(.+?)\}\-\-\>/s", "{\\1}", $template);
-        $template = preg_replace_callback("/\{lang\s+(.+?)\}/", array($this, 'language_tags'), $template);
+        $template = preg_replace_callback("/\{lang\s+(.+?)\}/", [$this, 'language_tags'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/", array($this, 'url_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{surl\s+(.+?)\}[\n\r\t]*/", array($this, 'surl_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{config\s+(.+?)\}[\n\r\t]*/", array($this, 'config_tags'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/", [$this, 'url_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{surl\s+(.+?)\}[\n\r\t]*/", [$this, 'surl_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{config\s+(.+?)\}[\n\r\t]*/", [$this, 'config_tags'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{ad\s+(.+?)\/(.+?)\}[\n\r\t]*/", array($this, 'adv_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{ad\s+(.+?)\}[\n\r\t]*/", array($this, 'adv_tags'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{script\s+(.+?)\}[\n\r\t]*/", [$this, 'script_tags'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{script\s+(.+?)\}[\n\r\t]*/", array($this, 'script_tags'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\|(.*?)\}[\n\r\t]*/", [$this, 'date_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\}[\n\r\t]*/", [$this, 'date_tags'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\|(.*?)\}[\n\r\t]*/", array($this, 'date_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\}[\n\r\t]*/", array($this, 'date_tags'), $template);
-
-        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\((.+?)\)\}[\n\r\t]*/", array($this, 'function_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\(\)\}[\n\r\t]*/", array($this, 'function_tags'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{eval\s+(.+?)\s*\}[\n\r\t]*/s", array($this, 'eval_tags'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\((.+?)\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\(\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{eval\s+(.+?)\s*\}[\n\r\t]*/s", [$this, 'eval_tags'], $template);
 
         $template = str_replace("{LF}", PHP_EOL, $template);
 
         $template = preg_replace("/\{(\\\$[a-zA-Z0-9_\-\>\[\]\'\"\$\.\x7f-\xff]+)\}/s", "<?=\\1?>", $template);
-        $template = preg_replace_callback("/$var_regexp/s", array($this, 'add_quote'), $template);
-        $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", array($this, 'add_quote'), $template);
+        $template = preg_replace_callback("/$var_regexp/s", [$this, 'add_quote'], $template);
+        $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [$this, 'add_quote'], $template);
 
         $headerAdd = '';
         if (!empty($this->subTemplates)) {
@@ -64,22 +60,20 @@ class Template
             }
             $headerAdd .= ';' . PHP_EOL;
         }
-        if (!empty($this->blocks)) {
-            $headerAdd .= "block_get('" . implode(',', $this->blocks) . "');" . PHP_EOL;
-        }
 
-        $template = "<?php " . PHP_EOL . "if(!defined('APP_ROOT')) exit('Access Denied');" . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
+        $template = "<?php " . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
 
-        $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z0-9_:\/]+)\}[\n\r\t]*/", array($this, 'tag_template'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", array($this, 'tag_echo'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z0-9_:\/]+)\}[\n\r\t]*/", [$this, 'tag_template'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);
 
-        $template = preg_replace_callback("/([\n\r\t]*)\{if\s+(.+?)\}([\n\r\t]*)/s", array($this, 'tag_if'), $template);
-        $template = preg_replace_callback("/([\n\r\t]*)\{elseif\s+(.+?)\}([\n\r\t]*)/s", array($this, 'tag_elseif'), $template);
+        $template = preg_replace_callback("/([\n\r\t]*)\{if\s+(.+?)\}([\n\r\t]*)/s", [$this, 'tag_if'], $template);
+        $template = preg_replace_callback("/([\n\r\t]*)\{elseif\s+(.+?)\}([\n\r\t]*)/s", [$this, 'tag_elseif'], $template);
         $template = preg_replace("/\{else\}/i", "<?php } else { ?>", $template);
         $template = preg_replace("/\{\/if\}/i", "<?php } ?>", $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\}[\n\r\t]*/s", array($this, 'tag_loop'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/s", array($this, 'tag_loop_as'), $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\}[\n\r\t]*/s", [$this, 'tag_loop'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{loop\s+(\S+)\s+(\S+)\s+(\S+)\}[\n\r\t]*/s", [$this, 'tag_loop_as'], $template);
         $template = preg_replace("/\{\/loop\}/i", "<?php } } ?>", $template);
 
         $template = preg_replace("/\{$const_regexp\}/s", "<?=\\1?>", $template);
@@ -91,8 +85,8 @@ class Template
         $template = preg_replace("/ \?\>[\n\r]*\<\? /s", " ", $template);
         $template = preg_replace("/ \?\>[\n\r]*\<\?php /s", " ", $template);
 
-        $template = preg_replace_callback("/\"(http)?[\w\.\/:]+\?[^\"]+?&[^\"]+?\"/", array($this, 'trans_amp'), $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{block\s+([a-zA-Z0-9_\[\]]+)\}(.+?)\{\/block\}/s", array($this, 'strip_block'), $template);
+        $template = preg_replace_callback("/\"(http)?[\w\.\/:]+\?[^\"]+?&[^\"]+?\"/", [$this, 'trans_amp'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{block\s+([a-zA-Z0-9_\[\]]+)\}(.+?)\{\/block\}/s", [$this, 'strip_block'], $template);
 
         $template = preg_replace("/\<\?(\s{1})/is", "<?php\\1", $template);
         $template = preg_replace("/\<\?\=(.+?)\?\>/is", "<?php echo \\1;?>", $template);
@@ -119,11 +113,11 @@ class Template
         $isPlugin = count($vars) == 2;
         if (!$isPlugin) {
             if (!isset($this->language['inner'])) {
-                $this->language['inner'] = array();
+                $this->language['inner'] = [];
             }
         } else {
             if (!isset($this->language['plugin'])) {
-                $this->language['plugin'] = array();
+                $this->language['plugin'] = [];
             }
         }
         if (!$isPlugin && !isset($this->language['inner'][$vars[0]])) {
@@ -147,7 +141,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--URL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = "<?php echo url(\"$parameter[1]\"); ?>";
+        $this->replaceCode['replace'][$i] = "<?php echo \Xcs\App::url(\"$parameter[1]\"); ?>";
         return $search;
     }
 
@@ -155,20 +149,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = url("$parameter[1]");
-        return $search;
-    }
-
-    private function adv_tags($parameter)
-    {
-        $i = count($this->replaceCode['search']);
-        if (!isset($parameter[2])) {
-            $this->replaceCode['search'][$i] = $search = "<!--AD_TAG_$i-->";
-            $this->replaceCode['replace'][$i] = "<?php echo ad_display(\"$parameter[1]\"); ?>";
-        } else {
-            $this->replaceCode['search'][$i] = $search = "<!--AD_TAG2_$i-->";
-            $this->replaceCode['replace'][$i] = '<?php $' . $parameter[2] . " = ad_display(\"$parameter[1]\"); ?>";
-        }
+        $this->replaceCode['replace'][$i] = App::url("$parameter[1]");
         return $search;
     }
 
@@ -271,7 +252,6 @@ class Template
 
     private function trans_amp($str)
     {
-        //$str = str_replace('&', '&amp;', $str[0]);
         $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
         $str = str_replace('\"', '"', $str);
