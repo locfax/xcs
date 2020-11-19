@@ -33,20 +33,21 @@ class App
             $uri = $_SERVER['PHP_SELF'];
         }
 
-        $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
-        self::runFile($files, $refresh);
+        self::runFile($refresh);
         self::_rootNamespace('\\', APP_PATH);
         self::_dispatching($uri);
     }
 
     /**
-     * @param array $files
      * @param bool $refresh
      */
-    public static function runFile($files, $refresh = false)
+    public static function runFile($refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
+
+            $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
+
             is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
 
@@ -73,8 +74,10 @@ class App
                 });
                 return;
             }
+
             $preloadFile = self::_makeRunFile($files, $preloadFile);
         }
+
         $preloadFile && include $preloadFile;
     }
 
@@ -101,11 +104,11 @@ class App
         } elseif (!is_writable($runFile)) {
             chmod($runFile, FILE_READ_MODE); //读写
         }
-        $ret = file_put_contents($runFile, '<?php ' . $content, LOCK_EX);
-        if ($ret) {
+        if (file_put_contents($runFile, '<?php ' . $content, LOCK_EX)) {
             chmod($runFile, FILE_READ_MODE); //只读
             return $runFile;
         }
+
         return false;
     }
 
@@ -122,6 +125,7 @@ class App
         $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'), 'strtolower');
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $controllerName);
         $actionName = preg_replace('/[^a-z0-9_]+/i', '', $actionName);
+
         if (defined('AUTH_ROLE') && AUTH_ROLE) {
             $ret = Rbac::check($controllerName, $actionName, AUTH_ROLE);
             if (!$ret) {
@@ -129,6 +133,7 @@ class App
                 return self::_errACL($args);
             }
         }
+
         self::_execute($controllerName, $actionName);
 
         if (function_exists('fastcgi_finish_request')) {
