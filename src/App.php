@@ -34,38 +34,16 @@ class App
         }
 
         $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
-        self::_runFile($files, $refresh);
+        self::runFile($files, $refresh);
         self::_rootNamespace('\\', APP_PATH);
         self::_dispatching($uri);
-    }
-
-    /**
-     * @param $udi
-     * @param $param
-     * @return string
-     */
-    public static function url($udi, $param = [])
-    {
-        $_udi = explode('/', $udi);
-        if (count($_udi) < 2) {
-            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=index';
-        } else {
-            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=' . $_udi[1];
-        }
-
-        if (!empty($param)) {
-            foreach ($param as $key => $val) {
-                $url .= '&' . $key . '=' . $val;
-            }
-        }
-        return $url;
     }
 
     /**
      * @param array $files
      * @param bool $refresh
      */
-    private static function _runFile($files, $refresh = false)
+    public static function runFile($files, $refresh = false)
     {
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
@@ -78,6 +56,18 @@ class App
             $files = array_merge($files);
 
             if (defined('DEBUG') && DEBUG) {
+                set_error_handler(function ($errno, $errStr) {
+                    new ExException($errStr, $errno);
+                });
+
+                define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
+                register_shutdown_function(function () {
+                    $error = error_get_last();
+                    if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
+                        new ExException($error["message"], $error["type"], 'systemError');
+                    }
+                });
+
                 array_walk($files, function ($file, $key) {
                     include $file;
                 });
@@ -171,23 +161,24 @@ class App
         } while (false);
 
         //控制器加载失败
-        self::_errACT("控制器 '" . $controllerName . '\' 不存在!');
+        self::_errCtrl("Controller '" . $controllerName . '\' is not exists!');
+        return false;
     }
 
     /**
      * @param $args
      * @return bool
      */
-    private static function _errACT($args)
+    private static function _errCtrl($args)
     {
         if (self::isAjax(true)) {
             $res = [
                 'code' => 1,
-                'msg' => '出错了！' . $args,
+                'msg' => 'error:' . $args,
             ];
             return self::response($res, 'json');
         }
-        $args = '出错了！' . $args;
+        $args = 'error:' . $args;
         include template('404');
     }
 
@@ -200,11 +191,11 @@ class App
         if (self::isAjax(true)) {
             $res = [
                 'code' => 1,
-                'msg' => '出错了！' . $args,
+                'msg' => 'error:' . $args,
             ];
             return self::response($res, 'json');
         }
-        $args = '出错了！' . $args;
+        $args = 'error！' . $args;
         include template('403');
     }
 
@@ -286,6 +277,28 @@ class App
         };
 
         spl_autoload_register($loader);
+    }
+
+    /**
+     * @param $udi
+     * @param $param
+     * @return string
+     */
+    public static function url($udi, $param = [])
+    {
+        $_udi = explode('/', $udi);
+        if (count($_udi) < 2) {
+            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=index';
+        } else {
+            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=' . $_udi[1];
+        }
+
+        if (!empty($param)) {
+            foreach ($param as $key => $val) {
+                $url .= '&' . $key . '=' . $val;
+            }
+        }
+        return $url;
     }
 
     /**
