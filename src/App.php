@@ -281,10 +281,10 @@ class App
 
     /**
      * @param $udi
-     * @param $param
+     * @param $params
      * @return string
      */
-    public static function url($udi, $param = [])
+    public static function url($udi, $params = [])
     {
         $_udi = explode('/', $udi);
         if (count($_udi) < 2) {
@@ -293,8 +293,8 @@ class App
             $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=' . $_udi[1];
         }
 
-        if (!empty($param)) {
-            foreach ($param as $key => $val) {
+        if (!empty($params)) {
+            foreach ($params as $key => $val) {
                 $url .= '&' . $key . '=' . $val;
             }
         }

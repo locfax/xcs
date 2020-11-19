@@ -179,6 +179,17 @@ function template($file, $getTplFile = false)
 }
 
 /**
+ * 模板使用的url构造函数
+ * @param $udi
+ * @param array $params
+ * @return string
+ */
+function url($udi, $params = [])
+{
+    return Xcs\App::url($udi, $params);
+}
+
+/**
  * 数组 转 对象
  *
  * @param array $arr 数组
