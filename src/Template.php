@@ -141,7 +141,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--URL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = "<?php echo \Xcs\App::url(\"$parameter[1]\"); ?>";
+        $this->replaceCode['replace'][$i] = "<?php echo url(\"$parameter[1]\"); ?>";
         return $search;
     }
 
@@ -149,7 +149,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = App::url("$parameter[1]");
+        $this->replaceCode['replace'][$i] = url("$parameter[1]");
         return $search;
     }
 
