@@ -155,7 +155,7 @@ class Template
 
     private function script_tags($parameter)
     {
-        $tplFile = template($parameter[1], true);
+        $tplFile = template($parameter[1], [], true);
         return implode('', file($this->tplDir . $tplFile));
     }
 
@@ -204,7 +204,7 @@ class Template
 
     private function tag_subTemplate($file)
     {
-        $tplFile = template($file[2], true);
+        $tplFile = template($file[2], [], true);
         $content = implode('', file($this->tplDir . $tplFile));
         if ($content) {
             $this->subTemplates[] = $tplFile;

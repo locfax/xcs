@@ -161,21 +161,27 @@ function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
 
 /**
  * @param $file
+ * @param array $data
  * @param bool $getTplFile
  * @return string
  */
-function template($file, $getTplFile = false)
+function template($file, array $data = [], $getTplFile = false)
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
     if ($getTplFile) {
         return $tplFile;
     }
+
     $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
     $cacheTpl = DATA_VIEW . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
     checkTplRefresh($tplFile, $tplFile, $cacheTime, $cacheFile, $file);
-    return $cacheTpl;
+
+    if (!empty($data)) {
+        extract($data, EXTR_OVERWRITE);
+    }
+    include $cacheTpl;
 }
 
 /**
