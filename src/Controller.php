@@ -34,14 +34,13 @@ class Controller
         //动作不存在
         if (App::isAjax(true)) {
             $res = [
-                'errcode' => 1,
-                'errmsg' => 'Action ' . $name . '不存在!',
-                'data' => ''
+                'code' => 1,
+                'msg' => 'Action ' . $name . '不存在!',
             ];
             return App::response($res);
         }
         $args = 'Action:' . $name . "不存在";
-        include template('404');
+        template('404', ['args' => $args]);
     }
 
     /**

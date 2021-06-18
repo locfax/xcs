@@ -184,7 +184,7 @@ class App
             return self::response($res, 'json');
         }
         $args = 'error:' . $args;
-        include template('404');
+        template('404', ['args' => $args]);
     }
 
     /**
@@ -201,7 +201,7 @@ class App
             return self::response($res, 'json');
         }
         $args = 'error！' . $args;
-        include template('403');
+        template('403', ['args'=>$args]);
     }
 
     /**

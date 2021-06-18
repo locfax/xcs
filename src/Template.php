@@ -216,7 +216,7 @@ class Template
 
     private function tag_template($parameter)
     {
-        $return = "<?php include template(\"$parameter[1]\"); ?>";
+        $return = "<?php template(\"$parameter[1]\"); ?>";
         return $this->strip_tags($return);
     }
 
