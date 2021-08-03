@@ -13,7 +13,6 @@ class RestFul extends Controller
     {
         parent::__construct($controllerName, $actionName);
         $this->method = strtolower(getgpc('s.REQUEST_METHOD'));
-        $this->request();
     }
 
     /**

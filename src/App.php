@@ -201,7 +201,7 @@ class App
             return self::response($res, 'json');
         }
         $args = 'error！' . $args;
-        template('403', ['args'=>$args]);
+        template('403', ['args' => $args]);
     }
 
     /**
@@ -379,8 +379,8 @@ class App
      */
     public static function output_start($nocache = true)
     {
-        ob_end_clean();
-        if (getini('site/gzip') && function_exists('ob_gzhandler')) { //whether start gzip
+        ob_get_length() && ob_end_clean();
+        if (function_exists('ob_gzhandler')) { //whether start gzip
             ob_start('ob_gzhandler');
         } else {
             ob_start();
@@ -402,7 +402,6 @@ class App
         $content = str_replace([chr(0), ']]>'], [' ', ']]&gt;'], $content);
         if (!$echo) {
             return $content;
-
         }
         echo $content;
     }
@@ -410,30 +409,32 @@ class App
     /**
      * @param $res
      * @param string $type
-     * @return bool
      */
     public static function response($res, $type = 'json')
     {
-        self::output_start();
+        self::output_nocache();
         if ('html' == $type) {
             header("Content-type: text/html; charset=UTF-8");
         } elseif ('json' == $type) {
             header('Content-type: text/json; charset=UTF-8');
-            $res = self::output_json($res);
+            if (is_array($res)) {
+                $res = self::output_json($res);
+            }
         } elseif ('xml' == $type) {
             header("Content-type: text/xml");
             $res = '<?xml version="1.0" encoding="utf-8"?' . '>' . "\r\n" . '<root><![CDATA[' . $res;
         } elseif ('text' == $type) {
             header("Content-type: text/plain");
+            if (is_array($res)) {
+                $res = self::output_json($res);
+            }
         } else {
             header("Content-type: text/html; charset=UTF-8");
         }
         echo $res;
-        self::output_end(true);
         if ('xml' == $type) {
             echo ']]></root>';
         }
-        return true;
     }
 
     /**
