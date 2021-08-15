@@ -196,7 +196,7 @@ class PdoDb extends BaseObject
     public function remove($tableName, $condition, $args = null, $multi = false)
     {
         if (is_array($condition)) {
-            list($condition, $args) = $this->field_param($condition, ',');
+            list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $limit = $multi ? '' : ' LIMIT 1';
         $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
