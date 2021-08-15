@@ -21,7 +21,8 @@ class Controller
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
-        $this->init_var();
+        $this->env();
+        $this->init();
     }
 
     /**
@@ -43,10 +44,15 @@ class Controller
         template('404', ['args' => $args]);
     }
 
+    protected function init()
+    {
+
+    }
+
     /**
      * 初始变量
      */
-    private function init_var()
+    private function env()
     {
         $this->timestamp = getgpc('s.REQUEST_TIME') ?: time();
         if (filter_input(INPUT_GET, 'page')) {

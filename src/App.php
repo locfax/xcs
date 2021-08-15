@@ -435,6 +435,7 @@ class App
         if ('xml' == $type) {
             echo ']]></root>';
         }
+        return true;
     }
 
     /**

@@ -4,16 +4,8 @@ namespace Xcs;
 
 class RestFul extends Controller
 {
-    // 当前请求类型
-    private $method;
     // REST允许的请求类型列表
-    private $allow_method = ['get', 'post', 'put', 'delete'];
-
-    public function __construct($controllerName, $actionName)
-    {
-        parent::__construct($controllerName, $actionName);
-        $this->method = strtolower(getgpc('s.REQUEST_METHOD'));
-    }
+    protected $allow_method = ['get', 'post', 'put', 'delete'];
 
     /**
      * @param $name
@@ -24,10 +16,10 @@ class RestFul extends Controller
     {
         //动作不存在
         $res = [
-            'errcode' => 1,
-            'errmsg' => 'Action ' . $name . '不存在!',
+            'code' => 1,
+            'msg' => 'Action ' . $name . '不存在!',
         ];
-        App::response($res);
+        $this->response($res);
     }
 
     /**
@@ -115,8 +107,9 @@ class RestFul extends Controller
 
     protected function request()
     {
-        if (in_array($this->method, $this->allow_method)) {
-            call_user_func([$this, $this->_act . '_' . $this->method]);
+        $method = strtolower(getgpc('s.REQUEST_METHOD'));
+        if (in_array($method, $this->allow_method)) {
+            call_user_func([$this, $this->_act . '_' . $method]);
         }
     }
 }
