@@ -224,25 +224,49 @@ class App
      */
     private static function _router($uri)
     {
+        if (strpos($uri, 'index.php') !== false) {
+            $uri = substr($uri, strpos($uri, 'index.php') + 10);
+        }
         if (!$uri) {
             return;
         }
-        if (strpos($uri, 'index.php') != false) {
-            $uri = substr($uri, strpos($uri, 'index.php') + 10);
-        }
+
         if (!self::$routes) {
             self::$routes = include(APP_ROOT . '/route/' . APP_KEY . '.php');
         }
+
+        $match = false;
         foreach (self::$routes as $key => $val) {
-            $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
-            if (preg_match('#^' . $key . '$#', $uri, $matches)) {
-                if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
-                    $val = preg_replace('#^' . $key . '$#', $val, $uri);
+            if (is_array($val)) {
+                foreach ($val as $k => $v) {
+                    $uri = str_replace($key . '/', '', $uri);
+                    $k = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $k);
+                    if (preg_match('#^' . $k . '$#', $uri, $matches)) {
+                        if (strpos($v, '$') !== false && strpos($k, '(') !== false) {
+                            $v = preg_replace('#^' . $k . '$#', $v, $uri);
+                        }
+                        $req = explode('/', $v);
+                        self::_setRequest($req);
+                        $match = true;
+                        break;
+                    }
                 }
-                $req = explode('/', $val);
-                self::_setRequest($req);
-                break;
+            } else {
+                $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
+                if (preg_match('#^' . $key . '$#', $uri, $matches)) {
+                    if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                        $val = preg_replace('#^' . $key . '$#', $val, $uri);
+                    }
+                    $req = explode('/', $val);
+                    self::_setRequest($req);
+                    $match = true;
+                    break;
+                }
             }
+        }
+        if (!$match) {
+            $req = explode('/', $uri);
+            self::_setRequest($req);
         }
     }
 
@@ -254,7 +278,7 @@ class App
         $_GET[self::$_dCTL] = array_shift($req);
         $_GET[self::$_dACT] = array_shift($req);
         $paramNum = count($req);
-        if (!$paramNum) {
+        if (!$paramNum || $paramNum % 2 !== 0) {
             return;
         }
         for ($i = 0; $i < $paramNum; $i++) {

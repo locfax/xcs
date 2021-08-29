@@ -548,7 +548,7 @@ class PdoDb extends BaseObject
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new DbException($message . ' SQL: ' . $sql, intval($code), 'PdoException');
+            throw new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
         }
         return false;
     }
