@@ -336,77 +336,6 @@ function char_output($text)
 }
 
 /**
- * @param $uTimeOffset
- * @return array
- */
-function locTime($uTimeOffset)
-{
-    static $dtFormat = null, $timeOffset = 8;
-    if (is_null($dtFormat)) {
-        $dtFormat = [
-            'd' => getini('settings/dateformat') ?: 'Y-m-d',
-            't' => getini('settings/timeformat') ?: 'H:i:s'
-        ];
-        $dtFormat['dt'] = $dtFormat['d'] . ' ' . $dtFormat['t'];
-        $timeOffset = getini('settings/timezone') ?: $timeOffset; //default is Asia/Shanghai
-    }
-    $offset = $uTimeOffset == 999 ? $timeOffset : $uTimeOffset;
-    return [$offset, $dtFormat];
-}
-
-/**
- * @param $timestamp
- * @param string $format
- * @param int $uTimeOffset
- * @param string $uFormat
- * @return string
- */
-function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
-{
-    if (!$timestamp) {
-        return '';
-    }
-    $locTime = locTime($uTimeOffset);
-    $offset = $locTime[0];
-    $dtFormat = $locTime[1];
-    $timestamp += $offset * 3600;
-    if ('u' == $format) {
-        $nowTime = time() + $offset * 3600;
-        $todayTimestamp = $nowTime - $nowTime % 86400;
-        $format = !$uFormat ? $dtFormat['dt'] : $uFormat;
-        $s = gmdate($format, $timestamp);
-        $time = $nowTime - $timestamp;
-        if ($timestamp >= $todayTimestamp) {
-            if ($time > 3600) {
-                return '<span title="' . $s . '">' . intval($time / 3600) . '&nbsp;小时前</span>';
-            } elseif ($time > 1800) {
-                return '<span title="' . $s . '">半小时前</span>';
-            } elseif ($time > 60) {
-                return '<span title="' . $s . '">' . intval($time / 60) . '&nbsp;分钟前</span>';
-            } elseif ($time > 0) {
-                return '<span title="' . $s . '">' . $time . '&nbsp;秒前</span>';
-            } elseif (0 == $time) {
-                return '<span title="' . $s . '">刚才</span>';
-            }
-            return $s;
-        } elseif (($days = intval(($todayTimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
-            if (0 == $days) {
-                return '<span title="' . $s . '">昨天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
-            } elseif (1 == $days) {
-                return '<span title="' . $s . '">前天&nbsp;' . gmdate('H:i', $timestamp) . '</span>';
-            } else {
-                return '<span title="' . $s . '">' . ($days + 1) . '&nbsp;天前</span>';
-            }
-        } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowTime)) {
-            return '<span title="' . $s . '">' . gmdate('m-d H:i', $timestamp) . '</span>';
-        }
-        return $s;
-    }
-    $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
-    return gmdate($format, $timestamp);
-}
-
-/**
  * @param $str
  * @param $needle
  * @return bool
@@ -417,21 +346,99 @@ function dstrpos($str, $needle)
 }
 
 /**
+ * @param $uTimeOffset
+ * @return array
+ */
+if (!function_exists('locTime')) {
+    function locTime($uTimeOffset)
+    {
+        static $dtFormat = null, $timeOffset = 8;
+        if (is_null($dtFormat)) {
+            $dtFormat = [
+                'd' => getini('settings/dateformat') ?: 'Y-m-d',
+                't' => getini('settings/timeformat') ?: 'H:i:s'
+            ];
+            $dtFormat['dt'] = $dtFormat['d'] . ' ' . $dtFormat['t'];
+            $timeOffset = getini('settings/timezone') ?: $timeOffset; //default is Asia/Shanghai
+        }
+        $offset = $uTimeOffset == 999 ? $timeOffset : $uTimeOffset;
+        return [$offset, $dtFormat];
+    }
+}
+
+/**
+ * @param $timestamp
+ * @param string $format
+ * @param int $uTimeOffset
+ * @param string $uFormat
+ * @return string
+ */
+
+if (!function_exists('dgmdate')) {
+    function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
+    {
+        if (!$timestamp) {
+            return '';
+        }
+        $locTime = locTime($uTimeOffset);
+        $offset = $locTime[0];
+        $dtFormat = $locTime[1];
+        $timestamp += $offset * 3600;
+        if ('u' == $format) {
+            $nowTime = time() + $offset * 3600;
+            $todayTimestamp = $nowTime - $nowTime % 86400;
+            $format = !$uFormat ? $dtFormat['dt'] : $uFormat;
+            $s = gmdate($format, $timestamp);
+            $time = $nowTime - $timestamp;
+            if ($timestamp >= $todayTimestamp) {
+                if ($time > 3600) {
+                    return intval($time / 3600) . ' 小时前';
+                } elseif ($time > 1800) {
+                    return '半小时前';
+                } elseif ($time > 60) {
+                    return intval($time / 60) . ' 分钟前';
+                } elseif ($time > 0) {
+                    return $time . ' 秒前';
+                } elseif (0 == $time) {
+                    return '刚才';
+                }
+                return $s;
+            } elseif (($days = intval(($todayTimestamp - $timestamp) / 86400)) >= 0 && $days < 7) {
+                if (0 == $days) {
+                    return '昨天 ' . gmdate('H:i', $timestamp);
+                } elseif (1 == $days) {
+                    return '前天 ' . gmdate('H:i', $timestamp);
+                } else {
+                    return ($days + 1) . ' 天前';
+                }
+            } elseif (gmdate('Y', $timestamp) == gmdate('Y', $nowTime)) {
+                return gmdate('m-d H:i', $timestamp);
+            }
+            return $s;
+        }
+        $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
+        return gmdate($format, $timestamp);
+    }
+}
+
+/**
  * @return null
  */
-function clientIp()
-{
-    $onlineIp = '';
-    if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
-        $onlineIp = getenv('HTTP_CLIENT_IP');
-    } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
-        $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
-    } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
-        $onlineIp = getenv('REMOTE_ADDR');
-    } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
-        $onlineIp = $_SERVER['REMOTE_ADDR'];
+if (!function_exists('clientIp')) {
+    function clientIp()
+    {
+        $onlineIp = '';
+        if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
+            $onlineIp = getenv('HTTP_CLIENT_IP');
+        } elseif (getenv('HTTP_X_FORWARDED_FOR') && strcasecmp(getenv('HTTP_X_FORWARDED_FOR'), 'unknown')) {
+            $onlineIp = getenv('HTTP_X_FORWARDED_FOR');
+        } elseif (getenv('REMOTE_ADDR') && strcasecmp(getenv('REMOTE_ADDR'), 'unknown')) {
+            $onlineIp = getenv('REMOTE_ADDR');
+        } elseif (isset($_SERVER['REMOTE_ADDR']) && $_SERVER['REMOTE_ADDR'] && strcasecmp($_SERVER['REMOTE_ADDR'], 'unknown')) {
+            $onlineIp = $_SERVER['REMOTE_ADDR'];
+        }
+        return $onlineIp;
     }
-    return $onlineIp;
 }
 
 /**
