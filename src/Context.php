@@ -27,7 +27,7 @@ class Context
      * @param $type
      * @return bool|mixed
      */
-    public static function config($name, $type = 'inc')
+    public static function config($name, $var = null, $type = 'inc')
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;
@@ -40,7 +40,11 @@ class Context
             return [];
         }
         $CacheConfig[$key] = include $file;
-        return $CacheConfig[$key];
+
+        if (is_null($var)) {
+            return $CacheConfig[$key];
+        }
+        return $CacheConfig[$key][$var];
     }
 
 }

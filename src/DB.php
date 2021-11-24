@@ -162,10 +162,10 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function findOne($table, $field, $condition, array $args = null, $retObj = false)
+    public static function findOne($table, $field, $condition, array $args = null, $orderBy = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findOne($table, $field, $condition, $args, $retObj);
+        return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
     }
 
     /**
@@ -179,10 +179,10 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function findAll($table, $field = '*', $condition = '', array $args = null, $index = null, $retObj = false)
+    public static function findAll($table, $field = '*', $condition = '', array $args = null, $orderBy = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->findAll($table, $field, $condition, $args, $index, $retObj);
+        return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
     }
 
     /**
@@ -197,7 +197,7 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function page($table, $field, $condition = '', array $args = null, $pageParam = 0, $limit = 18, $retObj = false)
+    public static function page($table, $field, $condition = '', array $args = null, $orderBy = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -205,7 +205,7 @@ class DB
         } else {
             $offset = $pageParam;
         }
-        $data = $db->page($table, $field, $condition, $args, $offset, $limit, $retObj);
+        $data = $db->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $retObj);
         if (is_array($pageParam)) {
             return ['data' => $data, 'bar' => $data ? self::pageBar($pageParam, $limit) : ''];
         }
@@ -223,10 +223,10 @@ class DB
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public static function first($table, $field, $condition, array $args = null)
+    public static function first($table, $field, $condition, array $args = null, $orderBy = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->first($table, $field, $condition, $args);
+        return $db->first($table, $field, $condition, $args, $orderBy);
     }
 
     /**
@@ -237,10 +237,10 @@ class DB
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public static function col($table, $field, $condition = '', array $args = null)
+    public static function col($table, $field, $condition = '', array $args = null, $orderBy = null)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->col($table, $field, $condition, $args);
+        return $db->col($table, $field, $condition, $args, $orderBy);
     }
 
     /**
@@ -462,6 +462,7 @@ class DB
     }
 
     /**
+     * mysql 专用
      * @param $arr
      * @return string
      */

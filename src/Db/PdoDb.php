@@ -211,12 +211,13 @@ class PdoDb extends BaseObject
      * @param bool $retObj
      * @return bool|mixed
      */
-    public function findOne($tableName, $field, $condition, $args = null, $retObj = false)
+    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . ' LIMIT 1';
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -229,12 +230,13 @@ class PdoDb extends BaseObject
      * @param bool $retObj
      * @return array|bool|mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $args = null, $index = null, $retObj = false)
+    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
@@ -249,12 +251,13 @@ class PdoDb extends BaseObject
      * @param bool $retObj
      * @return bool|mixed|null
      */
-    public function page($tableName, $field, $condition, $args = null, $offset = 0, $limit = 18, $retObj = false)
+    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
@@ -266,13 +269,13 @@ class PdoDb extends BaseObject
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public function first($tableName, $field, $condition, $args = null)
+    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition} LIMIT 1";
-
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy} LIMIT 1";
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -296,14 +299,13 @@ class PdoDb extends BaseObject
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public function col($tableName, $field, $condition, $args = null)
+    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
     {
-
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}";
-
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -544,11 +546,11 @@ class PdoDb extends BaseObject
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->dsn['rundev']) {
+        if ($this->dsn['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            throw new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
+            new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
         }
         return false;
     }

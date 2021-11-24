@@ -4,8 +4,6 @@ namespace Xcs;
 
 class RestFul extends Controller
 {
-    // REST允许的请求类型列表
-    protected $allow_method = ['get', 'post', 'put', 'delete'];
 
     /**
      * @param $name
@@ -17,7 +15,7 @@ class RestFul extends Controller
         //动作不存在
         $res = [
             'code' => 1,
-            'msg' => 'Action ' . $name . '不存在!',
+            'msg' => 'Action ' . $name . '不存在!!',
         ];
         $this->response($res);
     }
@@ -97,19 +95,14 @@ class RestFul extends Controller
      * @param mixed $data 要返回的数据
      * @param String $type 返回类型 JSON XML
      * @param integer $code HTTP状态
-     * @return void
+     * @return bool
      */
     protected function response($data, $code = 200, $type = "json")
     {
-        $this->status($code);
-        App::response($data, $type);
+        if ($code != 200) {
+            $this->status($code);
+        }
+        return App::response($data, $type);
     }
 
-    protected function request()
-    {
-        $method = strtolower(getgpc('s.REQUEST_METHOD'));
-        if (in_array($method, $this->allow_method)) {
-            call_user_func([$this, $this->_act . '_' . $method]);
-        }
-    }
 }
