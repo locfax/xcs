@@ -24,7 +24,7 @@ define('LIB_PATH', APP_PATH . 'Library/'); //module路径
 define('DATA_CACHE', DATA_PATH . 'cache/'); //缓存路径
 define('DATA_VIEW', DATA_PATH . 'tplcache/'); //模板解析路径
 define('DATA_LANG', APP_ROOT . '/themes/lang/'); //语言包
-define('DATA_TPLDIR', APP_ROOT . '/themes/view/' . APP_KEY . '/'); //模板路径
+define('DATA_TPLDIR', APP_ROOT . '/themes/' . APP_KEY . '/'); //模板路径
 
 define('FILE_READ_MODE', 0644);
 define('FILE_WRITE_MODE', 0755);
