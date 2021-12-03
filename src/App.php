@@ -121,8 +121,8 @@ class App
         if (defined('ROUTE') && ROUTE) {
             self::_router($uri);
         }
-        $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'), 'strtolower');
-        $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'), 'strtolower');
+        $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
+        $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
         $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $controllerName);
         $actionName = preg_replace('/[^a-z0-9_]+/i', '', $actionName);
 
