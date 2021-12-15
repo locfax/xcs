@@ -146,7 +146,7 @@ class DB
      * @param mixed $multi bool true 删除多条 返回影响数 false: 只能删除一条
      * @return bool|int
      */
-    public static function remove($table, $condition, array $args = null, $multi = false)
+    public static function remove($table, $condition, $multi = false, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->remove($table, $condition, $args, $multi);
@@ -162,7 +162,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function findOne($table, $field, $condition, array $args = null, $orderBy = null, $retObj = false)
+    public static function findOne($table, $field, $condition, $orderBy = null, array $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
@@ -179,7 +179,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function findAll($table, $field = '*', $condition = '', array $args = null, $orderBy = null, $index = null, $retObj = false)
+    public static function findAll($table, $field = '*', $condition = '', $orderBy = null, array $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
@@ -197,7 +197,7 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function page($table, $field, $condition = '', array $args = null, $orderBy = null, $pageParam = 0, $limit = 18, $retObj = false)
+    public static function page($table, $field, $condition = '', $orderBy = null, array $args = null, $pageParam = 0, $limit = 20, $retObj = true)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -223,7 +223,7 @@ class DB
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public static function first($table, $field, $condition, array $args = null, $orderBy = null)
+    public static function first($table, $field, $condition, $orderBy = null, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first($table, $field, $condition, $args, $orderBy);
@@ -237,7 +237,7 @@ class DB
      * @param array $args [':var' => $var]
      * @return mixed
      */
-    public static function col($table, $field, $condition = '', array $args = null, $orderBy = null)
+    public static function col($table, $field, $condition = '', $orderBy = null, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->col($table, $field, $condition, $args, $orderBy);
@@ -309,7 +309,7 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function pageSql($sql, array $args = null, $pageParam = 0, $limit = 18, $retObj = false)
+    public static function pageSql($sql, array $args = null, $pageParam = 0, $limit = 18, $retObj = true)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {

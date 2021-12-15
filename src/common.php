@@ -6,7 +6,7 @@
  * @param string $runFunc
  * @return mixed
  */
-function getgpc($variable, $defVal = null, $runFunc = '')
+function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
 {
     if (1 == strpos($variable, '.')) {
         $tmp = strtoupper(substr($variable, 0, 1));
@@ -64,9 +64,11 @@ function getgpc($variable, $defVal = null, $runFunc = '')
     }
     if (in_array($type, ['GET', 'POST', 'COOKIE'])) {
         if (is_array($value)) {
-            array_walk_recursive($value, 'gpc_value', $runFunc);
+            foreach ($value as &$val) {
+                gpc_value($val, $runFunc, $addslashes);
+            }
         } else {
-            gpc_value($value, 0, $runFunc);
+            gpc_value($value, $runFunc, $addslashes);
         }
         return $value;
     } elseif ('SERVER' == $type) {
@@ -79,11 +81,11 @@ function getgpc($variable, $defVal = null, $runFunc = '')
 /**
  * private
  * @param $value
- * @param $key
  * @param $runFunc
+ * @param bool $addslashes
  * @return array|bool|int|mixed|string|void
  */
-function gpc_value(&$value, $key, $runFunc)
+function gpc_value(&$value, $runFunc, $addslashes)
 {
     if (empty($value)) {
         return;
@@ -91,7 +93,9 @@ function gpc_value(&$value, $key, $runFunc)
 
     if ($runFunc && strpos($runFunc, '|')) {
         $funds = explode('|', $runFunc);
-        array_push($funds, 'addslashes');
+        if ($addslashes) {
+            array_push($funds, 'addslashes');
+        }
         foreach ($funds as $run) {
             if ('xss' == $run) {
                 $value = is_numeric($value) ? $value : Xcs\Helper\Xss::getInstance()->clean($value);
@@ -110,7 +114,9 @@ function gpc_value(&$value, $key, $runFunc)
         $value = call_user_func($runFunc, $value);
     }
 
-    $value = is_numeric($value) ? $value : addslashes($value);
+    if ($addslashes) {
+        $value = is_numeric($value) ? $value : addslashes($value);
+    }
 }
 
 /**
