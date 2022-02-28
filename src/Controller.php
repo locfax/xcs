@@ -54,7 +54,7 @@ class Controller
      */
     private function env()
     {
-        $this->timestamp = getgpc('s.REQUEST_TIME') ?: time();
+        $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
         if (filter_input(INPUT_GET, 'page')) {
             $_GET['page'] = max(1, intval(filter_input(INPUT_GET, 'page')));
         }

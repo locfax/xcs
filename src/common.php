@@ -8,18 +8,23 @@
  */
 function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
 {
-    if (1 == strpos($variable, '.')) {
-        $tmp = strtoupper(substr($variable, 0, 1));
-        $var = substr($variable, 2);
+    $arr = explode('.', $variable);
+    if (count($arr) == 2) {
+        $tmp = strtoupper($arr[0]);
+        $var = $arr[1];
     } else {
         $tmp = false;
         $var = $variable;
     }
+
     $value = '';
     if ($tmp) {
         switch ($tmp) {
             case 'G':
                 $type = 'GET';
+                if ($var == '*') {
+                    return $_GET;
+                }
                 if (!isset($_GET[$var])) {
                     return $defVal;
                 }
@@ -27,20 +32,13 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
                 break;
             case 'P':
                 $type = 'POST';
+                if ($var == '*') {
+                    return $_POST;
+                }
                 if (!isset($_POST[$var])) {
                     return $defVal;
                 }
                 $value = $_POST[$var];
-                break;
-            case 'C':
-                $type = 'COOKIE';
-                if (!isset($_COOKIE[$var])) {
-                    return $defVal;
-                }
-                $value = $_COOKIE[$var];
-                break;
-            case 'S' :
-                $type = 'SERVER';
                 break;
             default:
                 return $defVal;
@@ -62,7 +60,8 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
             return $defVal;
         }
     }
-    if (in_array($type, ['GET', 'POST', 'COOKIE'])) {
+
+    if (in_array($type, ['GET', 'POST'])) {
         if (is_array($value)) {
             foreach ($value as &$val) {
                 gpc_value($val, $runFunc, $addslashes);
@@ -71,8 +70,6 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
             gpc_value($value, $runFunc, $addslashes);
         }
         return $value;
-    } elseif ('SERVER' == $type) {
-        return isset($_SERVER[$var]) ? $_SERVER[$var] : $defVal;
     } else {
         return $defVal;
     }

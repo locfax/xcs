@@ -101,7 +101,8 @@ class App
         if (!is_file($runFile)) {
             file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
             touch($runFile) && chmod($runFile, FILE_READ_MODE); //读写空文件
-        } elseif (!is_writable($runFile)) {
+        }
+        if (!is_writable($runFile)) {
             chmod($runFile, FILE_READ_MODE); //读写
         }
         if (file_put_contents($runFile, '<?php ' . $content, LOCK_EX)) {
@@ -183,8 +184,7 @@ class App
             ];
             return self::response($res, 'json');
         }
-        $args = 'error:' . $args;
-        template('404', ['args' => $args]);
+        echo 'error:' . $args;
     }
 
     /**
@@ -200,8 +200,7 @@ class App
             ];
             return self::response($res, 'json');
         }
-        $args = 'error！' . $args;
-        template('403', ['args' => $args]);
+        echo 'error！' . $args;
     }
 
     /**
@@ -468,7 +467,7 @@ class App
      */
     public static function isGet($retBool = true)
     {
-        if ('GET' == getgpc('s.REQUEST_METHOD')) {
+        if ('GET' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
         }
         return !$retBool;
@@ -480,7 +479,7 @@ class App
      */
     public static function isPost($retBool = true)
     {
-        if ('POST' == getgpc('s.REQUEST_METHOD')) {
+        if ('POST' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
         }
         return !$retBool;
@@ -492,7 +491,7 @@ class App
      */
     public static function isAjax($retBool = true)
     {
-        if ('XMLHttpRequest' == getgpc('s.HTTP_X_REQUESTED_WITH')) {
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']) {
             return $retBool;
         }
         return !$retBool;

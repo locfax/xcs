@@ -21,6 +21,17 @@ class StringHelper
         return $reqId;
     }
 
+    public static function randomNum($length = 6)
+    {
+        $reqId = '';
+        $characters = ["1", "2", "3", "4", "5", "6", "7", "8", "9"];
+        shuffle($characters);
+        for (; strlen($reqId) < $length;) {
+            $reqId .= $characters[rand(0, count($characters) - 1)];
+        }
+        return $reqId;
+    }
+
     /**
      * cut string to set length
      * return string

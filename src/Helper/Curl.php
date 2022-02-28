@@ -39,8 +39,17 @@ class Curl
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         /* 请求地址 */
         curl_setopt($ch, CURLOPT_URL, $url);
-        /* HTTP Basic Authentication */
-        //curl_setopt($ch,CURLOPT_USERPWD,"username:password");
+
+        if (isset($httpHead['proxy'])) {
+            curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
+            curl_setopt($ch, CURLOPT_PROXY, $httpHead['proxy']);
+            unset($httpHead['proxy']);
+        }
+
+        if (isset($httpHead['interface'])) {
+            curl_setopt($ch, CURLOPT_INTERFACE, $httpHead['interface']);
+            unset($httpHead['interface']);
+        }
 
         $reqHead = $httpHead;
 

@@ -236,8 +236,8 @@ class PdoDb extends BaseObject
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
 
@@ -257,8 +257,8 @@ class PdoDb extends BaseObject
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
 
