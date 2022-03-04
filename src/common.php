@@ -358,8 +358,8 @@ if (!function_exists('locTime')) {
         static $dtFormat = null, $timeOffset = 8;
         if (is_null($dtFormat)) {
             $dtFormat = [
-                'd' => getini('settings/dateformat') ?: 'Y-m-d',
-                't' => getini('settings/timeformat') ?: 'H:i:s'
+                'd' => getini('settings/dateFormat') ?: 'Y-m-d',
+                't' => getini('settings/timeFormat') ?: 'H:i:s'
             ];
             $dtFormat['dt'] = $dtFormat['d'] . ' ' . $dtFormat['t'];
             $timeOffset = getini('settings/timezone') ?: $timeOffset; //default is Asia/Shanghai
