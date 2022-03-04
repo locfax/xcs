@@ -209,6 +209,7 @@ class PdoDb extends BaseObject
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param null $orderBy
      * @param bool $retObj
      * @return bool|mixed
      */
@@ -227,6 +228,7 @@ class PdoDb extends BaseObject
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param null $orderBy
      * @param null $index
      * @param bool $retObj
      * @return array|bool|mixed
@@ -247,6 +249,7 @@ class PdoDb extends BaseObject
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param null $orderBy
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
@@ -268,6 +271,7 @@ class PdoDb extends BaseObject
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param null $orderBy
      * @return mixed
      */
     public function first($tableName, $field, $condition, $args = null, $orderBy = null)
@@ -298,6 +302,7 @@ class PdoDb extends BaseObject
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param null $orderBy
      * @return mixed
      */
     public function col($tableName, $field, $condition, $args = null, $orderBy = null)

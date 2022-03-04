@@ -158,6 +158,7 @@ class DB
      * @param string $table
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param null $orderBy
      * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
@@ -174,6 +175,7 @@ class DB
      * @param string $table
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param null $orderBy
      * @param array $args [':var' => $var]
      * @param string $index
      * @param bool $retObj
@@ -191,13 +193,14 @@ class DB
      * @param string $table
      * @param $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param null $orderBy
      * @param array $args [':var' => $var]
      * @param array|int $pageParam
      * @param int $limit
      * @param bool $retObj
      * @return array
      */
-    public static function page($table, $field, $condition = '', $orderBy = null, array $args = null, $pageParam = 0, $limit = 20, $retObj = true)
+    public static function page($table, $field, $condition = '', $orderBy = null, array $args = null, $pageParam = 0, $limit = 20, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -220,6 +223,7 @@ class DB
      * @param string $table
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param null $orderBy
      * @param array $args [':var' => $var]
      * @return mixed
      */
@@ -234,6 +238,7 @@ class DB
      * @param $table
      * @param $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param null $orderBy
      * @param array $args [':var' => $var]
      * @return mixed
      */
@@ -309,7 +314,7 @@ class DB
      * @param bool $retObj
      * @return array
      */
-    public static function pageSql($sql, array $args = null, $pageParam = 0, $limit = 18, $retObj = true)
+    public static function pageSql($sql, array $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
