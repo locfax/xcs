@@ -432,6 +432,7 @@ class App
     /**
      * @param $res
      * @param string $type
+     * @return bool
      */
     public static function response($res, $type = 'json')
     {

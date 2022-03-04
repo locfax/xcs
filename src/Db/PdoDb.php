@@ -2,6 +2,7 @@
 
 namespace Xcs\Db;
 
+use Xcs\App;
 use Xcs\Di\BaseObject;
 use Xcs\Ex\DbException;
 
@@ -550,7 +551,15 @@ class PdoDb extends BaseObject
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
+            if (App::isAjax(true)) {
+                $res = [
+                    'code' => -1,
+                    'msg' => 'error:' . $message . ' SQL:' . $sql,
+                ];
+                echo json_encode($res, JSON_UNESCAPED_UNICODE);
+            } else {
+                new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
+            }
         }
         return false;
     }

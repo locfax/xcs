@@ -468,6 +468,6 @@ class DB
      */
     public static function implode($arr)
     {
-        return "'" . implode("','", (array)$arr) . "'";
+        return implode(',', (array)$arr);
     }
 }
