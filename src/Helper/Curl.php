@@ -15,7 +15,7 @@ class Curl
      * @param bool $retSession
      * @return array
      */
-    public static function send($url, $data = '', $httpHead = [], $retGzip = false, $retCharset = 'UTF-8', $retHead = false, $retSession = false)
+    public static function send($url, $data = '', $httpHead = [], $retGzip = 'gzip', $retCharset = 'UTF-8', $retHead = false, $retSession = false)
     {
         $ch = curl_init();
         if (!$ch) {
@@ -40,13 +40,13 @@ class Curl
         /* 请求地址 */
         curl_setopt($ch, CURLOPT_URL, $url);
 
-        if (isset($httpHead['proxy'])) {
+        if (isset($httpHead['proxy']) && $httpHead['proxy']) {
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
             curl_setopt($ch, CURLOPT_PROXY, $httpHead['proxy']);
             unset($httpHead['proxy']);
         }
 
-        if (isset($httpHead['interface'])) {
+        if (isset($httpHead['interface']) && $httpHead['interface']) {
             curl_setopt($ch, CURLOPT_INTERFACE, $httpHead['interface']);
             unset($httpHead['interface']);
         }

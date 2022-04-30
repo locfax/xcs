@@ -467,12 +467,20 @@ class DB
     }
 
     /**
-     * mysql 专用
+     * @param $arr
+     * @return string
+     */
+    public static function ids($arr)
+    {
+        return implode(',', (array)$arr);
+    }
+
+    /**
      * @param $arr
      * @return string
      */
     public static function implode($arr)
     {
-        return implode(',', (array)$arr);
+        return "'" . implode("','", (array)$arr) . "'";
     }
 }
