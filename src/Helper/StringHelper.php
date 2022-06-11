@@ -32,6 +32,17 @@ class StringHelper
         return $reqId;
     }
 
+    public static function randomStr($length = 4)
+    {
+        $reqId = '';
+        $characters = ["A", "B", "C", "D", "E", "F", "G", "H", "J", "K", "L", "M", "N", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"];
+        shuffle($characters);
+        for (; strlen($reqId) < $length;) {
+            $reqId .= $characters[rand(0, count($characters) - 1)];
+        }
+        return $reqId;
+    }
+
     /**
      * cut string to set length
      * return string
