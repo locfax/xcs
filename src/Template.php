@@ -47,6 +47,7 @@ class Template
 
         $template = str_replace("{LF}", PHP_EOL, $template);
 
+        $template = preg_replace_callback("/\{\\\$([a-zA-Z0-9_\.\x7f-\xff]+)\}/s", [$this, 'add_quote_exp'], $template);
         $template = preg_replace("/\{(\\\$[a-zA-Z0-9_\-\>\[\]\'\"\$\.\x7f-\xff]+)\}/s", "<?=\\1?>", $template);
         $template = preg_replace_callback("/$var_regexp/s", [$this, 'add_quote'], $template);
         $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [$this, 'add_quote'], $template);
@@ -262,6 +263,14 @@ class Template
     {
         $var = '<?=' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([a-zA-Z0-9_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
+    }
+
+    private function add_quote_exp($var)
+    {
+        $vars = explode('.', $var[1]);
+        $var = array_shift($vars);
+        $return = "{\${$var}['{$vars[0]}']}";
+        return $this->strip_tags($return);
     }
 
     private function strip_tags($expr, $statement = '')
