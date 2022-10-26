@@ -34,7 +34,6 @@ class App
         }
 
         self::runFile($refresh);
-        self::_rootNamespace('\\', APP_PATH);
         self::_dispatching($uri);
     }
 
@@ -43,6 +42,8 @@ class App
      */
     public static function runFile($refresh = false)
     {
+        self::_rootNamespace('\\', APP_PATH);
+        
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
 
