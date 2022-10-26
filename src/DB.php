@@ -12,7 +12,7 @@ class DB
     private static $using_dbo_id = null;
     private static $used_dbo = [];
     private static $dbm_time_out = 0;
-    private static $mgo_time_out = 0
+    private static $mgo_time_out = 0;
 
     /**
      * 返回 PDO 对象
@@ -25,7 +25,7 @@ class DB
     public static function dbm($dsnId = 'default')
     {
         $dsn = Context::dsn($dsnId);
-        if (isset(self::$used_dbo[$dsnId] && self::$dbm_time_out > time())) {
+        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time())) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -58,7 +58,7 @@ class DB
             return null;
         }
 
-        self::$mgo_time_out = time() + 60
+        self::$mgo_time_out = time() + 60;
         $object = new MongoDb(['dsn' => $dsn]);
         self::$used_dbo[$dsnId] = $object;
         return $object;
