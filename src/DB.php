@@ -25,7 +25,7 @@ class DB
     public static function dbm($dsnId = 'default')
     {
         $dsn = Context::dsn($dsnId);
-        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time())) {
+        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
