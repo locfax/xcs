@@ -36,18 +36,13 @@ class MongoDb extends BaseObject
      */
     private $_dbname;
 
-    public function __destruct()
-    {
-        $this->close();
-    }
-
     /**
      * MongoDb constructor.
      * @param array|null $config
      */
-    public function __construct(array $config = null)
+    public function __construct(array $config)
     {
-        $this->dsn = $config['dsn'];
+        $this->dsn = $config;
 
         if (empty($this->dsn)) {
             new DbException('dsn is empty', 404, 'PdoException');
@@ -68,9 +63,9 @@ class MongoDb extends BaseObject
 
     }
 
-    public function info()
+    public function __destruct()
     {
-        return $this->dsn;
+        $this->close();
     }
 
     public function close()
@@ -86,6 +81,11 @@ class MongoDb extends BaseObject
     public function __call($func, $args)
     {
 
+    }
+
+    public function info()
+    {
+        return $this->dsn;
     }
 
     /**

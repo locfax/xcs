@@ -2,56 +2,20 @@
 
 namespace Xcs\Db;
 
-use Xcs\App;
-use Xcs\Di\BaseObject;
 use Xcs\Ex\DbException;
 
-class PdoDb extends BaseObject
+class PdoPool
 {
 
-    private $dsn;
     private $_link = null;
-    private $repeat = false;
 
     /**
      * PdoDb constructor.
      * @param array|null $config
      */
-    public function __construct(array $config)
+    public function __construct($pdo)
     {
-        $this->dsn = $config;
-
-        if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoException');
-            return;
-        }
-
-        $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
-        if (isset($this->dsn['options'])) {
-            $options = array_merge($options, $this->dsn['options']);
-        }
-
-        try {
-            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
-        } catch (\PDOException $exception) {
-            if (!$this->repeat) {
-                $this->repeat = true;
-                $this->__construct($config);
-            } else {
-                $this->close();
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
-            }
-        }
-    }
-
-    public function __destruct()
-    {
-        $this->close();
-    }
-
-    public function close()
-    {
-        $this->_link = null;
+        $this->_link = $pdo;
     }
 
     /**
@@ -62,14 +26,6 @@ class PdoDb extends BaseObject
     public function __call($func, $args)
     {
         return $this->_link && call_user_func_array([$this->_link, $func], $args);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function info()
-    {
-        return $this->dsn;
     }
 
     /**
@@ -555,20 +511,9 @@ class PdoDb extends BaseObject
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->dsn['dev']) {
-            $this->close();
-            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
-            $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            if (App::isAjax(true)) {
-                $res = [
-                    'code' => -1,
-                    'msg' => 'error:' . $message . ' SQL:' . $sql,
-                ];
-                echo json_encode($res, JSON_UNESCAPED_UNICODE);
-            } else {
-                new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
-            }
-        }
+        $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
+        $message = mb_convert_encoding($message, 'UTF-8', $encode);
+        echo 'error:' . $message . ' SQL:' . $sql . PHP_EOL;
         return false;
     }
 

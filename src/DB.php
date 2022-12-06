@@ -4,6 +4,7 @@ namespace Xcs;
 
 use Xcs\Db\MongoDb;
 use Xcs\Db\PdoDb;
+use Xcs\Db\PdoPool;
 
 class DB
 {
@@ -24,18 +25,19 @@ class DB
      */
     public static function dbm($dsnId = 'default')
     {
-        $dsn = Context::dsn($dsnId);
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
+
+        $dsn = Context::dsn($dsnId);
 
         if ('PdoDb' != $dsn['driver']) {
             new ExException("the driver error: PdoDb");
             return null;
         }
 
-        self::$dbm_time_out = time() + 60; //60秒超时控制
-        $object = new PdoDb(['dsn' => $dsn]);
+        self::$dbm_time_out = time() + 30;
+        $object = new PdoDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -48,36 +50,67 @@ class DB
      */
     public static function mgo($dsnId = 'default')
     {
-        $dsn = Context::dsn($dsnId);
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
+
+        $dsn = Context::dsn($dsnId);
 
         if ('MongoDb' != $dsn['driver']) {
             new ExException("the driver error: MongoDb");
             return null;
         }
 
-        self::$mgo_time_out = time() + 60;
-        $object = new MongoDb(['dsn' => $dsn]);
+        self::$mgo_time_out = time() + 30;
+        $object = new MongoDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
 
     /**
-     * 关闭数据库  通常不用调用
+     * swoole 专用
+     * @param $dsnId
+     * @return \Swoole\Database\PDOPool
      */
-    public static function close()
+    public static function PdoPool($dsnId = 'pool')
     {
-        if (!empty(self::$used_dbo)) {
-            foreach (self::$used_dbo as $dbo) {
-                $dbo->close();
-            }
-        }
+        $dsn = Context::dsn($dsnId);
+        $pool = new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
+            ->withHost($dsn['host'])
+            ->withPort($dsn['port'])
+            ->withDbName($dsn['dbname'])
+            ->withCharset($dsn['charset'])
+            ->withUsername($dsn['login'])
+            ->withPassword($dsn['secret'])
+        );
+        return $pool;
+    }
+
+    public static function getPdo($pdo)
+    {
+        $object = new PdoPool($pdo);
+        return $object;
     }
 
     /**
-     * mysql专用
+     * swoole 专用
+     * @param $dsnId
+     * @return \Swoole\Database\RedisPool
+     */
+    public static function RedisPool($dsnId = 'redis')
+    {
+        $dsn = Context::dsn($dsnId);
+        $pool = new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
+            ->withHost($dsn['host'])
+            ->withPort($dsn['port'])
+            ->withAuth($dsn['password'])
+            ->withDbIndex($dsn['index'])
+            ->withTimeout($dsn['timeout'])
+        );
+        return $pool;
+    }
+
+    /**
      * 还原默认数据源对象
      */
     public static function resume()
