@@ -50,7 +50,7 @@ class ArrayHelper
      * @param array $args
      * @return mixed
      */
-    private static function sort_multi(& $arr, array $args)
+    private static function sort_multi(&$arr, array $args)
     {
         $sortArray = [];
         $sortRule = '';
@@ -194,8 +194,8 @@ class ArrayHelper
     public static function group_by($arr, $groupField)
     {
         $ret = [];
-        foreach ($arr as $row) {
-            $ret[$row[$groupField]][] = $row;
+        foreach ($arr as $key => $val) {
+            $ret[$val[$groupField]][$key] = $val;
         }
         return $ret;
     }

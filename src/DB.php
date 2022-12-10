@@ -86,6 +86,10 @@ class DB
         return $pool;
     }
 
+    /**
+     * @param $pdo
+     * @return PdoPool
+     */
     public static function getPdo($pdo)
     {
         $object = new PdoPool($pdo);

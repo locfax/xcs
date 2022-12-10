@@ -69,7 +69,7 @@ class ExException extends \Exception
     public function clear($message)
     {
         if (defined('DEBUG') && DEBUG) {
-            return $message;
+            return is_object($message) ? '#object#' : $message;
         }
         return htmlspecialchars(substr(str_replace(["t", "r", "n"], " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
     }
