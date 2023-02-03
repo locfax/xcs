@@ -19,6 +19,7 @@ class File
      */
     public function init()
     {
+        !is_dir(DATA_CACHE) && mkdir(DATA_CACHE);
         if (!is_writeable(DATA_CACHE)) {
             throw new ExException('路径:' . DATA_CACHE . ' 不可写');
         }

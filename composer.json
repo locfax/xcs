@@ -25,7 +25,8 @@
   "name": "locfax/xcs",
   "require": {
     "php": ">=5.6",
-    "monolog/monolog": "^2.1.1"
+    "monolog/monolog": "^2.1.1",
+    "ext-json": "*"
   },
   "suggest": {}
 }

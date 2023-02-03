@@ -43,7 +43,7 @@ class App
     public static function runFile($refresh = false)
     {
         self::_rootNamespace('\\', APP_PATH);
-        
+
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
 
@@ -54,8 +54,6 @@ class App
 
             is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
-
-            $files = array_merge($files);
 
             if (defined('DEBUG') && DEBUG) {
                 set_error_handler(function ($errno, $errStr) {
@@ -76,6 +74,7 @@ class App
                 return;
             }
 
+            !is_dir(DATA_PATH . 'preload') && mkdir(DATA_PATH . 'preload');
             $preloadFile = self::_makeRunFile($files, $preloadFile);
         }
 
@@ -85,7 +84,7 @@ class App
     /**
      * @param $runtimeFiles
      * @param $runFile
-     * @return bool
+     * @return mixed
      */
     private static function _makeRunFile($runtimeFiles, $runFile)
     {
@@ -115,8 +114,8 @@ class App
     }
 
     /**
-     * @param string $uri
-     * @return bool
+     * @param $uri
+     * @return void
      */
     private static function _dispatching($uri)
     {
@@ -132,7 +131,8 @@ class App
             $ret = Rbac::check($controllerName, $actionName, AUTH_ROLE);
             if (!$ret) {
                 $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
-                return self::_errACL($args);
+                self::_errACL($args);
+                return;
             }
         }
 
@@ -174,7 +174,7 @@ class App
 
     /**
      * @param $args
-     * @return bool
+     * @return bool|void
      */
     private static function _errCtrl($args)
     {
@@ -190,7 +190,7 @@ class App
 
     /**
      * @param $args
-     * @return bool
+     * @return bool|void
      */
     private static function _errACL($args)
     {

@@ -158,6 +158,9 @@ function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
     if ($tplTime < intval($cacheTime)) {
         return;
     }
+
+    !is_dir(DATA_VIEW) && mkdir(DATA_VIEW);
+
     $template = new Xcs\Template();
     $template->parse(DATA_VIEW, $tplDir, $mainTpl, $cacheFile, $file);
 }

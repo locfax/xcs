@@ -16,17 +16,17 @@ defined('AUTH_ROLE') or define('AUTH_ROLE', false);
 */
 defined('APP_DSN') or define('APP_DSN', 'default');
 
-define('BASE_PATH', __DIR__ . '/');  //框架路径
-define('APP_PATH', APP_ROOT . '/app/'); //应用路径
-define('DATA_PATH', APP_ROOT . '/gdata/'); //全局数据路径
-define('LIB_PATH', APP_PATH . 'Library/'); //module路径
+const BASE_PATH = __DIR__ . '/';  //框架路径
+const APP_PATH = APP_ROOT . '/app/'; //应用路径
+const DATA_PATH = APP_ROOT . '/gdata/'; //全局数据路径
+const LIB_PATH = APP_PATH . 'Library/'; //module路径
 
-define('DATA_CACHE', DATA_PATH . 'cache/'); //缓存路径
-define('DATA_VIEW', DATA_PATH . 'tplcache/'); //模板解析路径
-define('DATA_LANG', APP_ROOT . '/themes/lang/'); //语言包
-define('DATA_TPLDIR', APP_ROOT . '/themes/' . APP_KEY . '/'); //模板路径
+const DATA_CACHE = DATA_PATH . 'cache/'; //缓存路径
+const DATA_VIEW = DATA_PATH . 'tplcache/'; //模板解析路径
+const DATA_LANG = APP_ROOT . '/themes/lang/'; //语言包
+const DATA_TPLDIR = APP_ROOT . '/themes/' . APP_KEY . '/'; //模板路径
 
-define('FILE_READ_MODE', 0644);
-define('FILE_WRITE_MODE', 0755);
-define('DIR_READ_MODE', 0644);
-define('DIR_WRITE_MODE', 0755);
+const FILE_READ_MODE = 0644;
+const FILE_WRITE_MODE = 0755;
+const DIR_READ_MODE = 0644;
+const DIR_WRITE_MODE = 0755;
