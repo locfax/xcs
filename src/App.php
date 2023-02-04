@@ -146,35 +146,33 @@ class App
     /**
      * @param $controllerName
      * @param $actionName
-     * @return bool
+     * @return void
      */
     private static function _execute($controllerName, $actionName)
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
-        do {
-            $controllerClass = self::_controllerPrefix . $controllerName;
-            //主动载入controller
-            if (!self::_loadController($controllerName, $controllerClass)) {
-                break;
-            }
-            $controller = new $controllerClass($controllerName, $actionName);
-            if (!$controller instanceof $controllerClass) {
-                break;
-            }
-            call_user_func([$controller, $actionMethod]);
-            $controller = null;
-            return true;
-        } while (false);
 
-        //控制器加载失败
-        self::_errCtrl("Controller '" . $controllerName . '\' is not exists!');
-        return false;
+        $controllerClass = self::_controllerPrefix . $controllerName;
+        //主动载入controller
+        if (!self::_loadController($controllerName, $controllerClass)) {
+            //控制器加载失败
+            self::_errCtrl("Controller '" . $controllerName . '\' is not exists!');
+            return;
+        }
+        $controller = new $controllerClass($controllerName, $actionName);
+        if (!$controller instanceof $controllerClass) {
+            //控制器加载失败
+            self::_errCtrl("Controller '" . $controllerName . '\' is not instanceof!');
+            return;
+        }
+        call_user_func([$controller, $actionMethod]);
+        $controller = null;
     }
 
     /**
      * @param $args
-     * @return bool|void
+     * @return void
      */
     private static function _errCtrl($args)
     {
@@ -183,14 +181,15 @@ class App
                 'code' => 1,
                 'msg' => 'error:' . $args,
             ];
-            return self::response($res, 'json');
+            self::response($res, 'json');
+            return;
         }
         echo 'error:' . $args;
     }
 
     /**
      * @param $args
-     * @return bool|void
+     * @return void
      */
     private static function _errACL($args)
     {
@@ -199,7 +198,8 @@ class App
                 'code' => 1,
                 'msg' => 'error:' . $args,
             ];
-            return self::response($res, 'json');
+            self::response($res, 'json');
+            return;
         }
         echo 'error！' . $args;
     }
@@ -220,7 +220,7 @@ class App
 
     /**
      * @param $uri
-     * @return bool|void
+     * @return void
      */
     private static function _router($uri)
     {
@@ -416,7 +416,7 @@ class App
 
     /**
      * @param bool $echo
-     * @return mixed|string
+     * @return array|false|string|string[]|void
      */
     public static function output_end($echo = false)
     {
