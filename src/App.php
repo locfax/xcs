@@ -2,8 +2,6 @@
 
 namespace Xcs;
 
-use ReflectionException;
-
 class App
 {
 
@@ -14,11 +12,6 @@ class App
     const _controllerPrefix = 'Controller\\';
 
     private static $routes;
-
-    /**
-     * @var Di\Container
-     */
-    public static $container;
 
     /**
      * @param bool $refresh
@@ -502,55 +495,6 @@ class App
             return $retBool;
         }
         return !$retBool;
-    }
-
-    /**
-     * @return Di\Container
-     */
-    public static function container(): Di\Container
-    {
-        if (self::$container) {
-            return self::$container;
-        }
-
-        self::$container = new Di\Container();
-        return self::$container;
-    }
-
-    /**
-     * @param $type
-     * @param array $params
-     * @return mixed|object
-     * @throws ExException|ReflectionException
-     */
-    public static function createObject($type, array $params = [])
-    {
-
-        if (is_string($type)) {
-            return self::container()->get($type, $params);
-        }
-
-        if (is_callable($type, true)) {
-            return self::container()->invoke($type, $params);
-        }
-
-        if (!is_array($type)) {
-            throw new ExException('Unsupported configuration type: ' . gettype($type));
-        }
-
-        if (isset($type['__class'])) {
-            $class = $type['__class'];
-            unset($type['__class'], $type['class']);
-            return self::container()->get($class, $params, $type);
-        }
-
-        if (isset($type['class'])) {
-            $class = $type['class'];
-            unset($type['class']);
-            return self::container()->get($class, $params, $type);
-        }
-
-        throw new ExException('Object configuration must be an array containing a "class" or "__class" element.');
     }
 
     /**
