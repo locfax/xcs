@@ -11,15 +11,16 @@ class Uploader
     /**
      * @param $tempFiles
      * @param bool $cascade
-     * @return $this|null
+     * @return Uploader|null
      */
-    public function init($tempFiles, $cascade = true)
+    public function init($tempFiles, bool $cascade = true)
     {
         $this->reset();
 
         if (!is_array($tempFiles)) {
             return null;
         }
+
         foreach ($tempFiles as $field => $struct) {
             if (!isset($struct['error'])) {
                 continue;
@@ -56,7 +57,7 @@ class Uploader
     /**
      * @return int
      */
-    public function getCount()
+    public function getCount(): int
     {
         return $this->_count;
     }
@@ -66,9 +67,8 @@ class Uploader
      */
     public function getFiles()
     {
-        $return = false;
         if (empty($this->_files)) {
-            return $return;
+            return false;
         }
         return $this->_files;
     }
@@ -79,9 +79,8 @@ class Uploader
      */
     public function getFile($name)
     {
-        $return = false;
         if (!isset($this->_files[$name])) {
-            return $return;
+            return false;
         }
         return $this->_files[$name];
     }
@@ -90,7 +89,7 @@ class Uploader
      * @param $name
      * @return bool
      */
-    public function isFileExist($name)
+    public function isFileExist($name): bool
     {
         return isset($this->_files[$name]);
     }

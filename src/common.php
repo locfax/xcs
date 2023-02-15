@@ -4,9 +4,10 @@
  * @param mixed $variable
  * @param mixed $defVal
  * @param string $runFunc
+ * @param bool $addslashes
  * @return mixed
  */
-function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
+function getgpc($variable, $defVal = null, string $runFunc = '', bool $addslashes = true)
 {
     $arr = explode('.', $variable);
     if (count($arr) == 2) {
@@ -17,7 +18,6 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
         $var = $variable;
     }
 
-    $value = '';
     if ($tmp) {
         switch ($tmp) {
             case 'G':
@@ -46,33 +46,23 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
     } else {
         if (isset($_GET[$var])) {
             $type = 'GET';
-            if (!isset($_GET[$var])) {
-                return $defVal;
-            }
             $value = $_GET[$var];
         } elseif (isset($_POST[$var])) {
             $type = 'POST';
-            if (!isset($_POST[$var])) {
-                return $defVal;
-            }
             $value = $_POST[$var];
         } else {
             return $defVal;
         }
     }
 
-    if (in_array($type, ['GET', 'POST'])) {
-        if (is_array($value)) {
-            foreach ($value as &$val) {
-                gpc_value($val, $runFunc, $addslashes);
-            }
-        } else {
-            gpc_value($value, $runFunc, $addslashes);
+    if (is_array($value)) {
+        foreach ($value as &$val) {
+            gpc_value($val, $runFunc, $addslashes);
         }
-        return $value;
     } else {
-        return $defVal;
+        gpc_value($value, $runFunc, $addslashes);
     }
+    return $value;
 }
 
 /**
@@ -80,9 +70,9 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
  * @param $value
  * @param $runFunc
  * @param bool $addslashes
- * @return array|bool|int|mixed|string|void
+ * @return void
  */
-function gpc_value(&$value, $runFunc, $addslashes)
+function gpc_value(&$value, $runFunc, bool $addslashes)
 {
     if (empty($value)) {
         return;
@@ -91,7 +81,7 @@ function gpc_value(&$value, $runFunc, $addslashes)
     if ($runFunc && strpos($runFunc, '|')) {
         $funds = explode('|', $runFunc);
         if ($addslashes) {
-            array_push($funds, 'addslashes');
+            $funds[] = 'addslashes';
         }
         foreach ($funds as $run) {
             if ('xss' == $run) {
@@ -126,15 +116,15 @@ function getini($key)
     $k = explode('/', $key);
     switch (count($k)) {
         case 1:
-            return isset($_CFG[$k[0]]) ? $_CFG[$k[0]] : null;
+            return $_CFG[$k[0]] ?? null;
         case 2:
-            return isset($_CFG[$k[0]][$k[1]]) ? $_CFG[$k[0]][$k[1]] : null;
+            return $_CFG[$k[0]][$k[1]] ?? null;
         case 3:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]]) ? $_CFG[$k[0]][$k[1]][$k[2]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]] ?? null;
         case 4:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]][$k[3]]) ? $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null;
         case 5:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]]) ? $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null;
         default:
             return null;
     }
@@ -169,9 +159,9 @@ function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
  * @param $file
  * @param array $data
  * @param bool $getTplFile
- * @return string
+ * @return string|void
  */
-function template($file, array $data = [], $getTplFile = false)
+function template($file, array $data = [], bool $getTplFile = false)
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
@@ -196,7 +186,7 @@ function template($file, array $data = [], $getTplFile = false)
  * @param array $params
  * @return string
  */
-function url($udi, $params = [])
+function url($udi, array $params = []): string
 {
     return Xcs\App::url($udi, $params);
 }
@@ -205,9 +195,9 @@ function url($udi, $params = [])
  * 数组 转 对象
  *
  * @param array $arr 数组
- * @return object|mixed
+ * @return array|object
  */
-function array2object($arr)
+function array2object(array $arr)
 {
     if (gettype($arr) != 'array') {
         return $arr;
@@ -226,7 +216,7 @@ function array2object($arr)
  * @param object $obj 对象
  * @return array
  */
-function object2array($obj)
+function object2array(object $obj): array
 {
     $obj = (array)$obj;
     foreach ($obj as $k => $v) {
@@ -346,7 +336,7 @@ function char_output($text)
  * @param $needle
  * @return bool
  */
-function dstrpos($str, $needle)
+function dstrpos($str, $needle): bool
 {
     return !(false === strpos($str, $needle));
 }
@@ -356,7 +346,7 @@ function dstrpos($str, $needle)
  * @return array
  */
 if (!function_exists('locTime')) {
-    function locTime($uTimeOffset)
+    function locTime($uTimeOffset): array
     {
         static $dtFormat = null, $timeOffset = 8;
         if (is_null($dtFormat)) {
@@ -422,7 +412,7 @@ if (!function_exists('dgmdate')) {
             }
             return $s;
         }
-        $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
+        $format = $dtFormat[$format] ?? $format;
         return gmdate($format, $timestamp);
     }
 }
@@ -452,7 +442,7 @@ if (!function_exists('clientIp')) {
  * @param int $halt
  * @param string $func
  */
-function dump($var, $halt = 0, $func = 'p')
+function dump($var, int $halt = 0, string $func = 'p')
 {
     echo '<style>.track {
       font-family:Verdana, Arial, Helvetica, sans-serif;
@@ -478,7 +468,7 @@ function dump($var, $halt = 0, $func = 'p')
 /**
  * @param bool $stop
  */
-function post($stop = false)
+function post(bool $stop = false)
 {
     $str = '';
     $post = $_POST;

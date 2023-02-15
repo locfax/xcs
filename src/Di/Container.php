@@ -48,9 +48,10 @@ class Container
      * they appear in the constructor declaration. If you want to skip some parameters, you should index the remaining
      * ones with the integers that represent their positions in the constructor parameter list.
      * @param array $config a list of name-value pairs that will be used to initialize the object properties.
-     * @return object an instance of the requested class.
+     * @return mixed an instance of the requested class.
+     * @throws ReflectionException
      */
-    public function get($class, $params = [], $config = [])
+    public function get($class, array $params = [], array $config = [])
     {
         if ($class instanceof Instance) {
             $class = $class->id;
@@ -161,7 +162,7 @@ class Container
      * constructor when [[get()]] is called.
      * @return $this the container itself
      */
-    public function set($class, $definition = [], array $params = [])
+    public function set(string $class, $definition = [], array $params = []): Container
     {
         $this->_definitions[$class] = $this->normalizeDefinition($class, $definition);
         $this->_params[$class] = $params;
@@ -182,7 +183,7 @@ class Container
      * @return $this the container itself
      * @see set()
      */
-    public function setSingleton($class, $definition = [], array $params = [])
+    public function setSingleton(string $class, $definition = [], array $params = []): Container
     {
         $this->_definitions[$class] = $this->normalizeDefinition($class, $definition);
         $this->_params[$class] = $params;
@@ -196,7 +197,7 @@ class Container
      * @return bool whether the container has the definition of the specified name..
      * @see set()
      */
-    public function has($class)
+    public function has(string $class): bool
     {
         return isset($this->_definitions[$class]);
     }
@@ -208,7 +209,7 @@ class Container
      * @return bool whether the given name corresponds to a registered singleton. If `$checkInstance` is true,
      * the method should return a value indicating whether the singleton has been instantiated.
      */
-    public function hasSingleton($class, $checkInstance = false)
+    public function hasSingleton(string $class, bool $checkInstance = false): bool
     {
         return $checkInstance ? isset($this->_singletons[$class]) : array_key_exists($class, $this->_singletons);
     }
@@ -217,7 +218,7 @@ class Container
      * Removes the definition for the specified name.
      * @param string $class class name, interface name or alias name
      */
-    public function clear($class)
+    public function clear(string $class)
     {
         unset($this->_definitions[$class], $this->_singletons[$class]);
     }
@@ -228,7 +229,7 @@ class Container
      * @param string|array|callable $definition the class definition
      * @return array the normalized class definition
      */
-    protected function normalizeDefinition($class, $definition)
+    protected function normalizeDefinition(string $class, $definition)
     {
         if (empty($definition)) {
             return ['class' => $class];
@@ -261,7 +262,7 @@ class Container
      * Returns the list of the object definitions or the loaded shared objects.
      * @return array the list of the object definitions or the loaded shared objects (type or ID => definition or instance).
      */
-    public function getDefinitions()
+    public function getDefinitions(): array
     {
         return $this->_definitions;
     }
@@ -273,9 +274,10 @@ class Container
      * @param string $class the class name
      * @param array $params constructor parameters
      * @param array $config configurations to be applied to the new instance
-     * @return object the newly created instance of the specified class
+     * @return object|null the newly created instance of the specified class
+     * @throws ReflectionException
      */
-    protected function build($class, $params, $config)
+    protected function build(string $class, array $params, array $config): ?object
     {
         /* @var $reflection ReflectionClass */
         list($reflection, $dependencies) = $this->getDependencies($class);
@@ -322,7 +324,7 @@ class Container
      * @param array $params the constructor parameters
      * @return array the merged parameters
      */
-    protected function mergeParams($class, $params)
+    protected function mergeParams(string $class, array $params): array
     {
         if (empty($this->_params[$class])) {
             return $params;
@@ -343,7 +345,7 @@ class Container
      * @param string $class class name, interface name or alias name
      * @return array the dependencies of the specified class.
      */
-    protected function getDependencies($class)
+    protected function getDependencies(string $class): array
     {
         if (isset($this->_reflections[$class])) {
             return [$this->_reflections[$class], $this->_dependencies[$class]];
@@ -384,10 +386,10 @@ class Container
     /**
      * Resolves dependencies by replacing them with the actual object instances.
      * @param array $dependencies the dependencies
-     * @param ReflectionClass $reflection the class reflection associated with the dependencies
+     * @param ReflectionClass|null $reflection the class reflection associated with the dependencies
      * @return array the resolved dependencies
      */
-    protected function resolveDependencies($dependencies, $reflection = null)
+    protected function resolveDependencies(array $dependencies, ReflectionClass $reflection = null): array
     {
         foreach ($dependencies as $index => $dependency) {
             if ($dependency instanceof Instance) {
@@ -429,8 +431,9 @@ class Container
      * @param array $params The array of parameters for the function.
      * This can be either a list of parameters, or an associative array representing named function parameters.
      * @return mixed the callback return value.
+     * @throws ReflectionException
      */
-    public function invoke(callable $callback, $params = [])
+    public function invoke(callable $callback, array $params = [])
     {
         return call_user_func_array($callback, $this->resolveCallableDependencies($callback, $params));
     }
@@ -444,8 +447,9 @@ class Container
      * @param callable $callback callable to be invoked.
      * @param array $params The array of parameters for the function, can be either numeric or associative.
      * @return array The resolved dependencies.
+     * @throws ReflectionException
      */
-    public function resolveCallableDependencies(callable $callback, $params = [])
+    public function resolveCallableDependencies(callable $callback, array $params = []): array
     {
         if (is_array($callback)) {
             $reflection = new ReflectionMethod($callback[0], $callback[1]);
@@ -509,9 +513,9 @@ class Container
      * the array to be treated as associative.
      * @return bool whether the array is associative
      */
-    public static function isAssociative($array, $allStrings = true)
+    public static function isAssociative(array $array, bool $allStrings = true): bool
     {
-        if (!is_array($array) || empty($array)) {
+        if (empty($array)) {
             return false;
         }
 
@@ -607,7 +611,7 @@ class Container
     }
 
     /**
-     * @param bool $value whether to attempt to resolve elements in array dependencies
+     * @param mixed $value whether to attempt to resolve elements in array dependencies
      */
     public function setResolveArrays($value)
     {

@@ -2,6 +2,8 @@
 
 namespace Xcs;
 
+use ReflectionException;
+
 class App
 {
 
@@ -21,7 +23,7 @@ class App
     /**
      * @param bool $refresh
      */
-    public static function run($refresh = false)
+    public static function run(bool $refresh = false)
     {
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
@@ -40,7 +42,7 @@ class App
     /**
      * @param bool $refresh
      */
-    public static function runFile($refresh = false)
+    public static function runFile(bool $refresh = false)
     {
         self::_rootNamespace('\\', APP_PATH);
 
@@ -209,7 +211,7 @@ class App
      * @param $controllerClass
      * @return bool
      */
-    private static function _loadController($controllerName, $controllerClass)
+    private static function _loadController($controllerName, $controllerClass): bool
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
@@ -310,10 +312,10 @@ class App
 
     /**
      * @param $udi
-     * @param $params
+     * @param array $params
      * @return string
      */
-    public static function url($udi, $params = [])
+    public static function url($udi, array $params = []): string
     {
         $_udi = explode('/', $udi);
         if (count($_udi) < 2) {
@@ -347,6 +349,7 @@ class App
         } else {
             $_CDATA[$appKey][$group] = array_merge($_CDATA[$appKey][$group], $vars);
         }
+
         return true;
     }
 
@@ -357,7 +360,7 @@ class App
      * @param string $ext 导入的文件扩展名
      * @return boolean
      */
-    public static function vendor($class, $ext = '.php', $baseUrl = LIB_PATH)
+    public static function vendor(string $class, string $ext = '.php', string $baseUrl = LIB_PATH): bool
     {
         static $_file = [];
         $key = $class . $baseUrl . $ext;
@@ -379,14 +382,15 @@ class App
             $_file[$key] = true;
             return true;
         }
+
         return false;
     }
 
     /**
-     * @param $arr
+     * @param array $arr
      * @return string
      */
-    public static function output_json($arr)
+    public static function output_json(array $arr): string
     {
         return json_encode($arr, JSON_UNESCAPED_UNICODE);
     }
@@ -401,7 +405,7 @@ class App
     /**
      * @param bool $nocache
      */
-    public static function output_start($nocache = true)
+    public static function output_start(bool $nocache = true)
     {
         ob_get_length() && ob_end_clean();
         if (function_exists('ob_gzhandler')) { //whether start gzip
@@ -418,7 +422,7 @@ class App
      * @param bool $echo
      * @return array|false|string|string[]|void
      */
-    public static function output_end($echo = false)
+    public static function output_end(bool $echo = false)
     {
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
@@ -435,7 +439,7 @@ class App
      * @param string $type
      * @return bool
      */
-    public static function response($res, $type = 'json')
+    public static function response($res, string $type = 'json'): bool
     {
         self::output_nocache();
         if ('html' == $type) {
@@ -460,6 +464,7 @@ class App
         if ('xml' == $type) {
             echo ']]></root>';
         }
+
         return true;
     }
 
@@ -467,7 +472,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isGet($retBool = true)
+    public static function isGet(bool $retBool = true): bool
     {
         if ('GET' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -479,7 +484,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isPost($retBool = true)
+    public static function isPost(bool $retBool = true): bool
     {
         if ('POST' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -491,7 +496,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isAjax($retBool = true)
+    public static function isAjax(bool $retBool = true): bool
     {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']) {
             return $retBool;
@@ -502,7 +507,7 @@ class App
     /**
      * @return Di\Container
      */
-    public static function container()
+    public static function container(): Di\Container
     {
         if (self::$container) {
             return self::$container;
@@ -516,7 +521,7 @@ class App
      * @param $type
      * @param array $params
      * @return mixed|object
-     * @throws ExException
+     * @throws ExException|ReflectionException
      */
     public static function createObject($type, array $params = [])
     {
@@ -554,10 +559,10 @@ class App
      * @param string $url
      * @return bool
      */
-    public static function jsAlert($message = '', $after_action = '', $url = '')
+    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): bool
     {
         //php turn to alert
-        $out = "<script language=\"javascript\" type=\"text/javascript\">\n";
+        $out = "<script type=\"text/javascript\">\n";
         if (!empty($message)) {
             $out .= "alert(\"";
             $out .= str_replace("\\\\n", "\\n", str_replace(["\r", "\n"], ['', '\n'], $message));
@@ -573,6 +578,7 @@ class App
         }
         $out .= "</script>";
         echo $out;
+
         return true;
     }
 
@@ -582,9 +588,9 @@ class App
      * @param bool $js
      * @param bool $jsWrapped
      * @param bool $return
-     * @return bool|null|string
+     * @return bool|string|null
      */
-    public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false)
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
     {
         $_delay = intval($delay);
         if (!$js) {
@@ -618,6 +624,7 @@ EOT;
             return $out;
         }
         echo $out;
+
         return true;
     }
 

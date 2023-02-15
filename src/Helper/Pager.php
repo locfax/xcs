@@ -8,7 +8,7 @@ class Pager
      * @param $pageInfo
      * @return string
      */
-    public static function pageBar($pageInfo)
+    public static function pageBar($pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -21,11 +21,11 @@ class Pager
                 $mpUrl .= '?' . $pageInfo['param'];
             }
         }
-        $maxPages = isset($pageInfo['maxpages']) ? $pageInfo['maxpages'] : false; //最大页数限制
-        $page = isset($pageInfo['showpage']) ? $pageInfo['showpage'] : false; //一次显示多少页码
-        $showNum = isset($pageInfo['shownum']) ? $pageInfo['shownum'] : false;
-        $showKbd = isset($pageInfo['showkbd']) ? $pageInfo['showkbd'] : false;
-        $simple = isset($pageInfo['simple']) ? $pageInfo['simple'] : false;
+        $maxPages = $pageInfo['maxpages'] ?? false; //最大页数限制
+        $page = $pageInfo['showpage'] ?? false; //一次显示多少页码
+        $showNum = $pageInfo['shownum'] ?? false;
+        $showKbd = $pageInfo['showkbd'] ?? false;
+        $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
         $hrefName = '';
@@ -66,15 +66,14 @@ class Pager
         $multiPage .= ($to < $pages ? '<a href="' . $mpUrl . 'page=' . $pages . $hrefName . '" class="last"' . $ajaxTarget . '>... ' . $realPages . '</a>' : '') .
             ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '') .
             ($showKbd && !$simple && $pages > $page && !$ajaxTarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(KeyboardEvent.keyCode===13) {window.location=\'' . $mpUrl . 'page=\'+this.value; doane(Event);}" /></kbd>' : '');
-        $multiPage = '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
-        return $multiPage;
+        return '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
     }
 
     /**
      * @param $pageInfo
      * @return string
      */
-    public static function simplePage($pageInfo)
+    public static function simplePage($pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -85,7 +84,7 @@ class Pager
         $lang['prev'] = '上一页';
         $realPages = ceil($totals / $perPage);
 
-        $curPage = $pageInfo['maxpages'] ? max(1, min(min($curPage, $realPages), $pageInfo['maxpages'])) : max(1, min($curPage, $realPages));
+        $curPage = $pageInfo['maxpages'] ? max(1, min($curPage, $realPages, $pageInfo['maxpages'])) : max(1, min($curPage, $realPages));
 
         $prev = $curPage > 1 ? '<li class="previous"><a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
         $next = $curPage < $realPages ? "<li class='next'><a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a></li>' : '';
@@ -104,7 +103,7 @@ class Pager
      * @param $needle
      * @return bool
      */
-    private static function strPos($str, $needle)
+    private static function strPos($str, $needle): bool
     {
         return !(false === strpos($str, $needle));
     }

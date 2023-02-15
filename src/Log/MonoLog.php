@@ -25,7 +25,7 @@ class MonoLog
      * @param $data
      * @param string $code
      */
-    public function log($data, $code = 'debug')
+    public function log($data, string $code = 'debug')
     {
         if ($code == 'info') {
             $this->log->addInfo($data);

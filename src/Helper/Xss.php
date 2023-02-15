@@ -76,9 +76,9 @@ class Xss
     /**
      * @param $str
      * @param bool $is_image
-     * @return array|bool|mixed|string
+     * @return array|bool|string
      */
-    public function clean($str, $is_image = false)
+    public function clean($str, bool $is_image = false)
     {
         if (is_array($str)) {
             foreach ($str as $key) {
@@ -100,7 +100,7 @@ class Xss
         $converted_string = $str;
         $str = $this->_do_never_allowed($str);
 
-        if (true == $is_image) {
+        if ($is_image) {
             $str = preg_replace('/<\?(php)/i', '&lt;?\\1', $str);
         } else {
             $str = str_replace(['<?', '?' . '>'], ['&lt;?', '?&gt;'], $str);
@@ -141,7 +141,7 @@ class Xss
 
         $str = $this->_do_never_allowed($str);
 
-        if (true == $is_image) {
+        if ($is_image) {
             return ($str === $converted_string);
         }
 
@@ -151,9 +151,10 @@ class Xss
     protected function _remove_evil_attributes($str, $is_image)
     {
         $evil_attributes = ['on\w*', 'style', 'xmlns', 'formaction', 'form', 'xlink:href'];
-        if (true == $is_image) {
+        if ($is_image) {
             unset($evil_attributes[array_search('xmlns', $evil_attributes)]);
         }
+
         do {
             $count = 0;
             $attribs = [];
@@ -173,7 +174,7 @@ class Xss
         return $str;
     }
 
-    protected function _sanitize_naughty_html($matches)
+    protected function _sanitize_naughty_html($matches): string
     {
         return '&lt;' . $matches[1] . $matches[2] . $matches[3] . str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[4]);
     }
@@ -188,7 +189,7 @@ class Xss
         return str_replace($match[1], preg_replace('#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
 
-    protected function _compact_exploded_words($matches)
+    protected function _compact_exploded_words($matches): string
     {
         return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
     }
@@ -198,7 +199,7 @@ class Xss
         return str_replace(['>', '<', '\\'], ['&gt;', '&lt;', '\\\\'], $match[0]);
     }
 
-    protected function _filter_attributes($str)
+    protected function _filter_attributes($str): string
     {
         $out = '';
         if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\\1]*?)\\1#is', $str, $matches)) {
@@ -209,7 +210,7 @@ class Xss
         return $out;
     }
 
-    public function xss_hash()
+    public function xss_hash(): string
     {
         if (null == $this->_xss_hash) {
             $rand = $this->get_random_bytes(16);

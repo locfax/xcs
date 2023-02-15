@@ -15,7 +15,7 @@ class Curl
      * @param bool $retSession
      * @return array
      */
-    public static function send($url, $data = '', $httpHead = [], $retGzip = 'gzip', $retCharset = 'UTF-8', $retHead = false, $retSession = false)
+    public static function send($url, string $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
     {
         $ch = curl_init();
         if (!$ch) {
@@ -217,7 +217,7 @@ class Curl
      * @param string $gzip
      * @return bool|string
      */
-    private static function gzip_decode($data, $gzip = 'gzip')
+    private static function gzip_decode($data, string $gzip = 'gzip')
     {
         $unpacked = false;
         if ('gzip' == $gzip && function_exists('gzinflate')) {
@@ -237,9 +237,9 @@ class Curl
             if ($flags & 2) { // CRC at end of file
                 $headerlen += 2;
             }
-            $unpacked = @gzinflate(substr($data, $headerlen));
+            $unpacked = gzinflate(substr($data, $headerlen));
         } elseif ('deflate' == $gzip && function_exists('gzuncompress')) {
-            $unpacked = @gzuncompress($data);
+            $unpacked = gzuncompress($data);
         }
         if (false === $unpacked) {
             $unpacked = $data;

@@ -17,7 +17,7 @@ class HandleGd
         $this->destroy();
     }
 
-    public function resize($width, $height)
+    public function resize($width, $height): HandleGd
     {
         //低质量
         if (is_null($this->_handle)) {
@@ -30,7 +30,7 @@ class HandleGd
         return $this;
     }
 
-    public function autoresize($width, $height)
+    public function autoresize($width, $height): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -55,7 +55,7 @@ class HandleGd
         return $this;
     }
 
-    public function resampled($width, $height)
+    public function resampled($width, $height): HandleGd
     {
         //高质量
         if (is_null($this->_handle)) {
@@ -68,7 +68,7 @@ class HandleGd
         return $this;
     }
 
-    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff')
+    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff'): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -130,7 +130,7 @@ class HandleGd
         return $this;
     }
 
-    public function cut($options = [])
+    public function cut($options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -153,15 +153,14 @@ class HandleGd
             list ($r, $g, $b) = ImageGd::hex2rgb($options['bgcolor'], '0xffffff');
             $bgcolor = imagecolorallocate($dest, $r, $g, $b);
             imagefilledrectangle($dest, 0, 0, $bgw, $bgh, $bgcolor);
-            imagecolordeallocate($dest, $bgcolor);
         } else {
             //for no background images
             $dest = imagecreatetruecolor($dst_w, $dst_h);
             list ($r, $g, $b) = ImageGd::hex2rgb($options['bgcolor'], '0xffffff');
             $bgcolor = imagecolorallocate($dest, $r, $g, $b);
             imagefilledrectangle($dest, 0, 0, $dst_w, $dst_h, $bgcolor);
-            imagecolordeallocate($dest, $bgcolor);
         }
+        imagecolordeallocate($dest, $bgcolor);
 
         $dst_x = $options['border'];
         $dst_y = $options['border'];
@@ -177,7 +176,7 @@ class HandleGd
         return $this;
     }
 
-    public function crop($width, $height, $options = [])
+    public function crop($width, $height, $options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -204,9 +203,9 @@ class HandleGd
         $ratio_h = doubleval($height) / doubleval($full_h);
 
         if ($options['fullimage']) {
-            $ratio = $ratio_w < $ratio_h ? $ratio_w : $ratio_h;
+            $ratio = min($ratio_w, $ratio_h);
         } else {
-            $ratio = $ratio_w > $ratio_h ? $ratio_w : $ratio_h;
+            $ratio = max($ratio_w, $ratio_h);
         }
 
         if (!$options['enlarge'] && $ratio > 1) {

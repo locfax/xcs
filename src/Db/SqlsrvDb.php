@@ -2,28 +2,74 @@
 
 namespace Xcs\Db;
 
-class PdoPool
+use Xcs\Ex\DbException;
+
+class SqlsrvDb
 {
 
-    private $_link;
+    private $dsn;
+    private $_link = null;
+    private $repeat = false;
 
     /**
      * PdoDb constructor.
-     * @param \Swoole\Database\PDOPool $pdo
+     * @param array $config
      */
-    public function __construct(\Swoole\Database\PDOPool $pdo)
+    public function __construct(array $config)
     {
-        $this->_link = $pdo;
+        $this->dsn = $config;
+
+        if (empty($this->dsn)) {
+            new DbException('dsn is empty', 404, 'PdoException');
+        }
+
+        $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+        if (isset($this->dsn['options'])) {
+            $options = array_merge($options, $this->dsn['options']);
+        }
+
+        try {
+            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
+        } catch (\PDOException $exception) {
+            if (!$this->repeat) {
+                $this->repeat = true;
+                $this->__construct($config);
+            } else {
+                $this->close();
+                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
+            }
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    public function close()
+    {
+        $this->_link = null;
     }
 
     /**
      * @param $func
      * @param $args
-     * @return bool
+     * @return mixed
      */
     public function __call($func, $args)
     {
-        return $this->_link && call_user_func_array([$this->_link, $func], $args);
+        if ($this->_link) {
+            return call_user_func_array([$this->_link, $func], $args);
+        }
+        return null;
+    }
+
+    /**
+     * @return array
+     */
+    public function info(): array
+    {
+        return $this->dsn;
     }
 
     /**
@@ -33,7 +79,7 @@ class PdoPool
     public function qTable($tableName): string
     {
         if (strpos($tableName, '.') === false) {
-            return "`{$tableName}`";
+            return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
@@ -72,7 +118,7 @@ class PdoPool
      * @param $tableName
      * @param array $data
      * @param bool $retId
-     * @return bool|int
+     * @return bool|string
      */
     public function create($tableName, array $data, bool $retId = false)
     {
@@ -188,7 +234,7 @@ class PdoPool
      * @param null $orderBy
      * @param null $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, $orderBy = null, $index = null, bool $retObj = false)
     {
@@ -210,7 +256,7 @@ class PdoPool
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function page(string $tableName, string $field, $condition, array $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
@@ -304,7 +350,7 @@ class PdoPool
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array|null $args [':var' => $var]
-     * @return mixed
+     * @return bool|int
      */
     public function exec(string $sql, array $args = null)
     {
@@ -357,7 +403,7 @@ class PdoPool
      * @param array|null $args [':var' => $var]
      * @param $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function rowSetSql(string $sql, array $args = null, $index = null, bool $retObj = false)
     {
@@ -393,7 +439,7 @@ class PdoPool
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
@@ -509,9 +555,12 @@ class PdoPool
      */
     private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
-        $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
-        $message = mb_convert_encoding($message, 'UTF-8', $encode);
-        echo 'ERROR:' . $message . ' SQL:' . $sql . ' CODE: ' . $code . PHP_EOL;
+        if ($this->dsn['dev']) {
+            $this->close();
+            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
+            $message = mb_convert_encoding($message, 'UTF-8', $encode);
+            echo 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
+        }
         return false;
     }
 

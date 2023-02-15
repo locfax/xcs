@@ -7,9 +7,9 @@ class Context
 
     /**
      * @param string $dsnId
-     * @return mixed|null
+     * @return mixed
      */
-    public static function dsn($dsnId = 'default')
+    public static function dsn(string $dsnId = 'default')
     {
         static $cacheDsn = [];
         if (empty($cacheDsn)) {
@@ -24,10 +24,11 @@ class Context
 
     /**
      * @param $name
-     * @param $type
-     * @return bool|mixed
+     * @param null $var
+     * @param string $type
+     * @return mixed
      */
-    public static function config($name, $var = null, $type = 'inc')
+    public static function config($name, $var = null, string $type = 'inc')
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;

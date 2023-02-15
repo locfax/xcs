@@ -13,7 +13,7 @@ class UID
      * @param int $life
      * @return bool
      */
-    public static function setUser(array $userData, $rolesData = null, $life = 0)
+    public static function setUser(array $userData, $rolesData = null, int $life = 0): bool
     {
         if (!is_null($rolesData)) {
             $userData[self::_ROLEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
@@ -23,7 +23,7 @@ class UID
     }
 
     /**
-     * @return array
+     * @return mixed
      */
     public static function getUser()
     {
@@ -31,6 +31,9 @@ class UID
         return self::_getData($dataKey);
     }
 
+    /**
+     * @return void
+     */
     public static function clearUser()
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
@@ -43,13 +46,13 @@ class UID
     public static function getRoles()
     {
         $data = self::getUser();
-        return isset($data[self::_ROLEY]) ? $data[self::_ROLEY] : null;
+        return $data[self::_ROLEY] ?? null;
     }
 
     /**
      * @return array
      */
-    public static function getRolesArray()
+    public static function getRolesArray(): array
     {
         $roles = self::getRoles();
         if (empty($roles)) {
@@ -68,7 +71,7 @@ class UID
      * @param null $type
      * @return bool
      */
-    public static function setData($key, array $data, $ttl = 0, $type = null)
+    public static function setData($key, array $data, int $ttl = 0, $type = null): bool
     {
         return self::_setData('data:' . $key, $data, $ttl, $type);
     }
@@ -76,19 +79,19 @@ class UID
     /**
      * @param string $key
      * @param null $type
-     * @return array
+     * @return mixed
      */
-    public static function getData($key, $type = null)
+    public static function getData(string $key, $type = null)
     {
         return self::_getData('data:' . $key, $type);
     }
 
     /**
      * @param string $key
-     * @param string $type
-     * @return array
+     * @param string|null $type
+     * @return mixed
      */
-    private static function _getData($key, $type = null)
+    private static function _getData(string $key, string $type = null)
     {
         $ret = [];
         if (is_null($type)) {
@@ -102,7 +105,7 @@ class UID
                 }
                 session_start();
             }
-            $ret = isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+            $ret = $_SESSION[$key] ?? null;
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key], 'DECODE'), true) : null;
@@ -112,12 +115,12 @@ class UID
 
     /**
      * @param string $key
-     * @param array|null $val
+     * @param mixed $val
      * @param int $life
      * @param null $type
      * @return bool
      */
-    private static function _setData($key, $val, $life = 0, $type = null)
+    private static function _setData(string $key, $val, int $life = 0, $type = null): bool
     {
         $ret = false;
         if (is_null($type)) {
@@ -153,7 +156,7 @@ class UID
      * @param null $key
      * @return string
      */
-    public static function getCookieKey($var, $prefix = true, $key = null)
+    public static function getCookieKey($var, bool $prefix = true, $key = null): string
     {
         if ($prefix) {
             if (is_null($key)) {
@@ -172,7 +175,7 @@ class UID
      * @param int $expiry
      * @return string
      */
-    public static function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0)
+    public static function authCode($string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
     {
         static $hash_auth = null;
         if (is_null($hash_auth)) {
@@ -184,7 +187,7 @@ class UID
         $_key = md5($key ?: $hash_auth);
         $keya = md5(substr($_key, 0, 16));
         $keyb = md5(substr($_key, 16, 16));
-        $keyc = $cKey_length ? ('DECODE' == $operation ? substr($string, 0, $cKey_length) : substr(md5(microtime()), -$cKey_length)) : '';
+        $keyc = 'DECODE' == $operation ? substr($string, 0, $cKey_length) : substr(md5(microtime()), -$cKey_length);
 
         $cryptKey = $keya . md5($keya . $keyc);
         $key_length = strlen($cryptKey);

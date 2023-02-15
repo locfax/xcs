@@ -9,7 +9,7 @@ namespace Xcs\Di;
 class BaseObject implements Configurable
 {
 
-    public function className()
+    public function className(): string
     {
         return get_called_class();
     }

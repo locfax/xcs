@@ -12,14 +12,14 @@ class ArrayHelper
      * @param string $column_key
      * @return array
      */
-    public static function column(array $array, $column_key)
+    public static function column(array $array, string $column_key): array
     {
         $data = [];
         foreach ($array as $arr) {
             if (is_array($column_key)) {
                 $ret = [];
                 foreach ($column_key as $key) {
-                    $ret[] = isset($arr[$key]) ? $arr[$key] : null;
+                    $ret[] = $arr[$key] ?? null;
                 }
                 $data[] = $ret;
             } else {
@@ -38,7 +38,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function sort_field($arr, $sortField, $sortDirection = SORT_ASC)
+    public static function sort_field(array $arr, string $sortField, int $sortDirection = SORT_ASC): array
     {
         self::sort_multi($arr, [$sortField => $sortDirection]);
         return $arr;
@@ -48,9 +48,9 @@ class ArrayHelper
      * 数组排序
      * @param $arr
      * @param array $args
-     * @return mixed
+     * @return void
      */
-    private static function sort_multi(&$arr, array $args)
+    private static function sort_multi(&$arr, array $args): void
     {
         $sortArray = [];
         $sortRule = '';
@@ -61,10 +61,9 @@ class ArrayHelper
             $sortRule .= '$sortArray[\'' . $sortField . '\'], ' . $sortDir . ', ';
         }
         if (empty($sortArray) || empty($sortRule)) {
-            return $arr;
+            return;
         }
         eval('array_multisort(' . $sortRule . '$arr);'); //引用传值
-        return $arr;
     }
 
     /**
@@ -75,7 +74,7 @@ class ArrayHelper
      * @param bool $apply_keys
      * @return null
      */
-    public static function walk($arr, callable $function, $apply_keys = false)
+    public static function walk($arr, callable $function, bool $apply_keys = false)
     {
         if (empty($arr)) {
             return null;
@@ -103,13 +102,14 @@ class ArrayHelper
      * 移除val为指定值的项目
      * @param array $arr
      * @param string $delVal
-     * @return array
+     * @return array|null
      */
-    public static function remove_value($arr, $delVal = '')
+    public static function remove_value(array $arr, string $delVal = '')
     {
         if (empty($arr)) {
             return null;
         }
+
         foreach ($arr as $key => $value) {
             if (is_array($value)) {
                 $arr[$key] = self::remove_value($value, $delVal);
@@ -128,9 +128,9 @@ class ArrayHelper
      *  多维
      * 移除val为空的项
      * @param array $arr
-     * @return array
+     * @return array|null
      */
-    public static function remove_empty($arr)
+    public static function remove_empty(array $arr)
     {
         if (empty($arr)) {
             return null;
@@ -155,12 +155,12 @@ class ArrayHelper
      * 如果省略 $valueField 参数，则转换结果每一项为包含该项所有数据的数组。
      *
      * @param array $arr 二维数组
-     * @param string $keyField 唯一 如果不是唯一会出现覆盖$value , 为空变成取某一字段的值 $valueField不能忽略
-     * @param string $valueField
+     * @param string|null $keyField 唯一 如果不是唯一会出现覆盖$value , 为空变成取某一字段的值 $valueField不能忽略
+     * @param string|null $valueField
      *
      * @return array
      */
-    public static function to_map($arr, $keyField = null, $valueField = null)
+    public static function to_map(array $arr, string $keyField = null, string $valueField = null): array
     {
         $map = [];
         if ($valueField) {
@@ -191,7 +191,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function group_by($arr, $groupField)
+    public static function group_by(array $arr, string $groupField): array
     {
         $ret = [];
         foreach ($arr as $key => $val) {
@@ -215,12 +215,12 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function to_tree($arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false)
+    public static function to_tree(array $arr, string $fid = 'catid', string $fparent = 'upid', string $index = 'catid', string $fchildrens = 'children', bool $returnReferences = false): array
     {
         $refs = $arr;
         $pkvRefs = [];
-        foreach ($arr as $offset => $row) {
-            $pkvRefs[$row[$fid]] = &$arr[$offset];
+        foreach ($arr as $row) {
+            $pkvRefs[$row[$fid]] = &$row;
         }
 
         $tree = [];
@@ -232,7 +232,7 @@ class ArrayHelper
                 }
                 $parent = &$pkvRefs[$parentId];
                 if ($index) {
-                    $parent[$fchildrens][$row[$index]] = &$arr[$offset];
+                    $parent[$fchildrens][$row[$index]] = &$row;
                 } else {
                     $parent[$fchildrens][] = &$arr[$offset];
                 }
@@ -258,7 +258,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function tree_to($tree, $fchildrens = 'children')
+    public static function tree_to(array $tree, string $fchildrens = 'children'): array
     {
         $arr = [];
         if (isset($tree[$fchildrens]) && is_array($tree[$fchildrens])) {
@@ -266,10 +266,8 @@ class ArrayHelper
                 $arr = array_merge($arr, self::tree_to($child, $fchildrens));
             }
             unset($tree[$fchildrens]);
-            $arr[] = $tree;
-        } else {
-            $arr[] = $tree;
         }
+        $arr[] = $tree;
         return $arr;
     }
 

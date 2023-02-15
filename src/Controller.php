@@ -61,10 +61,10 @@ class Controller
      * 权限验证
      * @param $controllerName
      * @param $actionName
-     * @param $auth
+     * @param bool $auth
      * @return bool
      */
-    final function checkAcl($controllerName, $actionName, $auth = AUTH_ROLE)
+    final function checkAcl($controllerName, $actionName, bool $auth = AUTH_ROLE): bool
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

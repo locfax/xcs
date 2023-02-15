@@ -18,8 +18,7 @@ class Cache
     public $type;
 
     /**
-     * Cache constructor.
-     * @param null $handle
+     * @param $handle
      * @throws ExException
      */
     public function __construct($handle = null)
@@ -42,28 +41,25 @@ class Cache
         }
     }
 
-    /**
-     * @return bool
-     */
     public function __destruct()
     {
-        return $this->enable && $this->handle->close();
+        $this->enable && $this->handle->close();
     }
 
     /**
      * @param string $key
      * @return mixed
      */
-    public static function get($key)
+    public static function get(string $key)
     {
         return self::getInstance()->_get($key);
     }
 
     /**
      * @param string $key
-     * @return mixed|null
+     * @return mixed
      */
-    private function _get($key)
+    private function _get(string $key)
     {
         if ($this->enable) {
             $data = $this->handle->get($this->_key($key));
@@ -82,7 +78,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    public static function set($key, $value, $ttl = 0)
+    public static function set(string $key, $value, int $ttl = 0)
     {
         return self::getInstance()->_set($key, $value, $ttl);
     }
@@ -91,9 +87,9 @@ class Cache
      * @param string $key
      * @param array|string $value
      * @param int $ttl
-     * @return bool
+     * @return mixed
      */
-    private function _set($key, $value, $ttl = 0)
+    private function _set(string $key, $value, int $ttl = 0): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -106,16 +102,16 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function rm($key)
+    public static function rm(string $key)
     {
         return self::getInstance()->_rm($key);
     }
 
     /**
      * @param $key
-     * @return bool
+     * @return mixed
      */
-    private function _rm($key)
+    private function _rm($key): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -133,9 +129,9 @@ class Cache
     }
 
     /**
-     * @return bool
+     * @return mixed
      */
-    private function _clear()
+    private function _clear(): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -146,9 +142,9 @@ class Cache
 
     /**
      * @param $str
-     * @return string
+     * @return mixed
      */
-    private function _key($str)
+    private function _key($str): string
     {
         return $this->prefix . $str;
     }

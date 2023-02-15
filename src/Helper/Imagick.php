@@ -20,7 +20,7 @@ class Imagick
         return new HandleImagek($handle);
     }
 
-    public static function hex2rgb($color, $default = 'ffffff')
+    public static function hex2rgb($color, $default = 'ffffff'): array
     {
         $hex = trim($color, '#&Hh');
         $len = strlen($hex);

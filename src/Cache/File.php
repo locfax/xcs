@@ -17,7 +17,7 @@ class File
      * @return $this
      * @throws ExException
      */
-    public function init()
+    public function init(): File
     {
         !is_dir(DATA_CACHE) && mkdir(DATA_CACHE);
         if (!is_writeable(DATA_CACHE)) {
@@ -34,7 +34,7 @@ class File
 
     /**
      * @param $key
-     * @return mixed|null
+     * @return mixed
      */
     public function get($key)
     {
@@ -56,9 +56,9 @@ class File
      * @param $key
      * @param $val
      * @param int $ttl
-     * @return bool|int
+     * @return false|int
      */
-    public function set($key, $val, $ttl = 0)
+    public function set($key, $val, int $ttl = 0)
     {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
@@ -84,7 +84,7 @@ class File
      * @param int $ttl
      * @return bool
      */
-    public function expire($key, $ttl = 0)
+    public function expire($key, int $ttl = 0): bool
     {
         return false;
     }
@@ -93,7 +93,7 @@ class File
      * @param $key
      * @return bool
      */
-    public function rm($key)
+    public function rm($key): bool
     {
         $cacheFile = DATA_CACHE . $key . '.php';
         if (file_exists($cacheFile)) {
@@ -105,7 +105,7 @@ class File
     /**
      * @return bool
      */
-    public function clear()
+    public function clear(): bool
     {
         $cacheDir = DATA_CACHE;
         $files = FileHelper::list_files($cacheDir);

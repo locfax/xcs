@@ -12,7 +12,7 @@ class CurlMulti
      * @param string $charset
      * @return array
      */
-    public static function send($urls, $data = '', $httpHead = [], $charset = 'UTF-8')
+    public static function send($urls, string $data = '', array $httpHead = [], string $charset = 'UTF-8'): array
     {
         //创建多个curl语柄
         $mHandle = curl_multi_init();
@@ -143,7 +143,7 @@ class CurlMulti
 
     /**
      * @param $_raw_url
-     * @return mixed
+     * @return array|false|int|string|null
      */
     private static function raw_url($_raw_url)
     {

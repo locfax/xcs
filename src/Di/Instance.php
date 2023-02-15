@@ -2,6 +2,7 @@
 
 namespace Xcs\Di;
 
+use ReflectionException;
 use Xcs\App;
 use Xcs\ExException;
 
@@ -57,7 +58,7 @@ class Instance
      * Constructor.
      * @param string $id the component ID
      */
-    protected function __construct($id)
+    protected function __construct(string $id)
     {
         $this->id = $id;
     }
@@ -67,7 +68,7 @@ class Instance
      * @param string $id the component ID
      * @return Instance the new Instance object.
      */
-    public static function of($id)
+    public static function of(string $id): Instance
     {
         return new static($id);
     }
@@ -95,14 +96,15 @@ class Instance
      * You may specify a reference in terms of a component ID or an Instance object.
      * Starting from version 2.0.2, you may also pass in a configuration array for creating the object.
      * If the "class" value is not specified in the configuration array, it will use the value of `$type`.
-     * @param string $type the class/interface name to be checked. If null, type check will not be performed.
-     * @param Container $container the container. This will be passed to [[get()]].
+     * @param string|null $type the class/interface name to be checked. If null, type check will not be performed.
+     * @param Container|null $container the container. This will be passed to [[get()]].
      * @return object the object referenced by the Instance, or `$reference` itself if it is an object.
+     * @throws ReflectionException
      */
-    public static function ensure($reference, $type = null, $container = null)
+    public static function ensure($reference, string $type = null, Container $container = null)
     {
         if (is_array($reference)) {
-            $class = isset($reference['class']) ? $reference['class'] : $type;
+            $class = $reference['class'] ?? $type;
             if (!$container instanceof Container) {
                 $container = App::$container;
             }
@@ -141,10 +143,11 @@ class Instance
 
     /**
      * Returns the actual object referenced by this Instance object.
-     * @param Container $container the container used to locate the referenced object.
-     * @return object the actual object referenced by this Instance object.
+     * @param $container //the container used to locate the referenced object.
+     * @return mixed the actual object referenced by this Instance object.
+     * @throws ReflectionException
      */
-    public function get($container)
+    public function get($container): object
     {
         if ($container) {
             return $container->get($this->id);
@@ -159,7 +162,7 @@ class Instance
      * @return Instance
      * @see var_export()
      */
-    public static function __set_state($state)
+    public static function __set_state(array $state)
     {
         if (!isset($state['id'])) {
             new ExException('Failed to instantiate class "Instance". Required parameter "id" is missing');

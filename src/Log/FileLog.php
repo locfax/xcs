@@ -39,7 +39,7 @@ class FileLog
     /**
      * 读取日志
      * @param $filename
-     * @return mixed|string
+     * @return mixed
      */
     public static function read($filename)
     {

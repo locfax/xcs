@@ -5,12 +5,13 @@ namespace Xcs;
 use Xcs\Db\MongoDb;
 use Xcs\Db\PdoDb;
 use Xcs\Db\PdoPool;
+use Xcs\Db\SqlsrvDb;
 
 class DB
 {
 
     private static $default_dbo_id = APP_DSN;
-    private static $using_dbo_id = null;
+    private static $using_dbo_id;
     private static $used_dbo = [];
     private static $dbm_time_out = 0;
     private static $mgo_time_out = 0;
@@ -23,7 +24,7 @@ class DB
      * @return PdoDb
      * @see PdoDb
      */
-    public static function dbm($dsnId = 'default')
+    public static function dbm(string $dsnId = 'default'): PdoDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -33,7 +34,6 @@ class DB
 
         if ('PdoDb' != $dsn['driver']) {
             new ExException("the driver error: PdoDb");
-            return null;
         }
 
         self::$dbm_time_out = time() + 30;
@@ -48,7 +48,7 @@ class DB
      * @return MongoDb
      * @see MongoDb
      */
-    public static function mgo($dsnId = 'default')
+    public static function mgo(string $dsnId = 'mongo'): MongoDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -58,7 +58,6 @@ class DB
 
         if ('MongoDb' != $dsn['driver']) {
             new ExException("the driver error: MongoDb");
-            return null;
         }
 
         self::$mgo_time_out = time() + 30;
@@ -68,14 +67,36 @@ class DB
     }
 
     /**
+     * @param string $dsnId
+     * @return SqlsrvDb
+     */
+    public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
+    {
+        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        $dsn = Context::dsn($dsnId);
+
+        if ('SqlsrvDb' != $dsn['driver']) {
+            new ExException("the driver error: SqlsrvDb");
+        }
+
+        self::$dbm_time_out = time() + 30;
+        $object = new SqlsrvDb($dsn);
+        self::$used_dbo[$dsnId] = $object;
+        return $object;
+    }
+
+    /**
      * swoole 专用
-     * @param $dsnId
+     * @param string $dsnId
      * @return \Swoole\Database\PDOPool
      */
-    public static function PdoPool($dsnId = 'pool')
+    public static function PdoPool(string $dsnId = 'pool'): \Swoole\Database\PDOPool
     {
         $dsn = Context::dsn($dsnId);
-        $pool = new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
+        return new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -83,35 +104,33 @@ class DB
             ->withUsername($dsn['login'])
             ->withPassword($dsn['secret'])
         );
-        return $pool;
-    }
-
-    /**
-     * @param $pdo
-     * @return PdoPool
-     */
-    public static function getPdo($pdo)
-    {
-        $object = new PdoPool($pdo);
-        return $object;
     }
 
     /**
      * swoole 专用
-     * @param $dsnId
+     * @param \Swoole\Database\PDOPool $pdo
+     * @return PdoPool
+     */
+    public static function getPdoPool(\Swoole\Database\PDOPool $pdo): PdoPool
+    {
+        return new PdoPool($pdo);
+    }
+
+    /**
+     * swoole 专用
+     * @param string $dsnId
      * @return \Swoole\Database\RedisPool
      */
-    public static function RedisPool($dsnId = 'redis')
+    public static function getRedisPool(string $dsnId = 'redis'): \Swoole\Database\RedisPool
     {
         $dsn = Context::dsn($dsnId);
-        $pool = new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
+        return new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withAuth($dsn['password'])
             ->withDbIndex($dsn['index'])
             ->withTimeout($dsn['timeout'])
         );
-        return $pool;
     }
 
     /**
@@ -124,9 +143,9 @@ class DB
 
     /**
      * mysql专用
-     * @return array|mixed
+     * @return array
      */
-    public static function info()
+    public static function info(): array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->info();
@@ -140,9 +159,9 @@ class DB
      * @param string $table
      * @param array $data
      * @param bool $retId
-     * @return bool|int
+     * @return mixed
      */
-    public static function create($table, array $data, $retId = false)
+    public static function create(string $table, array $data, bool $retId = false): bool
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->create($table, $data, $retId);
@@ -155,9 +174,9 @@ class DB
      *
      * @param string $table
      * @param array $data
-     * @return bool|int|null
+     * @return bool|int
      */
-    public static function replace($table, array $data)
+    public static function replace(string $table, array $data)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->replace($table, $data);
@@ -169,10 +188,10 @@ class DB
      * @param string $table
      * @param string|array $data
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public static function update($table, $data, $condition, array $args = null)
+    public static function update(string $table, $data, $condition, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->update($table, $data, $condition, $args);
@@ -183,11 +202,11 @@ class DB
      * 删除符合条件的项
      * @param string $table
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
      * @param mixed $multi bool true 删除多条 返回影响数 false: 只能删除一条
+     * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public static function remove($table, $condition, $multi = false, array $args = null)
+    public static function remove(string $table, $condition, $multi = false, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->remove($table, $condition, $args, $multi);
@@ -200,11 +219,11 @@ class DB
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      */
-    public static function findOne($table, $field, $condition, $orderBy = null, array $args = null, $retObj = false)
+    public static function findOne(string $table, string $field, $condition, $orderBy = null, array $args = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
@@ -217,12 +236,12 @@ class DB
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
-     * @param array $args [':var' => $var]
-     * @param string $index
+     * @param array|null $args [':var' => $var]
+     * @param null $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
-    public static function findAll($table, $field = '*', $condition = '', $orderBy = null, array $args = null, $index = null, $retObj = false)
+    public static function findAll(string $table, string $field = '*', $condition = '', $orderBy = null, array $args = null, $index = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
@@ -235,13 +254,13 @@ class DB
      * @param $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param array|int $pageParam
      * @param int $limit
      * @param bool $retObj
-     * @return array
+     * @return mixed
      */
-    public static function page($table, $field, $condition = '', $orderBy = null, array $args = null, $pageParam = 0, $limit = 20, $retObj = false)
+    public static function page(string $table, $field, $condition = '', $orderBy = null, array $args = null, $pageParam = 0, int $limit = 20, bool $retObj = false): array
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -265,10 +284,10 @@ class DB
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public static function first($table, $field, $condition, $orderBy = null, array $args = null)
+    public static function first(string $table, string $field, $condition, $orderBy = null, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first($table, $field, $condition, $args, $orderBy);
@@ -280,8 +299,8 @@ class DB
      * @param $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
-     * @param array $args [':var' => $var]
-     * @return mixed
+     * @param array|null $args [':var' => $var]
+     * @return array|bool
      */
     public static function col($table, $field, $condition = '', $orderBy = null, array $args = null)
     {
@@ -294,11 +313,11 @@ class DB
      * 单表符合条件的数量
      * @param string $table
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
      */
-    public static function count($table, $condition, array $args = null, $field = '*')
+    public static function count(string $table, $condition, array $args = null, string $field = '*')
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->count($table, $condition, $args, $field);
@@ -307,10 +326,10 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @return mixed
+     * @param array|null $args [':var' => $var]
+     * @return bool|int
      */
-    public static function exec($sql, array $args = null)
+    public static function exec(string $sql, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->exec($sql, $args);
@@ -322,11 +341,11 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      */
-    public static function rowSql($sql, array $args = null, $retObj = false)
+    public static function rowSql(string $sql, array $args = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSql($sql, $args, $retObj);
@@ -335,12 +354,12 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
-    public static function rowSetSql($sql, array $args = null, $index = null, $retObj = false)
+    public static function rowSetSql(string $sql, array $args = null, $index = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSetSql($sql, $args, $index, $retObj);
@@ -349,13 +368,13 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param int $pageParam
      * @param int $limit
      * @param bool $retObj
-     * @return array
+     * @return mixed
      */
-    public static function pageSql($sql, array $args = null, $pageParam = 0, $limit = 18, $retObj = false)
+    public static function pageSql(string $sql, array $args = null, int $pageParam = 0, int $limit = 18, bool $retObj = false): array
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -373,10 +392,10 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public static function countSql($sql, array $args = null)
+    public static function countSql(string $sql, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->countSql($sql, $args);
@@ -385,10 +404,10 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public static function firstSql($sql, array $args = null)
+    public static function firstSql(string $sql, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->firstSql($sql, $args);
@@ -397,10 +416,10 @@ class DB
     /**
      * mysql专用
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @return mixed
+     * @param array|null $args [':var' => $var]
+     * @return array|bool
      */
-    public static function colSql($sql, array $args = null)
+    public static function colSql(string $sql, array $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->colSql($sql, $args);
@@ -411,9 +430,9 @@ class DB
     /**
      * mysql专用
      * 开始事务
-     * @return mixed
+     * @return bool
      */
-    public static function startTrans()
+    public static function startTrans(): bool
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->startTrans();
@@ -423,12 +442,11 @@ class DB
      * mysql专用
      * 事务提交或者回滚
      * @param bool $commit_no_errors
-     * @return mixed
      */
-    public static function endTrans($commit_no_errors = true)
+    public static function endTrans(bool $commit_no_errors = true)
     {
         $db = self::Using(self::$using_dbo_id);
-        return $db->endTrans($commit_no_errors);
+        $db->endTrans($commit_no_errors);
     }
 
     //----------------------事务END-------------------//
@@ -439,7 +457,7 @@ class DB
      * @param null $id
      * @return PdoDb
      */
-    public static function Using($id = null)
+    public static function Using($id = null): PdoDb
     {
         if (!$id) {
             //初始运行
@@ -457,7 +475,7 @@ class DB
      * @param int $total
      * @return int
      */
-    public static function pageStart($page, $ppp, $total)
+    public static function pageStart(int $page, int $ppp, int $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -467,9 +485,9 @@ class DB
     /**
      * @param array|int $pageParam
      * @param int $length
-     * @return array
+     * @return mixed
      */
-    public static function pageBar($pageParam, $length)
+    public static function pageBar($pageParam, int $length): array
     {
         if (!isset($pageParam['bar']) || 'default' == $pageParam['bar']) {
             $defPageParam = [
@@ -511,7 +529,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function ids($arr)
+    public static function ids($arr): string
     {
         return implode(',', (array)$arr);
     }
@@ -520,7 +538,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function implode($arr)
+    public static function implode($arr): string
     {
         return "'" . implode("','", (array)$arr) . "'";
     }

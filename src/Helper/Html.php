@@ -12,7 +12,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function dropdown_list($name, $arr, $selected = null, $extra = null)
+    public static function dropdown_list($name, $arr, $selected = null, $extra = null): string
     {
         $str = "<select name=\"{$name}\" {$extra} >\n";
         foreach ($arr as $value => $title) {
@@ -34,7 +34,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function radio_group($name, $arr, $checked = null, $separator = '', $extra = null)
+    public static function radio_group($name, $arr, $checked = null, string $separator = '', $extra = null): string
     {
         $ix = 0;
         $str = "";
@@ -62,7 +62,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function checkbox_group($name, $arr, $selected = [], $separator = '', $extra = null)
+    public static function checkbox_group($name, $arr, array $selected = [], string $separator = '', $extra = null): string
     {
         $ix = 0;
         if (!is_array($selected)) {
@@ -93,7 +93,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function checkbox($name, $value = 1, $checked = false, $label = '', $extra = null)
+    public static function checkbox($name, int $value = 1, bool $checked = false, string $label = '', $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"checkbox\" id=\"{$name}_1\" value=\"{$value}\"";
         if ($checked) {
@@ -114,7 +114,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function textbox($name, $value = '', $width = null, $maxLength = null, $extra = null)
+    public static function textbox($name, string $value = '', $width = null, $maxLength = null, $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"text\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
@@ -135,7 +135,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function password($name, $value = '', $width = null, $maxLength = null, $extra = null)
+    public static function password($name, string $value = '', $width = null, $maxLength = null, $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"password\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
@@ -156,7 +156,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function textarea($name, $value = '', $width = null, $height = null, $extra = null)
+    public static function textarea($name, string $value = '', $width = null, $height = null, $extra = null): string
     {
         $str = "<textarea name=\"{$name}\"";
         if ($width) {
@@ -177,7 +177,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function hidden($name, $value = '', $extra = null)
+    public static function hidden($name, string $value = '', $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"hidden\" value=\"";
         $str .= htmlspecialchars($value);
@@ -191,7 +191,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function filefield($name, $width = null, $extra = null)
+    public static function filefield($name, $width = null, $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"file\"";
         if ($width) {
@@ -209,7 +209,7 @@ class Html
      * @param null $extra
      * @return string
      */
-    public static function form_open($name, $action, $method = 'post', $onsubmit = '', $extra = null)
+    public static function form_open($name, $action, string $method = 'post', string $onsubmit = '', $extra = null): string
     {
         $str = "<form name=\"{$name}\" action=\"{$action}\" method=\"{$method}\" ";
         if ($onsubmit) {
@@ -222,7 +222,7 @@ class Html
     /**
      * @return string
      */
-    public static function form_close()
+    public static function form_close(): string
     {
         return "</form>\n";
     }

@@ -2,11 +2,9 @@
 
 namespace Xcs\Db;
 
-use Xcs\App;
-use Xcs\Di\BaseObject;
 use Xcs\Ex\DbException;
 
-class PdoDb extends BaseObject
+class PdoDb
 {
 
     private $dsn;
@@ -23,7 +21,6 @@ class PdoDb extends BaseObject
 
         if (empty($this->dsn)) {
             new DbException('dsn is empty', 404, 'PdoException');
-            return;
         }
 
         $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
@@ -61,13 +58,16 @@ class PdoDb extends BaseObject
      */
     public function __call($func, $args)
     {
-        return $this->_link && call_user_func_array([$this->_link, $func], $args);
+        if ($this->_link) {
+            return call_user_func_array([$this->_link, $func], $args);
+        }
+        return null;
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public function info()
+    public function info(): array
     {
         return $this->dsn;
     }
@@ -76,10 +76,10 @@ class PdoDb extends BaseObject
      * @param $tableName
      * @return string
      */
-    public function qTable($tableName)
+    public function qTable($tableName): string
     {
         if (strpos($tableName, '.') === false) {
-            return "`{$tableName}`";
+            return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
@@ -92,7 +92,7 @@ class PdoDb extends BaseObject
      * @param $fieldName
      * @return string
      */
-    public function qField($fieldName)
+    public function qField($fieldName): string
     {
         return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
@@ -102,7 +102,7 @@ class PdoDb extends BaseObject
      * @param string $glue
      * @return array
      */
-    public function field_param(array $fields, $glue = ',')
+    public function field_param(array $fields, string $glue = ','): array
     {
         $args = [];
         $sql = $comma = '';
@@ -118,9 +118,9 @@ class PdoDb extends BaseObject
      * @param $tableName
      * @param array $data
      * @param bool $retId
-     * @return mixed
+     * @return bool|string
      */
-    public function create($tableName, array $data, $retId = false)
+    public function create($tableName, array $data, bool $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -148,7 +148,7 @@ class PdoDb extends BaseObject
      * @param array $data
      * @return bool|int
      */
-    public function replace($tableName, array $data)
+    public function replace(string $tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -167,10 +167,10 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string|array $data
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public function update($tableName, $data, $condition, $args = null)
+    public function update(string $tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -193,11 +193,11 @@ class PdoDb extends BaseObject
     /**
      * @param string $tableName
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param bool $multi
      * @return bool|int
      */
-    public function remove($tableName, $condition, $args = null, $multi = false)
+    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -211,12 +211,12 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $orderBy
      * @param bool $retObj
-     * @return bool|mixed
+     * @return mixed
      */
-    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
+    public function findOne(string $tableName, string $field, $condition, array $args = null, $orderBy = null, bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -230,13 +230,13 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $orderBy
      * @param null $index
      * @param bool $retObj
-     * @return array|bool|mixed
+     * @return array|bool
      */
-    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
+    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, $orderBy = null, $index = null, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -251,14 +251,14 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $orderBy
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return bool|mixed|null
+     * @return array|bool
      */
-    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
+    public function page(string $tableName, string $field, $condition, array $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -273,11 +273,11 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $orderBy
      * @return mixed
      */
-    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -304,11 +304,11 @@ class PdoDb extends BaseObject
      * @param string $tableName
      * @param string $field
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param null $orderBy
-     * @return mixed
+     * @return array|bool
      */
-    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function col(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -338,21 +338,21 @@ class PdoDb extends BaseObject
     /**
      * @param $tableName
      * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $args = null, $field = '*')
+    public function count($tableName, $condition, array $args = null, string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public function exec($sql, $args = null)
+    public function exec(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -372,11 +372,11 @@ class PdoDb extends BaseObject
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql($sql, $args = null, $retObj = false)
+    public function rowSql(string $sql, array $args = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -400,12 +400,12 @@ class PdoDb extends BaseObject
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param $index
-     * @param $retObj
-     * @return mixed
+     * @param bool $retObj
+     * @return array|bool
      */
-    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
+    public function rowSetSql(string $sql, array $args = null, $index = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -435,13 +435,13 @@ class PdoDb extends BaseObject
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return array|bool|null
+     * @return array|bool
      */
-    public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
+    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -466,20 +466,20 @@ class PdoDb extends BaseObject
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @return bool|mixed
+     * @param array|null $args [':var' => $var]
+     * @return mixed
      */
-    public function countSql($sql, $args = null)
+    public function countSql(string $sql, array $args = null)
     {
         return $this->firstSql($sql, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @return bool|mixed
+     * @param array|null $args [':var' => $var]
+     * @return mixed
      */
-    public function firstSql($sql, $args = null)
+    public function firstSql(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -499,10 +499,10 @@ class PdoDb extends BaseObject
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql($sql, $args = null)
+    public function colSql(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -526,7 +526,7 @@ class PdoDb extends BaseObject
     /**
      * @return bool
      */
-    public function startTrans()
+    public function startTrans(): bool
     {
         return $this->_link->beginTransaction();
     }
@@ -534,7 +534,7 @@ class PdoDb extends BaseObject
     /**
      * @param bool $commit_no_errors
      */
-    public function endTrans($commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -553,21 +553,13 @@ class PdoDb extends BaseObject
      * @param string $sql
      * @return bool
      */
-    private function _halt($message = '', $code = 0, $sql = '')
+    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
         if ($this->dsn['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            if (App::isAjax(true)) {
-                $res = [
-                    'code' => -1,
-                    'msg' => 'error:' . $message . ' SQL:' . $sql,
-                ];
-                echo json_encode($res, JSON_UNESCAPED_UNICODE);
-            } else {
-                new DbException($message . ', SQL: ' . $sql, intval($code), 'PdoException');
-            }
+            echo 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
         }
         return false;
     }
@@ -577,7 +569,7 @@ class PdoDb extends BaseObject
      * @param $col
      * @return array
      */
-    private function _array_index($arr, $col)
+    private function _array_index($arr, $col): array
     {
         if (!is_array($arr)) {
             return $arr;
@@ -594,7 +586,7 @@ class PdoDb extends BaseObject
      * @param $col
      * @return array
      */
-    private function _object_index($arr, $col)
+    private function _object_index($arr, $col): array
     {
         if (!is_array($arr)) {
             return $arr;

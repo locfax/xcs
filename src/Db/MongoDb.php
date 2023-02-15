@@ -11,10 +11,9 @@ use \MongoDB\Driver\Query as MongoQuery;
 use \MongoDB\Driver\Command;
 use \MongoDB\Driver\ReadPreference;
 use \MongoDB\Driver\WriteConcern;
-use Xcs\Di\BaseObject;
 use Xcs\Ex\DbException;
 
-class MongoDb extends BaseObject
+class MongoDb
 {
     /**
      * @var array
@@ -24,7 +23,7 @@ class MongoDb extends BaseObject
     /**
      * @var Manager
      */
-    private $_link = null;
+    private $_link;
 
     /**
      * @var WriteConcern
@@ -32,13 +31,13 @@ class MongoDb extends BaseObject
     private $_writeConcern;
 
     /**
-     * @var mixed|null
+     * @var string
      */
     private $_dbname;
 
     /**
      * MongoDb constructor.
-     * @param array|null $config
+     * @param array $config
      */
     public function __construct(array $config)
     {
@@ -46,7 +45,6 @@ class MongoDb extends BaseObject
 
         if (empty($this->dsn)) {
             new DbException('dsn is empty', 404, 'PdoException');
-            return;
         }
 
         $options = [
@@ -76,14 +74,17 @@ class MongoDb extends BaseObject
     /**
      * @param $func
      * @param $args
-     * @return mixed
+     * @return void
      */
     public function __call($func, $args)
     {
 
     }
 
-    public function info()
+    /**
+     * @return array
+     */
+    public function info(): array
     {
         return $this->dsn;
     }
@@ -92,9 +93,9 @@ class MongoDb extends BaseObject
      * @param $table
      * @param array $document
      * @param bool $retId
-     * @return bool|string
+     * @return bool|int|string|null
      */
-    public function create($table, $document = [], $retId = false)
+    public function create($table, array $document = [], bool $retId = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -123,7 +124,7 @@ class MongoDb extends BaseObject
      * @param string $options
      * @return bool|int|null
      */
-    public function update($table, $document = [], $condition = [], $options = '$set')
+    public function update($table, array $document = [], array $condition = [], string $options = '$set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -152,7 +153,7 @@ class MongoDb extends BaseObject
      * @param bool $multi
      * @return bool|int|null
      */
-    public function remove($table, $condition = [], $multi = false)
+    public function remove($table, array $condition = [], bool $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -177,7 +178,7 @@ class MongoDb extends BaseObject
      * @param array $condition
      * @return array|bool
      */
-    public function findOne($table, $options = [], $condition = [])
+    public function findOne($table, array $options = [], array $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -208,7 +209,7 @@ class MongoDb extends BaseObject
      * @param array $condition
      * @return array|bool
      */
-    public function findAll($table, $options = [], $condition = [])
+    public function findAll($table, array $options = [], array $condition = [])
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -237,7 +238,7 @@ class MongoDb extends BaseObject
      * @param int $limit
      * @return array|bool
      */
-    public function page($table, $options = [], $condition = [], $offset = 0, $limit = 18)
+    public function page($table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
     {
         $options = array_merge($options, [
             'limit' => $limit,
@@ -268,9 +269,9 @@ class MongoDb extends BaseObject
     /**
      * @param $table
      * @param array $condition
-     * @return bool
+     * @return mixed
      */
-    public function count($table, $condition = [])
+    public function count($table, array $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -297,7 +298,7 @@ class MongoDb extends BaseObject
      * @param $total
      * @return int
      */
-    public function pageStart($page, $ppp, $total)
+    public function pageStart(int $page, int $ppp, $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -307,16 +308,15 @@ class MongoDb extends BaseObject
     /**
      * @param string $message
      * @param int $code
-     * @param string $sql
      * @return bool
      */
-    private function _halt($message = '', $code = 0, $sql = '')
+    private function _halt(string $message = '', int $code = 0): bool
     {
         if ($this->dsn['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            new DbException($message . ' : ' . $sql, intval($code), 'MongoDbException');
+            echo 'ERROR: ' . $message . ' CODE: ' . $code;
         }
         return false;
     }

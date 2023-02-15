@@ -2,7 +2,9 @@
 
 namespace Xcs;
 
-class ExException extends \Exception
+use Exception;
+
+class ExException extends Exception
 {
 
     public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null)
@@ -15,10 +17,10 @@ class ExException extends \Exception
     }
 
     /**
-     * @param \Exception $exception
+     * @param Exception $exception
      * @param string $type
      */
-    public function exception($exception, $type = 'Exception')
+    public function exception(Exception $exception, string $type = 'Exception')
     {
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
@@ -61,17 +63,17 @@ class ExException extends \Exception
         $this->showError($type, $errorMsg, $phpMsg);
     }
 
-    public function writeErrorLog($message)
+    public function writeErrorLog($message): bool
     {
         return false; // 暂时不写入
     }
 
-    public function clear($message)
+    public function clear($message): string
     {
         if (defined('DEBUG') && DEBUG) {
             return is_object($message) ? '#object#' : $message;
         }
-        return htmlspecialchars(substr(str_replace(["t", "r", "n"], " ", $message), 0, 10)) . (strlen($message) > 10 ? ' ...' : '') . "'";
+        return htmlspecialchars($message);
     }
 
     /**
@@ -81,9 +83,9 @@ class ExException extends \Exception
      * @access public
      * @param string $type 错误类型 db,system
      * @param string $errorMsg
-     * @param string $phpMsg
+     * @param mixed $phpMsg
      */
-    public static function showError($type, $errorMsg, $phpMsg = '')
+    public static function showError(string $type, string $errorMsg, $phpMsg = '')
     {
         ob_get_length() && ob_end_clean();
 

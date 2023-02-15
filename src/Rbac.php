@@ -18,18 +18,18 @@ class Rbac
      * @param string $auth
      * @return bool
      */
-    public static function check($controllerName, $actionName = null, $auth = 'general')
+    public static function check($controllerName, $actionName = null, string $auth = 'general'): bool
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
 
         //if controller offer empty AC, authtype 'general' then allow
         if ('general' == $auth) {
-            if (is_null($ACL) || empty($ACL)) {
+            if (empty($ACL)) {
                 return true;
             }
         } else {
-            if (is_null($ACL) || empty($ACL)) {
+            if (empty($ACL)) {
                 return false;
             }
         }
@@ -59,7 +59,7 @@ class Rbac
      * @param $ACL
      * @return bool
      */
-    private static function _check($_roles, $ACL)
+    private static function _check($_roles, $ACL): bool
     {
         $roles = array_map('strtoupper', $_roles);
         if ($ACL['allow'] == self::ACL_EVERYONE) {
@@ -163,7 +163,7 @@ class Rbac
 
     /**
      * @param $controllerName
-     * @return null
+     * @return mixed
      */
     private static function _getACL($controllerName)
     {

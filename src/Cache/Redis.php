@@ -21,7 +21,7 @@ class Redis
      * @return $this
      * @throws ExException
      */
-    public function init($config)
+    public function init($config): Redis
     {
         try {
             $this->_link = new \Redis();
@@ -46,34 +46,26 @@ class Redis
 
     /**
      * @param $key
-     * @return bool
+     * @return mixed
      */
     public function get($key)
     {
-        try {
-            return $this->_link->get($key);
-        } catch (\RedisException $e) {
-            return false;
-        }
+        return $this->_link->get($key);
     }
 
     /**
      * @param $key
      * @param $value
      * @param int $ttl
-     * @return bool
+     * @return mixed
      */
-    public function set($key, $value, $ttl = 0)
+    public function set($key, $value, int $ttl = 0): bool
     {
-        try {
-            $ret = $this->_link->set($key, $value);
-            if ($ttl > 0) {
-                $this->_link->expire($key, $ttl);
-            }
-            return $ret;
-        } catch (\RedisException $e) {
-            return false;
+        $ret = $this->_link->set($key, $value);
+        if ($ttl > 0) {
+            $this->_link->expire($key, $ttl);
         }
+        return $ret;
     }
 
     /**
@@ -81,31 +73,23 @@ class Redis
      * @param int $ttl
      * @return bool
      */
-    public function expire($key, $ttl = 0)
+    public function expire($key, int $ttl = 0): bool
     {
         return false;
     }
 
     /**
      * @param $key
-     * @return bool
+     * @return mixed
      */
-    public function rm($key)
+    public function rm($key): bool
     {
-        try {
-            return $this->_link->delete($key);
-        } catch (\RedisException $e) {
-            return false;
-        }
+        return $this->_link->del($key);
     }
 
     public function clear()
     {
-        try {
-            return $this->_link->flushDB();
-        } catch (\RedisException $e) {
-            return false;
-        }
+        return $this->_link->flushDB();
     }
 
 }

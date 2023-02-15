@@ -2,6 +2,10 @@
 
 namespace Xcs\Helper;
 
+use ImagickDrawException;
+use ImagickException;
+use ImagickPixelException;
+
 class HandleImagek
 {
 
@@ -43,6 +47,9 @@ class HandleImagek
         $this->_handle->thumbnailImage($width, $height, $options['bestfit'], $options['fill']);
     }
 
+    /**
+     * @throws ImagickException
+     */
     public function watermark($waterImage, $pos = 5, $Opacity = 0.2)
     {
         $water = new \Imagick($waterImage);
@@ -107,6 +114,11 @@ class HandleImagek
       $src:保存图片的地址,string型
      */
 
+    /**
+     * @throws ImagickException
+     * @throws ImagickDrawException
+     * @throws ImagickPixelException
+     */
     public function text($text, $color, $size, $font = 'FetteSteinschrift')
     {
         $font = LIB_PATH . "captcha/fonts/en/" . $font . ".ttf";
@@ -136,6 +148,11 @@ class HandleImagek
       $x,$y:水印位置,int型
      */
 
+    /**
+     * @throws ImagickException
+     * @throws ImagickPixelException
+     * @throws ImagickDrawException
+     */
     public function mark($text, $color, $size, $font, $x, $y)
     {
         $im = $this->text($text, $color, $size, $font);
@@ -236,6 +253,9 @@ class HandleImagek
       $dst:保存图片的地址,string型
      */
 
+    /**
+     * @throws ImagickPixelException
+     */
     public function frame($frame_width, $frame_height, $bevel, $color, $apply, $x = 0, $y = 0, $w = 0, $h = 0)
     {
         if ($apply && $x == 0 && $y == 0 && $w == 0 && $h == 0) {
@@ -313,6 +333,10 @@ class HandleImagek
       $angle:倾斜角度,int型
      */
 
+    /**
+     * @throws ImagickPixelException
+     * @throws ImagickException
+     */
     public function polaroidEffect($src, $color, $angle = 0)
     {
         if (15 != abs($angle)) {
@@ -382,6 +406,11 @@ class HandleImagek
       $brushpath:画笔轨迹,array型
      */
 
+    /**
+     * @throws ImagickException
+     * @throws ImagickDrawException
+     * @throws ImagickPixelException
+     */
     public function brushpng($color, $size, $brushpath)
     {
         $info = $this->_handle->getImageGeometry();
@@ -413,6 +442,9 @@ class HandleImagek
       $png:需要合并的png图片地址,string型
      */
 
+    /**
+     * @throws ImagickException
+     */
     public function dobrush($png)
     {
         if (is_file($png)) {
@@ -446,6 +478,11 @@ class HandleImagek
       $type:true表示存储图片,false表示返回处理后的Imagick对象
      */
 
+    /**
+     * @throws ImagickException
+     * @throws ImagickDrawException
+     * @throws ImagickPixelException
+     */
     public function brightness($n, $s_x = 0, $e_x = 0, $s_y = 0, $e_y = 0)
     {
         $info = $this->_handle->getImageGeometry();
