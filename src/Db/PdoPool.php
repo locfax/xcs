@@ -506,11 +506,11 @@ class PdoPool
 
     /**
      * @param string $message
-     * @param int $code
+     * @param mixed $code
      * @param string $sql
      * @return bool
      */
-    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
+    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
     {
         $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
         $message = mb_convert_encoding($message, 'UTF-8', $encode);

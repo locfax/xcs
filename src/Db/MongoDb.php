@@ -307,10 +307,10 @@ class MongoDb
 
     /**
      * @param string $message
-     * @param int $code
+     * @param mixed $code
      * @return bool
      */
-    private function _halt(string $message = '', int $code = 0): bool
+    private function _halt(string $message = '', $code = 0): bool
     {
         if ($this->dsn['dev']) {
             $this->close();

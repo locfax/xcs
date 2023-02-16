@@ -549,11 +549,11 @@ class PdoDb
 
     /**
      * @param string $message
-     * @param int $code
+     * @param mixed $code
      * @param string $sql
      * @return bool
      */
-    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
+    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
     {
         if ($this->dsn['dev']) {
             $this->close();

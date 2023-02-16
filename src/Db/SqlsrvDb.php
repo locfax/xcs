@@ -6,7 +6,6 @@ use Xcs\Ex\DbException;
 
 class SqlsrvDb
 {
-
     private $dsn;
     private $_link = null;
     private $repeat = false;
@@ -78,14 +77,7 @@ class SqlsrvDb
      */
     public function qTable(string $tableName): string
     {
-        if (strpos($tableName, '.') === false) {
-            return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
-        }
-        $arr = explode('.', $tableName);
-        if (count($arr) > 2) {
-            $this->_halt("tableName:{$tableName} 最多只能有一个点.", 0, '');
-        }
-        return "`{$arr[0]}`.`{$arr[1]}`";
+        return $tableName;
     }
 
     /**
@@ -94,7 +86,7 @@ class SqlsrvDb
      */
     public function qField(string $fieldName): string
     {
-        return ($fieldName == '*') ? '*' : "`{$fieldName}`";
+        return $fieldName;
     }
 
     /**
@@ -222,7 +214,7 @@ class SqlsrvDb
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy . ' LIMIT 1';
+        $sql = 'SELECT TOP 1 ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy;
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -258,15 +250,15 @@ class SqlsrvDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = null, int $offset = 0, int $limit = 20, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->pageSql($sql, $args, $offset, $limit, $retObj);
+        $sql = 'SELECT TOP ' . ($limit + $offset) . ' ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
+        return $this->pageSql($sql, $args, $offset, $retObj);
     }
 
     /**
@@ -283,7 +275,7 @@ class SqlsrvDb
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy} LIMIT 1";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -437,25 +429,30 @@ class SqlsrvDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param int $offset
-     * @param int $limit
      * @param bool $retObj
      * @return array|bool
      */
-    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, $args = null, int $offset = 0, bool $retObj = false)
     {
-        $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
-                $sth = $this->_link->prepare($sql);
+                $sth = $this->_link->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
                 $sth->execute($args);
             }
+
+            $data = [];
             if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
+                while ($one = $sth->fetch(\PDO::FETCH_OBJ, \PDO::FETCH_ORI_NEXT, $offset)) {
+                    $data[] = $one;
+                }
             } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+                while ($one = $sth->fetch(\PDO::FETCH_ASSOC, \PDO::FETCH_ORI_NEXT, $offset)) {
+                    $data[] = $one;
+                }
             }
+
             $sth->closeCursor();
             $sth = null;
             return $data;
@@ -549,11 +546,11 @@ class SqlsrvDb
 
     /**
      * @param string $message
-     * @param int $code
+     * @param mixed $code
      * @param string $sql
      * @return bool
      */
-    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
+    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
     {
         if ($this->dsn['dev']) {
             $this->close();

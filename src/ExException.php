@@ -68,7 +68,7 @@ class ExException extends Exception
         return false; // 暂时不写入
     }
 
-    public function clear($message): string
+    public function clear($message)
     {
         if (defined('DEBUG') && DEBUG) {
             return is_object($message) ? '#object#' : $message;
