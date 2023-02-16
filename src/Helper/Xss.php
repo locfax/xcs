@@ -74,7 +74,7 @@ class Xss
     }
 
     /**
-     * @param $str
+     * @param mixed $str
      * @param bool $is_image
      * @return array|bool|string
      */
@@ -174,7 +174,7 @@ class Xss
         return $str;
     }
 
-    protected function _sanitize_naughty_html($matches): string
+    protected function _sanitize_naughty_html($matches)
     {
         return '&lt;' . $matches[1] . $matches[2] . $matches[3] . str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[4]);
     }
@@ -189,7 +189,7 @@ class Xss
         return str_replace($match[1], preg_replace('#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
 
-    protected function _compact_exploded_words($matches): string
+    protected function _compact_exploded_words($matches)
     {
         return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
     }
@@ -199,7 +199,7 @@ class Xss
         return str_replace(['>', '<', '\\'], ['&gt;', '&lt;', '\\\\'], $match[0]);
     }
 
-    protected function _filter_attributes($str): string
+    protected function _filter_attributes($str)
     {
         $out = '';
         if (preg_match_all('#\s*[a-z\-]+\s*=\s*(\042|\047)([^\\\1]*?)\\1#is', $str, $matches)) {
@@ -210,7 +210,7 @@ class Xss
         return $out;
     }
 
-    public function xss_hash(): string
+    public function xss_hash()
     {
         if (null == $this->_xss_hash) {
             $rand = $this->get_random_bytes(16);

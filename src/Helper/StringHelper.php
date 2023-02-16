@@ -54,15 +54,15 @@ class StringHelper
     /**
      * cut string to set length
      * return string
-     * @param $string
-     * @param $length
+     * @param string $string
+     * @param int $length
      * @param bool $suffix
      * @param string $charset
      * @param int $start
      * @param string $dot
-     * @return array|string|string[]
+     * @return string
      */
-    public static function cutStr($string, $length, bool $suffix = true, string $charset = "utf-8", int $start = 0, string $dot = ' ...')
+    public static function cutStr(string $string, int $length, bool $suffix = true, string $charset = "utf-8", int $start = 0, string $dot = ' ...'): string
     {
         $str = str_replace(['&amp;', '&quot;', '&lt;', '&gt;'], ['&', '"', '<', '>'], $string);
         if (function_exists("mb_substr")) {
@@ -85,13 +85,13 @@ class StringHelper
     }
 
     /**
-     * @param $string
-     * @param $length
+     * @param string $string
+     * @param int $length
      * @param int $out_slashes
      * @param int $html
      * @return array|string|string[]|null
      */
-    public static function getStr($string, $length, int $out_slashes = 0, int $html = 0)
+    public static function getStr(string $string, int $length, int $out_slashes = 0, int $html = 0)
     {
         $string = stripslashes($string);
         if ($html < 0) {
@@ -109,12 +109,12 @@ class StringHelper
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $string
-     * @return mixed|string
+     * @param string $in
+     * @param string $out
+     * @param string $string
+     * @return array|false|string
      */
-    public static function convert_encode($in, $out, $string)
+    public static function convert_encode(string $in, string $out, string $string)
     { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
@@ -127,12 +127,12 @@ class StringHelper
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $string
-     * @return array|mixed|string
+     * @param string $in
+     * @param string $out
+     * @param mixed $string
+     * @return mixed
      */
-    public static function convert_char($in, $out, $string)
+    public static function convert_char(string $in, string $out, $string)
     {
         // string change charset return mix
         if (is_array($string)) {

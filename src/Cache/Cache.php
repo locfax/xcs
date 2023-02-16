@@ -89,7 +89,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    private function _set(string $key, $value, int $ttl = 0): bool
+    private function _set(string $key, $value, int $ttl = 0)
     {
         $ret = false;
         if ($this->enable) {
@@ -111,7 +111,7 @@ class Cache
      * @param $key
      * @return mixed
      */
-    private function _rm($key): bool
+    private function _rm($key)
     {
         $ret = false;
         if ($this->enable) {
@@ -131,7 +131,7 @@ class Cache
     /**
      * @return mixed
      */
-    private function _clear(): bool
+    private function _clear()
     {
         $ret = false;
         if ($this->enable) {

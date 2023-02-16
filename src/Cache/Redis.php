@@ -21,7 +21,7 @@ class Redis
      * @return $this
      * @throws ExException
      */
-    public function init($config): Redis
+    public function init($config)
     {
         try {
             $this->_link = new \Redis();
@@ -59,7 +59,7 @@ class Redis
      * @param int $ttl
      * @return mixed
      */
-    public function set($key, $value, int $ttl = 0): bool
+    public function set($key, $value, int $ttl = 0)
     {
         $ret = $this->_link->set($key, $value);
         if ($ttl > 0) {
@@ -82,14 +82,14 @@ class Redis
      * @param $key
      * @return mixed
      */
-    public function rm($key): bool
+    public function rm($key)
     {
         return $this->_link->del($key);
     }
 
     public function clear()
     {
-        return $this->_link->flushDB();
+        $this->_link->flushDB();
     }
 
 }

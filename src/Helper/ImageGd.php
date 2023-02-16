@@ -2,7 +2,7 @@
 
 namespace Xcs\Helper;
 
-/*
+/**
  * $ext = pathinfo($_FILES['postfile']['name'], PATHINFO_EXTENSION);
  * $image = imagegd::createFromFile($_FILES['postfile']['tmp_name'], $ext);
  */

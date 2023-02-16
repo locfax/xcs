@@ -45,7 +45,7 @@ class Http
      * @param string $url
      * @param int $timeout
      * @param string $header
-     * @return mixed
+     * @return bool|string
      */
     public static function doGet(string $url, int $timeout = 5, string $header = "")
     {
@@ -58,13 +58,10 @@ class Http
         switch ($code) {
             case 1:
                 return self::curlGet($url, $timeout, $header);
-                break;
             case 2:
                 return self::socketGet($url, $timeout, $header);
-                break;
             case 3:
                 return self::phpGet($url, $timeout, $header);
-                break;
             default:
                 return false;
         }
@@ -131,7 +128,7 @@ class Http
      * @param int $timeout
      * @param string $header
      * @param string $data_type
-     * @return mixed
+     * @return bool|string
      */
     public static function curlPost($url, array $post_data = [], int $timeout = 5, string $header = "", string $data_type = "")
     {
@@ -267,7 +264,7 @@ class Http
      * @param int $timeout
      * @param string $header
      * @param string $data_type
-     * @return mixed
+     * @return false|string
      */
     public static function phpPost($url, array $post_data = [], int $timeout = 5, string $header = "", string $data_type = "")
     {
@@ -570,12 +567,7 @@ class Http
             'zip' => 'application/zip',
         ];
         $type = strtolower(substr(strrchr($filename, '.'), 1));
-        if (isset($contentType[$type])) {
-            $mime = $contentType[$type];
-        } else {
-            $mime = 'application/octet-stream';
-        }
-        return $mime;
+        return $contentType[$type] ?? 'application/octet-stream';
     }
 
 

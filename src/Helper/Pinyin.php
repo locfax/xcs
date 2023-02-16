@@ -20,7 +20,7 @@ class Pinyin
 
     /**
      * @param $s
-     * @return string
+     * @return mixed
      */
     public static function utf8_to_gb2312($s): string
     {

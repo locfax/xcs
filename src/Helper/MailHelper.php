@@ -4,7 +4,6 @@ namespace Xcs\Helper;
 
 class MailHelper
 {
-
     public $debug = true;
 
     public $mail = [

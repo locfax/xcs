@@ -81,27 +81,27 @@ class FileHelper
 
     /**
      * 遍历文件目录
-     * @param $dir
-     * @param bool $dirfile
+     * @param string $dir
+     * @param bool $dirFile
      * @param bool $md5
      * @param bool $root
      * @return array
      */
-    public static function list_files($dir, bool $dirfile = false, bool $md5 = true, bool $root = true): array
+    public static function list_files(string $dir, bool $dirFile = false, bool $md5 = true, bool $root = true): array
     {
         static $return = [];
         if ($root) {
             $return = [];
         }
-        $filepoint = opendir($dir);
-        while (($target = readdir($filepoint)) !== false) {
+        $filePoint = opendir($dir);
+        while (($target = readdir($filePoint)) !== false) {
             if ("." == $target || ".." == $target) {
                 continue;
             }
             if (is_dir($dir . $target)) {
-                self::list_files($dir . $target . '/', $dirfile, $md5, false);
+                self::list_files($dir . $target . '/', $dirFile, $md5, false);
             } else {
-                $file = $dirfile ? $dir . $target : $target;
+                $file = $dirFile ? $dir . $target : $target;
                 if ($md5) {
                     $return[md5_file($dir . $target)] = $file;
                 } else {
@@ -109,7 +109,7 @@ class FileHelper
                 }
             }
         }
-        closedir($filepoint);
+        closedir($filePoint);
         return $return;
     }
 

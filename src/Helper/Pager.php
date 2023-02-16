@@ -5,10 +5,10 @@ namespace Xcs\Helper;
 class Pager
 {
     /**
-     * @param $pageInfo
+     * @param array $pageInfo
      * @return string
      */
-    public static function pageBar($pageInfo): string
+    public static function pageBar(array $pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -70,10 +70,10 @@ class Pager
     }
 
     /**
-     * @param $pageInfo
+     * @param array $pageInfo
      * @return string
      */
-    public static function simplePage($pageInfo): string
+    public static function simplePage(array $pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -99,11 +99,11 @@ class Pager
     }
 
     /**
-     * @param $str
-     * @param $needle
+     * @param string $str
+     * @param string $needle
      * @return bool
      */
-    private static function strPos($str, $needle): bool
+    private static function strPos(string $str, string $needle): bool
     {
         return !(false === strpos($str, $needle));
     }

@@ -29,11 +29,10 @@ class HandleImagek
         $this->_handle = null;
     }
 
-    /*
+    /**
       函数说明：切割图片
       参数:
      */
-
     public function crop($width, $height, $options = [])
     {
         if (is_null($this->_handle)) {
@@ -62,21 +61,20 @@ class HandleImagek
         $dw->destroy();
     }
 
-    /*
+    /**
       函数说明：切割图片
       参数: $filepath:生成的缩略图位置 ,string
      */
-
     public function saveAsJpeg($filepath)
     {
         $this->_handle->writeImage($filepath);
     }
 
-    /*
+    /**
       利用Imagick模块处理图像的方法
      */
 
-    /*
+    /**
       函数说明：对比度处理
       函数参数：
       $type:表示增加或减少对比度,逻辑型,true:增加; false:减少
@@ -85,7 +83,6 @@ class HandleImagek
       $src:原图片位置,string型
       $dst:处理后的目标图片存储位置,string型
      */
-
     public function contrast($type, $apply, $w = 0, $h = 0, $x = 0, $y = 0)
     {
         if ($type) {
@@ -103,7 +100,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：将字母和数字生成png图片
       函数参数：
       $text:需要生成图片的文字,string型
@@ -136,7 +133,7 @@ class HandleImagek
         return $im;
     }
 
-    /*
+    /**
       函数说明：加水印
       函数参数：
       $text:水印文字,string型
@@ -160,7 +157,7 @@ class HandleImagek
         $im->destroy();
     }
 
-    /*
+    /**
       函数说明：模糊处理
       函数参数：
       $radius:模糊程度,int型
@@ -185,7 +182,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：锐化处理
       函数参数：
       $radius:锐化程度,int型
@@ -210,7 +207,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：突起效果
       函数参数：
       $raise:突起度,int型
@@ -240,7 +237,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：边框效果
       函数参数：
       $frame_width:边框宽度,int型
@@ -273,7 +270,7 @@ class HandleImagek
         $framecolor->destroy();
     }
 
-    /*
+    /**
       函数说明：油画效果
       函数参数：
       $radius:油画效果参数
@@ -298,7 +295,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：发散效果
       函数参数：
       $radius:发散效果参数
@@ -324,7 +321,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：倾斜效果
       参数说明：
       $src:原图地址,string型
@@ -396,7 +393,7 @@ class HandleImagek
         $this->_handle = $image;
     }
 
-    /*
+    /**
       函数说明：生成手绘图片
       参数说明：
       $src:原图地址,string型
@@ -434,7 +431,7 @@ class HandleImagek
         $this->_handle = $image;
     }
 
-    /*
+    /**
       函数说明：合并图片
       参数说明：
       $src:原图地址,string型
@@ -455,7 +452,7 @@ class HandleImagek
         }
     }
 
-    /*
+    /**
       函数说明：旋转图片
       参数说明：
       $src:原图地址,string型
@@ -468,7 +465,7 @@ class HandleImagek
         $this->_handle->rotateImage(new \ImagickPixel(), $angle);
     }
 
-    /*
+    /**
       函数说明：图片亮度处理
       参数说明：
       $src:原图地址,string型
@@ -528,7 +525,7 @@ class HandleImagek
         $draw->destroy();
     }
 
-    /*
+    /**
       函数说明：图片灰度处理
       参数说明：
       $src:原图地址,string型
@@ -559,7 +556,7 @@ class HandleImagek
         $this->_handle->clear();
     }
 
-    /*
+    /**
       函数说明：jpg质量压缩
       参数说明：
       $src:原图地址,string型

@@ -21,7 +21,7 @@ class Memcache
      * @return $this
      * @throws ExException
      */
-    public function init($config): Memcache
+    public function init($config)
     {
         try {
             $this->_link = new \Memcache();

@@ -6,16 +6,16 @@ class Curl
 {
 
     /**
-     * @param $url
-     * @param string $data
+     * @param string $url
+     * @param mixed $data
      * @param array $httpHead
-     * @param bool $retGzip
+     * @param mixed $retGzip
      * @param string $retCharset
      * @param bool $retHead
      * @param bool $retSession
      * @return array
      */
-    public static function send($url, string $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
+    public static function send(string $url, $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
     {
         $ch = curl_init();
         if (!$ch) {

@@ -13,7 +13,7 @@ class PdoDb
 
     /**
      * PdoDb constructor.
-     * @param array|null $config
+     * @param array $config
      */
     public function __construct(array $config)
     {
@@ -52,11 +52,11 @@ class PdoDb
     }
 
     /**
-     * @param $func
-     * @param $args
+     * @param string $func
+     * @param array $args
      * @return mixed
      */
-    public function __call($func, $args)
+    public function __call(string $func, array $args)
     {
         if ($this->_link) {
             return call_user_func_array([$this->_link, $func], $args);
@@ -73,10 +73,10 @@ class PdoDb
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @return string
      */
-    public function qTable($tableName): string
+    public function qTable(string $tableName): string
     {
         if (strpos($tableName, '.') === false) {
             return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
@@ -89,10 +89,10 @@ class PdoDb
     }
 
     /**
-     * @param $fieldName
+     * @param string $fieldName
      * @return string
      */
-    public function qField($fieldName): string
+    public function qField(string $fieldName): string
     {
         return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
@@ -115,12 +115,12 @@ class PdoDb
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param array $data
      * @param bool $retId
      * @return bool|string
      */
-    public function create($tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -165,12 +165,12 @@ class PdoDb
 
     /**
      * @param string $tableName
-     * @param string|array $data
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $data
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, $data, $condition, $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -192,12 +192,12 @@ class PdoDb
 
     /**
      * @param string $tableName
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
      * @param bool $multi
      * @return bool|int
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, $condition, $args = null, bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -210,13 +210,13 @@ class PdoDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param null $orderBy
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param mixed $orderBy
      * @param bool $retObj
      * @return mixed
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, $condition, $args = null, $orderBy = null, bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -229,14 +229,14 @@ class PdoDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param null $orderBy
-     * @param null $index
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param mixed $orderBy
+     * @param mixed $index
      * @param bool $retObj
      * @return array|bool
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, $orderBy = null, $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -250,15 +250,15 @@ class PdoDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param null $orderBy
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param mixed $orderBy
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -272,12 +272,12 @@ class PdoDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param null $orderBy
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param mixed $orderBy
      * @return mixed
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -303,12 +303,12 @@ class PdoDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param null $orderBy
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param mixed $orderBy
      * @return array|bool
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
+    public function col(string $tableName, string $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -337,22 +337,22 @@ class PdoDb
 
     /**
      * @param $tableName
-     * @param string|array $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, array $args = null, string $field = '*')
+    public function count($tableName, $condition, $args = null, string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -372,11 +372,11 @@ class PdoDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql(string $sql, array $args = null, bool $retObj = false)
+    public function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -400,12 +400,12 @@ class PdoDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param $index
+     * @param mixed $args [':var' => $var]
+     * @param mixed $index
      * @param bool $retObj
      * @return array|bool
      */
-    public function rowSetSql(string $sql, array $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -435,13 +435,13 @@ class PdoDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
      */
-    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -466,20 +466,20 @@ class PdoDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, $args = null)
     {
         return $this->firstSql($sql, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -499,10 +499,10 @@ class PdoDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param mixed $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -565,11 +565,11 @@ class PdoDb
     }
 
     /**
-     * @param $arr
-     * @param $col
-     * @return array
+     * @param mixed $arr
+     * @param string $col
+     * @return mixed
      */
-    private function _array_index($arr, $col): array
+    private function _array_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -582,11 +582,11 @@ class PdoDb
     }
 
     /**
-     * @param $arr
-     * @param $col
-     * @return array
+     * @param mixed $arr
+     * @param string $col
+     * @return mixed
      */
-    private function _object_index($arr, $col): array
+    private function _object_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;

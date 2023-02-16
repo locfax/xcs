@@ -7,12 +7,12 @@ class CurlMulti
 
     /**
      * @param $urls
-     * @param string $data
+     * @param mixed $data
      * @param array $httpHead
      * @param string $charset
      * @return array
      */
-    public static function send($urls, string $data = '', array $httpHead = [], string $charset = 'UTF-8'): array
+    public static function send($urls, $data = '', array $httpHead = [], string $charset = 'UTF-8'): array
     {
         //创建多个curl语柄
         $mHandle = curl_multi_init();

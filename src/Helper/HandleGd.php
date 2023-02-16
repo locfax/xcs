@@ -17,6 +17,11 @@ class HandleGd
         $this->destroy();
     }
 
+    /**
+     * @param $width
+     * @param $height
+     * @return $this
+     */
     public function resize($width, $height): HandleGd
     {
         //低质量
@@ -30,6 +35,11 @@ class HandleGd
         return $this;
     }
 
+    /**
+     * @param $width
+     * @param $height
+     * @return $this
+     */
     public function autoresize($width, $height): HandleGd
     {
         if (is_null($this->_handle)) {
@@ -55,6 +65,11 @@ class HandleGd
         return $this;
     }
 
+    /**
+     * @param $width
+     * @param $height
+     * @return $this
+     */
     public function resampled($width, $height): HandleGd
     {
         //高质量
@@ -68,7 +83,14 @@ class HandleGd
         return $this;
     }
 
-    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff'): HandleGd
+    /**
+     * @param $width
+     * @param $height
+     * @param string $pos
+     * @param string $bgcolor
+     * @return $this
+     */
+    public function canvas($width, $height, string $pos = 'center', string $bgcolor = '0xffffff'): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -130,7 +152,11 @@ class HandleGd
         return $this;
     }
 
-    public function cut($options = []): HandleGd
+    /**
+     * @param array $options
+     * @return $this
+     */
+    public function cut(array $options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -176,7 +202,13 @@ class HandleGd
         return $this;
     }
 
-    public function crop($width, $height, $options = []): HandleGd
+    /**
+     * @param $width
+     * @param $height
+     * @param array $options
+     * @return $this
+     */
+    public function crop($width, $height, array $options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -267,16 +299,29 @@ class HandleGd
         return $this;
     }
 
-    public function saveAsJpeg($filename, $quality = 80)
+    /**
+     * @param $filename
+     * @param int $quality
+     * @return void
+     */
+    public function saveAsJpeg($filename, int $quality = 80)
     {
         imagejpeg($this->_handle, $filename, $quality);
     }
 
+    /**
+     * @param $filename
+     * @return void
+     */
     public function saveAsPng($filename)
     {
         imagepng($this->_handle, $filename);
     }
 
+    /**
+     * @param $filename
+     * @return void
+     */
     function saveAsGif($filename)
     {
         imagegif($this->_handle, $filename);
@@ -292,6 +337,10 @@ class HandleGd
 
 }
 
+/**
+ * @param $fname
+ * @return false|\GdImage|resource
+ */
 function imagecreatefrombmp($fname)
 {
     $buf = file_get_contents($fname);
@@ -368,7 +417,6 @@ function imagecreatefrombmp($fname)
             break;
         default:
             return false;
-            break;
     }
     return $img;
 }

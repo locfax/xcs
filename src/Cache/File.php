@@ -17,7 +17,7 @@ class File
      * @return $this
      * @throws ExException
      */
-    public function init(): File
+    public function init()
     {
         !is_dir(DATA_CACHE) && mkdir(DATA_CACHE);
         if (!is_writeable(DATA_CACHE)) {
@@ -103,16 +103,15 @@ class File
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function clear(): bool
+    public function clear()
     {
         $cacheDir = DATA_CACHE;
         $files = FileHelper::list_files($cacheDir);
         foreach ($files as $file) {
             unlink($cacheDir . $file);
         }
-        return true;
     }
 
     /**
