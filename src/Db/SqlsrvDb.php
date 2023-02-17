@@ -194,8 +194,8 @@ class SqlsrvDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
+
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition;
         return $this->exec($sql, $args);
     }
 
@@ -237,28 +237,6 @@ class SqlsrvDb
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
-    }
-
-    /**
-     * @param string $tableName
-     * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
-     * @param int $offset
-     * @param int $limit
-     * @param bool $retObj
-     * @return array|bool
-     */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = null, int $offset = 0, int $limit = 20, bool $retObj = false)
-    {
-        if (is_array($condition) && !empty($condition)) {
-            list($condition, $args) = $this->field_param($condition, ' AND ');
-        }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'SELECT TOP ' . ($limit + $offset) . ' ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->pageSql($sql, $args, $offset, $retObj);
     }
 
     /**
@@ -417,42 +395,6 @@ class SqlsrvDb
                     $data = $this->_array_index($data, $index);
                 }
             }
-            $sth->closeCursor();
-            $sth = null;
-            return $data;
-        } catch (\PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
-        }
-    }
-
-    /**
-     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param int $offset
-     * @param bool $retObj
-     * @return array|bool
-     */
-    public function pageSql(string $sql, $args = null, int $offset = 0, bool $retObj = false)
-    {
-        try {
-            if (empty($args)) {
-                $sth = $this->_link->query($sql);
-            } else {
-                $sth = $this->_link->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_SCROLL]);
-                $sth->execute($args);
-            }
-
-            $data = [];
-            if ($retObj) {
-                while ($one = $sth->fetch(\PDO::FETCH_OBJ, \PDO::FETCH_ORI_NEXT, $offset)) {
-                    $data[] = $one;
-                }
-            } else {
-                while ($one = $sth->fetch(\PDO::FETCH_ASSOC, \PDO::FETCH_ORI_NEXT, $offset)) {
-                    $data[] = $one;
-                }
-            }
-
             $sth->closeCursor();
             $sth = null;
             return $data;
