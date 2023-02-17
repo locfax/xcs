@@ -186,7 +186,8 @@ class PdoDb
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} WHERE {$condition}";
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
         return $this->exec($sql, $args);
     }
 
@@ -202,8 +203,9 @@ class PdoDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition . $limit;
         return $this->exec($sql, $args);
     }
 
@@ -221,8 +223,9 @@ class PdoDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy . ' LIMIT 1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -241,8 +244,8 @@ class PdoDb
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
@@ -263,8 +266,8 @@ class PdoDb
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
@@ -282,8 +285,9 @@ class PdoDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy} LIMIT 1";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -313,8 +317,9 @@ class PdoDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -322,7 +327,6 @@ class PdoDb
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             }
-
             $data = [];
             while ($col = $sth->fetchColumn()) {
                 $data[] = $col;

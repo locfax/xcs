@@ -178,7 +178,8 @@ class SqlsrvDb
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} WHERE {$condition}";
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
         return $this->exec($sql, $args);
     }
 
@@ -194,8 +195,8 @@ class SqlsrvDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition;
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition;
         return $this->exec($sql, $args);
     }
 
@@ -213,8 +214,9 @@ class SqlsrvDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT TOP 1 ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy;
+        $sql = 'SELECT TOP 1 ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -233,10 +235,31 @@ class SqlsrvDb
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
+    }
+
+    /**
+     * @param string $tableName
+     * @param string $field
+     * @param mixed $condition
+     * @param mixed $args
+     * @param mixed $orderBy
+     * @param int $offset
+     * @param int $limit
+     * @param bool $retObj
+     * @return array|bool
+     */
+    public function page(string $tableName, string $field, $condition, $args = null, $orderBy, int $offset = 0, int $ppp = 18, bool $retObj = false)
+    {
+        if (is_array($condition) && !empty($condition)) {
+            list($condition, $args) = $this->field_param($condition, ' AND ');
+        }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'SELECT T1.* FROM (SELECT ' . $field . ', ROW_NUMBER() OVER ( ORDER BY ' . $orderBy . ') AS ROW_NUMBER FROM ' . $this->qTable($tableName) . $condition . ') AS T1 WHERE T1.ROW_NUMBER BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $ppp);
+        return $this->rowSetSql($sql, $args, null, $retObj);
     }
 
     /**
@@ -252,8 +275,9 @@ class SqlsrvDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -283,8 +307,9 @@ class SqlsrvDb
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -292,7 +317,6 @@ class SqlsrvDb
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             }
-
             $data = [];
             while ($col = $sth->fetchColumn()) {
                 $data[] = $col;

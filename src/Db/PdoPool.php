@@ -178,8 +178,9 @@ class PdoPool
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $orderBy . ' LIMIT 1';
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -198,8 +199,8 @@ class PdoPool
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
@@ -220,8 +221,8 @@ class PdoPool
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
@@ -239,8 +240,9 @@ class PdoPool
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy} LIMIT 1";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -270,8 +272,9 @@ class PdoPool
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . " WHERE {$condition}{$orderBy}";
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
