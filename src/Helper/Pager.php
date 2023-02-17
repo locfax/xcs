@@ -23,7 +23,7 @@ class Pager
         }
         $maxPages = $pageInfo['maxpages'] ?? false; //最大页数限制
         $page = $pageInfo['showpage'] ?? false; //一次显示多少页码
-        $showNum = $pageInfo['shownum'] ?? false;
+        $showNum = $pageInfo['shownum'] ?? true;
         $showKbd = $pageInfo['showkbd'] ?? false;
         $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
