@@ -495,7 +495,7 @@ class DB
                 'udi' => '',
                 'maxpages' => 100,
                 'showpage' => 10,
-                'shownum' => false,
+                'shownum' => true,
                 'showkbd' => false,
                 'simple' => false
             ];
