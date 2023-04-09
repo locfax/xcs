@@ -220,7 +220,11 @@ class Curl
     private static function gzip_decode($data, string $gzip = 'gzip')
     {
         $unpacked = false;
-        if ('gzip' == $gzip && function_exists('gzinflate')) {
+        if ('gzip' == $gzip) {
+            if (!function_exists('gzinflate')) {
+                echo 'gzinflate is not exists' . PHP_EOL;
+                return $data;
+            }
             $flags = ord(substr($data, 3, 1));
             $headerlen = 10;
             if ($flags & 4) {
@@ -239,6 +243,10 @@ class Curl
             }
             $unpacked = @gzinflate(substr($data, $headerlen));
         } elseif ('deflate' == $gzip && function_exists('gzuncompress')) {
+            if(!function_exists('gzuncompress')) {
+                echo 'gzuncompress is not exists' . PHP_EOL;
+                return $data;
+            }
             $unpacked = @gzuncompress($data);
         }
         if (false === $unpacked) {
