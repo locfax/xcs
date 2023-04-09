@@ -242,7 +242,7 @@ class Curl
                 $headerlen += 2;
             }
             $unpacked = @gzinflate(substr($data, $headerlen));
-        } elseif ('deflate' == $gzip && function_exists('gzuncompress')) {
+        } elseif ('deflate' == $gzip) {
             if(!function_exists('gzuncompress')) {
                 echo 'gzuncompress is not exists' . PHP_EOL;
                 return $data;
