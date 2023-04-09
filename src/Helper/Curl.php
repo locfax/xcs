@@ -237,9 +237,9 @@ class Curl
             if ($flags & 2) { // CRC at end of file
                 $headerlen += 2;
             }
-            $unpacked = gzinflate(substr($data, $headerlen));
+            $unpacked = @gzinflate(substr($data, $headerlen));
         } elseif ('deflate' == $gzip && function_exists('gzuncompress')) {
-            $unpacked = gzuncompress($data);
+            $unpacked = @gzuncompress($data);
         }
         if (false === $unpacked) {
             $unpacked = $data;
