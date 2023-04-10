@@ -4,51 +4,20 @@ namespace Xcs\Db;
 
 use PDO;
 use PDOException;
-use Xcs\DbException;
+use Swoole\Database\PDOPool;
 
-class SqlsrvDb
+class SwooleMysql
 {
-    private $dsn;
-    private $_link = null;
-    private $repeat = false;
+
+    private $_link;
 
     /**
      * PdoDb constructor.
-     * @param array $config
+     * @param PDOPool $pdo
      */
-    public function __construct(array $config)
+    public function __construct(PDOPool $pdo)
     {
-        $this->dsn = $config;
-
-        if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoException');
-        }
-
-        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if (isset($this->dsn['options'])) {
-            $options = array_merge($options, $this->dsn['options']);
-        }
-
-        try {
-            $this->_link = new PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
-        } catch (PDOException $exception) {
-            if (!$this->repeat) {
-                $this->repeat = true;
-                $this->__construct($config);
-            } else {
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
-            }
-        }
-    }
-
-    public function __destruct()
-    {
-        $this->close();
-    }
-
-    public function close()
-    {
-        $this->_link = null;
+        $this->_link = $pdo;
     }
 
     /**
@@ -65,20 +34,19 @@ class SqlsrvDb
     }
 
     /**
-     * @return array
-     */
-    public function info()
-    {
-        return $this->dsn;
-    }
-
-    /**
      * @param string $tableName
      * @return string
      */
     public function qTable($tableName)
     {
-        return $tableName;
+        if (strpos($tableName, '.') === false) {
+            return "`{$tableName}`";
+        }
+        $arr = explode('.', $tableName);
+        if (count($arr) > 2) {
+            $this->_halt("tableName:{$tableName} 最多只能有一个点.");
+        }
+        return "`{$arr[0]}`.`{$arr[1]}`";
     }
 
     /**
@@ -87,7 +55,7 @@ class SqlsrvDb
      */
     public function qField($fieldName)
     {
-        return $fieldName;
+        return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
 
     /**
@@ -111,7 +79,7 @@ class SqlsrvDb
      * @param string $tableName
      * @param array $data
      * @param bool $retId
-     * @return bool|string
+     * @return bool|int
      */
     public function create($tableName, array $data, $retId = false)
     {
@@ -179,8 +147,7 @@ class SqlsrvDb
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
+        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} WHERE {$condition}";
         return $this->exec($sql, $args);
     }
 
@@ -188,15 +155,16 @@ class SqlsrvDb
      * @param string $tableName
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
+     * @param bool $multi
      * @return bool|int
      */
-    public function remove($tableName, $condition, $args = null)
+    public function remove($tableName, $condition, $args = null, $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
-        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition;
+        $limit = $multi ? '' : ' LIMIT 1';
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
         return $this->exec($sql, $args);
     }
 
@@ -216,7 +184,7 @@ class SqlsrvDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT TOP 1 ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
 
@@ -228,7 +196,7 @@ class SqlsrvDb
      * @param mixed $orderBy
      * @param mixed $index
      * @param bool $retObj
-     * @return array|bool
+     * @return mixed
      */
     public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
     {
@@ -244,22 +212,23 @@ class SqlsrvDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition
-     * @param mixed $args
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $args [':var' => $var]
      * @param mixed $orderBy
      * @param int $offset
-     * @param int $ppp
+     * @param int $limit
      * @param bool $retObj
-     * @return array|bool
+     * @return mixed
      */
-    public function page($tableName, $field, $condition, $args = null, $orderBy = '', $offset = 0, $ppp = 18, $retObj = false)
+    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'SELECT T1.* FROM (SELECT ' . $field . ', ROW_NUMBER() OVER ( ORDER BY ' . $orderBy . ') AS ROW_NUMBER FROM ' . $this->qTable($tableName) . $condition . ') AS T1 WHERE T1.ROW_NUMBER BETWEEN ' . ($offset + 1) . ' AND ' . ($offset + $ppp);
-        return $this->rowSetSql($sql, $args, null, $retObj);
+        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
+        return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
 
     /**
@@ -277,7 +246,7 @@ class SqlsrvDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
+        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -317,6 +286,7 @@ class SqlsrvDb
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             }
+
             $data = [];
             while ($col = $sth->fetchColumn()) {
                 $data[] = $col;
@@ -330,7 +300,7 @@ class SqlsrvDb
     }
 
     /**
-     * @param $tableName
+     * @param string $tableName
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param string $field
@@ -344,7 +314,7 @@ class SqlsrvDb
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
-     * @return bool|int
+     * @return mixed
      */
     public function exec($sql, $args = null)
     {
@@ -397,7 +367,7 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @param mixed $index
      * @param bool $retObj
-     * @return array|bool
+     * @return mixed
      */
     public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
@@ -418,6 +388,37 @@ class SqlsrvDb
                 if (!is_null($index)) {
                     $data = $this->_array_index($data, $index);
                 }
+            }
+            $sth->closeCursor();
+            $sth = null;
+            return $data;
+        } catch (PDOException $e) {
+            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
+        }
+    }
+
+    /**
+     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
+     * @param mixed $args [':var' => $var]
+     * @param int $offset
+     * @param int $limit
+     * @param bool $retObj
+     * @return mixed
+     */
+    public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
+    {
+        $sql .= " LIMIT {$limit} OFFSET {$offset}";
+        try {
+            if (empty($args)) {
+                $sth = $this->_link->query($sql);
+            } else {
+                $sth = $this->_link->prepare($sql);
+                $sth->execute($args);
+            }
+            if ($retObj) {
+                $data = $sth->fetchAll(PDO::FETCH_OBJ);
+            } else {
+                $data = $sth->fetchAll(PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
@@ -518,12 +519,9 @@ class SqlsrvDb
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->dsn['dev']) {
-            $this->close();
-            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
-            $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            echo 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
-        }
+        $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
+        $message = mb_convert_encoding($message, 'UTF-8', $encode);
+        echo 'ERROR:' . $message . ' SQL:' . $sql . ' CODE: ' . $code . PHP_EOL;
         return false;
     }
 

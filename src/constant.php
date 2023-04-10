@@ -14,7 +14,7 @@ defined('AUTH_ROLE') or define('AUTH_ROLE', false);
 /**
  * 默认的dsn
 */
-defined('APP_DSN') or define('APP_DSN', 'default');
+defined('APP_DSN') or define('APP_DSN', 'mysql');
 
 const BASE_PATH = __DIR__ . '/';  //框架路径
 const APP_PATH = APP_ROOT . '/app/'; //应用路径

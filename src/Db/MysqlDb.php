@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 use Xcs\DbException;
 
-class PdoDb
+class MysqlDb
 {
 
     private $dsn;
@@ -37,7 +37,6 @@ class PdoDb
                 $this->repeat = true;
                 $this->__construct($config);
             } else {
-                $this->close();
                 $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }

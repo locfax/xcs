@@ -4,19 +4,47 @@ namespace Xcs\Db;
 
 use PDO;
 use PDOException;
+use Xcs\DbException;
 
-class PdoPool
+class SqliteDb
 {
 
-    private $_link;
+    private $dsn;
+    private $_link = null;
+    private $repeat = false;
 
     /**
      * PdoDb constructor.
-     * @param \Swoole\Database\PDOPool $pdo
+     * @param array $config //dsn sqlite:data.db
      */
-    public function __construct(\Swoole\Database\PDOPool $pdo)
+    public function __construct(array $config)
     {
-        $this->_link = $pdo;
+        $this->dsn = $config;
+
+        if (empty($this->dsn)) {
+            new DbException('dsn is empty', 404, 'PdoException');
+        }
+
+        try {
+            $this->_link = new PDO($this->dsn['dsn']);
+        } catch (PDOException $exception) {
+            if (!$this->repeat) {
+                $this->repeat = true;
+                $this->__construct($config);
+            } else {
+                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
+            }
+        }
+    }
+
+    public function __destruct()
+    {
+        $this->close();
+    }
+
+    public function close()
+    {
+        $this->_link = null;
     }
 
     /**
@@ -33,13 +61,21 @@ class PdoPool
     }
 
     /**
+     * @return array
+     */
+    public function info()
+    {
+        return $this->dsn;
+    }
+
+    /**
      * @param string $tableName
      * @return string
      */
     public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
-            return "`{$tableName}`";
+            return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
@@ -78,7 +114,7 @@ class PdoPool
      * @param string $tableName
      * @param array $data
      * @param bool $retId
-     * @return bool|int
+     * @return bool|string
      */
     public function create($tableName, array $data, $retId = false)
     {
@@ -146,7 +182,8 @@ class PdoPool
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} WHERE {$condition}";
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
+        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
         return $this->exec($sql, $args);
     }
 
@@ -162,8 +199,9 @@ class PdoPool
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+        $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . ' WHERE ' . $condition . $limit;
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition . $limit;
         return $this->exec($sql, $args);
     }
 
@@ -195,7 +233,7 @@ class PdoPool
      * @param mixed $orderBy
      * @param mixed $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
     {
@@ -217,7 +255,7 @@ class PdoPool
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
     {
@@ -285,7 +323,6 @@ class PdoPool
                 $sth = $this->_link->prepare($sql);
                 $sth->execute($args);
             }
-
             $data = [];
             while ($col = $sth->fetchColumn()) {
                 $data[] = $col;
@@ -299,7 +336,7 @@ class PdoPool
     }
 
     /**
-     * @param string $tableName
+     * @param $tableName
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param string $field
@@ -313,7 +350,7 @@ class PdoPool
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
-     * @return mixed
+     * @return bool|int
      */
     public function exec($sql, $args = null)
     {
@@ -366,7 +403,7 @@ class PdoPool
      * @param mixed $args [':var' => $var]
      * @param mixed $index
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
@@ -402,7 +439,7 @@ class PdoPool
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
      */
     public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
     {
@@ -518,9 +555,12 @@ class PdoPool
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
-        $message = mb_convert_encoding($message, 'UTF-8', $encode);
-        echo 'ERROR:' . $message . ' SQL:' . $sql . ' CODE: ' . $code . PHP_EOL;
+        if ($this->dsn['dev']) {
+            $this->close();
+            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
+            $message = mb_convert_encoding($message, 'UTF-8', $encode);
+            echo 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
+        }
         return false;
     }
 

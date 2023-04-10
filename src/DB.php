@@ -3,11 +3,13 @@
 namespace Xcs;
 
 use Swoole\Database\PDOConfig;
+use Swoole\Database\PDOPool;
 use Swoole\Database\RedisConfig;
 use Swoole\Database\RedisPool;
 use Xcs\Db\MongoDb;
-use Xcs\Db\PdoDb;
-use Xcs\Db\PdoPool;
+use Xcs\Db\MysqlDb;
+use Xcs\Db\SqliteDb;
+use Xcs\Db\SwooleMysql;
 use Xcs\Db\SqlsrvDb;
 
 class DB
@@ -20,14 +22,13 @@ class DB
     private static $mgo_time_out = 0;
 
     /**
-     * 返回 PDO 对象
-     * 通常用 DB::find*  DB::row* DB::page* ...
+     * 返回 mysql 对象
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
-     * @return PdoDb
-     * @see PdoDb
+     * @return MysqlDb
+     * @see MysqlDb
      */
-    public static function dbm($dsnId = 'default')
+    public static function dbm($dsnId = 'mysql')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -35,12 +36,12 @@ class DB
 
         $dsn = Context::dsn($dsnId);
 
-        if ('PdoDb' != $dsn['driver']) {
-            new ExException("the driver error: PdoDb");
+        if ('MysqlDb' != $dsn['driver']) {
+            new ExException("the driver error: MysqlDb");
         }
 
         self::$dbm_time_out = time() + 30;
-        $object = new PdoDb($dsn);
+        $object = new MysqlDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -92,14 +93,36 @@ class DB
     }
 
     /**
+     * @param string $dsnId
+     * @return SqliteDb
+     */
+    public static function sqlite($dsnId = 'sqlite')
+    {
+        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        $dsn = Context::dsn($dsnId);
+
+        if ('SqliteDb' != $dsn['driver']) {
+            new ExException("the driver error: SqliteDb");
+        }
+
+        self::$dbm_time_out = time() + 30;
+        $object = new SqliteDb($dsn);
+        self::$used_dbo[$dsnId] = $object;
+        return $object;
+    }
+
+    /**
      * swoole 专用
      * @param string $dsnId
-     * @return \Swoole\Database\PDOPool
+     * @return PDOPool
      */
-    public static function PdoPool($dsnId = 'pool')
+    public static function SwoolePdoPool($dsnId = 'pool')
     {
         $dsn = Context::dsn($dsnId);
-        return new \Swoole\Database\PDOPool((new PDOConfig)
+        return new PDOPool((new PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -111,12 +134,12 @@ class DB
 
     /**
      * swoole 专用
-     * @param \Swoole\Database\PDOPool $pdo
-     * @return PdoPool
+     * @param PDOPool $pdo
+     * @return SwooleMysql
      */
-    public static function getPdoPool($pdo)
+    public static function SwooleMysql($pdo)
     {
-        return new PdoPool($pdo);
+        return new SwooleMysql($pdo);
     }
 
     /**
@@ -124,7 +147,7 @@ class DB
      * @param string $dsnId
      * @return RedisPool
      */
-    public static function getRedisPool($dsnId = 'redis')
+    public static function RedisPool($dsnId = 'redis')
     {
         $dsn = Context::dsn($dsnId);
         return new RedisPool((new RedisConfig)
@@ -458,7 +481,7 @@ class DB
      * mysql专用
      * 切换数据源对象
      * @param string|null $id
-     * @return PdoDb
+     * @return MysqlDb
      */
     public static function Using($id = null)
     {
