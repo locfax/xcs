@@ -210,17 +210,17 @@ class ArrayHelper
      * @param string $fid 节点ID字段名
      * @param string $fparent 节点父ID字段名
      * @param string $index 索引字段
-     * @param string $fchildrens 保存子节点的字段名
+     * @param string $children 保存子节点的字段名
      * @param boolean $returnReferences 是否在返回结果中包含节点引用
      *
      * @return array
      */
-    public static function to_tree(array $arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $fchildrens = 'children', $returnReferences = false)
+    public static function to_tree(array $arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $children = 'children', $returnReferences = false)
     {
         $refs = $arr;
         $pkvRefs = [];
-        foreach ($arr as $row) {
-            $pkvRefs[$row[$fid]] = &$row;
+        foreach ($arr as $offset => $row) {
+            $pkvRefs[$row[$fid]] = &$arr[$offset];
         }
 
         $tree = [];
@@ -232,9 +232,9 @@ class ArrayHelper
                 }
                 $parent = &$pkvRefs[$parentId];
                 if ($index) {
-                    $parent[$fchildrens][$row[$index]] = &$row;
+                    $parent[$children][$row[$index]] = &$arr[$offset];
                 } else {
-                    $parent[$fchildrens][] = &$arr[$offset];
+                    $parent[$children][] = &$arr[$offset];
                 }
             } else {
                 if ($index) {
@@ -254,18 +254,18 @@ class ArrayHelper
      * 将树转换为平面的数组
      *
      * @param array $tree
-     * @param string $fchildrens
+     * @param string $children
      *
      * @return array
      */
-    public static function tree_to(array $tree, $fchildrens = 'children')
+    public static function tree_to(array $tree, $children = 'children')
     {
         $arr = [];
-        if (isset($tree[$fchildrens]) && is_array($tree[$fchildrens])) {
-            foreach ($tree[$fchildrens] as $child) {
-                $arr = array_merge($arr, self::tree_to($child, $fchildrens));
+        if (isset($tree[$children]) && is_array($tree[$children])) {
+            foreach ($tree[$children] as $child) {
+                $arr = array_merge($arr, self::tree_to($child, $children));
             }
-            unset($tree[$fchildrens]);
+            unset($tree[$children]);
         }
         $arr[] = $tree;
         return $arr;
