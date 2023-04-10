@@ -2,6 +2,8 @@
 
 namespace Xcs\Helper;
 
+use ImagickException;
+
 class Imagick
 {
 
@@ -14,13 +16,13 @@ class Imagick
         //$fileext = trim(strtolower($ext), '.');
         try {
             $handle = new \Imagick($tempname);
-        } catch (\ImagickException $ex) {
+        } catch (ImagickException $ex) {
             return false;
         }
         return new HandleImagek($handle);
     }
 
-    public static function hex2rgb($color, $default = 'ffffff'): array
+    public static function hex2rgb($color, $default = 'ffffff')
     {
         $hex = trim($color, '#&Hh');
         $len = strlen($hex);

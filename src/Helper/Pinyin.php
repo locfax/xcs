@@ -13,7 +13,7 @@ class Pinyin
      * @param bool $isfirst
      * @return string
      */
-    public static function utf8_to($s, bool $isfirst = false): string
+    public static function utf8_to($s, $isfirst = false)
     {
         return self::to_gb2312(self::utf8_to_gb2312($s), $isfirst);
     }
@@ -22,7 +22,7 @@ class Pinyin
      * @param $s
      * @return mixed
      */
-    public static function utf8_to_gb2312($s): string
+    public static function utf8_to_gb2312($s)
     {
         return iconv('UTF-8', 'GB2312//IGNORE', $s);
     }
@@ -33,7 +33,7 @@ class Pinyin
      * @param bool $isfirst
      * @return string
      */
-    public static function to_gb2312($s, bool $isfirst = false): string
+    public static function to_gb2312($s, $isfirst = false)
     {
         $res = '';
         $len = strlen($s);
@@ -163,7 +163,7 @@ class Pinyin
     /**
      * @return array
      */
-    public static function get_pinyin_array(): array
+    public static function get_pinyin_array()
     {
         static $py_arr;
         if (isset($py_arr)) {

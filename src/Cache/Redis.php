@@ -2,7 +2,6 @@
 
 namespace Xcs\Cache;
 
-use Xcs\ExException;
 use Xcs\Traits\Singleton;
 
 class Redis
@@ -19,22 +18,17 @@ class Redis
     /**
      * @param $config
      * @return $this
-     * @throws ExException
      */
     public function init($config)
     {
-        try {
-            $this->_link = new \Redis();
-            $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
-            if ($connect && $config['password']) {
-                $connect = $this->_link->auth($config['password']);
-            }
-            if ($connect) {
-                $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
-                $this->enable = true;
-            }
-        } catch (\RedisException $ex) {
-            throw new ExException('redis初始化错误');
+        $this->_link = new \Redis();
+        $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
+        if ($connect && $config['password']) {
+            $connect = $this->_link->auth($config['password']);
+        }
+        if ($connect) {
+            $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
+            $this->enable = true;
         }
         return $this;
     }
@@ -59,7 +53,7 @@ class Redis
      * @param int $ttl
      * @return mixed
      */
-    public function set($key, $value, int $ttl = 0)
+    public function set($key, $value, $ttl = 0)
     {
         $ret = $this->_link->set($key, $value);
         if ($ttl > 0) {
@@ -69,18 +63,16 @@ class Redis
     }
 
     /**
-     * @param $key
-     * @param int $ttl
      * @return bool
      */
-    public function expire($key, int $ttl = 0): bool
+    public function expire()
     {
         return false;
     }
 
     /**
      * @param $key
-     * @return mixed
+     * @return int|\Redis
      */
     public function rm($key)
     {

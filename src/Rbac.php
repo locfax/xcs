@@ -18,12 +18,12 @@ class Rbac
      * @param string $auth
      * @return bool
      */
-    public static function check($controllerName, $actionName = null, string $auth = 'general'): bool
+    public static function check($controllerName, $actionName = null, $auth = 'general')
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
 
-        //if controller offer empty AC, authtype 'general' then allow
+        //if controller offer empty AC, auth type 'general' then allow
         if ('general' == $auth) {
             if (empty($ACL)) {
                 return true;
@@ -34,7 +34,7 @@ class Rbac
             }
         }
 
-        // get user rolearray
+        // get user role array
         $roles = UID::getRolesArray();
 
         // 1, check user's role whether allow to call controller
@@ -59,12 +59,12 @@ class Rbac
      * @param $ACL
      * @return bool
      */
-    private static function _check($_roles, $ACL): bool
+    private static function _check($_roles, $ACL)
     {
         $roles = array_map('strtoupper', $_roles);
         if ($ACL['allow'] == self::ACL_EVERYONE) {
 
-            //if allow all role ,and deny is't set ,then allow
+            //if allow all role ,and deny isn't set ,then allow
             if ($ACL['deny'] == self::ACL_NULL) {
                 return true;
             }
@@ -90,7 +90,7 @@ class Rbac
                 return false;
             }
 
-            //if deny has't the role of user's roles , allow
+            //if deny hasn't the role of user's roles , allow
             foreach ($roles as $role) {
                 if (in_array($role, $ACL['deny'], true)) {
                     return false;
@@ -100,7 +100,7 @@ class Rbac
         }
 
         do {
-            //if allow request role , user's role has't the role , deny
+            //if allow request role , user's role hasn't the role , deny
             if ($ACL['allow'] == self::ACL_HAS_ROLE) {
                 if (!empty($roles)) {
                     break;
@@ -115,7 +115,7 @@ class Rbac
                 return false;
             }
             if ($ACL['allow'] != self::ACL_NULL) {
-                //if allow request the rolename , then check
+                //if allow request the role name , then check
                 $passed = false;
                 foreach ($roles as $role) {
                     if (in_array($role, $ACL['allow'], true)) {
@@ -129,11 +129,11 @@ class Rbac
             }
         } while (false);
 
-        //if deny is't set , allow
+        //if deny isn't set , allow
         if ($ACL['deny'] == self::ACL_NULL) {
             return true;
         }
-        //if deny is ACL_NO_ROEL, user'role is't empty , allow
+        //if deny is ACL_NO_ROEL, user role isn't empty , allow
         if ($ACL['deny'] == self::ACL_NO_ROLE) {
             if (empty($roles)) {
                 return false;

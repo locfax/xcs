@@ -10,7 +10,7 @@ class FileHelper
      * @param int $mode
      * @return bool
      */
-    public static function mk_dir($path, int $mode = DIR_WRITE_MODE): bool
+    public static function mk_dir($path, $mode = DIR_WRITE_MODE)
     {
         if (!is_dir($path)) {
             return mkdir($path, $mode, true);
@@ -22,7 +22,7 @@ class FileHelper
      * @param $path
      * @return bool
      */
-    public static function rm_dir($path): bool
+    public static function rm_dir($path)
     {
         $dir = realpath($path);
         if ('' == $dir || '/' == $dir || (3 == strlen($dir) && ':\\' == substr($dir, 1))) {
@@ -87,7 +87,7 @@ class FileHelper
      * @param bool $root
      * @return array
      */
-    public static function list_files(string $dir, bool $dirFile = false, bool $md5 = true, bool $root = true): array
+    public static function list_files($dir, $dirFile = false, $md5 = true, $root = true)
     {
         static $return = [];
         if ($root) {

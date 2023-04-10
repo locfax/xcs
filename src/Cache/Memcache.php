@@ -2,6 +2,7 @@
 
 namespace Xcs\Cache;
 
+use MemcachedException;
 use Xcs\ExException;
 use Xcs\Traits\Singleton;
 
@@ -29,7 +30,7 @@ class Memcache
             if ($connect) {
                 $this->enable = true;
             }
-        } catch (\MemcachedException $e) {
+        } catch (MemcachedException $e) {
             throw new ExException('memcache初始化错误');
         }
         return $this;
@@ -48,7 +49,7 @@ class Memcache
     {
         try {
             return $this->_link->get($key);
-        } catch (\MemcachedException $e) {
+        } catch (MemcachedException $e) {
             return false;
         }
     }
@@ -57,9 +58,9 @@ class Memcache
      * @param $key
      * @param $value
      * @param int $ttl
-     * @return mixed
+     * @return bool
      */
-    public function set($key, $value, int $ttl = 0): bool
+    public function set($key, $value, $ttl = 0)
     {
         try {
             $data = $this->get($key);
@@ -68,35 +69,33 @@ class Memcache
             } else {
                 return $this->_link->add($key, $value, MEMCACHE_COMPRESSED, $ttl);
             }
-        } catch (\MemcachedException $e) {
+        } catch (MemcachedException $e) {
             return false;
         }
     }
 
     /**
-     * @param $key
-     * @param int $ttl
      * @return bool
      */
-    public function expire($key, int $ttl = 0): bool
+    public function expire()
     {
         return false;
     }
 
     /**
      * @param $key
-     * @return mixed
+     * @return bool
      */
-    public function rm($key): bool
+    public function rm($key)
     {
         try {
             return $this->_link->delete($key);
-        } catch (\MemcachedException $e) {
+        } catch (MemcachedException $e) {
             return false;
         }
     }
 
-    public function clear(): bool
+    public function clear()
     {
         return $this->_link->flush();
     }

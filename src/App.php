@@ -16,7 +16,7 @@ class App
     /**
      * @param bool $refresh
      */
-    public static function run(bool $refresh = false)
+    public static function run($refresh = false)
     {
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
@@ -35,7 +35,7 @@ class App
     /**
      * @param bool $refresh
      */
-    public static function runFile(bool $refresh = false)
+    public static function runFile($refresh = false)
     {
         self::_rootNamespace('\\', APP_PATH);
 
@@ -63,7 +63,7 @@ class App
                     }
                 });
 
-                array_walk($files, function ($file, $key) {
+                array_walk($files, function ($file) {
                     include $file;
                 });
                 return;
@@ -119,8 +119,8 @@ class App
         }
         $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
         $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
-        $controllerName = preg_replace('/[^a-z0-9_]+/i', '', $controllerName);
-        $actionName = preg_replace('/[^a-z0-9_]+/i', '', $actionName);
+        $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
+        $actionName = preg_replace('/[^a-z\d_]+/i', '', $actionName);
 
         if (defined('AUTH_ROLE') && AUTH_ROLE) {
             $ret = Rbac::check($controllerName, $actionName, AUTH_ROLE);
@@ -171,12 +171,12 @@ class App
      */
     private static function _errCtrl($args)
     {
-        if (self::isAjax(true)) {
+        if (self::isAjax()) {
             $res = [
                 'code' => 1,
                 'msg' => 'error:' . $args,
             ];
-            self::response($res, 'json');
+            self::response($res);
             return;
         }
         echo 'error:' . $args;
@@ -188,12 +188,12 @@ class App
      */
     private static function _errACL($args)
     {
-        if (self::isAjax(true)) {
+        if (self::isAjax()) {
             $res = [
                 'code' => 1,
                 'msg' => 'error:' . $args,
             ];
-            self::response($res, 'json');
+            self::response($res);
             return;
         }
         echo 'error！' . $args;
@@ -204,7 +204,7 @@ class App
      * @param $controllerClass
      * @return bool
      */
-    private static function _loadController($controllerName, $controllerClass): bool
+    private static function _loadController($controllerName, $controllerClass)
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
@@ -283,8 +283,8 @@ class App
     }
 
     /**
-     * @param $namespace
-     * @param $path
+     * @param string $namespace
+     * @param string $path
      */
     private static function _rootNamespace($namespace, $path)
     {
@@ -308,7 +308,7 @@ class App
      * @param array $params
      * @return string
      */
-    public static function url($udi, array $params = []): string
+    public static function url($udi, array $params = [])
     {
         $_udi = explode('/', $udi);
         if (count($_udi) < 2) {
@@ -349,11 +349,11 @@ class App
     /**
      * 导入所需的类库
      * @param string $class 类库命名空间字符串
-     * @param string $baseUrl 起始路径
      * @param string $ext 导入的文件扩展名
+     * @param string $baseUrl 起始路径
      * @return boolean
      */
-    public static function vendor(string $class, string $ext = '.php', string $baseUrl = LIB_PATH): bool
+    public static function vendor($class, $ext = '.php', $baseUrl = LIB_PATH)
     {
         static $_file = [];
         $key = $class . $baseUrl . $ext;
@@ -383,7 +383,7 @@ class App
      * @param array $arr
      * @return string
      */
-    public static function output_json(array $arr): string
+    public static function output_json(array $arr)
     {
         return json_encode($arr, JSON_UNESCAPED_UNICODE);
     }
@@ -398,7 +398,7 @@ class App
     /**
      * @param bool $nocache
      */
-    public static function output_start(bool $nocache = true)
+    public static function output_start($nocache = true)
     {
         ob_get_length() && ob_end_clean();
         if (function_exists('ob_gzhandler')) { //whether start gzip
@@ -415,7 +415,7 @@ class App
      * @param bool $echo
      * @return array|false|string|string[]|void
      */
-    public static function output_end(bool $echo = false)
+    public static function output_end($echo = false)
     {
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
@@ -432,7 +432,7 @@ class App
      * @param string $type
      * @return bool
      */
-    public static function response($res, string $type = 'json'): bool
+    public static function response($res, $type = 'json')
     {
         self::output_nocache();
         if ('html' == $type) {
@@ -465,7 +465,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isGet(bool $retBool = true): bool
+    public static function isGet($retBool = true)
     {
         if ('GET' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -477,7 +477,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isPost(bool $retBool = true): bool
+    public static function isPost($retBool = true)
     {
         if ('POST' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -489,7 +489,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isAjax(bool $retBool = true): bool
+    public static function isAjax($retBool = true)
     {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']) {
             return $retBool;
@@ -503,7 +503,7 @@ class App
      * @param string $url
      * @return bool
      */
-    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): bool
+    public static function jsAlert($message = '', $after_action = '', $url = '')
     {
         //php turn to alert
         $out = "<script type=\"text/javascript\">\n";
@@ -534,7 +534,7 @@ class App
      * @param bool $return
      * @return bool|string|null
      */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
+    public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false)
     {
         $_delay = intval($delay);
         if (!$js) {
@@ -542,7 +542,7 @@ class App
                 echo <<<EOT
     <html>
     <head>
-    <meta http-equiv="refresh" content="{$_delay};URL={$url}" />
+    <meta http-equiv="refresh" content="$_delay;URL=$url" />
     </head>
     </html>
 EOT;
@@ -557,9 +557,9 @@ EOT;
             $out .= '<script language="javascript" type="text/javascript">';
         }
         if ($_delay > 0) {
-            $out .= "window.setTimeout(function () { document.location='{$url}'; }, {$_delay});";
+            $out .= "window.setTimeout(function () { document.location='$url'; }, {$_delay});";
         } else {
-            $out .= "document.location='{$url}';";
+            $out .= "document.location='$url';";
         }
         if ($jsWrapped) {
             $out .= '</script>';

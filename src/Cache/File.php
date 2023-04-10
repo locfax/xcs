@@ -58,7 +58,7 @@ class File
      * @param int $ttl
      * @return false|int
      */
-    public function set($key, $val, int $ttl = 0)
+    public function set($key, $val, $ttl = 0)
     {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
@@ -74,17 +74,15 @@ class File
         }
 
         $cacheFile = DATA_CACHE . $key . '.php';
-        $cacheData = "return array('data' => '{$val}', 'type'=>'{$type}', 'timeout' => {$timeout});";
-        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n{$cacheData}";
+        $cacheData = "return array('data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
+        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n$cacheData";
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
     }
 
     /**
-     * @param $key
-     * @param int $ttl
      * @return bool
      */
-    public function expire($key, int $ttl = 0): bool
+    public function expire()
     {
         return false;
     }
@@ -93,7 +91,7 @@ class File
      * @param $key
      * @return bool
      */
-    public function rm($key): bool
+    public function rm($key)
     {
         $cacheFile = DATA_CACHE . $key . '.php';
         if (file_exists($cacheFile)) {

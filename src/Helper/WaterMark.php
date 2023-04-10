@@ -14,7 +14,7 @@ class WaterMark
      * @param string $textColor
      * @return false|string|void
      */
-    public static function mark(string $groundImage, int $waterPos = 0, string $waterImage = "", string $waterText = "", int $textFont = 5, string $textColor = "#FF0000")
+    public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000")
     {
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
 
@@ -61,8 +61,7 @@ class WaterMark
                     die($formatMsg);
             }
         } else {
-            $formatMsg = "需要加水印的图片不存在！";
-            return $formatMsg;
+            return "需要加水印的图片不存在！";
         }
 
         //水印位置
@@ -78,8 +77,7 @@ class WaterMark
             $label = "文字区域";
         }
         if (($ground_w < $w) || ($ground_h < $h)) {
-            $formatMsg = "需要加水印的图片的长度或宽度比水印" . $label . "还小，无法生成水印！";
-            return $formatMsg;
+            return "需要加水印的图片的长度或宽度比水印" . $label . "还小，无法生成水印！";
         }
         switch ($waterPos) {
             case 1: //1为顶端居左
@@ -135,8 +133,7 @@ class WaterMark
                 $G = hexdec(substr($textColor, 3, 2));
                 $B = hexdec(substr($textColor, 5));
             } else {
-                $formatMsg = "水印文字颜色格式不正确！";
-                return $formatMsg;
+                return "水印文字颜色格式不正确！";
             }
             imagestring($ground_im, $textFont, $posX, $posY, $waterText, imagecolorallocate($ground_im, $R, $G, $B));
         }

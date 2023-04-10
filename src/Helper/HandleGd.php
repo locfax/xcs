@@ -22,7 +22,7 @@ class HandleGd
      * @param $height
      * @return $this
      */
-    public function resize($width, $height): HandleGd
+    public function resize($width, $height)
     {
         //低质量
         if (is_null($this->_handle)) {
@@ -37,10 +37,9 @@ class HandleGd
 
     /**
      * @param $width
-     * @param $height
      * @return $this
      */
-    public function autoresize($width, $height): HandleGd
+    public function autoresize($width)
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -70,7 +69,7 @@ class HandleGd
      * @param $height
      * @return $this
      */
-    public function resampled($width, $height): HandleGd
+    public function resampled($width, $height)
     {
         //高质量
         if (is_null($this->_handle)) {
@@ -90,7 +89,7 @@ class HandleGd
      * @param string $bgcolor
      * @return $this
      */
-    public function canvas($width, $height, string $pos = 'center', string $bgcolor = '0xffffff'): HandleGd
+    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff')
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -156,7 +155,7 @@ class HandleGd
      * @param array $options
      * @return $this
      */
-    public function cut(array $options = []): HandleGd
+    public function cut(array $options = [])
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -208,7 +207,7 @@ class HandleGd
      * @param array $options
      * @return $this
      */
-    public function crop($width, $height, array $options = []): HandleGd
+    public function crop($width, $height, array $options = [])
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -304,7 +303,7 @@ class HandleGd
      * @param int $quality
      * @return void
      */
-    public function saveAsJpeg($filename, int $quality = 80)
+    public function saveAsJpeg($filename, $quality = 80)
     {
         imagejpeg($this->_handle, $filename, $quality);
     }

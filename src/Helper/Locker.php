@@ -13,7 +13,7 @@ class Locker
      * @param int $ttl
      * @return bool
      */
-    public static function isLocked($process, int $ttl = 0): bool
+    public static function isLocked($process, $ttl = 0)
     {
         $_ttl = $ttl < 1 ? 600 : intval($ttl);
         if (self::status('get', $process)) {
@@ -38,7 +38,7 @@ class Locker
      * @param $process
      * @return bool
      */
-    public static function status($action, $process): bool
+    public static function status($action, $process)
     {
         static $plist = [];
         switch ($action) {
@@ -60,7 +60,7 @@ class Locker
      * @param $ttl
      * @return bool
      */
-    private static function tryLock($name, $ttl): bool
+    private static function tryLock($name, $ttl)
     {
         if (!self::cmd('get', $name)) {
             self::cmd('set', $name, $ttl);
@@ -79,7 +79,7 @@ class Locker
      * @param int $ttl
      * @return bool|string
      */
-    private static function cmd($cmd, $name, int $ttl = 0)
+    private static function cmd($cmd, $name, $ttl = 0)
     {
         $ret = false;
         switch ($cmd) {

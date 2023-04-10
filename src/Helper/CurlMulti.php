@@ -2,6 +2,8 @@
 
 namespace Xcs\Helper;
 
+use CURLFile;
+
 class CurlMulti
 {
 
@@ -12,7 +14,7 @@ class CurlMulti
      * @param string $charset
      * @return array
      */
-    public static function send($urls, $data = '', array $httpHead = [], string $charset = 'UTF-8'): array
+    public static function send($urls, $data = '', array $httpHead = [], $charset = 'UTF-8')
     {
         //创建多个curl语柄
         $mHandle = curl_multi_init();
@@ -65,7 +67,7 @@ class CurlMulti
             if (!empty($data)) {
                 if (is_array($data)) {
                     if (isset($data['__file'])) {
-                        $data[$data['__file']] = class_exists('\CURLFile', false) ? new \CURLFile($data[$data['__file']]) : '@' . $data[$data['__file']];
+                        $data[$data['__file']] = class_exists('\CURLFile', false) ? new CURLFile($data[$data['__file']]) : '@' . $data[$data['__file']];
                         unset($data['__file']);
                         $poststr = $data;
                     } else {
@@ -125,10 +127,10 @@ class CurlMulti
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $string
-     * @return mixed|string
+     * @param string $in
+     * @param string $out
+     * @param string $string
+     * @return array|false|string
      */
     private static function convert_encode($in, $out, $string)
     { // string change charset return string

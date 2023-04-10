@@ -20,7 +20,7 @@ class ExException extends Exception
      * @param Exception $exception
      * @param string $type
      */
-    public function exception(Exception $exception, string $type = 'Exception')
+    public function exception(Exception $exception, $type = 'Exception')
     {
         $errorMsg = $exception->getMessage();
         $trace = $exception->getTrace();
@@ -63,7 +63,7 @@ class ExException extends Exception
         $this->showError($type, $errorMsg, $phpMsg);
     }
 
-    public function writeErrorLog($message): bool
+    public function writeErrorLog()
     {
         return false; // 暂时不写入
     }
@@ -79,17 +79,15 @@ class ExException extends Exception
     /**
      * 显示错误
      *
-     * @static
-     * @access public
      * @param string $type 错误类型 db,system
      * @param string $errorMsg
      * @param mixed $phpMsg
      */
-    public static function showError(string $type, string $errorMsg, $phpMsg = '')
+    public static function showError($type, $errorMsg, $phpMsg = '')
     {
         ob_get_length() && ob_end_clean();
 
-        $title = $type ? $type : 'System';
+        $title = $type ?: 'System';
 
         echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

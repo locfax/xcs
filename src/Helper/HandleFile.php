@@ -2,6 +2,8 @@
 
 namespace Xcs\Helper;
 
+use finfo;
+
 class HandleFile
 {
 
@@ -56,7 +58,7 @@ class HandleFile
     /**
      * @return bool
      */
-    public function isSuccessed(): bool
+    public function isSuccessed()
     {
         return $this->_file['error'] == UPLOAD_ERR_OK;
     }
@@ -88,7 +90,7 @@ class HandleFile
     /**
      * @return string
      */
-    public function getExt(): string
+    public function getExt()
     {
         if ($this->isMoved()) {
             $ext = pathinfo($this->getNewPath(), PATHINFO_EXTENSION);
@@ -112,7 +114,7 @@ class HandleFile
     public function getMimeType()
     {
         if (class_exists('finfo', false)) {
-            $finfo = new \finfo(FILEINFO_MIME);
+            $finfo = new finfo(FILEINFO_MIME);
         } else {
             $finfo = null;
         }
@@ -147,7 +149,7 @@ class HandleFile
      * @param null $maxSize
      * @return int
      */
-    public function check($allowExts = null, $maxSize = null): int
+    public function check($allowExts = null, $maxSize = null)
     {
         if (!$this->isSuccessed()) {
             return 1;
@@ -195,7 +197,7 @@ class HandleFile
      * @param $destPath
      * @return bool
      */
-    public function move($destPath): bool
+    public function move($destPath)
     {
         $this->_file['is_moved'] = true;
         $this->_file['new_path'] = $destPath;
@@ -206,7 +208,7 @@ class HandleFile
      * @param $destPath
      * @return bool
      */
-    public function copy($destPath): bool
+    public function copy($destPath)
     {
         return copy($this->_file['tmp_name'], $destPath);
     }
@@ -232,7 +234,7 @@ class HandleFile
      * @param $needle
      * @return bool
      */
-    private function strPos($str, $needle): bool
+    private function strPos($str, $needle)
     {
         return !(false === strpos($str, $needle));
     }

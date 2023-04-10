@@ -2,7 +2,9 @@
 
 namespace Xcs\Db;
 
-use Xcs\Ex\DbException;
+use PDO;
+use PDOException;
+use Xcs\DbException;
 
 class PdoDb
 {
@@ -23,14 +25,14 @@ class PdoDb
             new DbException('dsn is empty', 404, 'PdoException');
         }
 
-        $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
         if (isset($this->dsn['options'])) {
             $options = array_merge($options, $this->dsn['options']);
         }
 
         try {
-            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
-        } catch (\PDOException $exception) {
+            $this->_link = new PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
+        } catch (PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
                 $this->__construct($config);
@@ -56,7 +58,7 @@ class PdoDb
      * @param array $args
      * @return mixed
      */
-    public function __call(string $func, array $args)
+    public function __call($func, array $args)
     {
         if ($this->_link) {
             return call_user_func_array([$this->_link, $func], $args);
@@ -67,7 +69,7 @@ class PdoDb
     /**
      * @return array
      */
-    public function info(): array
+    public function info()
     {
         return $this->dsn;
     }
@@ -76,14 +78,14 @@ class PdoDb
      * @param string $tableName
      * @return string
      */
-    public function qTable(string $tableName): string
+    public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
             return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
-            $this->_halt("tableName:{$tableName} 最多只能有一个点.", 0, '');
+            $this->_halt("tableName:{$tableName} 最多只能有一个点.");
         }
         return "`{$arr[0]}`.`{$arr[1]}`";
     }
@@ -92,7 +94,7 @@ class PdoDb
      * @param string $fieldName
      * @return string
      */
-    public function qField(string $fieldName): string
+    public function qField($fieldName)
     {
         return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
@@ -102,7 +104,7 @@ class PdoDb
      * @param string $glue
      * @return array
      */
-    public function field_param(array $fields, string $glue = ','): array
+    public function field_param(array $fields, $glue = ',')
     {
         $args = [];
         $sql = $comma = '';
@@ -120,7 +122,7 @@ class PdoDb
      * @param bool $retId
      * @return bool|string
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create($tableName, array $data, $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -138,7 +140,7 @@ class PdoDb
                 $ret = $this->_link->lastInsertId();
             }
             return $ret;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -148,7 +150,7 @@ class PdoDb
      * @param array $data
      * @return bool|int
      */
-    public function replace(string $tableName, array $data)
+    public function replace($tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -170,19 +172,19 @@ class PdoDb
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function update(string $tableName, $data, $condition, $args = null)
+    public function update($tableName, $data, $condition, $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
             if (is_array($data)) {
-                list($data, $args2) = $this->field_param($data, ',');
+                list($data, $args2) = $this->field_param($data);
                 $args = array_merge($args2, $args1);
             } else {
                 $args = empty($args) ? $args1 : array_merge($args, $args1);
             }
         } else {
             if (is_array($data)) {
-                list($data, $args1) = $this->field_param($data, ',');
+                list($data, $args1) = $this->field_param($data);
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
@@ -198,7 +200,7 @@ class PdoDb
      * @param bool $multi
      * @return bool|int
      */
-    public function remove(string $tableName, $condition, $args = null, bool $multi = false)
+    public function remove($tableName, $condition, $args = null, $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -218,7 +220,7 @@ class PdoDb
      * @param bool $retObj
      * @return mixed
      */
-    public function findOne(string $tableName, string $field, $condition, $args = null, $orderBy = null, bool $retObj = false)
+    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -239,7 +241,7 @@ class PdoDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, bool $retObj = false)
+    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -261,7 +263,7 @@ class PdoDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -280,7 +282,7 @@ class PdoDb
      * @param mixed $orderBy
      * @return mixed
      */
-    public function first(string $tableName, string $field, $condition, $args = null, $orderBy = null)
+    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -299,7 +301,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -312,7 +314,7 @@ class PdoDb
      * @param mixed $orderBy
      * @return array|bool
      */
-    public function col(string $tableName, string $field, $condition, $args = null, $orderBy = null)
+    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -334,7 +336,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -346,7 +348,7 @@ class PdoDb
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $args = null, string $field = '*')
+    public function count($tableName, $condition, $args = null, $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -356,7 +358,7 @@ class PdoDb
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function exec(string $sql, $args = null)
+    public function exec($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -369,7 +371,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $ret;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -380,7 +382,7 @@ class PdoDb
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql(string $sql, $args = null, bool $retObj = false)
+    public function rowSql($sql, $args = null, $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -390,14 +392,14 @@ class PdoDb
                 $sth->execute($args);
             }
             if ($retObj) {
-                $data = $sth->fetch(\PDO::FETCH_OBJ);
+                $data = $sth->fetch(PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetch(\PDO::FETCH_ASSOC);
+                $data = $sth->fetch(PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -409,7 +411,7 @@ class PdoDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -419,12 +421,12 @@ class PdoDb
                 $sth->execute($args);
             }
             if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
+                $data = $sth->fetchAll(PDO::FETCH_OBJ);
                 if (!is_null($index)) {
                     $data = $this->_object_index($data, $index);
                 }
             } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+                $data = $sth->fetchAll(PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
                     $data = $this->_array_index($data, $index);
                 }
@@ -432,7 +434,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -445,7 +447,7 @@ class PdoDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -456,14 +458,14 @@ class PdoDb
                 $sth->execute($args);
             }
             if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
+                $data = $sth->fetchAll(PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+                $data = $sth->fetchAll(PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -473,7 +475,7 @@ class PdoDb
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function countSql(string $sql, $args = null)
+    public function countSql($sql, $args = null)
     {
         return $this->firstSql($sql, $args);
     }
@@ -483,7 +485,7 @@ class PdoDb
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function firstSql(string $sql, $args = null)
+    public function firstSql($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -496,7 +498,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -506,7 +508,7 @@ class PdoDb
      * @param mixed $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql(string $sql, $args = null)
+    public function colSql($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -522,7 +524,7 @@ class PdoDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -530,7 +532,7 @@ class PdoDb
     /**
      * @return bool
      */
-    public function startTrans(): bool
+    public function startTrans()
     {
         return $this->_link->beginTransaction();
     }
@@ -538,7 +540,7 @@ class PdoDb
     /**
      * @param bool $commit_no_errors
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans($commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -546,7 +548,7 @@ class PdoDb
             } else {
                 $this->_link->rollBack();
             }
-        } catch (\PDOException $PDOException) {
+        } catch (PDOException $PDOException) {
             $this->_halt($PDOException->getMessage(), $PDOException->getCode());
         }
     }
@@ -557,7 +559,7 @@ class PdoDb
      * @param string $sql
      * @return bool
      */
-    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
+    private function _halt($message = '', $code = 0, $sql = '')
     {
         if ($this->dsn['dev']) {
             $this->close();
@@ -573,7 +575,7 @@ class PdoDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index($arr, $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -590,7 +592,7 @@ class PdoDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index($arr, $col)
     {
         if (!is_array($arr)) {
             return $arr;

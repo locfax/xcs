@@ -28,12 +28,12 @@ class Controller
     /**
      * @param $name
      * @param $arguments
-     * @return bool
+     * @return bool|void
      */
     public function __call($name, $arguments)
     {
         //动作不存在
-        if (App::isAjax(true)) {
+        if (App::isAjax()) {
             $res = [
                 'code' => 1,
                 'msg' => 'Action ' . $name . '不存在!',
@@ -64,7 +64,7 @@ class Controller
      * @param bool $auth
      * @return bool
      */
-    final function checkAcl($controllerName, $actionName, bool $auth = AUTH_ROLE): bool
+    final function checkAcl($controllerName, $actionName, $auth = AUTH_ROLE)
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

@@ -2,6 +2,8 @@
 
 namespace Xcs\Helper;
 
+use CURLFile;
+
 class Curl
 {
 
@@ -15,7 +17,7 @@ class Curl
      * @param bool $retSession
      * @return array
      */
-    public static function send(string $url, $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
+    public static function send($url, $data = '', array $httpHead = [], $retGzip = 'gzip', $retCharset = 'UTF-8', $retHead = false, $retSession = false)
     {
         $ch = curl_init();
         if (!$ch) {
@@ -59,7 +61,7 @@ class Curl
         if (!empty($data)) {
             if (is_array($data)) {
                 if (isset($data['__formfile'])) {
-                    $data[$data['__formfile']] = class_exists('\CURLFile', false) ? new \CURLFile($data[$data['__formfile']]) : '@' . $data[$data['__formfile']];
+                    $data[$data['__formfile']] = class_exists('\CURLFile', false) ? new CURLFile($data[$data['__formfile']]) : '@' . $data[$data['__formfile']];
                     unset($data['__formfile']);
                     $postStr = $data;
                 } else {
@@ -175,10 +177,10 @@ class Curl
     }
 
     /**
-     * @param $in
-     * @param $out
-     * @param $string
-     * @return mixed|string
+     * @param string $in
+     * @param string $out
+     * @param string $string
+     * @return array|false|string
      */
     private static function convert_encode($in, $out, $string)
     { // string change charset return string
@@ -217,12 +219,11 @@ class Curl
      * @param string $gzip
      * @return bool|string
      */
-    private static function gzip_decode($data, string $gzip = 'gzip')
+    private static function gzip_decode($data, $gzip = 'gzip')
     {
         $unpacked = false;
         if ('gzip' == $gzip) {
             if (!function_exists('gzinflate')) {
-                echo 'gzinflate is not exists' . PHP_EOL;
                 return $data;
             }
             $flags = ord(substr($data, 3, 1));
@@ -244,7 +245,6 @@ class Curl
             $unpacked = @gzinflate(substr($data, $headerlen));
         } elseif ('deflate' == $gzip) {
             if(!function_exists('gzuncompress')) {
-                echo 'gzuncompress is not exists' . PHP_EOL;
                 return $data;
             }
             $unpacked = @gzuncompress($data);

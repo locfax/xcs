@@ -78,7 +78,7 @@ class Xss
      * @param bool $is_image
      * @return array|bool|string
      */
-    public function clean($str, bool $is_image = false)
+    public function clean($str, $is_image = false)
     {
         if (is_array($str)) {
             foreach ($str as $key) {
@@ -91,9 +91,9 @@ class Xss
 
         do {
             $str = rawurldecode($str);
-        } while (preg_match('/%[0-9a-f]{2,}/i', $str));
+        } while (preg_match('/%[\da-f]{2,}/i', $str));
 
-        $str = preg_replace_callback("/[^a-z0-9>]+[a-z0-9]+=([\'\"]).*?\\1/si", [$this, '_convert_attribute'], $str);
+        $str = preg_replace_callback("/[^a-z\d>]+[a-z\d]+=([\'\"]).*?\\1/si", [$this, '_convert_attribute'], $str);
         $str = preg_replace_callback('/<\w+.*/si', [$this, '_decode_entity'], $str);
         $str = $this->remove_invisible_characters($str);
         $str = str_replace("\t", ' ', $str);
@@ -120,10 +120,10 @@ class Xss
         do {
             $original = $str;
             if (preg_match('/<a/i', $str)) {
-                $str = preg_replace_callback('#<a[^a-z0-9>]+([^>]*?)(?:>|$)#si', [$this, '_js_link_removal'], $str);
+                $str = preg_replace_callback('#<a[^a-z\d>]+([^>]*?)(?:>|$)#si', [$this, '_js_link_removal'], $str);
             }
             if (preg_match('/<img/i', $str)) {
-                $str = preg_replace_callback('#<img[^a-z0-9]+([^>]*?)(?:\s?/?>|$)#si', [$this, '_js_img_removal'], $str);
+                $str = preg_replace_callback('#<img[^a-z\d]+([^>]*?)(?:\s?/?>|$)#si', [$this, '_js_img_removal'], $str);
             }
             if (preg_match('/script|xss/i', $str)) {
                 $str = preg_replace('#</*(?:script|xss).*?>#si', '[del]', $str);
@@ -242,8 +242,8 @@ class Xss
 
     protected function _decode_entity($match)
     {
-        $match = preg_replace('|\&([a-z\_0-9\-]+)\=([a-z\_0-9\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
-        return str_replace($this->xss_hash(), '&', $this->entity_decode($match, 'UTF-8'));
+        $match = preg_replace('|\&([a-z\_\d\-]+)\=([a-z\_\d\-/]+)|i', $this->xss_hash() . '\\1=\\2', $match[0]);
+        return str_replace($this->xss_hash(), '&', $this->entity_decode($match));
     }
 
     public function entity_decode($str, $charset = 'UTF-8')
@@ -276,7 +276,7 @@ class Xss
                 }
                 $str = str_ireplace(array_keys($replace), array_values($replace), $str);
             }
-            $str = html_entity_decode(preg_replace('/(&#(?:x0*[0-9a-f]{2,5}(?![0-9a-f;]))|(?:0*\d{2,4}(?![0-9;])))/iS', '$1;', $str), $flag, $charset);
+            $str = html_entity_decode(preg_replace('/(&#(?:x0*[\da-f]{2,5}(?![\da-f;]))|(?:0*\d{2,4}(?![\d;])))/iS', '$1;', $str), $flag, $charset);
         } while ($str_compare !== $str);
         return $str;
     }

@@ -2,16 +2,16 @@
 
 namespace Xcs\Db;
 
-use \MongoDB\BSON\ObjectID;
-use \MongoDB\Driver\BulkWrite;
-use \MongoDB\Driver\Exception\BulkWriteException;
-use \MongoDB\Driver\Exception\Exception;
-use \MongoDB\Driver\Manager;
-use \MongoDB\Driver\Query as MongoQuery;
-use \MongoDB\Driver\Command;
-use \MongoDB\Driver\ReadPreference;
-use \MongoDB\Driver\WriteConcern;
-use Xcs\Ex\DbException;
+use MongoDB\BSON\ObjectID;
+use MongoDB\Driver\BulkWrite;
+use MongoDB\Driver\Command;
+use MongoDB\Driver\Exception\BulkWriteException;
+use MongoDB\Driver\Exception\Exception;
+use MongoDB\Driver\Manager;
+use MongoDB\Driver\Query as MongoQuery;
+use MongoDB\Driver\ReadPreference;
+use MongoDB\Driver\WriteConcern;
+use Xcs\DbException;
 
 class MongoDb
 {
@@ -84,7 +84,7 @@ class MongoDb
     /**
      * @return array
      */
-    public function info(): array
+    public function info()
     {
         return $this->dsn;
     }
@@ -95,7 +95,7 @@ class MongoDb
      * @param bool $retId
      * @return bool|int|string|null
      */
-    public function create($table, array $document = [], bool $retId = false)
+    public function create($table, array $document = [], $retId = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -124,7 +124,7 @@ class MongoDb
      * @param string $options
      * @return bool|int|null
      */
-    public function update($table, array $document = [], array $condition = [], string $options = '$set')
+    public function update($table, array $document = [], array $condition = [], $options = '$set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -138,7 +138,7 @@ class MongoDb
             } elseif (in_array($options, ['$set', '$inc', '$unset', '$push', '$pop', '$pull', '$addToSet'])) { //更新 字段
                 $bulk->update($condition, [$options => $document], ['multi' => false, 'upsert' => false]);
             } else {
-                return $this->_halt('the option is not support', 0);
+                return $this->_halt('the option is not support');
             }
             $ret = $this->_link->executeBulkWrite($this->_dbname . '.' . $table, $bulk, $this->_writeConcern);
             return $ret->getModifiedCount();
@@ -153,7 +153,7 @@ class MongoDb
      * @param bool $multi
      * @return bool|int|null
      */
-    public function remove($table, array $condition = [], bool $multi = false)
+    public function remove($table, array $condition = [], $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -238,7 +238,7 @@ class MongoDb
      * @param int $limit
      * @return array|bool
      */
-    public function page($table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
+    public function page($table, array $options = [], array $condition = [], $offset = 0, $limit = 20)
     {
         $options = array_merge($options, [
             'limit' => $limit,
@@ -298,7 +298,7 @@ class MongoDb
      * @param $total
      * @return int
      */
-    public function pageStart(int $page, int $ppp, $total)
+    public function pageStart($page, $ppp, $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -310,7 +310,7 @@ class MongoDb
      * @param mixed $code
      * @return bool
      */
-    private function _halt(string $message = '', $code = 0): bool
+    private function _halt($message = '', $code = 0)
     {
         if ($this->dsn['dev']) {
             $this->close();

@@ -2,6 +2,9 @@
 
 namespace Xcs;
 
+use Swoole\Database\PDOConfig;
+use Swoole\Database\RedisConfig;
+use Swoole\Database\RedisPool;
 use Xcs\Db\MongoDb;
 use Xcs\Db\PdoDb;
 use Xcs\Db\PdoPool;
@@ -24,7 +27,7 @@ class DB
      * @return PdoDb
      * @see PdoDb
      */
-    public static function dbm(string $dsnId = 'default'): PdoDb
+    public static function dbm($dsnId = 'default')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -48,7 +51,7 @@ class DB
      * @return MongoDb
      * @see MongoDb
      */
-    public static function mgo(string $dsnId = 'mongo'): MongoDb
+    public static function mgo($dsnId = 'mongo')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -70,7 +73,7 @@ class DB
      * @param string $dsnId
      * @return SqlsrvDb
      */
-    public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
+    public static function sqlsrv($dsnId = 'sqlsrv')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -93,10 +96,10 @@ class DB
      * @param string $dsnId
      * @return \Swoole\Database\PDOPool
      */
-    public static function PdoPool(string $dsnId = 'pool'): \Swoole\Database\PDOPool
+    public static function PdoPool($dsnId = 'pool')
     {
         $dsn = Context::dsn($dsnId);
-        return new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
+        return new \Swoole\Database\PDOPool((new PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -111,7 +114,7 @@ class DB
      * @param \Swoole\Database\PDOPool $pdo
      * @return PdoPool
      */
-    public static function getPdoPool(\Swoole\Database\PDOPool $pdo): PdoPool
+    public static function getPdoPool($pdo)
     {
         return new PdoPool($pdo);
     }
@@ -119,12 +122,12 @@ class DB
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return \Swoole\Database\RedisPool
+     * @return RedisPool
      */
-    public static function getRedisPool(string $dsnId = 'redis'): \Swoole\Database\RedisPool
+    public static function getRedisPool($dsnId = 'redis')
     {
         $dsn = Context::dsn($dsnId);
-        return new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
+        return new RedisPool((new RedisConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withAuth($dsn['password'])
@@ -145,7 +148,7 @@ class DB
      * mysql专用
      * @return array
      */
-    public static function info(): array
+    public static function info()
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->info();
@@ -161,7 +164,7 @@ class DB
      * @param bool $retId
      * @return bool|string
      */
-    public static function create(string $table, array $data, bool $retId = false)
+    public static function create($table, array $data, $retId = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->create($table, $data, $retId);
@@ -176,7 +179,7 @@ class DB
      * @param array $data
      * @return bool|int
      */
-    public static function replace(string $table, array $data)
+    public static function replace($table, array $data)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->replace($table, $data);
@@ -191,7 +194,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public static function update(string $table, $data, $condition, $args = null)
+    public static function update($table, $data, $condition, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->update($table, $data, $condition, $args);
@@ -206,7 +209,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public static function remove(string $table, $condition, $multi = false, $args = null)
+    public static function remove($table, $condition, $multi = false, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->remove($table, $condition, $args, $multi);
@@ -223,7 +226,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function findOne(string $table, string $field, $condition, $orderBy = null, $args = null, bool $retObj = false)
+    public static function findOne($table, $field, $condition, $orderBy = null, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
@@ -241,7 +244,7 @@ class DB
      * @param bool $retObj
      * @return array|bool
      */
-    public static function findAll(string $table, string $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, bool $retObj = false)
+    public static function findAll($table, $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
@@ -260,7 +263,7 @@ class DB
      * @param bool $retObj
      * @return array|bool
      */
-    public static function page(string $table, string $field, $condition = '', $orderBy = null, $args = null, $pageParam = 0, int $limit = 20, bool $retObj = false)
+    public static function page($table, $field, $condition = '', $orderBy = null, $args = null, $pageParam = 0, $limit = 20, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -287,7 +290,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public static function first(string $table, string $field, $condition, $orderBy = null, $args = null)
+    public static function first($table, $field, $condition, $orderBy = null, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first($table, $field, $condition, $args, $orderBy);
@@ -302,7 +305,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return array|bool
      */
-    public static function col(string $table, string $field, $condition = '', $orderBy = null, $args = null)
+    public static function col($table, $field, $condition = '', $orderBy = null, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->col($table, $field, $condition, $args, $orderBy);
@@ -317,7 +320,7 @@ class DB
      * @param string $field
      * @return mixed
      */
-    public static function count(string $table, $condition, $args = null, string $field = '*')
+    public static function count($table, $condition, $args = null, $field = '*')
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->count($table, $condition, $args, $field);
@@ -329,7 +332,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public static function exec(string $sql, $args = null)
+    public static function exec($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->exec($sql, $args);
@@ -345,7 +348,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function rowSql(string $sql, $args = null, bool $retObj = false)
+    public static function rowSql($sql, $args = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSql($sql, $args, $retObj);
@@ -359,7 +362,7 @@ class DB
      * @param bool $retObj
      * @return array|bool
      */
-    public static function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public static function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSetSql($sql, $args, $index, $retObj);
@@ -374,7 +377,7 @@ class DB
      * @param bool $retObj
      * @return mixed
      */
-    public static function pageSql(string $sql, $args = null, $pageParam = 0, int $limit = 18, bool $retObj = false): array
+    public static function pageSql($sql, $args = null, $pageParam = 0, $limit = 18, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -395,7 +398,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public static function countSql(string $sql, $args = null)
+    public static function countSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->countSql($sql, $args);
@@ -407,7 +410,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public static function firstSql(string $sql, $args = null)
+    public static function firstSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->firstSql($sql, $args);
@@ -419,7 +422,7 @@ class DB
      * @param mixed $args [':var' => $var]
      * @return array|bool
      */
-    public static function colSql(string $sql, $args = null)
+    public static function colSql($sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->colSql($sql, $args);
@@ -432,7 +435,7 @@ class DB
      * 开始事务
      * @return bool
      */
-    public static function startTrans(): bool
+    public static function startTrans()
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->startTrans();
@@ -443,7 +446,7 @@ class DB
      * 事务提交或者回滚
      * @param bool $commit_no_errors
      */
-    public static function endTrans(bool $commit_no_errors = true)
+    public static function endTrans($commit_no_errors = true)
     {
         $db = self::Using(self::$using_dbo_id);
         $db->endTrans($commit_no_errors);
@@ -457,7 +460,7 @@ class DB
      * @param string|null $id
      * @return PdoDb
      */
-    public static function Using(string $id = null): PdoDb
+    public static function Using($id = null)
     {
         if (!$id) {
             //初始运行
@@ -475,7 +478,7 @@ class DB
      * @param int $total
      * @return int
      */
-    public static function pageStart(int $page, int $ppp, int $total)
+    public static function pageStart($page, $ppp, $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -487,7 +490,7 @@ class DB
      * @param int $length
      * @return array|string
      */
-    public static function pageBar($pageParam, int $length)
+    public static function pageBar($pageParam, $length)
     {
         if (!isset($pageParam['bar']) || 'default' == $pageParam['bar']) {
             $defPageParam = [
@@ -529,7 +532,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function ids($arr): string
+    public static function ids($arr)
     {
         return implode(',', (array)$arr);
     }
@@ -538,7 +541,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function implode($arr): string
+    public static function implode($arr)
     {
         return "'" . implode("','", (array)$arr) . "'";
     }

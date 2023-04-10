@@ -50,7 +50,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function get(string $key)
+    public static function get($key)
     {
         return self::getInstance()->_get($key);
     }
@@ -59,7 +59,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    private function _get(string $key)
+    private function _get($key)
     {
         if ($this->enable) {
             $data = $this->handle->get($this->_key($key));
@@ -78,7 +78,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    public static function set(string $key, $value, int $ttl = 0)
+    public static function set($key, $value, $ttl = 0)
     {
         return self::getInstance()->_set($key, $value, $ttl);
     }
@@ -89,7 +89,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    private function _set(string $key, $value, int $ttl = 0)
+    private function _set($key, $value, $ttl = 0)
     {
         $ret = false;
         if ($this->enable) {
@@ -102,7 +102,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function rm(string $key)
+    public static function rm($key)
     {
         return self::getInstance()->_rm($key);
     }
@@ -142,9 +142,9 @@ class Cache
 
     /**
      * @param $str
-     * @return mixed
+     * @return string
      */
-    private function _key($str): string
+    private function _key($str)
     {
         return $this->prefix . $str;
     }

@@ -19,6 +19,12 @@ class MailHelper
         'auth_password' => '',
     ];
 
+    /**
+     * @param $email_to
+     * @param $subject
+     * @param $message
+     * @return bool|void
+     */
     function send($email_to, $subject, $message)
     {
         $mail = $this->mail;
@@ -37,8 +43,8 @@ $message
 EOT;
 
         $maildelimiter = 1 == $mail['maildelimiter'] ? "\r\n" : (2 == $mail['maildelimiter'] ? "\r" : "\n");
-        $mail['port'] = $mail['port'] ? $mail['port'] : 25;
-        $mail['mailsend'] = $mail['mailsend'] ? $mail['mailsend'] : 1;
+        $mail['port'] = $mail['port'] ?: 25;
+        $mail['mailsend'] = $mail['mailsend'] ?: 1;
         $email_from = $mail['from'];
 
         $email_subject = '=?' . $charset . '?B?' . base64_encode(preg_replace("/[\r|\n]/", '', '[' . $mail['sitename'] . '] ' . $subject)) . '?=';
@@ -164,7 +170,7 @@ EOT;
         }
     }
 
-    function fsocketopen($hostname, $port = 80, &$errno, &$errstr, $timeout = 15)
+    function fsocketopen($hostname, $port, &$errno, &$errstr, $timeout = 15)
     {
         $fp = '';
         if (function_exists('fsockopen')) {

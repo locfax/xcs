@@ -97,7 +97,7 @@ class RestFul extends Controller
      * @param integer $code HTTP状态
      * @return bool
      */
-    protected function response($data, int $code = 200, string $type = "json"): bool
+    protected function response($data, $code = 200, $type = "json")
     {
         if ($code != 200) {
             $this->status($code);

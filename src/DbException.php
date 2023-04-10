@@ -1,8 +1,6 @@
 <?php
 
-namespace Xcs\Ex;
-
-use Xcs\ExException;
+namespace Xcs;
 
 class DbException extends ExException
 {

@@ -2,7 +2,9 @@
 
 namespace Xcs\Db;
 
-use Xcs\Ex\DbException;
+use PDO;
+use PDOException;
+use Xcs\DbException;
 
 class SqlsrvDb
 {
@@ -22,14 +24,14 @@ class SqlsrvDb
             new DbException('dsn is empty', 404, 'PdoException');
         }
 
-        $options = [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION];
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
         if (isset($this->dsn['options'])) {
             $options = array_merge($options, $this->dsn['options']);
         }
 
         try {
-            $this->_link = new \PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
-        } catch (\PDOException $exception) {
+            $this->_link = new PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
+        } catch (PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
                 $this->__construct($config);
@@ -55,7 +57,7 @@ class SqlsrvDb
      * @param array $args
      * @return mixed
      */
-    public function __call(string $func, array $args)
+    public function __call($func, array $args)
     {
         if ($this->_link) {
             return call_user_func_array([$this->_link, $func], $args);
@@ -66,7 +68,7 @@ class SqlsrvDb
     /**
      * @return array
      */
-    public function info(): array
+    public function info()
     {
         return $this->dsn;
     }
@@ -75,7 +77,7 @@ class SqlsrvDb
      * @param string $tableName
      * @return string
      */
-    public function qTable(string $tableName): string
+    public function qTable($tableName)
     {
         return $tableName;
     }
@@ -84,7 +86,7 @@ class SqlsrvDb
      * @param string $fieldName
      * @return string
      */
-    public function qField(string $fieldName): string
+    public function qField($fieldName)
     {
         return $fieldName;
     }
@@ -94,7 +96,7 @@ class SqlsrvDb
      * @param string $glue
      * @return array
      */
-    public function field_param(array $fields, string $glue = ','): array
+    public function field_param(array $fields, $glue = ',')
     {
         $args = [];
         $sql = $comma = '';
@@ -112,7 +114,7 @@ class SqlsrvDb
      * @param bool $retId
      * @return bool|string
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create($tableName, array $data, $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -130,7 +132,7 @@ class SqlsrvDb
                 $ret = $this->_link->lastInsertId();
             }
             return $ret;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -140,7 +142,7 @@ class SqlsrvDb
      * @param array $data
      * @return bool|int
      */
-    public function replace(string $tableName, array $data)
+    public function replace($tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -162,19 +164,19 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function update(string $tableName, $data, $condition, $args = null)
+    public function update($tableName, $data, $condition, $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
             if (is_array($data)) {
-                list($data, $args2) = $this->field_param($data, ',');
+                list($data, $args2) = $this->field_param($data);
                 $args = array_merge($args2, $args1);
             } else {
                 $args = empty($args) ? $args1 : array_merge($args, $args1);
             }
         } else {
             if (is_array($data)) {
-                list($data, $args1) = $this->field_param($data, ',');
+                list($data, $args1) = $this->field_param($data);
                 $args = empty($args) ? $args1 : array_merge($args1, $args);
             }
         }
@@ -187,10 +189,9 @@ class SqlsrvDb
      * @param string $tableName
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
-     * @param bool $multi
      * @return bool|int
      */
-    public function remove(string $tableName, $condition, $args = null, bool $multi = false)
+    public function remove($tableName, $condition, $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -209,7 +210,7 @@ class SqlsrvDb
      * @param bool $retObj
      * @return mixed
      */
-    public function findOne(string $tableName, string $field, $condition, $args = null, $orderBy = null, bool $retObj = false)
+    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -230,7 +231,7 @@ class SqlsrvDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, bool $retObj = false)
+    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -248,11 +249,11 @@ class SqlsrvDb
      * @param mixed $args
      * @param mixed $orderBy
      * @param int $offset
-     * @param int $limit
+     * @param int $ppp
      * @param bool $retObj
      * @return array|bool
      */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy, int $offset = 0, int $ppp = 18, bool $retObj = false)
+    public function page($tableName, $field, $condition, $args = null, $orderBy = '', $offset = 0, $ppp = 18, $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -270,7 +271,7 @@ class SqlsrvDb
      * @param mixed $orderBy
      * @return mixed
      */
-    public function first(string $tableName, string $field, $condition, $args = null, $orderBy = null)
+    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -289,7 +290,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -302,7 +303,7 @@ class SqlsrvDb
      * @param mixed $orderBy
      * @return array|bool
      */
-    public function col(string $tableName, string $field, $condition, $args = null, $orderBy = null)
+    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -324,7 +325,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -336,7 +337,7 @@ class SqlsrvDb
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $args = null, string $field = '*')
+    public function count($tableName, $condition, $args = null, $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -346,7 +347,7 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @return bool|int
      */
-    public function exec(string $sql, $args = null)
+    public function exec($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -359,7 +360,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $ret;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -370,7 +371,7 @@ class SqlsrvDb
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql(string $sql, $args = null, bool $retObj = false)
+    public function rowSql($sql, $args = null, $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -380,14 +381,14 @@ class SqlsrvDb
                 $sth->execute($args);
             }
             if ($retObj) {
-                $data = $sth->fetch(\PDO::FETCH_OBJ);
+                $data = $sth->fetch(PDO::FETCH_OBJ);
             } else {
-                $data = $sth->fetch(\PDO::FETCH_ASSOC);
+                $data = $sth->fetch(PDO::FETCH_ASSOC);
             }
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -399,7 +400,7 @@ class SqlsrvDb
      * @param bool $retObj
      * @return array|bool
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -409,12 +410,12 @@ class SqlsrvDb
                 $sth->execute($args);
             }
             if ($retObj) {
-                $data = $sth->fetchAll(\PDO::FETCH_OBJ);
+                $data = $sth->fetchAll(PDO::FETCH_OBJ);
                 if (!is_null($index)) {
                     $data = $this->_object_index($data, $index);
                 }
             } else {
-                $data = $sth->fetchAll(\PDO::FETCH_ASSOC);
+                $data = $sth->fetchAll(PDO::FETCH_ASSOC);
                 if (!is_null($index)) {
                     $data = $this->_array_index($data, $index);
                 }
@@ -422,7 +423,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -432,7 +433,7 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function countSql(string $sql, $args = null)
+    public function countSql($sql, $args = null)
     {
         return $this->firstSql($sql, $args);
     }
@@ -442,7 +443,7 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @return mixed
      */
-    public function firstSql(string $sql, $args = null)
+    public function firstSql($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -455,7 +456,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -465,7 +466,7 @@ class SqlsrvDb
      * @param mixed $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql(string $sql, $args = null)
+    public function colSql($sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -481,7 +482,7 @@ class SqlsrvDb
             $sth->closeCursor();
             $sth = null;
             return $data;
-        } catch (\PDOException $e) {
+        } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
         }
     }
@@ -489,7 +490,7 @@ class SqlsrvDb
     /**
      * @return bool
      */
-    public function startTrans(): bool
+    public function startTrans()
     {
         return $this->_link->beginTransaction();
     }
@@ -497,7 +498,7 @@ class SqlsrvDb
     /**
      * @param bool $commit_no_errors
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans($commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -505,7 +506,7 @@ class SqlsrvDb
             } else {
                 $this->_link->rollBack();
             }
-        } catch (\PDOException $PDOException) {
+        } catch (PDOException $PDOException) {
             $this->_halt($PDOException->getMessage(), $PDOException->getCode());
         }
     }
@@ -516,7 +517,7 @@ class SqlsrvDb
      * @param string $sql
      * @return bool
      */
-    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
+    private function _halt($message = '', $code = 0, $sql = '')
     {
         if ($this->dsn['dev']) {
             $this->close();
@@ -532,7 +533,7 @@ class SqlsrvDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index($arr, $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -549,7 +550,7 @@ class SqlsrvDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index($arr, $col)
     {
         if (!is_array($arr)) {
             return $arr;
