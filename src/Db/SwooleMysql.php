@@ -515,7 +515,7 @@ class SwooleMysql
      * @param string $message
      * @param mixed $code
      * @param string $sql
-     * @return bool
+     * @return false
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {

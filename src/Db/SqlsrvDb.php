@@ -36,7 +36,7 @@ class SqlsrvDb
                 $this->repeat = true;
                 $this->__construct($config);
             } else {
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error', true);
+                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }
     }
@@ -516,14 +516,14 @@ class SqlsrvDb
      * @param string $sql
      * @return bool
      */
-    private function _halt($message = '', $code = 0, $sql = '', $stop = false)
+    private function _halt($message = '', $code = 0, $sql = '')
     {
         if ($this->dsn['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            echo 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
-            if ($stop) exit;
+            $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
+            throw new DbException($msg, $code);
         }
         return false;
     }

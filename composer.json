@@ -28,7 +28,8 @@
     "ext-json": "*",
     "ext-gd": "*",
     "ext-curl": "*",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "ext-mbstring": "*"
   },
   "suggest": {}
 }

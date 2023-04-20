@@ -3,8 +3,9 @@
 namespace Xcs;
 
 use Exception;
+use RuntimeException;
 
-class ExException extends Exception
+class ExException extends RuntimeException
 {
 
     public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null)

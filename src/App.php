@@ -52,14 +52,14 @@ class App
 
             if (defined('DEBUG') && DEBUG) {
                 set_error_handler(function ($errno, $errStr) {
-                    new ExException($errStr, $errno);
+                    throw new ExException($errStr, $errno);
                 });
 
                 define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                        new ExException($error["message"], $error["type"], 'systemError');
+                        throw new ExException($error["message"], $error["type"], 'systemError');
                     }
                 });
 
