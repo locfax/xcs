@@ -7,10 +7,16 @@ use Exception;
 class ExException extends Exception
 {
 
+    /**
+     * @var mixed|string
+     */
+    public $type = '';
+
     public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception', $Trace = true)
     {
         parent::__construct($message, intval($code));
         $this->exception($file, $line, $type, $Trace);
+        $this->type = $type;
     }
 
     /**
@@ -59,6 +65,7 @@ class ExException extends Exception
                 if (!isset($error['line'])) {
                     $error['line'] = '';
                     $error['file'] = '';
+                    $error['function'] = '<pre>' . $error['function'] . '</pre>';
                 }
                 $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
             }

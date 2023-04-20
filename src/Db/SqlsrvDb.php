@@ -526,7 +526,7 @@ class SqlsrvDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . DEBUG_EOL;
             } else {
-                new DbException($msg, $code);
+                throw new DbException($msg, $code);
             }
         }
         return false;
