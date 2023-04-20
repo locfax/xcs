@@ -317,7 +317,7 @@ class MongoDb
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             $msg = 'ERROR: ' . $message . ' CODE: ' . $code;
-            throw new DbException($msg, $code);
+            new DbException($msg, $code);
         }
         return false;
     }

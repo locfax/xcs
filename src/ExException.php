@@ -3,30 +3,32 @@
 namespace Xcs;
 
 use Exception;
-use RuntimeException;
 
-class ExException extends RuntimeException
+class ExException extends Exception
 {
 
-    public function __construct($message = '', $code = 0, $type = 'Exception', $previous = null)
+    public function __construct($code = 0, $message = '', $file = '', $line = 0, $type = 'Exception')
     {
-        parent::__construct($message, $code, $previous);
-        $this->exception($this, $type);
+        parent::__construct($message, intval($code));
         set_exception_handler(function () {
             //不用自带的显示异常
         });
+        $this->exception($file, $line, $type);
     }
 
     /**
-     * @param Exception $exception
-     * @param string $type
+     * @param $file
+     * @param $line
+     * @param string $title
      */
-    public function exception(Exception $exception, $type = 'Exception')
+    public function exception($file, $line, $title)
     {
-        $errorMsg = $exception->getMessage();
-        $trace = $exception->getTrace();
+        $errorMsg = $this->getMessage();
+        $trace = $this->getTrace();
         krsort($trace);
-        $trace[] = ['file' => $exception->getFile(), 'line' => $exception->getLine(), 'function' => 'break'];
+
+        $trace[] = ['file' => $file, 'line' => $line, 'function' => 'break'];
+
         $phpMsg = [];
         foreach ($trace as $error) {
             if (!empty($error['function'])) {
@@ -57,11 +59,12 @@ class ExException extends RuntimeException
                 $error['function'] = $fun;
             }
             if (!isset($error['line'])) {
-                continue;
+                $error['line'] = '';
+                $error['file'] = '';
             }
             $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
         }
-        $this->showError($type, $errorMsg, $phpMsg);
+        $this->showError($title, $errorMsg, $phpMsg);
     }
 
     public function writeErrorLog()
@@ -72,7 +75,7 @@ class ExException extends RuntimeException
     public function clear($message)
     {
         if (defined('DEBUG') && DEBUG) {
-            return is_object($message) ? '#object#' : $message;
+            return is_object($message) ? '#object#' : htmlspecialchars($message);
         }
         return htmlspecialchars($message);
     }
@@ -80,15 +83,13 @@ class ExException extends RuntimeException
     /**
      * 显示错误
      *
-     * @param string $type 错误类型 db,system
+     * @param string $title 错误类型 db,system
      * @param string $errorMsg
      * @param mixed $phpMsg
      */
-    public static function showError($type, $errorMsg, $phpMsg = '')
+    public static function showError($title, $errorMsg, $phpMsg = '')
     {
         ob_get_length() && ob_end_clean();
-
-        $title = $type ?: 'System';
 
         echo <<<EOT
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -147,10 +148,10 @@ class ExException extends RuntimeException
 EOT;
         if (!empty($phpMsg)) {
             $str = '<div class="info">';
-            $str .= '<p><strong>tracing</strong></p>';
+            $str .= '<p><strong>Call Stack</strong></p>';
             if (is_array($phpMsg)) {
                 $str .= '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
-                $str .= '<tr class="bg2"><td>No.</td><td>FileHelper</td><td>Line</td><td>Code</td></tr>';
+                $str .= '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
                 foreach ($phpMsg as $k => $msg) {
                     $k++;
                     $str .= '<tr class="bg1">';
