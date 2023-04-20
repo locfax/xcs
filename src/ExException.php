@@ -6,17 +6,10 @@ use Exception;
 
 class ExException extends Exception
 {
-
-    /**
-     * @var mixed|string
-     */
-    public $type = '';
-
-    public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception', $Trace = true)
+    public function __construct($message = '', $code = 0, $file = '', $line = 0, $title = 'Exception', $Trace = true, $previous = null)
     {
-        parent::__construct($message, intval($code));
-        $this->exception($file, $line, $type, $Trace);
-        $this->type = $type;
+        parent::__construct($message, intval($code), $previous);
+        $this->exception($file, $line, $title, $Trace);
     }
 
     /**

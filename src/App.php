@@ -66,7 +66,7 @@ class App
                     if($e instanceof ExException) {
                         return;
                     }
-                    new ExException($e->getMessage(), $e->getCode(), $e->getFile(), $e->getLine(), 'Exception');
+                    new ExException($e->getMessage(), $e->getCode(), $e->getFile(), $e->getLine(), get_class($e),true, $e);
                 });
                 array_walk($files, function ($file) {
                     include $file;
