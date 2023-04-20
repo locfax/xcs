@@ -54,12 +54,12 @@ class App
                 define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
                 set_error_handler(function ($errno, $errStr, $errFile = '', $errLine = 0) {
-                    new ExException($errno, $errStr, $errFile, $errLine, '语法解析错误！');
+                    new ExException($errStr, $errno, $errFile, $errLine, '语法解析错误');
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                        new ExException($error['type'], $error['message'], $error['file'], $error['line'], '致命错误！');
+                        new ExException($error['message'], $error['type'], $error['file'], $error['line'], '致命错误');
                     }
                 });
 

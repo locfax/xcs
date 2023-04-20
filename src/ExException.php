@@ -7,7 +7,7 @@ use Exception;
 class ExException extends Exception
 {
 
-    public function __construct($code = 0, $message = '', $file = '', $line = 0, $type = 'Exception')
+    public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception')
     {
         parent::__construct($message, intval($code));
         set_exception_handler(function () {
