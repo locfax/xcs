@@ -10,9 +10,6 @@ class ExException extends Exception
     public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception', $Trace = true)
     {
         parent::__construct($message, intval($code));
-        set_exception_handler(function () {
-            //不用自带的显示异常
-        });
         $this->exception($file, $line, $type, $Trace);
     }
 
@@ -77,7 +74,7 @@ class ExException extends Exception
     public function clear($message)
     {
         if (defined('DEBUG') && DEBUG) {
-            return is_object($message) ? '#object#' : htmlspecialchars($message);
+            return is_object($message) ? $message : htmlspecialchars($message);
         }
         return htmlspecialchars($message);
     }

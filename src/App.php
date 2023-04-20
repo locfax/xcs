@@ -62,7 +62,9 @@ class App
                         new ExException($error['message'], $error['type'], $error['file'], $error['line'], '致命错误');
                     }
                 });
-
+                set_exception_handler(function ($e) {
+                    new ExException($e->getMessage(), $e->getCode(), $e->getFile(), $e->getLine(), 'Exception');
+                });
                 array_walk($files, function ($file) {
                     include $file;
                 });

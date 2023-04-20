@@ -524,30 +524,6 @@ class SqliteDb
     }
 
     /**
-     * @return bool
-     */
-    public function startTrans()
-    {
-        return $this->_link->beginTransaction();
-    }
-
-    /**
-     * @param bool $commit_no_errors
-     */
-    public function endTrans($commit_no_errors = true)
-    {
-        try {
-            if ($commit_no_errors) {
-                $this->_link->commit();
-            } else {
-                $this->_link->rollBack();
-            }
-        } catch (PDOException $PDOException) {
-            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
-        }
-    }
-
-    /**
      * @param string $message
      * @param mixed $code
      * @param string $sql
