@@ -13,8 +13,16 @@ defined('APP_KEY') or define('APP_KEY', 'web');
 defined('AUTH_ROLE') or define('AUTH_ROLE', false);
 /**
  * 默认的dsn
-*/
+ */
 defined('APP_DSN') or define('APP_DSN', 'mysql');
+/**
+ * 是否在命令行运行
+ */
+defined('APP_CLI') or define('APP_CLI', false);
+/**
+ * 换行
+ */
+defined('DEBUG_EOL') or define('DEBUG_EOL', PHP_OS == 'Linux' ? "\n" : "\r\n");
 
 const BASE_PATH = __DIR__ . '/';  //框架路径
 const APP_PATH = APP_ROOT . '/app/'; //应用路径

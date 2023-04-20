@@ -4,7 +4,6 @@ namespace Xcs\Db;
 
 use PDO;
 use PDOException;
-use Swoole\Database\PDOPool;
 
 class SwooleMysql
 {
@@ -13,9 +12,9 @@ class SwooleMysql
 
     /**
      * PdoDb constructor.
-     * @param PDOPool $pdo
+     * @param \Swoole\Database\PDOProxy $pdo
      */
-    public function __construct(PDOPool $pdo)
+    public function __construct($pdo)
     {
         $this->_link = $pdo;
     }

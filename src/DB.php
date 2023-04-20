@@ -2,10 +2,6 @@
 
 namespace Xcs;
 
-use Swoole\Database\PDOConfig;
-use Swoole\Database\PDOPool;
-use Swoole\Database\RedisConfig;
-use Swoole\Database\RedisPool;
 use Xcs\Db\MongoDb;
 use Xcs\Db\MysqlDb;
 use Xcs\Db\SqliteDb;
@@ -117,12 +113,12 @@ class DB
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return PDOPool
+     * @return \Swoole\Database\PDOPool
      */
     public static function SwoolePdoPool($dsnId = 'pool')
     {
         $dsn = Context::dsn($dsnId);
-        return new PDOPool((new PDOConfig)
+        return new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -134,7 +130,7 @@ class DB
 
     /**
      * swoole 专用
-     * @param PDOPool $pdo
+     * @param \Swoole\Database\PDOProxy $pdo
      * @return SwooleMysql
      */
     public static function SwooleMysql($pdo)
@@ -145,12 +141,12 @@ class DB
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return RedisPool
+     * @return \Swoole\Database\RedisPool
      */
-    public static function RedisPool($dsnId = 'redis')
+    public static function SwooleRedisPool($dsnId = 'redis')
     {
         $dsn = Context::dsn($dsnId);
-        return new RedisPool((new RedisConfig)
+        return new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withAuth($dsn['password'])
