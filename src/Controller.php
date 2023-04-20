@@ -40,8 +40,8 @@ class Controller
             ];
             return App::response($res);
         }
-        $args = 'Action:' . $name . "不存在";
-        template('404', ['args' => $args]);
+        $message = 'Action:' . $name . "不存在";
+        new ExException($message, 0);
     }
 
     protected function init()
