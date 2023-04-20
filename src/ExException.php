@@ -7,62 +7,64 @@ use Exception;
 class ExException extends Exception
 {
 
-    public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception')
+    public function __construct($message = '', $code = 0, $file = '', $line = 0, $type = 'Exception', $Trace = true)
     {
         parent::__construct($message, intval($code));
         set_exception_handler(function () {
             //不用自带的显示异常
         });
-        $this->exception($file, $line, $type);
+        $this->exception($file, $line, $type, $Trace);
     }
 
     /**
      * @param $file
      * @param $line
      * @param string $title
+     * @param $Trace
      */
-    public function exception($file, $line, $title)
+    public function exception($file, $line, $title, $Trace)
     {
         $errorMsg = $this->getMessage();
-        $trace = $this->getTrace();
-        krsort($trace);
-
-        $trace[] = ['file' => $file, 'line' => $line, 'function' => 'break'];
 
         $phpMsg = [];
-        foreach ($trace as $error) {
-            if (!empty($error['function'])) {
-                $fun = '';
-                if (!empty($error['class'])) {
-                    $fun .= $error['class'] . $error['type'];
-                }
-                $fun .= $error['function'] . '(';
-                if (!empty($error['args'])) {
-                    $mark = '';
-                    foreach ($error['args'] as $arg) {
-                        $fun .= $mark;
-                        if (is_array($arg)) {
-                            $fun .= 'Array';
-                        } elseif (is_bool($arg)) {
-                            $fun .= $arg ? 'true' : 'false';
-                        } elseif (is_int($arg)) {
-                            $fun .= $arg;
-                        } elseif (is_float($arg)) {
-                            $fun .= $arg;
-                        } else {
-                            $fun .= $this->clear($arg);
-                        }
-                        $mark = ', ';
+        if ($Trace) {
+            $trace = $this->getTrace();
+            krsort($trace);
+            $trace[] = ['file' => $file, 'line' => $line, 'function' => 'break'];
+            foreach ($trace as $error) {
+                if (!empty($error['function'])) {
+                    $fun = '';
+                    if (!empty($error['class'])) {
+                        $fun .= $error['class'] . $error['type'];
                     }
+                    $fun .= $error['function'] . '(';
+                    if (!empty($error['args'])) {
+                        $mark = '';
+                        foreach ($error['args'] as $arg) {
+                            $fun .= $mark;
+                            if (is_array($arg)) {
+                                $fun .= 'Array';
+                            } elseif (is_bool($arg)) {
+                                $fun .= $arg ? 'true' : 'false';
+                            } elseif (is_int($arg)) {
+                                $fun .= $arg;
+                            } elseif (is_float($arg)) {
+                                $fun .= $arg;
+                            } else {
+                                $fun .= $this->clear($arg);
+                            }
+                            $mark = ', ';
+                        }
+                    }
+                    $fun .= ')';
+                    $error['function'] = $fun;
                 }
-                $fun .= ')';
-                $error['function'] = $fun;
+                if (!isset($error['line'])) {
+                    $error['line'] = '';
+                    $error['file'] = '';
+                }
+                $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
             }
-            if (!isset($error['line'])) {
-                $error['line'] = '';
-                $error['file'] = '';
-            }
-            $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
         }
         $this->showError($title, $errorMsg, $phpMsg);
     }

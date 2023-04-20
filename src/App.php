@@ -152,13 +152,13 @@ class App
         //主动载入controller
         if (!self::_loadController($controllerName, $controllerClass)) {
             //控制器加载失败
-            self::_errCtrl("Controller '" . $controllerName . '\' is not exists!');
+            self::_errCtrl($controllerName . ' 控制器不存在');
             return;
         }
         $controller = new $controllerClass($controllerName, $actionName);
         if (!$controller instanceof $controllerClass) {
             //控制器加载失败
-            self::_errCtrl("Controller '" . $controllerName . '\' is not instanceof!');
+            self::_errCtrl($controllerName . ' 控制器加载失败');
             return;
         }
         call_user_func([$controller, $actionMethod]);
@@ -179,7 +179,7 @@ class App
             self::response($res);
             return;
         }
-        echo 'error:' . $args;
+        new ExException($args, 0, '', 0, '控制器', false);
     }
 
     /**
@@ -196,7 +196,7 @@ class App
             self::response($res);
             return;
         }
-        echo 'error！' . $args;
+        new ExException($args, 0, '', 0, '权限', false);
     }
 
     /**
