@@ -286,10 +286,23 @@ class DB
      * @param bool $retObj
      * @return array|bool
      */
-    public static function page($table, $field, $condition = '', $orderBy = null, $args = null, $pageParam = 0, $limit = 20, $retObj = false)
+    public static function page($table, $field, $condition = '', $orderBy = null, $args = null, $pageParam = [], $limit = 20, $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
+            $_pageParam = [
+                'page' => getgpc('g.page', 1),
+                'udi' => url(getini('udi')),
+            ];
+            if (!empty($pageParam)) {
+                if (!isset($pageParam['total'])) {
+                    $_pageParam['total'] = self::count($table, $condition, $args);
+                }
+                $pageParam = array_merge($_pageParam, $pageParam);
+            } else {
+                $_pageParam['total'] = self::count($table, $condition, $args);
+                $pageParam = $_pageParam;
+            }
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
         } else {
             $offset = $pageParam;
