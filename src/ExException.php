@@ -6,25 +6,28 @@ use Exception;
 
 class ExException extends Exception
 {
-    public function __construct($message = '', $code = 0, $file = '', $line = 0, $title = 'Exception', $Trace = true, $previous = null)
+    public function __construct($message = '', $code = 0, $file = '', $line = 0, $title = 'Exception', $Trace = true, $e = null)
     {
-        parent::__construct($message, intval($code), $previous);
-        $this->exception($file, $line, $title, $Trace);
+        parent::__construct($message, intval($code));
+        if (is_null($e)) {
+            $e = $this;
+        }
+        $this->exception($message, $file, $line, $title, $Trace, $e);
     }
 
     /**
+     * @param $message
      * @param $file
      * @param $line
      * @param string $title
      * @param $Trace
+     * @param $e
      */
-    public function exception($file, $line, $title, $Trace)
+    public function exception($message, $file, $line, $title, $Trace, $e)
     {
-        $errorMsg = $this->getMessage();
-
         $phpMsg = [];
         if ($Trace) {
-            $trace = $this->getTrace();
+            $trace = $e->getTrace();
             krsort($trace);
             $trace[] = ['file' => $file, 'line' => $line, 'function' => 'break'];
             foreach ($trace as $error) {
@@ -63,7 +66,7 @@ class ExException extends Exception
                 $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
             }
         }
-        $this->showError($title, $errorMsg, $phpMsg);
+        $this->showError($message, $title, $phpMsg);
     }
 
     public function writeErrorLog()
@@ -82,11 +85,11 @@ class ExException extends Exception
     /**
      * 显示错误
      *
+     * @param $message
      * @param string $title 错误类型 db,system
-     * @param string $errorMsg
      * @param mixed $phpMsg
      */
-    public static function showError($title, $errorMsg, $phpMsg = '')
+    public static function showError($message, $title, $phpMsg = '')
     {
         ob_get_length() && ob_end_clean();
 
@@ -143,7 +146,7 @@ class ExException extends Exception
 <body>
 <div id="container">
 <h1>$title</h1>
-<div class='info'><pre>$errorMsg</pre></div>
+<div class='info'><pre>$message</pre></div>
 EOT;
         if (!empty($phpMsg)) {
             $str = '<div class="info">';
