@@ -41,7 +41,7 @@ class Controller
             return App::response($res);
         }
         $message = 'Action:' . $name . "不存在";
-        new ExException($message, 0,'', 0, '控制器', false);
+        ExUiException::render('控制器', $message, '', 0, false);
     }
 
     protected function init()

@@ -53,20 +53,20 @@ class App
             if (defined('DEBUG') && DEBUG) {
                 define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
-                set_error_handler(function ($errno, $errStr, $errFile = '', $errLine = 0) {
-                    throw new ExException($errStr, $errno, $errFile, $errLine, '语法解析错误');
+                set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
+                    throw new ErrException($errStr, $errno, $errFile, $errLine);
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                        throw new ExException($error['message'], $error['type'], $error['file'], $error['line'], '致命错误');
+                        throw new ExException($error['message'], $error['type'], $error['file'], $error['line']);
                     }
                 });
-                set_exception_handler(function ($e) {
-                    if($e instanceof ExException) {
+                set_exception_handler(function ($ex) {
+                    if ($ex instanceof \Exception) {
                         return;
                     }
-                    new ExException($e->getMessage(), $e->getCode(), $e->getFile(), $e->getLine(), get_class($e),true, $e);
+                    ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
                 array_walk($files, function ($file) {
                     include $file;
@@ -184,7 +184,7 @@ class App
             self::response($res);
             return;
         }
-        new ExException($args, 0, '', 0, '控制器', false);
+        ExUiException::render('控制器', $args, '', 0, false);
     }
 
     /**
@@ -201,7 +201,7 @@ class App
             self::response($res);
             return;
         }
-        new ExException($args, 0, '', 0, '权限', false);
+        ExUiException::render('权限', $args, '', 0, false);
     }
 
     /**
