@@ -33,7 +33,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('MysqlDb' != $dsn['driver']) {
-            new ExException("the driver error: MysqlDb");
+            throw new ExException('driver','the driver error: MysqlDb');
         }
 
         self::$dbm_time_out = time() + 30;
@@ -57,7 +57,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('MongoDb' != $dsn['driver']) {
-            new ExException("the driver error: MongoDb");
+            throw new ExException('driver', 'the driver error: MongoDb');
         }
 
         self::$mgo_time_out = time() + 30;
@@ -79,7 +79,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('SqlsrvDb' != $dsn['driver']) {
-            new ExException("the driver error: SqlsrvDb");
+            throw new ExException('driver', 'the driver error: SqlsrvDb');
         }
 
         self::$dbm_time_out = time() + 30;
@@ -101,7 +101,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('SqliteDb' != $dsn['driver']) {
-            new ExException("the driver error: SqliteDb");
+            throw new ExException('driver', 'the driver error: SqliteDb');
         }
 
         self::$dbm_time_out = time() + 30;

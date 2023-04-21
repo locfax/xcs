@@ -2,13 +2,10 @@
 
 namespace Xcs;
 
-use Exception;
-
-class DbException extends Exception
+class DbException extends ExException
 {
     public function __construct($message = '', $code = 0)
     {
-        parent::__construct($message, intval($code));
-        ExUiException::render('数据库', $message, '', 0, $this, true);
+        parent::__construct('数据库', $message, $code);
     }
 }

@@ -21,7 +21,7 @@ class SqlsrvDb
         $this->dsn = $config;
 
         if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoException');
+            throw new DbException('dsn is empty', 404);
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
@@ -522,9 +522,9 @@ class SqlsrvDb
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE: ' . $code . PHP_EOL;
+            $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . PHP_EOL;
             if (APP_CLI) {
-                echo DEBUG_EOL . $msg . DEBUG_EOL;
+                echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
                 throw new DbException($msg, $code);
             }

@@ -44,7 +44,7 @@ class MongoDb
         $this->dsn = $config;
 
         if (empty($this->dsn)) {
-            new DbException('dsn is empty', 404, 'PdoException');
+            throw new DbException('dsn is empty', 404);
         }
 
         $options = [
@@ -316,11 +316,11 @@ class MongoDb
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            $msg = 'ERROR: ' . $message . ' CODE: ' . $code;
+            $msg = 'ERROR: ' . $message;
             if (APP_CLI) {
-                echo DEBUG_EOL . $msg . DEBUG_EOL;
+                echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-               throw new DbException($msg, $code);
+                throw new DbException($msg, $code);
             }
         }
         return false;

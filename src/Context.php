@@ -9,14 +9,13 @@ class Context
      * @param string $dsnId
      * @return mixed
      */
-    public static function dsn($dsnId = 'default')
+    public static function dsn($dsnId = 'mysql')
     {
         static $cacheDsn = [];
         if (empty($cacheDsn)) {
             $cacheDsn = App::mergeVars('dsn');
             if (!isset($cacheDsn[$dsnId])) {
-                new ExException("$dsnId is not setting");
-                return null;
+                throw new ExException('notice', "$dsnId is not setting");
             }
         }
         return $cacheDsn[$dsnId];
@@ -37,8 +36,7 @@ class Context
         }
         $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            new ExException("$name.inc.php is not exists");
-            return [];
+            throw new ExException('notice', "$name.inc.php is not exists");
         }
         $CacheConfig[$key] = include $file;
 

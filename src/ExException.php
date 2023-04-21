@@ -6,9 +6,9 @@ use Exception;
 
 class ExException extends Exception
 {
-    public function __construct($message = '', $code = 0, $file = '', $line = 0, $trace = true)
+    public function __construct($title = '异常信息', $message = '', $code = 0, $file = '', $line = 0, $trace = true)
     {
         parent::__construct($message, intval($code));
-        ExUiException::render('异常信息', $message, $file, $line, $trace, $this);
+        ExUiException::render($title, $message . ' CODE:' . $code, $file, $line, $trace, $this);
     }
 }

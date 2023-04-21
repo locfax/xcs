@@ -21,7 +21,7 @@ class File
     {
         !is_dir(DATA_CACHE) && mkdir(DATA_CACHE);
         if (!is_writeable(DATA_CACHE)) {
-            throw new ExException('路径:' . DATA_CACHE . ' 不可写');
+            throw new ExException('提示', '路径:' . DATA_CACHE . ' 不可写');
         }
         $this->enable = true;
         return $this;

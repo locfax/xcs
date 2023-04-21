@@ -14,7 +14,7 @@ trait Singleton
      */
     public function __clone()
     {
-        throw new ExException('Cloning ' . __CLASS__ . ' is not allowed');
+        throw new ExException('__clone', 'Cloning ' . __CLASS__ . ' is not allowed');
     }
 
     /**
