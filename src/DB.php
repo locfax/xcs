@@ -2,8 +2,11 @@
 
 namespace Xcs;
 
+use Swoole\Database\PDOPool;
+use Swoole\Database\RedisPool;
 use Xcs\Db\MongoDb;
 use Xcs\Db\MysqlDb;
+use Xcs\Db\PostgreDb;
 use Xcs\Db\SqliteDb;
 use Xcs\Db\SwooleMysql;
 use Xcs\Db\SqlsrvDb;
@@ -24,7 +27,7 @@ class DB
      * @return MysqlDb
      * @see MysqlDb
      */
-    public static function dbm($dsnId = 'mysql')
+    public static function mysql($dsnId = 'mysql')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -48,7 +51,7 @@ class DB
      * @return MongoDb
      * @see MongoDb
      */
-    public static function mgo($dsnId = 'mongo')
+    public static function mongo($dsnId = 'mongo')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -111,14 +114,36 @@ class DB
     }
 
     /**
+     * @param string $dsnId
+     * @return PostgreDb
+     */
+    public static function postgre($dsnId = 'postgre')
+    {
+        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        $dsn = Context::dsn($dsnId);
+
+        if ('PostgreDb' != $dsn['driver']) {
+            throw new ExException('driver', 'the driver error: PostgreDb');
+        }
+
+        self::$dbm_time_out = time() + 30;
+        $object = new PostgreDb($dsn);
+        self::$used_dbo[$dsnId] = $object;
+        return $object;
+    }
+
+    /**
      * swoole 专用
      * @param string $dsnId
-     * @return \Swoole\Database\PDOPool
+     * @return PDOPool
      */
     public static function SwoolePdoPool($dsnId = 'pool')
     {
         $dsn = Context::dsn($dsnId);
-        return new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
+        return new PDOPool((new \Swoole\Database\PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -141,12 +166,12 @@ class DB
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return \Swoole\Database\RedisPool
+     * @return RedisPool
      */
     public static function SwooleRedisPool($dsnId = 'redis')
     {
         $dsn = Context::dsn($dsnId);
-        return new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
+        return new RedisPool((new \Swoole\Database\RedisConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withAuth($dsn['password'])
@@ -501,7 +526,7 @@ class DB
             //切换dbo id
             self::$using_dbo_id = $id;
         }
-        return self::dbm(self::$using_dbo_id);
+        return self::mysql(self::$using_dbo_id);
     }
 
     /**

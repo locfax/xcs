@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 use Xcs\DbException;
 
-class SqliteDb
+class PostgreDb
 {
 
     private $_config;
@@ -15,7 +15,7 @@ class SqliteDb
 
     /**
      * PdoDb constructor.
-     * @param array $config //dsn sqlite:data.db
+     * @param array $config
      */
     public function __construct(array $config)
     {
@@ -25,9 +25,14 @@ class SqliteDb
             throw new DbException('dsn is empty', 404);
         }
 
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        if (isset($config['options'])) {
+            $options = array_merge($options, $config['options']);
+        }
+
         try {
-            $dsn = 'sqlite:' . $config['dbname'];
-            $this->_link = new PDO($dsn);
+            $dsn = sprintf('pgsql:host=%s;port=%s;dbname=%s', $config['host'], $config['port'], $config['dbname']);
+            $this->_link = new PDO($dsn, $config['login'], $config['secret'], $options);
         } catch (PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
@@ -76,13 +81,13 @@ class SqliteDb
     public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
-            return "`{$this->_config['dbname']}`" . ".`{$tableName}`";
+            return trim($tableName);
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
             $this->_halt("tableName:{$tableName} 最多只能有一个点.");
         }
-        return "`{$arr[0]}`.`{$arr[1]}`";
+        return "{$arr[0]}.{$arr[1]}";
     }
 
     /**
@@ -91,7 +96,7 @@ class SqliteDb
      */
     public function qField($fieldName)
     {
-        return ($fieldName == '*') ? '*' : "`{$fieldName}`";
+        return ($fieldName == '*') ? '*' : $fieldName;
     }
 
     /**
@@ -201,8 +206,7 @@ class SqliteDb
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition . $limit;
+        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition;
         return $this->exec($sql, $args);
     }
 
@@ -521,6 +525,30 @@ class SqliteDb
             return $data;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode(), $sql);
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public function startTrans()
+    {
+        return $this->_link->beginTransaction();
+    }
+
+    /**
+     * @param bool $commit_no_errors
+     */
+    public function endTrans($commit_no_errors = true)
+    {
+        try {
+            if ($commit_no_errors) {
+                $this->_link->commit();
+            } else {
+                $this->_link->rollBack();
+            }
+        } catch (PDOException $PDOException) {
+            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
         }
     }
 

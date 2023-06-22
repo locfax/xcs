@@ -9,7 +9,7 @@ use Xcs\DbException;
 class MysqlDb
 {
 
-    private $dsn;
+    private $_config;
     private $_link = null;
     private $repeat = false;
 
@@ -19,19 +19,20 @@ class MysqlDb
      */
     public function __construct(array $config)
     {
-        $this->dsn = $config;
+        $this->_config = $config;
 
-        if (empty($this->dsn)) {
+        if (empty($config)) {
             throw new DbException('dsn is empty', 404);
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if (isset($this->dsn['options'])) {
-            $options = array_merge($options, $this->dsn['options']);
+        if (isset($config['options'])) {
+            $options = array_merge($options, $config['options']);
         }
 
         try {
-            $this->_link = new PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
+            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8', $config['host'], $config['port'], $config['dbname']);
+            $this->_link = new PDO($dsn, $config['login'], $config['secret'], $options);
         } catch (PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
@@ -70,7 +71,7 @@ class MysqlDb
      */
     public function info()
     {
-        return $this->dsn;
+        return $this->_config;
     }
 
     /**
@@ -80,7 +81,7 @@ class MysqlDb
     public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
-            return "`{$this->dsn['dbname']}`" . ".`{$tableName}`";
+            return "`{$this->_config['dbname']}`" . ".`{$tableName}`";
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
@@ -560,7 +561,7 @@ class MysqlDb
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->dsn['dev']) {
+        if ($this->_config['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);

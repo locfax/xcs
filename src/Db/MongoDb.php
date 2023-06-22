@@ -18,7 +18,7 @@ class MongoDb
     /**
      * @var array
      */
-    private $dsn;
+    private $_config;
 
     /**
      * @var Manager
@@ -41,9 +41,9 @@ class MongoDb
      */
     public function __construct(array $config)
     {
-        $this->dsn = $config;
+        $this->_config = $config;
 
-        if (empty($this->dsn)) {
+        if (empty($config)) {
             throw new DbException('dsn is empty', 404);
         }
 
@@ -51,13 +51,18 @@ class MongoDb
             'connect' => true,
             'persist' => false
         ];
-        if (isset($this->dsn['options'])) {
-            $options = array_merge($options, $this->dsn['options']);
+        if (isset($config['options'])) {
+            $options = array_merge($options, $config['options']);
         }
 
-        $this->_link = new Manager($this->dsn['dsn'], $options);
+        if ($config['login']) {
+            $dsn = sprintf('mongodb://%s:%s@%s:%s/%s', $config['login'], $config['secret'], $config['host'], $config['port'], $config['dbname']);
+        } else {
+            $dsn = sprintf('mongodb://%s:%s/%s', $config['host'], $config['port'], $config['dbname']);
+        }
+        $this->_link = new Manager($dsn, $options);
         $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
-        $this->_dbname = $this->dsn['dbname'];
+        $this->_dbname = $config['dbname'];
 
     }
 
@@ -86,7 +91,7 @@ class MongoDb
      */
     public function info()
     {
-        return $this->dsn;
+        return $this->_config;
     }
 
     /**
@@ -312,7 +317,7 @@ class MongoDb
      */
     private function _halt($message = '', $code = 0)
     {
-        if ($this->dsn['dev']) {
+        if ($this->_config['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);

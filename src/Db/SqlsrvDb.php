@@ -8,7 +8,7 @@ use Xcs\DbException;
 
 class SqlsrvDb
 {
-    private $dsn;
+    private $_config;
     private $_link = null;
     private $repeat = false;
 
@@ -18,19 +18,20 @@ class SqlsrvDb
      */
     public function __construct(array $config)
     {
-        $this->dsn = $config;
+        $this->_config = $config;
 
-        if (empty($this->dsn)) {
+        if (empty($config)) {
             throw new DbException('dsn is empty', 404);
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if (isset($this->dsn['options'])) {
-            $options = array_merge($options, $this->dsn['options']);
+        if (isset($config['options'])) {
+            $options = array_merge($options, $config['options']);
         }
 
         try {
-            $this->_link = new PDO($this->dsn['dsn'], $this->dsn['login'], $this->dsn['secret'], $options);
+            $dsn = sprintf('sqlsrv:Database=%s;Server=%s,%s', $config['dbname'], $config['host'], $config['port']);
+            $this->_link = new PDO($dsn, $config['login'], $config['secret'], $options);
         } catch (PDOException $exception) {
             if (!$this->repeat) {
                 $this->repeat = true;
@@ -69,7 +70,7 @@ class SqlsrvDb
      */
     public function info()
     {
-        return $this->dsn;
+        return $this->_config;
     }
 
     /**
@@ -518,7 +519,7 @@ class SqlsrvDb
      */
     private function _halt($message = '', $code = 0, $sql = '')
     {
-        if ($this->dsn['dev']) {
+        if ($this->_config['dev']) {
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
