@@ -11,7 +11,7 @@ class App
 
     const _controllerPrefix = 'Controller\\';
 
-    private static $routes;
+    private static $routes = [];
 
     /**
      * @param bool $refresh
@@ -227,43 +227,29 @@ class App
         if (strpos($uri, 'index.php') !== false) {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
+
         if (!$uri) {
             return;
         }
 
-        if (!self::$routes) {
+        if (is_file(APP_ROOT . '/route/' . APP_KEY . '.php')) {
             self::$routes = include(APP_ROOT . '/route/' . APP_KEY . '.php');
         }
 
         $match = false;
         foreach (self::$routes as $key => $val) {
-            if (is_array($val)) {
-                foreach ($val as $k => $v) {
-                    $uri = str_replace($key . '/', '', $uri);
-                    $k = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $k);
-                    if (preg_match('#^' . $k . '$#', $uri, $matches)) {
-                        if (strpos($v, '$') !== false && strpos($k, '(') !== false) {
-                            $v = preg_replace('#^' . $k . '$#', $v, $uri);
-                        }
-                        $req = explode('/', $v);
-                        self::_setRequest($req);
-                        $match = true;
-                        break;
-                    }
+            $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
+            if (preg_match('#^' . $key . '$#', $uri, $matches)) {
+                if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                    $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }
-            } else {
-                $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
-                if (preg_match('#^' . $key . '$#', $uri, $matches)) {
-                    if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
-                        $val = preg_replace('#^' . $key . '$#', $val, $uri);
-                    }
-                    $req = explode('/', $val);
-                    self::_setRequest($req);
-                    $match = true;
-                    break;
-                }
+                $req = explode('/', $val);
+                self::_setRequest($req);
+                $match = true;
+                break;
             }
         }
+
         if (!$match) {
             $req = explode('/', $uri);
             self::_setRequest($req);

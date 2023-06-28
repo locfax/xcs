@@ -215,7 +215,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function to_tree(array $arr, $fid = 'catid', $fparent = 'upid', $index = 'catid', $children = 'children', $returnReferences = false)
+    public static function to_tree(array $arr, $fid = 'id', $fparent = 'upid', $index = 'id', $children = 'children', $returnReferences = false)
     {
         $refs = $arr;
         $pkvRefs = [];
