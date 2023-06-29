@@ -6,7 +6,7 @@ use Swoole\Database\PDOPool;
 use Swoole\Database\RedisPool;
 use Xcs\Db\MongoDb;
 use Xcs\Db\MysqlDb;
-use Xcs\Db\PostgreDb;
+use Xcs\Db\PostgresDb;
 use Xcs\Db\SqliteDb;
 use Xcs\Db\SwooleMysql;
 use Xcs\Db\SqlsrvDb;
@@ -36,7 +36,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('MysqlDb' != $dsn['driver']) {
-            throw new ExException('driver','the driver error: MysqlDb');
+            throw new ExException('driver', 'the driver error: MysqlDb');
         }
 
         self::$dbm_time_out = time() + 30;
@@ -115,9 +115,9 @@ class DB
 
     /**
      * @param string $dsnId
-     * @return PostgreDb
+     * @return PostgresDb
      */
-    public static function postgre($dsnId = 'postgre')
+    public static function postgres($dsnId = 'postgres')
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -125,12 +125,12 @@ class DB
 
         $dsn = Context::dsn($dsnId);
 
-        if ('PostgreDb' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: PostgreDb');
+        if ('PostgresDb' != $dsn['driver']) {
+            throw new ExException('driver', 'the driver error: PostgresDb');
         }
 
         self::$dbm_time_out = time() + 30;
-        $object = new PostgreDb($dsn);
+        $object = new PostgresDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -181,15 +181,7 @@ class DB
     }
 
     /**
-     * 还原默认数据源对象
-     */
-    public static function resume()
-    {
-        self::$using_dbo_id = self::$default_dbo_id;
-    }
-
-    /**
-     * mysql专用
+     * mysql postges
      * @return array
      */
     public static function info()
@@ -199,7 +191,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 插入一条数据
      * $option bool 是否返回插入的ID
      *
@@ -215,7 +207,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 替换一条数据
      * PS:需要设置主键值
      *
@@ -230,7 +222,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 更新符合条件的数据
      * @param string $table
      * @param mixed $data
@@ -245,7 +237,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 删除符合条件的项
      * @param string $table
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -260,7 +252,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 查找一条数据
      * @param string $table
      * @param string $field
@@ -277,7 +269,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 查找多条数据
      * @param string $table
      * @param string $field
@@ -295,7 +287,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 带分页数据的DB::page
      * @param string $table
      * @param string $field
@@ -336,7 +328,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 返回一条数据的第一栏
      * $filed mix  需要返回的字段  或者sql语法
      *
@@ -354,7 +346,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $table
      * @param string $field
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -369,7 +361,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 单表符合条件的数量
      * @param string $table
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -384,7 +376,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
@@ -399,7 +391,7 @@ class DB
     //--------------sql查询---start---------------//
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param bool $retObj
@@ -412,7 +404,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param mixed $index
@@ -426,7 +418,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param mixed $pageParam
@@ -450,7 +442,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
@@ -462,7 +454,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
@@ -474,7 +466,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return array|bool
@@ -488,7 +480,7 @@ class DB
     //--------------多表查询---end---------------//
 
     /**
-     * mysql专用
+     * mysql postges
      * 开始事务
      * @return bool
      */
@@ -499,7 +491,7 @@ class DB
     }
 
     /**
-     * mysql专用
+     * mysql postges
      * 事务提交或者回滚
      * @param bool $commit_no_errors
      */
@@ -512,10 +504,10 @@ class DB
     //----------------------事务END-------------------//
 
     /**
-     * mysql专用
+     * mysql postges
      * 切换数据源对象
      * @param string|null $id
-     * @return MysqlDb
+     * @return MysqlDb | PostgresDb
      */
     public static function Using($id = null)
     {
@@ -526,7 +518,18 @@ class DB
             //切换dbo id
             self::$using_dbo_id = $id;
         }
-        return self::mysql(self::$using_dbo_id);
+
+        if (!in_array(self::$using_dbo_id, ['mysql', 'postgres'])) {
+            throw new ExException('driver', 'id must be mysql | postgres');
+        }
+
+        if (self::$using_dbo_id == 'mysql') {
+            return self::mysql(self::$using_dbo_id);
+        } elseif (self::$using_dbo_id == 'postgres') {
+            return self::postgres(self::$default_dbo_id);
+        } else {
+            throw new ExException('driver', 'dsn id is error. must be mysql | postgres');
+        }
     }
 
     /**

@@ -6,7 +6,7 @@ use PDO;
 use PDOException;
 use Xcs\DbException;
 
-class PostgreDb
+class PostgresDb
 {
 
     private $_config;
@@ -81,13 +81,13 @@ class PostgreDb
     public function qTable($tableName)
     {
         if (strpos($tableName, '.') === false) {
-            return trim($tableName);
+            return 'public.' . $tableName;
         }
         $arr = explode('.', $tableName);
         if (count($arr) > 2) {
             $this->_halt("tableName:{$tableName} 最多只能有一个点.");
         }
-        return "{$arr[0]}.{$arr[1]}";
+        return $arr[0] . '.' . $arr[1];
     }
 
     /**
