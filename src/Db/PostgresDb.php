@@ -83,11 +83,7 @@ class PostgresDb
         if (strpos($tableName, '.') === false) {
             return 'public.' . $tableName;
         }
-        $arr = explode('.', $tableName);
-        if (count($arr) > 2) {
-            $this->_halt("tableName:{$tableName} 最多只能有一个点.");
-        }
-        return $arr[0] . '.' . $arr[1];
+        return $tableName;
     }
 
     /**
