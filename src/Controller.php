@@ -14,10 +14,10 @@ class Controller
 
     /**
      * 初始执行
-     * @param $controllerName
-     * @param $actionName
+     * @param string $controllerName
+     * @param string $actionName
      */
-    public function __construct($controllerName, $actionName)
+    public function __construct(string $controllerName, string $actionName)
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
@@ -26,11 +26,11 @@ class Controller
     }
 
     /**
-     * @param $name
-     * @param $arguments
+     * @param string $name
+     * @param mixed $arguments
      * @return bool|void
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, $arguments)
     {
         //动作不存在
         if (App::isAjax()) {
@@ -60,12 +60,12 @@ class Controller
 
     /**
      * 权限验证
-     * @param $controllerName
-     * @param $actionName
+     * @param string $controllerName
+     * @param string $actionName
      * @param mixed $auth
      * @return bool
      */
-    final function checkAcl($controllerName, $actionName, $auth = AUTH_ROLE): bool
+    final function checkAcl(string $controllerName, string $actionName, $auth = AUTH_ROLE): bool
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

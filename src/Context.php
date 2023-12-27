@@ -23,13 +23,13 @@ class Context
     }
 
     /**
-     * @param $name
+     * @param string $name
      * @param null $var
      * @param string $type
      * @return mixed
      * @throws ExException
      */
-    public static function config($name, $var = null, string $type = 'inc')
+    public static function config(string $name, $var = null, string $type = 'inc')
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;

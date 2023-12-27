@@ -6,11 +6,11 @@ class RestFul extends Controller
 {
 
     /**
-     * @param $name
+     * @param string $name
      * @param $arguments
      * @return void
      */
-    public function __call($name, $arguments)
+    public function __call(string $name, $arguments)
     {
         //动作不存在
         $res = [

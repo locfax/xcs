@@ -13,12 +13,12 @@ class Rbac
     const ACL_NULL = 'ACL_NULL';
 
     /**
-     * @param $controllerName
-     * @param null $actionName
+     * @param string $controllerName
+     * @param string|null $actionName
      * @param mixed $auth
      * @return bool
      */
-    public static function check($controllerName, $actionName = null, $auth = 'general'): bool
+    public static function check(string $controllerName, string $actionName = null, $auth = 'general'): bool
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
@@ -55,11 +55,11 @@ class Rbac
     }
 
     /**
-     * @param $_roles
-     * @param $ACL
+     * @param array $_roles
+     * @param array $ACL
      * @return bool
      */
-    private static function _check($_roles, $ACL): bool
+    private static function _check(array $_roles, array $ACL): bool
     {
         $roles = array_map('strtoupper', $_roles);
         if ($ACL['allow'] == self::ACL_EVERYONE) {
@@ -162,10 +162,10 @@ class Rbac
 
 
     /**
-     * @param $controllerName
+     * @param string $controllerName
      * @return mixed
      */
-    private static function _getACL($controllerName)
+    private static function _getACL(string $controllerName)
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {
