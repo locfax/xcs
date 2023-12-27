@@ -22,7 +22,7 @@ class Memcache
      * @return $this
      * @throws ExException
      */
-    public function init($config)
+    public function init($config): Memcache
     {
         try {
             $this->_link = new \Memcache();
@@ -42,10 +42,10 @@ class Memcache
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return array|false|string
      */
-    public function get($key)
+    public function get(string $key)
     {
         try {
             return $this->_link->get($key);
@@ -55,12 +55,12 @@ class Memcache
     }
 
     /**
-     * @param $key
-     * @param $value
+     * @param string $key
+     * @param array|string $value
      * @param int $ttl
      * @return bool
      */
-    public function set($key, $value, $ttl = 0)
+    public function set(string $key, $value, int $ttl = 0): bool
     {
         try {
             $data = $this->get($key);
@@ -77,16 +77,16 @@ class Memcache
     /**
      * @return bool
      */
-    public function expire()
+    public function expire(): bool
     {
         return false;
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @return bool
      */
-    public function rm($key)
+    public function rm(string $key): bool
     {
         try {
             return $this->_link->delete($key);
@@ -95,7 +95,7 @@ class Memcache
         }
     }
 
-    public function clear()
+    public function clear(): bool
     {
         return $this->_link->flush();
     }

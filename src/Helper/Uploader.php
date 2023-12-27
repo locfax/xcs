@@ -13,7 +13,7 @@ class Uploader
      * @param bool $cascade
      * @return Uploader|null
      */
-    public function init($tempFiles, $cascade = true)
+    public function init($tempFiles, bool $cascade = true): ?Uploader
     {
         $this->reset();
 
@@ -57,7 +57,7 @@ class Uploader
     /**
      * @return int
      */
-    public function getCount()
+    public function getCount(): int
     {
         return $this->_count;
     }
@@ -89,7 +89,7 @@ class Uploader
      * @param $name
      * @return bool
      */
-    public function isFileExist($name)
+    public function isFileExist($name): bool
     {
         return isset($this->_files[$name]);
     }

@@ -8,8 +8,9 @@ class Context
     /**
      * @param string $dsnId
      * @return mixed
+     * @throws ExException
      */
-    public static function dsn($dsnId = 'mysql')
+    public static function dsn(string $dsnId = 'mysql')
     {
         static $cacheDsn = [];
         if (empty($cacheDsn)) {
@@ -26,8 +27,9 @@ class Context
      * @param null $var
      * @param string $type
      * @return mixed
+     * @throws ExException
      */
-    public static function config($name, $var = null, $type = 'inc')
+    public static function config($name, $var = null, string $type = 'inc')
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;

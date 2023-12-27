@@ -58,7 +58,7 @@ class HandleFile
     /**
      * @return bool
      */
-    public function isSuccessed()
+    public function isSuccessed(): bool
     {
         return $this->_file['error'] == UPLOAD_ERR_OK;
     }
@@ -90,7 +90,7 @@ class HandleFile
     /**
      * @return string
      */
-    public function getExt()
+    public function getExt(): string
     {
         if ($this->isMoved()) {
             $ext = pathinfo($this->getNewPath(), PATHINFO_EXTENSION);
@@ -149,7 +149,7 @@ class HandleFile
      * @param null $maxSize
      * @return int
      */
-    public function check($allowExts = null, $maxSize = null)
+    public function check($allowExts = null, $maxSize = null): int
     {
         if (!$this->isSuccessed()) {
             return 1;
@@ -197,7 +197,7 @@ class HandleFile
      * @param $destPath
      * @return bool
      */
-    public function move($destPath)
+    public function move($destPath): bool
     {
         $this->_file['is_moved'] = true;
         $this->_file['new_path'] = $destPath;
@@ -208,7 +208,7 @@ class HandleFile
      * @param $destPath
      * @return bool
      */
-    public function copy($destPath)
+    public function copy($destPath): bool
     {
         return copy($this->_file['tmp_name'], $destPath);
     }
@@ -234,7 +234,7 @@ class HandleFile
      * @param $needle
      * @return bool
      */
-    private function strPos($str, $needle)
+    private function strPos($str, $needle): bool
     {
         return !(false === strpos($str, $needle));
     }

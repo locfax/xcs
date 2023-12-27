@@ -14,7 +14,7 @@ class WaterMark
      * @param string $textColor
      * @return false|string|void
      */
-    public static function mark($groundImage, $waterPos = 0, $waterImage = "", $waterText = "", $textFont = 5, $textColor = "#FF0000")
+    public static function mark(string $groundImage, int $waterPos = 0, string $waterImage = "", string $waterText = "", int $textFont = 5, string $textColor = "#FF0000")
     {
         $formatMsg = "暂不支持该文件格式，请用图片处理软件将图片转换为GIF、JPG、PNG格式。";
 

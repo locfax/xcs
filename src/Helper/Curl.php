@@ -17,7 +17,7 @@ class Curl
      * @param bool $retSession
      * @return array
      */
-    public static function send($url, $data = '', array $httpHead = [], $retGzip = 'gzip', $retCharset = 'UTF-8', $retHead = false, $retSession = false)
+    public static function send(string $url, $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
     {
         $ch = curl_init();
         if (!$ch) {
@@ -182,7 +182,7 @@ class Curl
      * @param string $string
      * @return array|false|string
      */
-    private static function convert_encode($in, $out, $string)
+    private static function convert_encode(string $in, string $out, string $string)
     { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
@@ -196,7 +196,7 @@ class Curl
 
     /**
      * @param $_raw_url
-     * @return mixed
+     * @return array|false|int|string|null
      */
     private static function raw_url($_raw_url)
     {
@@ -219,7 +219,7 @@ class Curl
      * @param string $gzip
      * @return bool|string
      */
-    private static function gzip_decode($data, $gzip = 'gzip')
+    private static function gzip_decode($data, string $gzip = 'gzip')
     {
         $unpacked = false;
         if ('gzip' == $gzip) {

@@ -16,6 +16,7 @@ class PostgresDb
     /**
      * PdoDb constructor.
      * @param array $config
+     * @throws DbException
      */
     public function __construct(array $config)
     {
@@ -58,7 +59,7 @@ class PostgresDb
      * @param array $args
      * @return mixed
      */
-    public function __call($func, array $args)
+    public function __call(string $func, array $args)
     {
         if ($this->_link) {
             return call_user_func_array([$this->_link, $func], $args);
@@ -69,7 +70,7 @@ class PostgresDb
     /**
      * @return array
      */
-    public function info()
+    public function info(): array
     {
         return $this->_config;
     }
@@ -78,7 +79,7 @@ class PostgresDb
      * @param string $tableName
      * @return string
      */
-    public function qTable($tableName)
+    public function qTable(string $tableName): string
     {
         if (strpos($tableName, '.') === false) {
             return 'public.' . $tableName;
@@ -90,7 +91,7 @@ class PostgresDb
      * @param string $fieldName
      * @return string
      */
-    public function qField($fieldName)
+    public function qField(string $fieldName): string
     {
         return ($fieldName == '*') ? '*' : $fieldName;
     }
@@ -100,7 +101,7 @@ class PostgresDb
      * @param string $glue
      * @return array
      */
-    public function field_param(array $fields, $glue = ',')
+    public function field_param(array $fields, string $glue = ','): array
     {
         $args = [];
         $sql = $comma = '';
@@ -117,8 +118,9 @@ class PostgresDb
      * @param array $data
      * @param bool $retId
      * @return bool|string
+     * @throws DbException
      */
-    public function create($tableName, array $data, $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -145,8 +147,9 @@ class PostgresDb
      * @param string $tableName
      * @param array $data
      * @return bool|int
+     * @throws DbException
      */
-    public function replace($tableName, array $data)
+    public function replace(string $tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -163,12 +166,13 @@ class PostgresDb
 
     /**
      * @param string $tableName
-     * @param mixed $data
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $data
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @return bool|int
+     * @throws DbException
      */
-    public function update($tableName, $data, $condition, $args = null)
+    public function update(string $tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -191,12 +195,13 @@ class PostgresDb
 
     /**
      * @param string $tableName
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @param bool $multi
      * @return bool|int
+     * @throws DbException
      */
-    public function remove($tableName, $condition, $args = null, $multi = false)
+    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -209,13 +214,14 @@ class PostgresDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @param bool $retObj
      * @return mixed
+     * @throws DbException
      */
-    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
+    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -229,14 +235,15 @@ class PostgresDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
-     * @param mixed $index
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
+     * @param string|null $index
      * @param bool $retObj
      * @return array|bool
+     * @throws DbException
      */
-    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
+    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -250,15 +257,16 @@ class PostgresDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
+     * @throws DbException
      */
-    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
+    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -272,12 +280,13 @@ class PostgresDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @return mixed
+     * @throws DbException
      */
-    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -304,12 +313,13 @@ class PostgresDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @return array|bool
+     * @throws DbException
      */
-    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -337,23 +347,25 @@ class PostgresDb
     }
 
     /**
-     * @param $tableName
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param string $tableName
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
+     * @throws DbException
      */
-    public function count($tableName, $condition, $args = null, $field = '*')
+    public function count(string $tableName, $condition, array $args = null, string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return bool|int
+     * @throws DbException
      */
-    public function exec($sql, $args = null)
+    public function exec(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -376,8 +388,9 @@ class PostgresDb
      * @param mixed $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
+     * @throws DbException
      */
-    public function rowSql($sql, $args = null, $retObj = false)
+    public function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -405,8 +418,9 @@ class PostgresDb
      * @param mixed $index
      * @param bool $retObj
      * @return array|bool
+     * @throws DbException
      */
-    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
+    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -441,8 +455,9 @@ class PostgresDb
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
+     * @throws DbException
      */
-    public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
+    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -469,8 +484,9 @@ class PostgresDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
+     * @throws DbException
      */
-    public function countSql($sql, $args = null)
+    public function countSql(string $sql, $args = null)
     {
         return $this->firstSql($sql, $args);
     }
@@ -479,8 +495,9 @@ class PostgresDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
+     * @throws DbException
      */
-    public function firstSql($sql, $args = null)
+    public function firstSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -502,8 +519,9 @@ class PostgresDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return array|bool
+     * @throws DbException
      */
-    public function colSql($sql, $args = null)
+    public function colSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -527,15 +545,16 @@ class PostgresDb
     /**
      * @return bool
      */
-    public function startTrans()
+    public function startTrans(): bool
     {
         return $this->_link->beginTransaction();
     }
 
     /**
      * @param bool $commit_no_errors
+     * @throws DbException
      */
-    public function endTrans($commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -550,11 +569,12 @@ class PostgresDb
 
     /**
      * @param string $message
-     * @param mixed $code
+     * @param int $code
      * @param string $sql
      * @return bool
+     * @throws DbException
      */
-    private function _halt($message = '', $code = 0, $sql = '')
+    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
         if ($this->_config['dev']) {
             $this->close();
@@ -575,7 +595,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, $col)
+    private function _array_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -592,7 +612,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, $col)
+    private function _object_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;

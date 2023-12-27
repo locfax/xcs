@@ -11,11 +11,11 @@ class ImageGd
 {
 
     /**
-     * @param $filename
+     * @param string $filename
      * @param string $ext
      * @return bool|HandleGd
      */
-    public static function createFromFile($filename, $ext = '')
+    public static function createFromFile(string $filename, string $ext = '')
     {
         if (!$ext) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
@@ -35,7 +35,7 @@ class ImageGd
         return new HandleGd($handle);
     }
 
-    public static function hex2rgb($color, $default = 'ffffff')
+    public static function hex2rgb(string $color, string $default = 'ffffff'): array
     {
         $hex = trim($color, '#&Hh');
         $len = strlen($hex);

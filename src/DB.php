@@ -25,9 +25,11 @@ class DB
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
      * @return MysqlDb
+     * @throws DbException
+     * @throws ExException
      * @see MysqlDb
      */
-    public static function mysql($dsnId = 'mysql')
+    public static function mysql(string $dsnId = 'mysql'): MysqlDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -49,9 +51,11 @@ class DB
      * 返回 mongodb 对象
      * @param string $dsnId
      * @return MongoDb
+     * @throws DbException
+     * @throws ExException
      * @see MongoDb
      */
-    public static function mongo($dsnId = 'mongo')
+    public static function mongo(string $dsnId = 'mongo'): MongoDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -72,8 +76,10 @@ class DB
     /**
      * @param string $dsnId
      * @return SqlsrvDb
+     * @throws DbException
+     * @throws ExException
      */
-    public static function sqlsrv($dsnId = 'sqlsrv')
+    public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -94,8 +100,10 @@ class DB
     /**
      * @param string $dsnId
      * @return SqliteDb
+     * @throws DbException
+     * @throws ExException
      */
-    public static function sqlite($dsnId = 'sqlite')
+    public static function sqlite(string $dsnId = 'sqlite'): SqliteDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -116,8 +124,10 @@ class DB
     /**
      * @param string $dsnId
      * @return PostgresDb
+     * @throws DbException
+     * @throws ExException
      */
-    public static function postgres($dsnId = 'postgres')
+    public static function postgres(string $dsnId = 'postgres'): PostgresDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
@@ -139,8 +149,9 @@ class DB
      * swoole 专用
      * @param string $dsnId
      * @return PDOPool
+     * @throws ExException
      */
-    public static function SwoolePdoPool($dsnId = 'pool')
+    public static function SwoolePdoPool(string $dsnId = 'pool'): PDOPool
     {
         $dsn = Context::dsn($dsnId);
         return new PDOPool((new \Swoole\Database\PDOConfig)
@@ -158,7 +169,7 @@ class DB
      * @param \Swoole\Database\PDOProxy $pdo
      * @return SwooleMysql
      */
-    public static function SwooleMysql($pdo)
+    public static function SwooleMysql(\Swoole\Database\PDOProxy $pdo): SwooleMysql
     {
         return new SwooleMysql($pdo);
     }
@@ -167,8 +178,9 @@ class DB
      * swoole 专用
      * @param string $dsnId
      * @return RedisPool
+     * @throws ExException
      */
-    public static function SwooleRedisPool($dsnId = 'redis')
+    public static function SwooleRedisPool(string $dsnId = 'redis'): RedisPool
     {
         $dsn = Context::dsn($dsnId);
         return new RedisPool((new \Swoole\Database\RedisConfig)
@@ -181,17 +193,18 @@ class DB
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @return array
+     * @throws ExException
      */
-    public static function info()
+    public static function info(): array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->info();
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 插入一条数据
      * $option bool 是否返回插入的ID
      *
@@ -199,60 +212,64 @@ class DB
      * @param array $data
      * @param bool $retId
      * @return bool|string
+     * @throws ExException
      */
-    public static function create($table, array $data, $retId = false)
+    public static function create(string $table, array $data, bool $retId = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->create($table, $data, $retId);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 替换一条数据
      * PS:需要设置主键值
      *
      * @param string $table
      * @param array $data
      * @return bool|int
+     * @throws ExException
      */
-    public static function replace($table, array $data)
+    public static function replace(string $table, array $data)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->replace($table, $data);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 更新符合条件的数据
      * @param string $table
      * @param mixed $data
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
+     * @throws ExException
      */
-    public static function update($table, $data, $condition, $args = null)
+    public static function update(string $table, $data, $condition, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->update($table, $data, $condition, $args);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 删除符合条件的项
      * @param string $table
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $multi bool true 删除多条 返回影响数 false: 只能删除一条
      * @param mixed $args [':var' => $var]
      * @return bool|int
+     * @throws ExException
      */
-    public static function remove($table, $condition, $multi = false, $args = null)
+    public static function remove(string $table, $condition, $multi = false, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->remove($table, $condition, $args, $multi);
     }
 
     /**
-     * mysql postges
+     * mysql PostgreSQL
      * 查找一条数据
      * @param string $table
      * @param string $field
@@ -261,15 +278,16 @@ class DB
      * @param mixed $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
-    public static function findOne($table, $field, $condition, $orderBy = null, $args = null, $retObj = false)
+    public static function findOne(string $table, string $field, $condition, $orderBy = null, $args = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 查找多条数据
      * @param string $table
      * @param string $field
@@ -279,15 +297,16 @@ class DB
      * @param mixed $index
      * @param bool $retObj
      * @return array|bool
+     * @throws ExException
      */
-    public static function findAll($table, $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, $retObj = false)
+    public static function findAll(string $table, string $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 带分页数据的DB::page
      * @param string $table
      * @param string $field
@@ -298,8 +317,9 @@ class DB
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
+     * @throws ExException
      */
-    public static function page($table, $field, $condition = '', $orderBy = null, $args = null, $pageParam = [], $limit = 20, $retObj = false)
+    public static function page(string $table, string $field, $condition = '', $orderBy = null, $args = null, $pageParam = [], int $limit = 20, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -328,7 +348,7 @@ class DB
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 返回一条数据的第一栏
      * $filed mix  需要返回的字段  或者sql语法
      *
@@ -338,50 +358,54 @@ class DB
      * @param mixed $orderBy
      * @param mixed $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
-    public static function first($table, $field, $condition, $orderBy = null, $args = null)
+    public static function first(string $table, string $field, $condition, $orderBy = null, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first($table, $field, $condition, $args, $orderBy);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $table
      * @param string $field
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param null $orderBy
      * @param mixed $args [':var' => $var]
      * @return array|bool
+     * @throws ExException
      */
-    public static function col($table, $field, $condition = '', $orderBy = null, $args = null)
+    public static function col(string $table, string $field, $condition = '', $orderBy = null, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->col($table, $field, $condition, $args, $orderBy);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 单表符合条件的数量
      * @param string $table
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param string $field
      * @return mixed
+     * @throws ExException
      */
-    public static function count($table, $condition, $args = null, $field = '*')
+    public static function count(string $table, $condition, $args = null, string $field = '*')
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->count($table, $condition, $args, $field);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
+     * @throws ExException
      */
-    public static function exec($sql, $args = null)
+    public static function exec(string $sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->exec($sql, $args);
@@ -396,37 +420,40 @@ class DB
      * @param mixed $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
+     * @throws ExException
      */
-    public static function rowSql($sql, $args = null, $retObj = false)
+    public static function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSql($sql, $args, $retObj);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param mixed $index
      * @param bool $retObj
      * @return array|bool
+     * @throws ExException
      */
-    public static function rowSetSql($sql, $args = null, $index = null, $retObj = false)
+    public static function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSetSql($sql, $args, $index, $retObj);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @param mixed $pageParam
      * @param int $limit
      * @param bool $retObj
-     * @return mixed
+     * @return array|bool
+     * @throws ExException
      */
-    public static function pageSql($sql, $args = null, $pageParam = 0, $limit = 18, $retObj = false)
+    public static function pageSql(string $sql, $args = null, $pageParam = 0, int $limit = 18, bool $retObj = false)
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -442,36 +469,39 @@ class DB
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
-    public static function countSql($sql, $args = null)
+    public static function countSql(string $sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->countSql($sql, $args);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
+     * @throws ExException
      */
-    public static function firstSql($sql, $args = null)
+    public static function firstSql(string $sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->firstSql($sql, $args);
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return array|bool
+     * @throws ExException
      */
-    public static function colSql($sql, $args = null)
+    public static function colSql(string $sql, $args = null)
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->colSql($sql, $args);
@@ -480,22 +510,24 @@ class DB
     //--------------多表查询---end---------------//
 
     /**
-     * mysql postges
+     * mysql postgres
      * 开始事务
      * @return bool
+     * @throws ExException
      */
-    public static function startTrans()
+    public static function startTrans(): bool
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->startTrans();
     }
 
     /**
-     * mysql postges
+     * mysql postgres
      * 事务提交或者回滚
      * @param bool $commit_no_errors
+     * @throws ExException
      */
-    public static function endTrans($commit_no_errors = true)
+    public static function endTrans(bool $commit_no_errors = true)
     {
         $db = self::Using(self::$using_dbo_id);
         $db->endTrans($commit_no_errors);
@@ -504,12 +536,14 @@ class DB
     //----------------------事务END-------------------//
 
     /**
-     * mysql postges
+     * mysql postgres
      * 切换数据源对象
      * @param string|null $id
      * @return MysqlDb | PostgresDb
+     * @throws DbException
+     * @throws ExException
      */
-    public static function Using($id = null)
+    public static function Using(string $id = null)
     {
         if (!$id) {
             //初始运行
@@ -538,7 +572,7 @@ class DB
      * @param int $total
      * @return int
      */
-    public static function pageStart($page, $ppp, $total)
+    public static function pageStart(int $page, int $ppp, int $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -550,7 +584,7 @@ class DB
      * @param int $length
      * @return array|string
      */
-    public static function pageBar($pageParam, $length)
+    public static function pageBar($pageParam, int $length)
     {
         if (!isset($pageParam['bar']) || 'default' == $pageParam['bar']) {
             $defPageParam = [
@@ -592,7 +626,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function ids($arr)
+    public static function ids($arr): string
     {
         return implode(',', (array)$arr);
     }
@@ -601,7 +635,7 @@ class DB
      * @param $arr
      * @return string
      */
-    public static function implode($arr)
+    public static function implode($arr): string
     {
         return "'" . implode("','", (array)$arr) . "'";
     }

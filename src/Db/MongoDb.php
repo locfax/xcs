@@ -38,6 +38,7 @@ class MongoDb
     /**
      * MongoDb constructor.
      * @param array $config
+     * @throws DbException
      */
     public function __construct(array $config)
     {
@@ -89,18 +90,19 @@ class MongoDb
     /**
      * @return array
      */
-    public function info()
+    public function info(): array
     {
         return $this->_config;
     }
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $document
      * @param bool $retId
      * @return bool|int|string|null
+     * @throws DbException
      */
-    public function create($table, array $document = [], $retId = false)
+    public function create(string $table, array $document = [], bool $retId = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -123,13 +125,14 @@ class MongoDb
     }
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $document
      * @param array $condition
      * @param string $options
      * @return bool|int|null
+     * @throws DbException
      */
-    public function update($table, array $document = [], array $condition = [], $options = '$set')
+    public function update(string $table, array $document = [], array $condition = [], string $options = '$set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -153,12 +156,13 @@ class MongoDb
     }
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $condition
      * @param bool $multi
      * @return bool|int|null
+     * @throws DbException
      */
-    public function remove($table, array $condition = [], $multi = false)
+    public function remove(string $table, array $condition = [], bool $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -178,12 +182,13 @@ class MongoDb
     }
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $options
      * @param array $condition
      * @return array|bool
+     * @throws DbException
      */
-    public function findOne($table, array $options = [], array $condition = [])
+    public function findOne(string $table, array $options = [], array $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -209,12 +214,13 @@ class MongoDb
 
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $options
      * @param array $condition
      * @return array|bool
+     * @throws DbException
      */
-    public function findAll($table, array $options = [], array $condition = [])
+    public function findAll(string $table, array $options = [], array $condition = [])
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -236,14 +242,15 @@ class MongoDb
 
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $options
      * @param array $condition
      * @param int $offset
      * @param int $limit
      * @return array|bool
+     * @throws DbException
      */
-    public function page($table, array $options = [], array $condition = [], $offset = 0, $limit = 20)
+    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
     {
         $options = array_merge($options, [
             'limit' => $limit,
@@ -272,11 +279,12 @@ class MongoDb
 
 
     /**
-     * @param $table
+     * @param string $table
      * @param array $condition
      * @return mixed
+     * @throws DbException
      */
-    public function count($table, array $condition = [])
+    public function count(string $table, array $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -300,10 +308,10 @@ class MongoDb
     /**
      * @param int $page
      * @param int $ppp
-     * @param $total
+     * @param int $total
      * @return int
      */
-    public function pageStart($page, $ppp, $total)
+    public function pageStart(int $page, int $ppp, int $total)
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -314,8 +322,9 @@ class MongoDb
      * @param string $message
      * @param mixed $code
      * @return bool
+     * @throws DbException
      */
-    private function _halt($message = '', $code = 0)
+    private function _halt(string $message = '', $code = 0): bool
     {
         if ($this->_config['dev']) {
             $this->close();

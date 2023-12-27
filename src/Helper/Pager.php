@@ -8,7 +8,7 @@ class Pager
      * @param array $pageInfo
      * @return string
      */
-    public static function pageBar(array $pageInfo)
+    public static function pageBar(array $pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -21,11 +21,11 @@ class Pager
                 $mpUrl .= '?' . $pageInfo['param'];
             }
         }
-        $maxPages = isset($pageInfo['maxpages']) ? $pageInfo['maxpages'] : false; //最大页数限制
-        $page = isset($pageInfo['showpage']) ? $pageInfo['showpage'] : false; //一次显示多少页码
+        $maxPages = $pageInfo['maxpages'] ?? false; //最大页数限制
+        $page = $pageInfo['showpage'] ?? false; //一次显示多少页码
         $showNum = !isset($pageInfo['shownum']) || $pageInfo['shownum'];
         $showKbd = isset($pageInfo['showkbd']) && $pageInfo['showkbd'];
-        $simple = isset($pageInfo['simple']) ? $pageInfo['simple'] : false;
+        $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
         $hrefName = '';
@@ -73,7 +73,7 @@ class Pager
      * @param array $pageInfo
      * @return string
      */
-    public static function simplePage(array $pageInfo)
+    public static function simplePage(array $pageInfo): string
     {
         $totals = $pageInfo['total'];
         $perPage = $pageInfo['length'];
@@ -103,7 +103,7 @@ class Pager
      * @param string $needle
      * @return bool
      */
-    private static function strPos($str, $needle)
+    private static function strPos(string $str, string $needle): bool
     {
         return !(false === strpos($str, $needle));
     }

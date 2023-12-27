@@ -18,11 +18,11 @@ class HandleGd
     }
 
     /**
-     * @param $width
-     * @param $height
+     * @param int $width
+     * @param int $height
      * @return $this
      */
-    public function resize($width, $height)
+    public function resize(int $width, int $height): HandleGd
     {
         //低质量
         if (is_null($this->_handle)) {
@@ -36,10 +36,10 @@ class HandleGd
     }
 
     /**
-     * @param $width
+     * @param int $width
      * @return $this
      */
-    public function autoresize($width)
+    public function autoresize(int $width): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -65,11 +65,11 @@ class HandleGd
     }
 
     /**
-     * @param $width
-     * @param $height
+     * @param int $width
+     * @param int $height
      * @return $this
      */
-    public function resampled($width, $height)
+    public function resampled(int $width, int $height): HandleGd
     {
         //高质量
         if (is_null($this->_handle)) {
@@ -83,13 +83,13 @@ class HandleGd
     }
 
     /**
-     * @param $width
-     * @param $height
+     * @param int $width
+     * @param int $height
      * @param string $pos
      * @param string $bgcolor
      * @return $this
      */
-    public function canvas($width, $height, $pos = 'center', $bgcolor = '0xffffff')
+    public function canvas(int $width, int $height, string $pos = 'center', string $bgcolor = '0xffffff'): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -155,7 +155,7 @@ class HandleGd
      * @param array $options
      * @return $this
      */
-    public function cut(array $options = [])
+    public function cut(array $options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -202,12 +202,12 @@ class HandleGd
     }
 
     /**
-     * @param $width
-     * @param $height
+     * @param int $width
+     * @param int $height
      * @param array $options
      * @return $this
      */
-    public function crop($width, $height, array $options = [])
+    public function crop(int $width, int $height, array $options = []): HandleGd
     {
         if (is_null($this->_handle)) {
             return $this;
@@ -299,29 +299,29 @@ class HandleGd
     }
 
     /**
-     * @param $filename
+     * @param string $filename
      * @param int $quality
      * @return void
      */
-    public function saveAsJpeg($filename, $quality = 80)
+    public function saveAsJpeg(string $filename, int $quality = 80)
     {
         imagejpeg($this->_handle, $filename, $quality);
     }
 
     /**
-     * @param $filename
+     * @param string $filename
      * @return void
      */
-    public function saveAsPng($filename)
+    public function saveAsPng(string $filename)
     {
         imagepng($this->_handle, $filename);
     }
 
     /**
-     * @param $filename
+     * @param string $filename
      * @return void
      */
-    function saveAsGif($filename)
+    function saveAsGif(string $filename)
     {
         imagegif($this->_handle, $filename);
     }
@@ -334,88 +334,88 @@ class HandleGd
         $this->_handle = null;
     }
 
-}
 
-/**
- * @param $fname
- * @return false|\GdImage|resource
- */
-function imagecreatefrombmp($fname)
-{
-    $buf = file_get_contents($fname);
-    if (strlen($buf) < 54) {
-        return false;
-    }
-    $file_header = unpack("sbfType/LbfSize/sbfReserved1/sbfReserved2/LbfOffBits", substr($buf, 0, 14));
-
-    if (19778 != $file_header["bfType"]) {
-        return false;
-    }
-    $info_header = unpack("LbiSize/lbiWidth/lbiHeight/sbiPlanes/sbiBitCountLbiCompression/LbiSizeImage/lbiXPelsPerMeter/lbiYPelsPerMeter/LbiClrUsed/LbiClrImportant", substr($buf, 14, 40));
-    if ($info_header["biBitCountLbiCompression"] == 2) {
-        return false;
-    }
-    $line_len = round($info_header["biWidth"] * $info_header["biBitCountLbiCompression"] / 8);
-    $x = $line_len % 4;
-    if ($x > 0) {
-        $line_len += 4 - $x;
-    }
-    $img = imagecreatetruecolor($info_header["biWidth"], $info_header["biHeight"]);
-    switch ($info_header["biBitCountLbiCompression"]) {
-        case 4:
-            $colorset = unpack("L*", substr($buf, 54, 64));
-            for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = [];
-                $y_pos = $y * $line_len + $file_header["bfOffBits"];
-                for ($x = 0; $x < $info_header["biWidth"]; $x++) {
-                    if ($x % 2)
-                        $colors[] = $colorset[(ord($buf[$y_pos + ($x + 1) / 2]) & 0xf) + 1];
-                    else
-                        $colors[] = $colorset[((ord($buf[$y_pos + $x / 2 + 1]) >> 4) & 0xf) + 1];
-                }
-                imagesetstyle($img, $colors);
-                imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
-            }
-            break;
-        case 8:
-            $colorset = unpack("L*", substr($buf, 54, 1024));
-            for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = [];
-                $y_pos = $y * $line_len + $file_header["bfOffBits"];
-                for ($x = 0; $x < $info_header["biWidth"]; $x++) {
-                    $colors[] = $colorset[ord($buf[$y_pos + $x]) + 1];
-                }
-                imagesetstyle($img, $colors);
-                imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
-            }
-            break;
-        case 16:
-            for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = [];
-                $y_pos = $y * $line_len + $file_header["bfOffBits"];
-                for ($x = 0; $x < $info_header["biWidth"]; $x++) {
-                    $i = $x * 2;
-                    $color = ord($buf[$y_pos + $i]) | (ord($buf[$y_pos + $i + 1]) << 8);
-                    $colors[] = imagecolorallocate($img, (($color >> 10) & 0x1f) * 0xff / 0x1f, (($color >> 5) & 0x1f) * 0xff / 0x1f, ($color & 0x1f) * 0xff / 0x1f);
-                }
-                imagesetstyle($img, $colors);
-                imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
-            }
-            break;
-        case 24:
-            for ($y = 0; $y < $info_header["biHeight"]; $y++) {
-                $colors = [];
-                $y_pos = $y * $line_len + $file_header["bfOffBits"];
-                for ($x = 0; $x < $info_header["biWidth"]; $x++) {
-                    $i = $x * 3;
-                    $colors[] = imagecolorallocate($img, ord($buf[$y_pos + $i + 2]), ord($buf[$y_pos + $i + 1]), ord($buf[$y_pos + $i]));
-                }
-                imagesetstyle($img, $colors);
-                imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
-            }
-            break;
-        default:
+    /**
+     * @param string $fname
+     * @return false|\GdImage|resource
+     */
+    function imagecreatefrombmp(string $fname)
+    {
+        $buf = file_get_contents($fname);
+        if (strlen($buf) < 54) {
             return false;
+        }
+        $file_header = unpack("sbfType/LbfSize/sbfReserved1/sbfReserved2/LbfOffBits", substr($buf, 0, 14));
+
+        if (19778 != $file_header["bfType"]) {
+            return false;
+        }
+        $info_header = unpack("LbiSize/lbiWidth/lbiHeight/sbiPlanes/sbiBitCountLbiCompression/LbiSizeImage/lbiXPelsPerMeter/lbiYPelsPerMeter/LbiClrUsed/LbiClrImportant", substr($buf, 14, 40));
+        if ($info_header["biBitCountLbiCompression"] == 2) {
+            return false;
+        }
+        $line_len = round($info_header["biWidth"] * $info_header["biBitCountLbiCompression"] / 8);
+        $x = $line_len % 4;
+        if ($x > 0) {
+            $line_len += 4 - $x;
+        }
+        $img = imagecreatetruecolor($info_header["biWidth"], $info_header["biHeight"]);
+        switch ($info_header["biBitCountLbiCompression"]) {
+            case 4:
+                $colorset = unpack("L*", substr($buf, 54, 64));
+                for ($y = 0; $y < $info_header["biHeight"]; $y++) {
+                    $colors = [];
+                    $y_pos = $y * $line_len + $file_header["bfOffBits"];
+                    for ($x = 0; $x < $info_header["biWidth"]; $x++) {
+                        if ($x % 2)
+                            $colors[] = $colorset[(ord($buf[$y_pos + ($x + 1) / 2]) & 0xf) + 1];
+                        else
+                            $colors[] = $colorset[((ord($buf[$y_pos + $x / 2 + 1]) >> 4) & 0xf) + 1];
+                    }
+                    imagesetstyle($img, $colors);
+                    imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
+                }
+                break;
+            case 8:
+                $colorset = unpack("L*", substr($buf, 54, 1024));
+                for ($y = 0; $y < $info_header["biHeight"]; $y++) {
+                    $colors = [];
+                    $y_pos = $y * $line_len + $file_header["bfOffBits"];
+                    for ($x = 0; $x < $info_header["biWidth"]; $x++) {
+                        $colors[] = $colorset[ord($buf[$y_pos + $x]) + 1];
+                    }
+                    imagesetstyle($img, $colors);
+                    imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
+                }
+                break;
+            case 16:
+                for ($y = 0; $y < $info_header["biHeight"]; $y++) {
+                    $colors = [];
+                    $y_pos = $y * $line_len + $file_header["bfOffBits"];
+                    for ($x = 0; $x < $info_header["biWidth"]; $x++) {
+                        $i = $x * 2;
+                        $color = ord($buf[$y_pos + $i]) | (ord($buf[$y_pos + $i + 1]) << 8);
+                        $colors[] = imagecolorallocate($img, (($color >> 10) & 0x1f) * 0xff / 0x1f, (($color >> 5) & 0x1f) * 0xff / 0x1f, ($color & 0x1f) * 0xff / 0x1f);
+                    }
+                    imagesetstyle($img, $colors);
+                    imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
+                }
+                break;
+            case 24:
+                for ($y = 0; $y < $info_header["biHeight"]; $y++) {
+                    $colors = [];
+                    $y_pos = $y * $line_len + $file_header["bfOffBits"];
+                    for ($x = 0; $x < $info_header["biWidth"]; $x++) {
+                        $i = $x * 3;
+                        $colors[] = imagecolorallocate($img, ord($buf[$y_pos + $i + 2]), ord($buf[$y_pos + $i + 1]), ord($buf[$y_pos + $i]));
+                    }
+                    imagesetstyle($img, $colors);
+                    imageline($img, 0, $info_header["biHeight"] - $y - 1, $info_header["biWidth"], $info_header["biHeight"] - $y - 1, IMG_COLOR_STYLED);
+                }
+                break;
+            default:
+                return false;
+        }
+        return $img;
     }
-    return $img;
 }

@@ -2,17 +2,19 @@
 
 namespace Xcs;
 
+use Exception;
+
 class ExUiException
 {
     /**
-     * @param $title
-     * @param $message
-     * @param $file
-     * @param $line
-     * @param $Trace
-     * @param $ex
+     * @param string $title
+     * @param string $message
+     * @param string $file
+     * @param int $line
+     * @param bool $Trace
+     * @param Exception|null $ex
      */
-    public static function render($title, $message, $file, $line, $Trace, $ex = null)
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace, Exception $ex = null)
     {
         $phpMsg = [];
         if ($Trace) {
@@ -58,11 +60,6 @@ class ExUiException
         self::showError($message, $title, $phpMsg);
     }
 
-    public static function writeErrorLog()
-    {
-        return false; // 暂时不写入
-    }
-
     public static function clear($message)
     {
         if (defined('DEBUG') && DEBUG) {
@@ -74,11 +71,11 @@ class ExUiException
     /**
      * 显示错误
      *
-     * @param $message
+     * @param string $message
      * @param string $title 错误类型 db,system
      * @param mixed $phpMsg
      */
-    public static function showError($message, $title, $phpMsg = '')
+    public static function showError(string $message, string $title, $phpMsg = '')
     {
         ob_get_length() && ob_end_clean();
 

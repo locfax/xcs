@@ -15,8 +15,10 @@ class App
 
     /**
      * @param bool $refresh
+     * @throws ErrException
+     * @throws ExException
      */
-    public static function run($refresh = false)
+    public static function run(bool $refresh = false)
     {
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
@@ -34,8 +36,10 @@ class App
 
     /**
      * @param bool $refresh
+     * @throws ErrException
+     * @throws ExException
      */
-    public static function runFile($refresh = false)
+    public static function runFile(bool $refresh = false)
     {
         self::_rootNamespace('\\', APP_PATH);
 
@@ -209,7 +213,7 @@ class App
      * @param $controllerClass
      * @return bool
      */
-    private static function _loadController($controllerName, $controllerClass)
+    private static function _loadController($controllerName, $controllerClass): bool
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
@@ -257,9 +261,9 @@ class App
     }
 
     /**
-     * @param $req
+     * @param array $req
      */
-    private static function _setRequest($req)
+    private static function _setRequest(array $req)
     {
         $_GET[self::$_dCTL] = array_shift($req);
         $_GET[self::$_dACT] = array_shift($req);
@@ -277,7 +281,7 @@ class App
      * @param string $namespace
      * @param string $path
      */
-    private static function _rootNamespace($namespace, $path)
+    private static function _rootNamespace(string $namespace, string $path)
     {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
@@ -299,7 +303,7 @@ class App
      * @param array $params
      * @return string
      */
-    public static function url($udi, array $params = [])
+    public static function url($udi, array $params = []): string
     {
         $_udi = explode('/', $udi);
         if (count($_udi) < 2) {
@@ -344,7 +348,7 @@ class App
      * @param string $baseUrl 起始路径
      * @return boolean
      */
-    public static function vendor($class, $ext = '.php', $baseUrl = LIB_PATH)
+    public static function vendor(string $class, string $ext = '.php', string $baseUrl = LIB_PATH): bool
     {
         static $_file = [];
         $key = $class . $baseUrl . $ext;
@@ -374,7 +378,7 @@ class App
      * @param array $arr
      * @return string
      */
-    public static function output_json(array $arr)
+    public static function output_json(array $arr): string
     {
         return json_encode($arr, JSON_UNESCAPED_UNICODE);
     }
@@ -389,7 +393,7 @@ class App
     /**
      * @param bool $nocache
      */
-    public static function output_start($nocache = true)
+    public static function output_start(bool $nocache = true)
     {
         ob_get_length() && ob_end_clean();
         if (function_exists('ob_gzhandler')) { //whether start gzip
@@ -406,7 +410,7 @@ class App
      * @param bool $echo
      * @return array|false|string|string[]|void
      */
-    public static function output_end($echo = false)
+    public static function output_end(bool $echo = false)
     {
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
@@ -423,7 +427,7 @@ class App
      * @param string $type
      * @return bool
      */
-    public static function response($res, $type = 'json')
+    public static function response($res, string $type = 'json'): bool
     {
         self::output_nocache();
         if ('html' == $type) {
@@ -456,7 +460,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isGet($retBool = true)
+    public static function isGet(bool $retBool = true): bool
     {
         if ('GET' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -468,7 +472,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isPost($retBool = true)
+    public static function isPost(bool $retBool = true): bool
     {
         if ('POST' == $_SERVER['REQUEST_METHOD']) {
             return $retBool;
@@ -480,7 +484,7 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isAjax($retBool = true)
+    public static function isAjax(bool $retBool = true): bool
     {
         if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']) {
             return $retBool;
@@ -494,7 +498,7 @@ class App
      * @param string $url
      * @return bool
      */
-    public static function jsAlert($message = '', $after_action = '', $url = '')
+    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): bool
     {
         //php turn to alert
         $out = "<script type=\"text/javascript\">\n";
@@ -525,7 +529,7 @@ class App
      * @param bool $return
      * @return bool|string|null
      */
-    public static function redirect($url, $delay = 0, $js = false, $jsWrapped = true, $return = false)
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
     {
         $_delay = intval($delay);
         if (!$js) {

@@ -1,13 +1,13 @@
 <?php
 
 /**
- * @param mixed $variable
+ * @param string $variable
  * @param mixed $defVal
  * @param string $runFunc
  * @param bool $addslashes
  * @return mixed
  */
-function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
+function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $addslashes = true)
 {
     $arr = explode('.', $variable);
     if (count($arr) == 2) {
@@ -63,12 +63,12 @@ function getgpc($variable, $defVal = null, $runFunc = '', $addslashes = true)
 
 /**
  * private
- * @param $value
- * @param $runFunc
+ * @param mixed $value
+ * @param string $runFunc
  * @param bool $addslashes
  * @return void
  */
-function gpc_value(&$value, $runFunc, $addslashes)
+function gpc_value(&$value, string $runFunc, bool $addslashes)
 {
     if (empty($value)) {
         return;
@@ -103,37 +103,37 @@ function gpc_value(&$value, $runFunc, $addslashes)
 }
 
 /**
- * @param $key
- * @return null
+ * @param string $key
+ * @return mixed
  */
-function getini($key)
+function getini(string $key)
 {
     $_CFG = Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
     switch (count($k)) {
         case 1:
-            return isset($_CFG[$k[0]]) ? $_CFG[$k[0]] : null;
+            return $_CFG[$k[0]] ?? null;
         case 2:
-            return isset($_CFG[$k[0]][$k[1]]) ? $_CFG[$k[0]][$k[1]] : null;
+            return $_CFG[$k[0]][$k[1]] ?? null;
         case 3:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]]) ? $_CFG[$k[0]][$k[1]][$k[2]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]] ?? null;
         case 4:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]][$k[3]]) ? $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null;
         case 5:
-            return isset($_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]]) ? $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] : null;
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null;
         default:
             return null;
     }
 }
 
 /**
- * @param $mainTpl
- * @param $subTpl
- * @param $cacheTime
- * @param $cacheFile
- * @param $file
+ * @param string $mainTpl
+ * @param string $subTpl
+ * @param int $cacheTime
+ * @param string $cacheFile
+ * @param string $file
  */
-function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
+function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string $cacheFile, string $file)
 {
     $tplDir = DATA_TPLDIR;
     if (is_file($tplDir . $subTpl)) {
@@ -141,7 +141,7 @@ function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
     } else {
         $tplTime = 0;
     }
-    if ($tplTime < intval($cacheTime)) {
+    if ($tplTime < $cacheTime) {
         return;
     }
 
@@ -152,12 +152,12 @@ function checkTplRefresh($mainTpl, $subTpl, $cacheTime, $cacheFile, $file)
 }
 
 /**
- * @param $file
+ * @param string $file
  * @param array $data
  * @param bool $getTplFile
  * @return string|void
  */
-function template($file, array $data = [], $getTplFile = false)
+function template(string $file, array $data = [], bool $getTplFile = false)
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
@@ -178,11 +178,11 @@ function template($file, array $data = [], $getTplFile = false)
 
 /**
  * 模板使用的url构造函数
- * @param $udi
+ * @param string $udi
  * @param array $params
  * @return string
  */
-function url($udi, array $params = [])
+function url(string $udi, array $params = []): string
 {
     return Xcs\App::url($udi, $params);
 }
@@ -212,7 +212,7 @@ function array2object(array $arr)
  * @param object $obj 对象
  * @return array
  */
-function object2array($obj)
+function object2array(object $obj): array
 {
     $obj = (array)$obj;
     foreach ($obj as $k => $v) {
@@ -224,7 +224,7 @@ function object2array($obj)
 }
 
 /**
- * @param $string
+ * @param mixed $string
  * @return array|string
  */
 function daddslashes($string)
@@ -242,7 +242,7 @@ function daddslashes($string)
 }
 
 /**
- * @param $value
+ * @param mixed $value
  * @return array|string
  */
 function dstripslashes($value)
@@ -261,7 +261,7 @@ function dstripslashes($value)
 
 /**
  * quotes get post cookie by \char(21)'
- * @param $string
+ * @param mixed $string
  * @return array|string
  */
 function daddcslashes($string)
@@ -280,7 +280,7 @@ function daddcslashes($string)
 
 /**
  * it's pair to daddcslashes
- * @param $value
+ * @param mixed $value
  * @return array|string
  */
 function dstripcslashes($value)
@@ -298,7 +298,7 @@ function dstripcslashes($value)
 }
 
 /**
- * @param $text
+ * @param mixed $text
  * @return string
  */
 function char_input($text)
@@ -313,7 +313,7 @@ function char_input($text)
 }
 
 /**
- * @param $text
+ * @param mixed $text
  * @return string
  */
 function char_output($text)
@@ -328,21 +328,22 @@ function char_output($text)
 }
 
 /**
- * @param $str
- * @param $needle
+ * @param string $str
+ * @param string $needle
  * @return bool
  */
-function dstrpos($str, $needle)
+function dstrpos(string $str, string $needle): bool
 {
     return !(false === strpos($str, $needle));
 }
 
-/**
- * @param $uTimeOffset
- * @return array
- */
+
 if (!function_exists('locTime')) {
-    function locTime($uTimeOffset)
+    /**
+     * @param int $uTimeOffset
+     * @return array
+     */
+    function locTime(int $uTimeOffset): array
     {
         static $dtFormat = null, $timeOffset = 8;
         if (is_null($dtFormat)) {
@@ -358,16 +359,17 @@ if (!function_exists('locTime')) {
     }
 }
 
-/**
- * @param $timestamp
- * @param string $format
- * @param int $uTimeOffset
- * @param string $uFormat
- * @return string
- */
 
 if (!function_exists('dgmdate')) {
-    function dgmdate($timestamp, $format = 'dt', $uTimeOffset = 999, $uFormat = '')
+    /**
+     * @param int $timestamp
+     * @param string $format
+     * @param int $uTimeOffset
+     * @param string $uFormat
+     * @return string
+     */
+
+    function dgmdate(int $timestamp, string $format = 'dt', int $uTimeOffset = 999, string $uFormat = ''): string
     {
         if (!$timestamp) {
             return '';
@@ -408,16 +410,17 @@ if (!function_exists('dgmdate')) {
             }
             return $s;
         }
-        $format = isset($dtFormat[$format]) ? $dtFormat[$format] : $format;
+        $format = $dtFormat[$format] ?? $format;
         return gmdate($format, $timestamp);
     }
 }
 
-/**
- * @return null
- */
+
 if (!function_exists('clientIp')) {
-    function clientIp()
+    /**
+     * @return string
+     */
+    function clientIp(): string
     {
         $onlineIp = '';
         if (getenv('HTTP_CLIENT_IP') && strcasecmp(getenv('HTTP_CLIENT_IP'), 'unknown')) {
@@ -434,11 +437,11 @@ if (!function_exists('clientIp')) {
 }
 
 /**
- * @param $var
+ * @param mixed $var
  * @param int $halt
  * @param string $func
  */
-function dump($var, $halt = 0, $func = 'p')
+function dump($var, int $halt = 0, string $func = 'p')
 {
     echo '<style>.track {
       font-family:Verdana, Arial, Helvetica, sans-serif;
@@ -464,7 +467,7 @@ function dump($var, $halt = 0, $func = 'p')
 /**
  * @param bool $stop
  */
-function post($stop = false)
+function post(bool $stop = false)
 {
     $str = '';
     $post = $_POST;

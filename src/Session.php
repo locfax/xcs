@@ -31,18 +31,18 @@ class Session
         }
     }
 
-    public function _open()
+    public function _open(): bool
     {
         $this->connect();
         return true;
     }
 
-    public function _close()
+    public function _close(): bool
     {
         return true;
     }
 
-    public function _read($id)
+    public function _read($id): string
     {
         $id = $this->prefix . $id;
         $data = $this->handle->get($id);
@@ -53,19 +53,19 @@ class Session
         return '';
     }
 
-    public function _write($id, $data)
+    public function _write($id, $data): bool
     {
         $this->handle->set($this->prefix . $id, $data, $this->ttl);
         return true;
     }
 
-    public function _destroy($id)
+    public function _destroy($id): bool
     {
         $this->handle->rm($this->prefix . $id);
         return true;
     }
 
-    public function _gc()
+    public function _gc(): bool
     {
         return true;
     }

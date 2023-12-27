@@ -9,13 +9,13 @@ class Locker
 
     /**
      * 进度加锁
-     * @param $process
+     * @param string $process
      * @param int $ttl
      * @return bool
      */
-    public static function isLocked($process, $ttl = 0)
+    public static function isLocked(string $process, int $ttl = 0): bool
     {
-        $_ttl = $ttl < 1 ? 600 : intval($ttl);
+        $_ttl = $ttl < 1 ? 600 : $ttl;
         if (self::status('get', $process)) {
             return true;
         }
@@ -24,9 +24,9 @@ class Locker
 
     /**
      * 进度解锁
-     * @param $process
+     * @param string $process
      */
-    public static function unLock($process)
+    public static function unLock(string $process)
     {
         self::status('rm', $process);
         self::cmd('rm', $process);
@@ -34,11 +34,11 @@ class Locker
 
     /**
      * 锁状态设置
-     * @param $action
-     * @param $process
+     * @param string $action
+     * @param string $process
      * @return bool
      */
-    public static function status($action, $process)
+    public static function status(string $action, string $process): bool
     {
         static $plist = [];
         switch ($action) {
@@ -56,11 +56,11 @@ class Locker
 
     /**
      * 尝试加锁
-     * @param $name
-     * @param $ttl
+     * @param string $name
+     * @param int $ttl
      * @return bool
      */
-    private static function tryLock($name, $ttl)
+    private static function tryLock(string $name, int $ttl): bool
     {
         if (!self::cmd('get', $name)) {
             self::cmd('set', $name, $ttl);
@@ -74,12 +74,12 @@ class Locker
 
     /**
      * 加锁操作
-     * @param $cmd
-     * @param $name
+     * @param string $cmd
+     * @param string $name
      * @param int $ttl
      * @return bool|string
      */
-    private static function cmd($cmd, $name, $ttl = 0)
+    private static function cmd(string $cmd, string $name, int $ttl = 0)
     {
         $ret = false;
         switch ($cmd) {

@@ -14,7 +14,7 @@ class SwooleMysql
      * PdoDb constructor.
      * @param \Swoole\Database\PDOProxy $pdo
      */
-    public function __construct($pdo)
+    public function __construct(\Swoole\Database\PDOProxy $pdo)
     {
         $this->_link = $pdo;
     }
@@ -24,7 +24,7 @@ class SwooleMysql
      * @param array $args
      * @return mixed
      */
-    public function __call($func, array $args)
+    public function __call(string $func, array $args)
     {
         if ($this->_link) {
             return call_user_func_array([$this->_link, $func], $args);
@@ -36,7 +36,7 @@ class SwooleMysql
      * @param string $tableName
      * @return string
      */
-    public function qTable($tableName)
+    public function qTable(string $tableName): string
     {
         if (strpos($tableName, '.') === false) {
             return "`{$tableName}`";
@@ -48,7 +48,7 @@ class SwooleMysql
      * @param string $fieldName
      * @return string
      */
-    public function qField($fieldName)
+    public function qField(string $fieldName): string
     {
         return ($fieldName == '*') ? '*' : "`{$fieldName}`";
     }
@@ -58,7 +58,7 @@ class SwooleMysql
      * @param string $glue
      * @return array
      */
-    public function field_param(array $fields, $glue = ',')
+    public function field_param(array $fields, string $glue = ','): array
     {
         $args = [];
         $sql = $comma = '';
@@ -76,7 +76,7 @@ class SwooleMysql
      * @param bool $retId
      * @return bool|int
      */
-    public function create($tableName, array $data, $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -104,7 +104,7 @@ class SwooleMysql
      * @param array $data
      * @return bool|int
      */
-    public function replace($tableName, array $data)
+    public function replace(string $tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -122,11 +122,11 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param mixed $data
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public function update($tableName, $data, $condition, $args = null)
+    public function update(string $tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -148,12 +148,12 @@ class SwooleMysql
 
     /**
      * @param string $tableName
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @param bool $multi
      * @return bool|int
      */
-    public function remove($tableName, $condition, $args = null, $multi = false)
+    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -166,13 +166,13 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @param bool $retObj
      * @return mixed
      */
-    public function findOne($tableName, $field, $condition, $args = null, $orderBy = null, $retObj = false)
+    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -186,14 +186,14 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
-     * @param mixed $index
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
+     * @param string|null $index
      * @param bool $retObj
      * @return mixed
      */
-    public function findAll($tableName, $field = '*', $condition = '', $args = null, $orderBy = null, $index = null, $retObj = false)
+    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -207,15 +207,15 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return mixed
      */
-    public function page($tableName, $field, $condition, $args = null, $orderBy = null, $offset = 0, $limit = 18, $retObj = false)
+    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -229,12 +229,12 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @param mixed $orderBy
      * @return mixed
      */
-    public function first($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -261,12 +261,12 @@ class SwooleMysql
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
+     * @param string|null $orderBy
      * @return array|bool
      */
-    public function col($tableName, $field, $condition, $args = null, $orderBy = null)
+    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -296,22 +296,22 @@ class SwooleMysql
 
     /**
      * @param string $tableName
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
      */
-    public function count($tableName, $condition, $args = null, $field = '*')
+    public function count(string $tableName, $condition, array $args = null, string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function exec($sql, $args = null)
+    public function exec(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -335,7 +335,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql($sql, $args = null, $retObj = false)
+    public function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -359,12 +359,12 @@ class SwooleMysql
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $index
+     * @param array|null $args [':var' => $var]
+     * @param string|null $index
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSetSql($sql, $args = null, $index = null, $retObj = false)
+    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -394,13 +394,13 @@ class SwooleMysql
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return mixed
      */
-    public function pageSql($sql, $args = null, $offset = 0, $limit = 18, $retObj = false)
+    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -425,20 +425,20 @@ class SwooleMysql
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function countSql($sql, $args = null)
+    public function countSql(string $sql, array $args = null)
     {
         return $this->firstSql($sql, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function firstSql($sql, $args = null)
+    public function firstSql(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -458,10 +458,10 @@ class SwooleMysql
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|null $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql($sql, $args = null)
+    public function colSql(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -485,7 +485,7 @@ class SwooleMysql
     /**
      * @return bool
      */
-    public function startTrans()
+    public function startTrans(): bool
     {
         return $this->_link->beginTransaction();
     }
@@ -493,7 +493,7 @@ class SwooleMysql
     /**
      * @param bool $commit_no_errors
      */
-    public function endTrans($commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true)
     {
         try {
             if ($commit_no_errors) {
@@ -508,11 +508,11 @@ class SwooleMysql
 
     /**
      * @param string $message
-     * @param mixed $code
+     * @param int $code
      * @param string $sql
      * @return false
      */
-    private function _halt($message = '', $code = 0, $sql = '')
+    private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
         $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
         $message = mb_convert_encoding($message, 'UTF-8', $encode);
@@ -525,7 +525,7 @@ class SwooleMysql
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, $col)
+    private function _array_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -542,7 +542,7 @@ class SwooleMysql
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, $col)
+    private function _object_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;

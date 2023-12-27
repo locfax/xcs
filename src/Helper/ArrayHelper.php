@@ -12,14 +12,14 @@ class ArrayHelper
      * @param string $column_key
      * @return array
      */
-    public static function column(array $array, $column_key)
+    public static function column(array $array, string $column_key): array
     {
         $data = [];
         foreach ($array as $arr) {
             if (is_array($column_key)) {
                 $ret = [];
                 foreach ($column_key as $key) {
-                    $ret[] = isset($arr[$key]) ? $arr[$key] : null;
+                    $ret[] = $arr[$key] ?? null;
                 }
                 $data[] = $ret;
             } else {
@@ -38,7 +38,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function sort_field(array $arr, $sortField, $sortDirection = SORT_ASC)
+    public static function sort_field(array $arr, string $sortField, int $sortDirection = SORT_ASC): array
     {
         self::sort_multi($arr, [$sortField => $sortDirection]);
         return $arr;
@@ -74,7 +74,7 @@ class ArrayHelper
      * @param bool $apply_keys
      * @return null
      */
-    public static function walk($arr, callable $function, $apply_keys = false)
+    public static function walk($arr, callable $function, bool $apply_keys = false)
     {
         if (empty($arr)) {
             return null;
@@ -104,7 +104,7 @@ class ArrayHelper
      * @param string $delVal
      * @return array|null
      */
-    public static function remove_value(array $arr, $delVal = '')
+    public static function remove_value(array $arr, string $delVal = ''): ?array
     {
         if (empty($arr)) {
             return null;
@@ -130,7 +130,7 @@ class ArrayHelper
      * @param array $arr
      * @return array|null
      */
-    public static function remove_empty(array $arr)
+    public static function remove_empty(array $arr): ?array
     {
         if (empty($arr)) {
             return null;
@@ -160,7 +160,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function to_map(array $arr, $keyField = null, $valueField = null)
+    public static function to_map(array $arr, string $keyField = null, string $valueField = null): array
     {
         $map = [];
         if ($valueField) {
@@ -191,7 +191,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function group_by(array $arr, $groupField)
+    public static function group_by(array $arr, string $groupField): array
     {
         $ret = [];
         foreach ($arr as $key => $val) {
@@ -215,7 +215,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function to_tree(array $arr, $fid = 'id', $fparent = 'upid', $index = 'id', $children = 'children', $returnReferences = false)
+    public static function to_tree(array $arr, string $fid = 'id', string $fparent = 'upid', string $index = 'id', string $children = 'children', bool $returnReferences = false): array
     {
         $refs = $arr;
         $pkvRefs = [];
@@ -258,7 +258,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function tree_to(array $tree, $children = 'children')
+    public static function tree_to(array $tree, string $children = 'children'): array
     {
         $arr = [];
         if (isset($tree[$children]) && is_array($tree[$children])) {

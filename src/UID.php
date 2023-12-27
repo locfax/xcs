@@ -9,14 +9,14 @@ class UID
 
     /**
      * @param array $userData
-     * @param array $rolesData
+     * @param array|null $rolesData
      * @param int $life
      * @return bool
      */
-    public static function setUser(array $userData, $rolesData = null, $life = 0)
+    public static function setUser(array $userData, array $rolesData = null, int $life = 0): bool
     {
         if (!is_null($rolesData)) {
-            $userData[self::_ROLEY] = is_array($rolesData) ? implode(',', $rolesData) : $rolesData;
+            $userData[self::_ROLEY] = implode(',', $rolesData);
         }
         $dataKey = getini('auth/prefix') . self::_UREY;
         return self::_setData($dataKey, $userData, $life);
@@ -46,13 +46,13 @@ class UID
     public static function getRoles()
     {
         $data = self::getUser();
-        return isset($data[self::_ROLEY]) ? $data[self::_ROLEY] : null;
+        return $data[self::_ROLEY] ?? null;
     }
 
     /**
      * @return array
      */
-    public static function getRolesArray()
+    public static function getRolesArray(): array
     {
         $roles = self::getRoles();
         if (empty($roles)) {
@@ -71,7 +71,7 @@ class UID
      * @param null $type
      * @return bool
      */
-    public static function setData($key, array $data, $ttl = 0, $type = null)
+    public static function setData($key, array $data, int $ttl = 0, $type = null): bool
     {
         return self::_setData('data:' . $key, $data, $ttl, $type);
     }
@@ -81,7 +81,7 @@ class UID
      * @param null $type
      * @return mixed
      */
-    public static function getData($key, $type = null)
+    public static function getData(string $key, $type = null)
     {
         return self::_getData('data:' . $key, $type);
     }
@@ -91,7 +91,7 @@ class UID
      * @param string|null $type
      * @return mixed
      */
-    private static function _getData($key, $type = null)
+    private static function _getData(string $key, string $type = null)
     {
         $ret = [];
         if (is_null($type)) {
@@ -105,7 +105,7 @@ class UID
                 }
                 session_start();
             }
-            $ret = isset($_SESSION[$key]) ? $_SESSION[$key] : null;
+            $ret = $_SESSION[$key] ?? null;
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key]), true) : null;
@@ -115,12 +115,12 @@ class UID
 
     /**
      * @param string $key
-     * @param mixed $val
+     * @param array $val
      * @param int $life
      * @param null $type
      * @return bool
      */
-    private static function _setData($key, $val, $life = 0, $type = null)
+    private static function _setData(string $key, array $val, int $life = 0, $type = null): bool
     {
         $ret = false;
         if (is_null($type)) {
@@ -151,12 +151,12 @@ class UID
     }
 
     /**
-     * @param $var
+     * @param string $var
      * @param bool $prefix
      * @param null $key
      * @return string
      */
-    public static function getCookieKey($var, $prefix = true, $key = null)
+    public static function getCookieKey(string $var, bool $prefix = true, $key = null): string
     {
         if ($prefix) {
             if (is_null($key)) {
@@ -169,13 +169,13 @@ class UID
     }
 
     /**
-     * @param $string
+     * @param string $string
      * @param string $operation
      * @param string $key
      * @param int $expiry
      * @return string
      */
-    public static function authCode($string, $operation = 'DECODE', $key = '', $expiry = 0)
+    public static function authCode(string $string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
     {
         static $hash_auth = null;
         if (is_null($hash_auth)) {
