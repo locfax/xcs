@@ -18,7 +18,7 @@ trait Singleton
     }
 
     /**
-     * @return self
+     * @return Singleton
      */
     public static function getInstance()
     {
