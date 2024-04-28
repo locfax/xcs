@@ -30,9 +30,6 @@
     "ext-curl": "*",
     "ext-pdo": "*",
     "ext-mbstring": "*",
-    "ext-memcache": "*",
-    "ext-redis": "*",
-    "ext-mongodb": "*",
     "ext-fileinfo": "*",
     "ext-iconv": "*"
   },
