@@ -15,7 +15,7 @@ class DB
 {
 
     private static string $default_dbo_id = APP_DSN;
-    private static string $using_dbo_id;
+    private static string $using_dbo_id = '';
     private static array $used_dbo = [];
     private static int $dbm_time_out = 0;
     private static int $mgo_time_out = 0;

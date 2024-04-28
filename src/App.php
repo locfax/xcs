@@ -41,7 +41,7 @@ class App
      */
     public static function runFile(bool $refresh = false): void
     {
-        self::_rootNamespace();
+        self::_rootNamespace('\\', APP_PATH);
 
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
@@ -278,11 +278,14 @@ class App
     }
 
     /**
+     * @param $namespace
+     * @param $path
+     * @return void
      */
-    private static function _rootNamespace(): void
+    private static function _rootNamespace($namespace, $path): void
     {
-        $namespace = '\\';
-        $path = rtrim(APP_PATH, '/');
+        $namespace = trim($namespace, '\\');
+        $path = rtrim($path, '/');
 
         $loader = function ($classname) use ($namespace, $path) {
             if ($namespace && stripos($classname, $namespace) !== 0) {

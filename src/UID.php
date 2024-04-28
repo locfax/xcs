@@ -9,14 +9,14 @@ class UID
 
     /**
      * @param array $userData
-     * @param array|null $rolesData
+     * @param string|null $rolesData
      * @param int $life
      * @return bool
      */
-    public static function setUser(array $userData, array $rolesData = null, int $life = 0): bool
+    public static function setUser(array $userData, string $rolesData = null, int $life = 0): bool
     {
         if (!is_null($rolesData)) {
-            $userData[self::_ROLEY] = implode(',', $rolesData);
+            $userData[self::_ROLEY] = $rolesData;
         }
         $dataKey = getini('auth/prefix') . self::_UREY;
         return self::_setData($dataKey, $userData, $life);

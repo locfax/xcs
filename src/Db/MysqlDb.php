@@ -233,7 +233,7 @@ class MysqlDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @param string|null $orderBy
      * @param string|null $index
@@ -241,7 +241,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
+    public function findAll(string $tableName, string $field = '*', mixed $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');

@@ -12,9 +12,9 @@ class ExUiException
      * @param string $file
      * @param int $line
      * @param bool $Trace
-     * @param Exception|null $ex
+     * @param mixed $ex
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace, Exception $ex = null): void
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace, mixed $ex = null): void
     {
         $phpMsg = [];
         if ($Trace) {
@@ -61,15 +61,15 @@ class ExUiException
     }
 
     /**
-     * @param $message
+     * @param mixed $message
      * @return mixed
      */
-    public static function clear($message): mixed
+    public static function clear(mixed $message): mixed
     {
         if (defined('DEBUG') && DEBUG) {
-            return is_object($message) ? $message : htmlspecialchars($message);
+            return is_object($message) ? $message : ($message ? htmlspecialchars($message) : '');
         }
-        return htmlspecialchars($message);
+        return $message ? htmlspecialchars($message) : '';
     }
 
     /**

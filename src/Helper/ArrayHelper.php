@@ -209,7 +209,7 @@ class ArrayHelper
      * @param array $arr 原始数据
      * @param string $fid 节点ID字段名
      * @param string $fparent 节点父ID字段名
-     * @param string $index 索引字段
+     * @param string|null $index 索引字段
      * @param string $children 保存子节点的字段名
      * @param boolean $returnReferences 是否在返回结果中包含节点引用
      *
