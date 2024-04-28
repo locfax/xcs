@@ -2,4 +2,4 @@
 
 php mini framework
 
-php7.3+
+php8.0+
