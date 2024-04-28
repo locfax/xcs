@@ -9,9 +9,9 @@ use Xcs\DbException;
 class PostgresDb
 {
 
-    private $_config;
-    private $_link = null;
-    private $repeat = false;
+    private array $_config;
+    private PDO $_link;
+    private bool $repeat = false;
 
     /**
      * PdoDb constructor.
@@ -46,12 +46,12 @@ class PostgresDb
 
     public function __destruct()
     {
-        $this->close();
+
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link = null;
+
     }
 
     /**
@@ -61,10 +61,7 @@ class PostgresDb
      */
     public function __call(string $func, array $args)
     {
-        if ($this->_link) {
-            return call_user_func_array([$this->_link, $func], $args);
-        }
-        return null;
+        return call_user_func_array([$this->_link, $func], $args);
     }
 
     /**
@@ -81,7 +78,7 @@ class PostgresDb
      */
     public function qTable(string $tableName): string
     {
-        if (strpos($tableName, '.') === false) {
+        if (!str_contains($tableName, '.')) {
             return 'public.' . $tableName;
         }
         return $tableName;
@@ -120,7 +117,7 @@ class PostgresDb
      * @return bool|string
      * @throws DbException
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -149,7 +146,7 @@ class PostgresDb
      * @return bool|int
      * @throws DbException
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -172,7 +169,7 @@ class PostgresDb
      * @return bool|int
      * @throws DbException
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, array|string $data, array|string $condition, array $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -201,7 +198,7 @@ class PostgresDb
      * @return bool|int
      * @throws DbException
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -221,7 +218,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -243,7 +240,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -266,7 +263,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -286,7 +283,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -319,7 +316,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -354,7 +351,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function count(string $tableName, $condition, array $args = null, string $field = '*')
+    public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -365,7 +362,7 @@ class PostgresDb
      * @return bool|int
      * @throws DbException
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = null): bool|int
     {
         try {
             if (empty($args)) {
@@ -390,7 +387,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function rowSql(string $sql, $args = null, bool $retObj = false)
+    public function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -420,7 +417,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
         try {
             if (empty($args)) {
@@ -457,7 +454,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, mixed $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -486,7 +483,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function countSql(string $sql, $args = null)
+    public function countSql(string $sql, mixed $args = null): mixed
     {
         return $this->firstSql($sql, $args);
     }
@@ -497,7 +494,7 @@ class PostgresDb
      * @return mixed
      * @throws DbException
      */
-    public function firstSql(string $sql, $args = null)
+    public function firstSql(string $sql, mixed $args = null): mixed
     {
         try {
             if (empty($args)) {
@@ -521,7 +518,7 @@ class PostgresDb
      * @return array|bool
      * @throws DbException
      */
-    public function colSql(string $sql, $args = null)
+    public function colSql(string $sql, mixed $args = null): bool|array
     {
         try {
             if (empty($args)) {
@@ -554,7 +551,7 @@ class PostgresDb
      * @param bool $commit_no_errors
      * @throws DbException
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true): void
     {
         try {
             if ($commit_no_errors) {
@@ -595,7 +592,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;
@@ -612,7 +609,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;

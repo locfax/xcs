@@ -11,11 +11,11 @@ class Memcache
 
     use Singleton;
 
-    public $enable = false;
+    public bool $enable = false;
     /**
      * @var \Memcache
      */
-    private $_link = null;
+    private \Memcache $_link;
 
     /**
      * @param $config
@@ -36,16 +36,16 @@ class Memcache
         return $this;
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link && $this->_link->close();
+        $this->_link->close();
     }
 
     /**
      * @param string $key
      * @return array|false|string
      */
-    public function get(string $key)
+    public function get(string $key): bool|array|string
     {
         try {
             return $this->_link->get($key);
@@ -60,7 +60,7 @@ class Memcache
      * @param int $ttl
      * @return bool
      */
-    public function set(string $key, $value, int $ttl = 0): bool
+    public function set(string $key, array|string $value, int $ttl = 0): bool
     {
         try {
             $data = $this->get($key);

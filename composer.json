@@ -24,12 +24,17 @@
   "license": "MIT",
   "name": "locfax/xcs",
   "require": {
-    "php": ">=7.3",
+    "php": ">=8.0",
     "ext-json": "*",
     "ext-gd": "*",
     "ext-curl": "*",
     "ext-pdo": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-memcache": "*",
+    "ext-redis": "*",
+    "ext-mongodb": "*",
+    "ext-fileinfo": "*",
+    "ext-iconv": "*"
   },
   "suggest": {}
 }

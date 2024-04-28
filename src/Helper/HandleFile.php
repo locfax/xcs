@@ -7,8 +7,8 @@ use finfo;
 class HandleFile
 {
 
-    private $_file;
-    private $_name;
+    private array $_file;
+    private mixed $_name;
 
     public function __construct($struct, $name, $ix = false)
     {
@@ -33,7 +33,7 @@ class HandleFile
      * @param $name
      * @param $value
      */
-    public function setAttribute($name, $value)
+    public function setAttribute($name, $value): void
     {
         $this->_file[$name] = $value;
     }
@@ -42,7 +42,7 @@ class HandleFile
      * @param $name
      * @return mixed
      */
-    public function getAttribute($name)
+    public function getAttribute($name): mixed
     {
         return $this->_file[$name];
     }
@@ -50,7 +50,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getName()
+    public function getName(): mixed
     {
         return $this->_name;
     }
@@ -66,7 +66,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getError()
+    public function getError(): mixed
     {
         return $this->_file['error'];
     }
@@ -74,7 +74,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function isMoved()
+    public function isMoved(): mixed
     {
         return $this->_file['is_moved'];
     }
@@ -82,7 +82,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getFilename()
+    public function getFilename(): mixed
     {
         return $this->_file['name'];
     }
@@ -103,7 +103,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getSize()
+    public function getSize(): mixed
     {
         return $this->_file['size'];
     }
@@ -111,7 +111,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getMimeType()
+    public function getMimeType(): mixed
     {
         if (class_exists('finfo', false)) {
             $finfo = new finfo(FILEINFO_MIME);
@@ -131,7 +131,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getTmpName()
+    public function getTmpName(): mixed
     {
         return $this->_file['tmp_name'];
     }
@@ -139,7 +139,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getNewPath()
+    public function getNewPath(): mixed
     {
         return $this->_file['new_path'];
     }
@@ -173,7 +173,7 @@ class HandleFile
             $passed = false;
             $ext = array_filter(array_map('trim', $ext), 'trim');
             foreach ($ext as $_ext) {
-                if ('.' == substr($_ext, 0, 1)) {
+                if (str_starts_with($_ext, '.')) {
                     $_ext = substr($_ext, 1);
                 }
                 $_fileExt = implode('.', array_slice($fileExt, $count - count(explode('.', $_ext))));
@@ -213,7 +213,7 @@ class HandleFile
         return copy($this->_file['tmp_name'], $destPath);
     }
 
-    public function remove()
+    public function remove(): void
     {
         if ($this->isMoved()) {
             unlink($this->getNewPath());
@@ -222,7 +222,7 @@ class HandleFile
         }
     }
 
-    public function removeMovedFile()
+    public function removeMovedFile(): void
     {
         if ($this->isMoved()) {
             unlink($this->getNewPath());
@@ -236,6 +236,6 @@ class HandleFile
      */
     private function strPos($str, $needle): bool
     {
-        return !(false === strpos($str, $needle));
+        return str_contains($str, $needle);
     }
 }

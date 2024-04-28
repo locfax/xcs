@@ -10,19 +10,19 @@ class Pinyin
 
     /**
      * @param string $s
-     * @param bool $isfirst
+     * @param bool $isFirst
      * @return string
      */
-    public static function utf8_to(string $s, bool $isfirst = false): string
+    public static function utf8_to(string $s, bool $isFirst = false): string
     {
-        return self::to_gb2312(self::utf8_to_gb2312($s), $isfirst);
+        return self::to_gb2312(self::utf8_to_gb2312($s), $isFirst);
     }
 
     /**
      * @param string $s
      * @return false|string
      */
-    public static function utf8_to_gb2312(string $s)
+    public static function utf8_to_gb2312(string $s): bool|string
     {
         return iconv('UTF-8', 'GB2312//IGNORE', $s);
     }
@@ -30,10 +30,10 @@ class Pinyin
     /**
      * 字符串必须为GB2312编码
      * @param string $s
-     * @param bool $isfirst
+     * @param bool $isFirst
      * @return string
      */
-    public static function to_gb2312(string $s, bool $isfirst = false): string
+    public static function to_gb2312(string $s, bool $isFirst = false): string
     {
         $res = '';
         $len = strlen($s);
@@ -57,7 +57,7 @@ class Pinyin
             } else {
                 foreach ($pinyin_arr as $py => $asc) {
                     if ($asc <= $ascii) {
-                        $res .= $isfirst ? $py[0] : $py;
+                        $res .= $isFirst ? $py[0] : $py;
                         break;
                     }
                 }
@@ -70,7 +70,7 @@ class Pinyin
      * @param string $s
      * @return bool|string
      */
-    public static function to_first(string $s)
+    public static function to_first(string $s): bool|string
     {
         $ascii = ord($s[0]);
         if ($ascii > 0xE0) {

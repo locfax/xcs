@@ -18,22 +18,22 @@ class MongoDb
     /**
      * @var array
      */
-    private $_config;
+    private array $_config;
 
     /**
      * @var Manager
      */
-    private $_link;
+    private Manager $_link;
 
     /**
      * @var WriteConcern
      */
-    private $_writeConcern;
+    private WriteConcern $_writeConcern;
 
     /**
      * @var string
      */
-    private $_dbname;
+    private mixed $_dbname;
 
     /**
      * MongoDb constructor.
@@ -69,12 +69,12 @@ class MongoDb
 
     public function __destruct()
     {
-        $this->close();
+
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link = $this->_writeConcern = null;
+
     }
 
     /**
@@ -102,7 +102,7 @@ class MongoDb
      * @return bool|int|string|null
      * @throws DbException
      */
-    public function create(string $table, array $document = [], bool $retId = false)
+    public function create(string $table, array $document = [], bool $retId = false): bool|int|string|null
     {
         try {
             if (isset($document['_id'])) {
@@ -132,7 +132,7 @@ class MongoDb
      * @return bool|int|null
      * @throws DbException
      */
-    public function update(string $table, array $document = [], array $condition = [], string $options = '$set')
+    public function update(string $table, array $document = [], array $condition = [], string $options = '$set'): bool|int|null
     {
         try {
             if (isset($condition['_id'])) {
@@ -162,7 +162,7 @@ class MongoDb
      * @return bool|int|null
      * @throws DbException
      */
-    public function remove(string $table, array $condition = [], bool $multi = false)
+    public function remove(string $table, array $condition = [], bool $multi = false): bool|int|null
     {
         try {
             if (isset($condition['_id'])) {
@@ -188,7 +188,7 @@ class MongoDb
      * @return array|bool
      * @throws DbException
      */
-    public function findOne(string $table, array $options = [], array $condition = [])
+    public function findOne(string $table, array $options = [], array $condition = []): bool|array
     {
         try {
             if (isset($condition['_id'])) {
@@ -220,7 +220,7 @@ class MongoDb
      * @return array|bool
      * @throws DbException
      */
-    public function findAll(string $table, array $options = [], array $condition = [])
+    public function findAll(string $table, array $options = [], array $condition = []): bool|array
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -250,7 +250,7 @@ class MongoDb
      * @return array|bool
      * @throws DbException
      */
-    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
+    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
     {
         $options = array_merge($options, [
             'limit' => $limit,
@@ -281,10 +281,10 @@ class MongoDb
     /**
      * @param string $table
      * @param array $condition
-     * @return mixed
+     * @return int
      * @throws DbException
      */
-    public function count(string $table, array $condition = [])
+    public function count(string $table, array $condition = []): int
     {
         try {
             if (isset($condition['_id'])) {
@@ -311,7 +311,7 @@ class MongoDb
      * @param int $total
      * @return int
      */
-    public function pageStart(int $page, int $ppp, int $total)
+    public function pageStart(int $page, int $ppp, int $total): int
     {
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, intval($page)));
@@ -320,11 +320,11 @@ class MongoDb
 
     /**
      * @param string $message
-     * @param mixed $code
+     * @param mixed|int $code
      * @return bool
      * @throws DbException
      */
-    private function _halt(string $message = '', $code = 0): bool
+    private function _halt(string $message = '', mixed $code = 0): bool
     {
         if ($this->_config['dev']) {
             $this->close();

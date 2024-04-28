@@ -53,7 +53,7 @@ class FileHelper
     /**
      * @param $dir
      */
-    public static function clear_dir($dir)
+    public static function clear_dir($dir): void
     {
         $d = dir($dir);
         while (($f = $d->read())) {

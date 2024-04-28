@@ -25,7 +25,7 @@ class UID
     /**
      * @return mixed
      */
-    public static function getUser()
+    public static function getUser(): mixed
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
         return self::_getData($dataKey);
@@ -34,7 +34,7 @@ class UID
     /**
      * @return void
      */
-    public static function clearUser()
+    public static function clearUser(): void
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
         self::_setData($dataKey, null, -86400 * 365);
@@ -43,7 +43,7 @@ class UID
     /**
      * @return mixed|null
      */
-    public static function getRoles()
+    public static function getRoles(): mixed
     {
         $data = self::getUser();
         return $data[self::_ROLEY] ?? null;
@@ -81,7 +81,7 @@ class UID
      * @param null $type
      * @return mixed
      */
-    public static function getData(string $key, $type = null)
+    public static function getData(string $key, $type = null): mixed
     {
         return self::_getData('data:' . $key, $type);
     }
@@ -91,7 +91,7 @@ class UID
      * @param string|null $type
      * @return mixed
      */
-    private static function _getData(string $key, string $type = null)
+    private static function _getData(string $key, string $type = null): mixed
     {
         $ret = [];
         if (is_null($type)) {

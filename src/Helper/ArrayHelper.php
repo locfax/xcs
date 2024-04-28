@@ -50,7 +50,7 @@ class ArrayHelper
      * @param array $args
      * @return void
      */
-    private static function sort_multi($arr, array $args)
+    private static function sort_multi($arr, array $args): void
     {
         $sortArray = [];
         $sortRule = '';
@@ -72,9 +72,9 @@ class ArrayHelper
      * @param $arr
      * @param callable $function
      * @param bool $apply_keys
-     * @return null
+     * @return mixed
      */
-    public static function walk($arr, callable $function, bool $apply_keys = false)
+    public static function walk($arr, callable $function, bool $apply_keys = false): mixed
     {
         if (empty($arr)) {
             return null;

@@ -7,10 +7,10 @@ class RestFul extends Controller
 
     /**
      * @param string $name
-     * @param $arguments
+     * @param mixed $arguments
      * @return void
      */
-    public function __call(string $name, $arguments)
+    public function __call(string $name, mixed $arguments)
     {
         //动作不存在
         $res = [
@@ -23,7 +23,7 @@ class RestFul extends Controller
     /**
      * @return false|string
      */
-    protected function rawData()
+    protected function rawData(): bool|string
     {
         return file_get_contents('php://input');
     }
@@ -97,7 +97,7 @@ class RestFul extends Controller
      * @param integer $code HTTP状态
      * @return bool
      */
-    protected function response($data, int $code = 200, string $type = "json"): bool
+    protected function response(mixed $data, int $code = 200, string $type = "json"): bool
     {
         if ($code != 200) {
             $this->status($code);

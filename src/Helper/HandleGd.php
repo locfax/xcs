@@ -2,10 +2,12 @@
 
 namespace Xcs\Helper;
 
+use GdImage;
+
 class HandleGd
 {
 
-    protected $_handle = null;
+    protected mixed $_handle;
 
     public function __construct($handle)
     {
@@ -303,7 +305,7 @@ class HandleGd
      * @param int $quality
      * @return void
      */
-    public function saveAsJpeg(string $filename, int $quality = 80)
+    public function saveAsJpeg(string $filename, int $quality = 80): void
     {
         imagejpeg($this->_handle, $filename, $quality);
     }
@@ -312,7 +314,7 @@ class HandleGd
      * @param string $filename
      * @return void
      */
-    public function saveAsPng(string $filename)
+    public function saveAsPng(string $filename): void
     {
         imagepng($this->_handle, $filename);
     }
@@ -321,12 +323,12 @@ class HandleGd
      * @param string $filename
      * @return void
      */
-    function saveAsGif(string $filename)
+    function saveAsGif(string $filename): void
     {
         imagegif($this->_handle, $filename);
     }
 
-    function destroy()
+    function destroy(): void
     {
         if (!$this->_handle) {
             imagedestroy($this->_handle);
@@ -337,9 +339,9 @@ class HandleGd
 
     /**
      * @param string $fname
-     * @return false|\GdImage|resource
+     * @return GdImage|bool
      */
-    function imagecreatefrombmp(string $fname)
+    function imageCreateFromBmp(string $fname): GdImage|bool
     {
         $buf = file_get_contents($fname);
         if (strlen($buf) < 54) {

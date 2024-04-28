@@ -18,7 +18,7 @@ class Rbac
      * @param mixed $auth
      * @return bool
      */
-    public static function check(string $controllerName, string $actionName = null, $auth = 'general'): bool
+    public static function check(string $controllerName, string $actionName = null, mixed $auth = 'general'): bool
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
@@ -165,7 +165,7 @@ class Rbac
      * @param string $controllerName
      * @return mixed
      */
-    private static function _getACL(string $controllerName)
+    private static function _getACL(string $controllerName): mixed
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {

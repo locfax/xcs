@@ -14,7 +14,7 @@ class ExUiException
      * @param bool $Trace
      * @param Exception|null $ex
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace, Exception $ex = null)
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace, Exception $ex = null): void
     {
         $phpMsg = [];
         if ($Trace) {
@@ -60,7 +60,11 @@ class ExUiException
         self::showError($message, $title, $phpMsg);
     }
 
-    public static function clear($message)
+    /**
+     * @param $message
+     * @return mixed
+     */
+    public static function clear($message): mixed
     {
         if (defined('DEBUG') && DEBUG) {
             return is_object($message) ? $message : htmlspecialchars($message);
@@ -75,7 +79,7 @@ class ExUiException
      * @param string $title 错误类型 db,system
      * @param mixed $phpMsg
      */
-    public static function showError(string $message, string $title, $phpMsg = '')
+    public static function showError(string $message, string $title, mixed $phpMsg = ''): void
     {
         ob_get_length() && ob_end_clean();
 

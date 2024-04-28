@@ -4,11 +4,11 @@ namespace Xcs;
 
 class Session
 {
-    private $ttl;
+    private int $ttl;
     private $handle;
     private $prefix;
 
-    public function start($prefix = "session:", $time = 1800)
+    public function start($prefix = "session:", $time = 1800): void
     {
         $this->prefix = $prefix;
         $this->ttl = $time;
@@ -23,7 +23,10 @@ class Session
         );
     }
 
-    private function connect()
+    /**
+     * @throws ExException
+     */
+    private function connect(): void
     {
         if (!$this->handle) {
             $_handle = '\\Xcs\\Cache\\' . ucfirst(getini('auth/handle'));
@@ -31,6 +34,9 @@ class Session
         }
     }
 
+    /**
+     * @throws ExException
+     */
     public function _open(): bool
     {
         $this->connect();

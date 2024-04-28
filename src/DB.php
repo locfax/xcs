@@ -14,11 +14,11 @@ use Xcs\Db\SqlsrvDb;
 class DB
 {
 
-    private static $default_dbo_id = APP_DSN;
-    private static $using_dbo_id;
-    private static $used_dbo = [];
-    private static $dbm_time_out = 0;
-    private static $mgo_time_out = 0;
+    private static string $default_dbo_id = APP_DSN;
+    private static string $using_dbo_id;
+    private static array $used_dbo = [];
+    private static int $dbm_time_out = 0;
+    private static int $mgo_time_out = 0;
 
     /**
      * 返回 mysql 对象
@@ -214,7 +214,7 @@ class DB
      * @return bool|string
      * @throws ExException
      */
-    public static function create(string $table, array $data, bool $retId = false)
+    public static function create(string $table, array $data, bool $retId = false): bool|string
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->create($table, $data, $retId);
@@ -230,7 +230,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function replace(string $table, array $data)
+    public static function replace(string $table, array $data): bool|int
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->replace($table, $data);
@@ -246,7 +246,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function update(string $table, $data, $condition, $args = null)
+    public static function update(string $table, mixed $data, mixed $condition, mixed $args = null): bool|int
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->update($table, $data, $condition, $args);
@@ -262,7 +262,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function remove(string $table, $condition, $multi = false, $args = null)
+    public static function remove(string $table, mixed $condition, mixed $multi = false, mixed $args = null): bool|int
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->remove($table, $condition, $args, $multi);
@@ -274,13 +274,13 @@ class DB
      * @param string $table
      * @param string $field
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $orderBy
-     * @param mixed $args [':var' => $var]
+     * @param mixed|null $orderBy
+     * @param mixed|null $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      * @throws ExException
      */
-    public static function findOne(string $table, string $field, $condition, $orderBy = null, $args = null, bool $retObj = false)
+    public static function findOne(string $table, string $field, mixed $condition, mixed $orderBy = null, mixed $args = null, bool $retObj = false): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findOne($table, $field, $condition, $args, $orderBy, $retObj);
@@ -299,7 +299,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function findAll(string $table, string $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, bool $retObj = false)
+    public static function findAll(string $table, string $field = '*', mixed $condition = '', mixed $orderBy = null, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
@@ -319,7 +319,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function page(string $table, string $field, $condition = '', $orderBy = null, $args = null, $pageParam = [], int $limit = 20, bool $retObj = false)
+    public static function page(string $table, string $field, mixed $condition = '', mixed $orderBy = null, mixed $args = null, mixed $pageParam = [], int $limit = 20, bool $retObj = false): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -360,7 +360,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function first(string $table, string $field, $condition, $orderBy = null, $args = null)
+    public static function first(string $table, string $field, mixed $condition, mixed $orderBy = null, mixed $args = null): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->first($table, $field, $condition, $args, $orderBy);
@@ -371,12 +371,12 @@ class DB
      * @param string $table
      * @param string $field
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param null $orderBy
+     * @param mixed $orderBy
      * @param mixed $args [':var' => $var]
      * @return array|bool
      * @throws ExException
      */
-    public static function col(string $table, string $field, $condition = '', $orderBy = null, $args = null)
+    public static function col(string $table, string $field, mixed $condition = '', mixed $orderBy = null, mixed $args = null): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->col($table, $field, $condition, $args, $orderBy);
@@ -392,7 +392,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function count(string $table, $condition, $args = null, string $field = '*')
+    public static function count(string $table, mixed $condition, mixed $args = null, string $field = '*'): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->count($table, $condition, $args, $field);
@@ -405,7 +405,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function exec(string $sql, $args = null)
+    public static function exec(string $sql, mixed $args = null): bool|int
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->exec($sql, $args);
@@ -422,7 +422,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function rowSql(string $sql, $args = null, bool $retObj = false)
+    public static function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSql($sql, $args, $retObj);
@@ -437,7 +437,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public static function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->rowSetSql($sql, $args, $index, $retObj);
@@ -453,7 +453,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function pageSql(string $sql, $args = null, $pageParam = 0, int $limit = 18, bool $retObj = false)
+    public static function pageSql(string $sql, mixed $args = null, mixed $pageParam = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
@@ -475,7 +475,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function countSql(string $sql, $args = null)
+    public static function countSql(string $sql, mixed $args = null): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->countSql($sql, $args);
@@ -488,7 +488,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function firstSql(string $sql, $args = null)
+    public static function firstSql(string $sql, mixed $args = null): mixed
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->firstSql($sql, $args);
@@ -501,7 +501,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function colSql(string $sql, $args = null)
+    public static function colSql(string $sql, mixed $args = null): bool|array
     {
         $db = self::Using(self::$using_dbo_id);
         return $db->colSql($sql, $args);
@@ -527,7 +527,7 @@ class DB
      * @param bool $commit_no_errors
      * @throws ExException
      */
-    public static function endTrans(bool $commit_no_errors = true)
+    public static function endTrans(bool $commit_no_errors = true): void
     {
         $db = self::Using(self::$using_dbo_id);
         $db->endTrans($commit_no_errors);
@@ -543,7 +543,7 @@ class DB
      * @throws DbException
      * @throws ExException
      */
-    public static function Using(string $id = null)
+    public static function Using(string $id = null): MysqlDb|PostgresDb
     {
         if (!$id) {
             //初始运行
@@ -572,28 +572,28 @@ class DB
      * @param int $total
      * @return int
      */
-    public static function pageStart(int $page, int $ppp, int $total)
+    public static function pageStart(int $page, int $ppp, int $total): int
     {
         $totalPage = ceil($total / $ppp);
-        $_page = max(1, min($totalPage, intval($page)));
+        $_page = max(1, min($totalPage, $page));
         return ($_page - 1) * $ppp;
     }
 
     /**
-     * @param array|int $pageParam
+     * @param int|array $pageParam
      * @param int $length
      * @return array|string
      */
-    public static function pageBar($pageParam, int $length)
+    public static function pageBar(int|array $pageParam, int $length): array|string
     {
         if (!isset($pageParam['bar']) || 'default' == $pageParam['bar']) {
             $defPageParam = [
                 'page' => 1,
                 'udi' => '',
-                'maxpages' => 100,
-                'showpage' => 10,
-                'shownum' => true,
-                'showkbd' => false,
+                'maxPages' => 100,
+                'showPage' => 10,
+                'showNum' => true,
+                'showKbd' => false,
                 'simple' => false
             ];
             $pageParam = array_merge($defPageParam, $pageParam);
@@ -603,7 +603,7 @@ class DB
             $defPageParam = [
                 'page' => 1,
                 'udi' => '',
-                'maxpages' => 100,
+                'maxPages' => 100,
             ];
             $pageParam = array_merge($defPageParam, $pageParam);
             $pageParam['length'] = $length;

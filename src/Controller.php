@@ -6,11 +6,11 @@ class Controller
 {
 
     //当前控制器
-    protected $_ctl;
+    protected string $_ctl;
     //当前动作
-    protected $_act;
+    protected string $_act;
     //时间戳
-    protected $timestamp;
+    protected int $timestamp;
 
     /**
      * 初始执行
@@ -30,7 +30,7 @@ class Controller
      * @param mixed $arguments
      * @return bool|void
      */
-    public function __call(string $name, $arguments)
+    public function __call(string $name, mixed $arguments)
     {
         //动作不存在
         if (App::isAjax()) {
@@ -44,7 +44,7 @@ class Controller
         ExUiException::render('控制器', $message, '', 0, false);
     }
 
-    protected function init()
+    protected function init(): void
     {
 
     }
@@ -52,7 +52,7 @@ class Controller
     /**
      * 初始变量
      */
-    private function env()
+    private function env(): void
     {
         $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
         App::mergeVars('cfg', ['udi' => $this->_ctl . '/' . $this->_act]);
@@ -65,7 +65,7 @@ class Controller
      * @param mixed $auth
      * @return bool
      */
-    final function checkAcl(string $controllerName, string $actionName, $auth = AUTH_ROLE): bool
+    final function checkAcl(string $controllerName, string $actionName, mixed $auth = AUTH_ROLE): bool
     {
         return Rbac::check($controllerName, $actionName, $auth);
     }

@@ -8,9 +8,9 @@ use Xcs\DbException;
 
 class SqlsrvDb
 {
-    private $_config;
-    private $_link = null;
-    private $repeat = false;
+    private array $_config;
+    private PDO $_link;
+    private bool $repeat = false;
 
     /**
      * PdoDb constructor.
@@ -45,12 +45,12 @@ class SqlsrvDb
 
     public function __destruct()
     {
-        $this->close();
+
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link = null;
+
     }
 
     /**
@@ -60,10 +60,7 @@ class SqlsrvDb
      */
     public function __call(string $func, array $args)
     {
-        if ($this->_link) {
-            return call_user_func_array([$this->_link, $func], $args);
-        }
-        return null;
+        return call_user_func_array([$this->_link, $func], $args);
     }
 
     /**
@@ -116,7 +113,7 @@ class SqlsrvDb
      * @return bool|string
      * @throws DbException
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -145,7 +142,7 @@ class SqlsrvDb
      * @return bool|int
      * @throws DbException
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -168,7 +165,7 @@ class SqlsrvDb
      * @return bool|int
      * @throws DbException
      */
-    public function update(string $tableName, $data, $condition, $args = null)
+    public function update(string $tableName, mixed $data, mixed $condition, mixed $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -196,7 +193,7 @@ class SqlsrvDb
      * @return bool|int
      * @throws DbException
      */
-    public function remove(string $tableName, $condition, $args = null)
+    public function remove(string $tableName, mixed $condition, mixed $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -216,7 +213,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, mixed $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -238,7 +235,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws DbException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -261,7 +258,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws DbException
      */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = '', int $offset = 0, int $ppp = 20, bool $retObj = false)
+    public function page(string $tableName, string $field, mixed $condition, mixed $args = null, mixed $orderBy = '', int $offset = 0, int $ppp = 20, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -280,7 +277,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = null, mixed $orderBy = null): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -313,7 +310,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws DbException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -348,7 +345,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function count($tableName, $condition, array $args = null, string $field = '*')
+    public function count($tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -359,7 +356,7 @@ class SqlsrvDb
      * @return bool|int
      * @throws DbException
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = null): bool|int
     {
         try {
             if (empty($args)) {
@@ -384,7 +381,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function rowSql(string $sql, array $args = null, bool $retObj = false)
+    public function rowSql(string $sql, array $args = null, bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -414,7 +411,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws DbException
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
         try {
             if (empty($args)) {
@@ -448,7 +445,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, array $args = null): mixed
     {
         return $this->firstSql($sql, $args);
     }
@@ -459,7 +456,7 @@ class SqlsrvDb
      * @return mixed
      * @throws DbException
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, array $args = null): mixed
     {
         try {
             if (empty($args)) {
@@ -483,7 +480,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws DbException
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, array $args = null): bool|array
     {
         try {
             if (empty($args)) {
@@ -516,7 +513,7 @@ class SqlsrvDb
      * @param bool $commit_no_errors
      * @throws DbException
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true): void
     {
         try {
             if ($commit_no_errors) {
@@ -557,7 +554,7 @@ class SqlsrvDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;
@@ -574,7 +571,7 @@ class SqlsrvDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;

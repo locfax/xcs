@@ -7,7 +7,7 @@ use Xcs\ExException;
 trait Singleton
 {
 
-    protected static $singleton_instances = [];
+    protected static array $singleton_instances = [];
 
     /**
      * @throws ExException
@@ -17,9 +17,7 @@ trait Singleton
         throw new ExException('__clone', 'Cloning ' . __CLASS__ . ' is not allowed');
     }
 
-    /**
-     * @return Singleton
-     */
+
     public static function getInstance()
     {
         $class = get_called_class();
@@ -29,7 +27,7 @@ trait Singleton
         return static::$singleton_instances[$class];
     }
 
-    public static function clearInstance()
+    public static function clearInstance(): void
     {
         $class = get_called_class();
         unset(static::$singleton_instances[$class]);

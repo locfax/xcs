@@ -11,11 +11,11 @@ class Cache
 
     use Singleton;
 
-    private $config;
-    private $prefix;
-    private $handle;
-    public $enable;
-    public $type;
+    private mixed $config;
+    private mixed $prefix;
+    private mixed $handle;
+    public bool $enable;
+    public mixed $type;
 
     /**
      * @param $handle
@@ -50,7 +50,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function get(string $key)
+    public static function get(string $key): mixed
     {
         return self::getInstance()->_get($key);
     }
@@ -59,7 +59,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    private function _get(string $key)
+    private function _get(string $key): mixed
     {
         if ($this->enable) {
             $data = $this->handle->get($this->_key($key));
@@ -78,7 +78,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    public static function set(string $key, $value, int $ttl = 0)
+    public static function set(string $key, array|string $value, int $ttl = 0): mixed
     {
         return self::getInstance()->_set($key, $value, $ttl);
     }
@@ -87,9 +87,9 @@ class Cache
      * @param string $key
      * @param array|string $value
      * @param int $ttl
-     * @return mixed
+     * @return bool
      */
-    private function _set(string $key, $value, int $ttl = 0)
+    private function _set(string $key, array|string $value, int $ttl = 0): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -102,16 +102,16 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function rm(string $key)
+    public static function rm(string $key): mixed
     {
         return self::getInstance()->_rm($key);
     }
 
     /**
      * @param $key
-     * @return mixed
+     * @return bool
      */
-    private function _rm($key)
+    private function _rm($key): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -123,15 +123,15 @@ class Cache
     /**
      * @return mixed
      */
-    public static function clear()
+    public static function clear(): mixed
     {
         return self::getInstance()->_clear();
     }
 
     /**
-     * @return mixed
+     * @return bool
      */
-    private function _clear()
+    private function _clear(): bool
     {
         $ret = false;
         if ($this->enable) {

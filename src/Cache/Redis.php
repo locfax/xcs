@@ -9,11 +9,11 @@ class Redis
 
     use Singleton;
 
-    public $enable = false;
+    public bool $enable = false;
     /**
      * @var \Redis
      */
-    private $_link = null;
+    private \Redis $_link;
 
     /**
      * @param $config
@@ -33,16 +33,16 @@ class Redis
         return $this;
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link && $this->_link = null;
+        $this->_link->close();
     }
 
     /**
      * @param string $key
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         return $this->_link->get($key);
     }
@@ -53,7 +53,7 @@ class Redis
      * @param int $ttl
      * @return bool|\Redis
      */
-    public function set(string $key, $value, int $ttl = 0)
+    public function set(string $key, array|string $value, int $ttl = 0): bool|\Redis
     {
         if ($ttl > 0) {
             $ret = $this->_link->set($key, $value, $ttl);
@@ -75,14 +75,14 @@ class Redis
      * @param string $key
      * @return int|\Redis
      */
-    public function rm(string $key)
+    public function rm(string $key): int|\Redis
     {
         return $this->_link->del($key);
     }
 
-    public function clear()
+    public function clear(): void
     {
-        $this->_link->flushDB();
+        //$this->_link->flushDB();
     }
 
 }

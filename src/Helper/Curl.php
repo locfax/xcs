@@ -3,6 +3,7 @@
 namespace Xcs\Helper;
 
 use CURLFile;
+use JetBrains\PhpStorm\ArrayShape;
 
 class Curl
 {
@@ -17,7 +18,7 @@ class Curl
      * @param bool $retSession
      * @return array
      */
-    public static function send(string $url, $data = '', array $httpHead = [], $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
+    public static function send(string $url, mixed $data = '', array $httpHead = [], mixed $retGzip = 'gzip', string $retCharset = 'UTF-8', bool $retHead = false, bool $retSession = false): array
     {
         $ch = curl_init();
         if (!$ch) {
@@ -182,7 +183,7 @@ class Curl
      * @param string $string
      * @return array|false|string
      */
-    private static function convert_encode(string $in, string $out, string $string)
+    private static function convert_encode(string $in, string $out, string $string): bool|array|string
     { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
@@ -196,22 +197,22 @@ class Curl
 
     /**
      * @param $_raw_url
-     * @return array|false|int|string|null
+     * @return array
      */
-    private static function raw_url($_raw_url)
+    #[ArrayShape(["scheme" => "string", "host" => "string", 'port' => "int|string", "user" => "string", "pass" => "string", "query" => "string", "path" => "string", "fragment" => "string"])] private static function raw_url($_raw_url): array
     {
         $raw_url = (string)$_raw_url;
-        if (strpos($raw_url, '://') === false) {
+        if (!str_contains($raw_url, '://')) {
             $raw_url = 'http://' . $raw_url;
         }
-        $retval = parse_url($raw_url);
-        if (!isset($retval['path'])) {
-            $retval['path'] = '/';
+        $retVal = parse_url($raw_url);
+        if (!isset($retVal['path'])) {
+            $retVal['path'] = '/';
         }
-        if (!isset($retval['port'])) {
-            $retval['port'] = '80';
+        if (!isset($retVal['port'])) {
+            $retVal['port'] = '80';
         }
-        return $retval;
+        return $retVal;
     }
 
     /**
@@ -219,7 +220,7 @@ class Curl
      * @param string $gzip
      * @return bool|string
      */
-    private static function gzip_decode($data, string $gzip = 'gzip')
+    private static function gzip_decode($data, string $gzip = 'gzip'): bool|string
     {
         $unpacked = false;
         if ('gzip' == $gzip) {
@@ -244,7 +245,7 @@ class Curl
             }
             $unpacked = @gzinflate(substr($data, $headerlen));
         } elseif ('deflate' == $gzip) {
-            if(!function_exists('gzuncompress')) {
+            if (!function_exists('gzuncompress')) {
                 return $data;
             }
             $unpacked = @gzuncompress($data);

@@ -15,7 +15,7 @@ class ImageGd
      * @param string $ext
      * @return bool|HandleGd
      */
-    public static function createFromFile(string $filename, string $ext = '')
+    public static function createFromFile(string $filename, string $ext = ''): HandleGd|bool
     {
         if (!$ext) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);

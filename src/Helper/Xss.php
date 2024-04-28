@@ -13,7 +13,7 @@ class Xss
      * 非法文件名字符
      * @var    array
      */
-    public $filename_bad_chars = [
+    public array $filename_bad_chars = [
         '../', '<!--', '-->', '<', '>',
         "'", '"', '&', '$', '#',
         '{', '}', '[', ']', '=',
@@ -31,7 +31,7 @@ class Xss
         '%3b', // ;
         '%3d'  // =
     ];
-    protected $never_allowed_str = [
+    protected array $never_allowed_str = [
         'document.cookie' => '[del]',
         'document.write' => '[del]',
         '.parentNode' => '[del]',
@@ -42,7 +42,7 @@ class Xss
         '<![CDATA[' => '&lt;![CDATA[',
         '<comment>' => '&lt;comment&gt;'
     ];
-    protected $never_allowed_regex = [
+    protected array $never_allowed_regex = [
         'javascript\s*:',
         '(document|(document\.)?window)\.(location|on\w*)',
         'expression\s*(\(|&\#40;)', // CSS and IE
@@ -54,20 +54,20 @@ class Xss
         "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?"
     ];
 
-    protected $_xss_hash = null;
+    protected mixed $_xss_hash = null;
 
-    public function remove_invisible_characters($str, $url_encoded = true)
+    public function remove_invisible_characters($str, $url_encoded = true): array|string|null
     {
-        $non_displayables = [];
+        $non_display_ables = [];
         if ($url_encoded) {
-            $non_displayables[] = '/%0[0-8bcef]/';
-            $non_displayables[] = '/%1[0-9a-f]/';
+            $non_display_ables[] = '/%0[0-8bcef]/';
+            $non_display_ables[] = '/%1[0-9a-f]/';
         }
 
-        $non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';
+        $non_display_ables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';
 
         do {
-            $str = preg_replace($non_displayables, '', $str, -1, $count);
+            $str = preg_replace($non_display_ables, '', $str, -1, $count);
         } while ($count);
 
         return $str;
@@ -78,7 +78,7 @@ class Xss
      * @param bool $is_image
      * @return array|bool|string
      */
-    public function clean($str, bool $is_image = false)
+    public function clean(mixed $str, bool $is_image = false): bool|array|string
     {
         if (is_array($str)) {
             foreach ($str as $key) {
@@ -179,12 +179,12 @@ class Xss
         return '&lt;' . $matches[1] . $matches[2] . $matches[3] . str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[4]);
     }
 
-    protected function _js_link_removal($match)
+    protected function _js_link_removal($match): array|string
     {
         return str_replace($match[1], preg_replace('#href=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
 
-    protected function _js_img_removal($match)
+    protected function _js_img_removal($match): array|string
     {
         return str_replace($match[1], preg_replace('#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
@@ -194,7 +194,7 @@ class Xss
         return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
     }
 
-    protected function _convert_attribute($match)
+    protected function _convert_attribute($match): array|string
     {
         return str_replace(['>', '<', '\\'], ['&gt;', '&lt;', '\\\\'], $match[0]);
     }
@@ -219,7 +219,7 @@ class Xss
         return $this->_xss_hash;
     }
 
-    public function get_random_bytes($length)
+    public function get_random_bytes($length): bool|string
     {
         if (empty($length) || !ctype_digit((string)$length)) {
             return false;
@@ -248,7 +248,7 @@ class Xss
 
     public function entity_decode($str, $charset = 'UTF-8')
     {
-        if (false === strpos($str, '&')) {
+        if (!str_contains($str, '&')) {
             return $str;
         }
         static $_entities = null;
@@ -281,7 +281,7 @@ class Xss
         return $str;
     }
 
-    protected function _do_never_allowed($str)
+    protected function _do_never_allowed($str): array|string|null
     {
         $str = str_replace(array_keys($this->never_allowed_str), $this->never_allowed_str, $str);
         foreach ($this->never_allowed_regex as $regex) {

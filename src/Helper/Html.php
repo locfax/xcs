@@ -6,13 +6,13 @@ class Html
 {
 
     /**
-     * @param $name
-     * @param $arr
+     * @param string $name
+     * @param array $arr
      * @param mixed $selected
      * @param mixed $extra
      * @return string
      */
-    public static function dropdown_list($name, $arr, $selected = null, $extra = null): string
+    public static function dropdown_list(string $name, array $arr, mixed $selected = null, mixed $extra = null): string
     {
         $str = "<select name=\"{$name}\" {$extra} >\n";
         foreach ($arr as $value => $title) {
@@ -31,10 +31,10 @@ class Html
      * @param array $arr
      * @param mixed $checked
      * @param string $separator
-     * @param mixed $extra
+     * @param mixed|null $extra
      * @return string
      */
-    public static function radio_group(string $name, array $arr, $checked = null, string $separator = '', $extra = null): string
+    public static function radio_group(string $name, array $arr, mixed $checked = null, string $separator = '', mixed $extra = null): string
     {
         $ix = 0;
         $str = "";
@@ -59,10 +59,10 @@ class Html
      * @param array $arr
      * @param array $selected
      * @param string $separator
-     * @param mixed $extra
+     * @param mixed|null $extra
      * @return string
      */
-    public static function checkbox_group(string $name, array $arr, array $selected = [], string $separator = '', $extra = null): string
+    public static function checkbox_group(string $name, array $arr, array $selected = [], string $separator = '', mixed $extra = null): string
     {
         $ix = 0;
         if (!is_array($selected)) {
@@ -90,10 +90,10 @@ class Html
      * @param int $value
      * @param bool $checked
      * @param string $label
-     * @param mixed $extra
+     * @param mixed|null $extra
      * @return string
      */
-    public static function checkbox(string $name, int $value = 1, bool $checked = false, string $label = '', $extra = null): string
+    public static function checkbox(string $name, int $value = 1, bool $checked = false, string $label = '', mixed $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"checkbox\" id=\"{$name}_1\" value=\"{$value}\"";
         if ($checked) {
@@ -114,7 +114,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function textBox(string $name, string $value = '', int $width = null, int $maxLength = null, $extra = null): string
+    public static function textBox(string $name, string $value = '', int $width = null, int $maxLength = null, mixed $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"text\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
@@ -135,7 +135,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function password(string $name, string $value = '', int $width = null, int $maxLength = null, $extra = null): string
+    public static function password(string $name, string $value = '', int $width = null, int $maxLength = null, mixed $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"password\" value=\"" . htmlspecialchars($value) . "\" ";
         if ($width) {
@@ -156,7 +156,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function textarea(string $name, string $value = '', int $width = null, int $height = null, $extra = null): string
+    public static function textarea(string $name, string $value = '', int $width = null, int $height = null, mixed $extra = null): string
     {
         $str = "<textarea name=\"{$name}\"";
         if ($width) {
@@ -177,7 +177,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function hidden(string $name, string $value = '', $extra = null): string
+    public static function hidden(string $name, string $value = '', mixed $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"hidden\" value=\"";
         $str .= htmlspecialchars($value);
@@ -191,7 +191,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function fileField(string $name, int $width = null, $extra = null): string
+    public static function fileField(string $name, int $width = null, mixed $extra = null): string
     {
         $str = "<input name=\"{$name}\" type=\"file\"";
         if ($width) {
@@ -209,7 +209,7 @@ class Html
      * @param mixed $extra
      * @return string
      */
-    public static function form_open(string $name, string $action, string $method = 'post', string $onsubmit = '', $extra = null): string
+    public static function form_open(string $name, string $action, string $method = 'post', string $onsubmit = '', mixed $extra = null): string
     {
         $str = "<form name=\"{$name}\" action=\"{$action}\" method=\"{$method}\" ";
         if ($onsubmit) {

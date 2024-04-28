@@ -5,20 +5,20 @@ namespace Xcs;
 class App
 {
 
-    public static $_dCTL = 'c';
-    public static $_dACT = 'a';
-    public static $_actionPrefix = 'act_';
+    public static string $_dCTL = 'c';
+    public static string $_dACT = 'a';
+    public static string $_actionPrefix = 'act_';
 
     const _controllerPrefix = 'Controller\\';
 
-    private static $routes = [];
+    private static array $routes = [];
 
     /**
      * @param bool $refresh
      * @throws ErrException
      * @throws ExException
      */
-    public static function run(bool $refresh = false)
+    public static function run(bool $refresh = false): void
     {
         if (!defined('APP_KEY')) {
             exit('APP_KEY not defined!');
@@ -39,9 +39,9 @@ class App
      * @throws ErrException
      * @throws ExException
      */
-    public static function runFile(bool $refresh = false)
+    public static function runFile(bool $refresh = false): void
     {
-        self::_rootNamespace('\\', APP_PATH);
+        self::_rootNamespace();
 
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh) {
@@ -90,7 +90,7 @@ class App
      * @param $runFile
      * @return mixed
      */
-    private static function _makeRunFile($runtimeFiles, $runFile)
+    private static function _makeRunFile($runtimeFiles, $runFile): mixed
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -121,7 +121,7 @@ class App
      * @param $uri
      * @return void
      */
-    private static function _dispatching($uri)
+    private static function _dispatching($uri): void
     {
         if (defined('ROUTE') && ROUTE) {
             self::_router($uri);
@@ -152,7 +152,7 @@ class App
      * @param $actionName
      * @return void
      */
-    private static function _execute($controllerName, $actionName)
+    private static function _execute($controllerName, $actionName): void
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
@@ -178,7 +178,7 @@ class App
      * @param $args
      * @return void
      */
-    private static function _errCtrl($args)
+    private static function _errCtrl($args): void
     {
         if (self::isAjax()) {
             $res = [
@@ -195,7 +195,7 @@ class App
      * @param $args
      * @return void
      */
-    private static function _errACL($args)
+    private static function _errACL($args): void
     {
         if (self::isAjax()) {
             $res = [
@@ -226,9 +226,9 @@ class App
      * @param $uri
      * @return void
      */
-    private static function _router($uri)
+    private static function _router($uri): void
     {
-        if (strpos($uri, 'index.php') !== false) {
+        if (str_contains($uri, 'index.php')) {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
 
@@ -244,7 +244,7 @@ class App
         foreach (self::$routes as $key => $val) {
             $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
             if (preg_match('#^' . $key . '$#', $uri, $matches)) {
-                if (strpos($val, '$') !== false && strpos($key, '(') !== false) {
+                if (str_contains($val, '$') && str_contains($key, '(')) {
                     $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }
                 $req = explode('/', $val);
@@ -263,7 +263,7 @@ class App
     /**
      * @param array $req
      */
-    private static function _setRequest(array $req)
+    private static function _setRequest(array $req): void
     {
         $_GET[self::$_dCTL] = array_shift($req);
         $_GET[self::$_dACT] = array_shift($req);
@@ -278,13 +278,11 @@ class App
     }
 
     /**
-     * @param string $namespace
-     * @param string $path
      */
-    private static function _rootNamespace(string $namespace, string $path)
+    private static function _rootNamespace(): void
     {
-        $namespace = trim($namespace, '\\');
-        $path = rtrim($path, '/');
+        $namespace = '\\';
+        $path = rtrim(APP_PATH, '/');
 
         $loader = function ($classname) use ($namespace, $path) {
             if ($namespace && stripos($classname, $namespace) !== 0) {
@@ -325,7 +323,7 @@ class App
      * @param null $vars
      * @return mixed
      */
-    public static function mergeVars($group, $vars = null)
+    public static function mergeVars($group, $vars = null): mixed
     {
         static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
         $appKey = APP_KEY;
@@ -383,7 +381,7 @@ class App
         return json_encode($arr, JSON_UNESCAPED_UNICODE);
     }
 
-    public static function output_nocache()
+    public static function output_nocache(): void
     {
         header("Expires: -1");
         header("Cache-Control: no-store, private, post-check=0, pre-check=0, max-age=0", false);
@@ -393,7 +391,7 @@ class App
     /**
      * @param bool $nocache
      */
-    public static function output_start(bool $nocache = true)
+    public static function output_start(bool $nocache = true): void
     {
         ob_get_length() && ob_end_clean();
         if (function_exists('ob_gzhandler')) { //whether start gzip
@@ -529,7 +527,7 @@ class App
      * @param bool $return
      * @return bool|string|null
      */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): bool|string|null
     {
         $_delay = intval($delay);
         if (!$js) {

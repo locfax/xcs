@@ -4,16 +4,15 @@ namespace Xcs\Helper;
 
 class Uploader
 {
-
-    private $_files = [];
-    private $_count = 0;
+    private array $_files = [];
+    private int $_count = 0;
 
     /**
      * @param $tempFiles
      * @param bool $cascade
-     * @return Uploader|null
+     * @return void
      */
-    public function init($tempFiles, bool $cascade = true): ?Uploader
+    public function init($tempFiles, bool $cascade = true)
     {
         $this->reset();
 
@@ -45,10 +44,9 @@ class Uploader
             }
         }
         $this->_count = count($this->_files);
-        return $this;
     }
 
-    public function reset()
+    public function reset(): void
     {
         $this->_files = [];
         $this->_count = 0;
@@ -65,7 +63,7 @@ class Uploader
     /**
      * @return array|bool
      */
-    public function getFiles()
+    public function getFiles(): bool|array
     {
         if (empty($this->_files)) {
             return false;
@@ -77,7 +75,7 @@ class Uploader
      * @param $name
      * @return HandleFile|bool
      */
-    public function getFile($name)
+    public function getFile($name): bool|HandleFile
     {
         if (!isset($this->_files[$name])) {
             return false;
@@ -97,7 +95,7 @@ class Uploader
     /**
      * @param $destDir
      */
-    public function batchMove($destDir)
+    public function batchMove($destDir): void
     {
         foreach ($this->_files as $file) {
             $file->move($destDir . '/' . $file->getFilename());

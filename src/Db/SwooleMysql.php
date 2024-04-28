@@ -8,7 +8,7 @@ use PDOException;
 class SwooleMysql
 {
 
-    private $_link;
+    private \Swoole\Database\PDOProxy $_link;
 
     /**
      * PdoDb constructor.
@@ -26,10 +26,7 @@ class SwooleMysql
      */
     public function __call(string $func, array $args)
     {
-        if ($this->_link) {
-            return call_user_func_array([$this->_link, $func], $args);
-        }
-        return null;
+        return call_user_func_array([$this->_link, $func], $args);
     }
 
     /**
@@ -38,7 +35,7 @@ class SwooleMysql
      */
     public function qTable(string $tableName): string
     {
-        if (strpos($tableName, '.') === false) {
+        if (!str_contains($tableName, '.')) {
             return "`{$tableName}`";
         }
         return $tableName;
@@ -76,7 +73,7 @@ class SwooleMysql
      * @param bool $retId
      * @return bool|int
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -104,7 +101,7 @@ class SwooleMysql
      * @param array $data
      * @return bool|int
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -126,7 +123,7 @@ class SwooleMysql
      * @param array|null $args [':var' => $var]
      * @return bool|int
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, mixed $data, array|string $condition, array $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -153,7 +150,7 @@ class SwooleMysql
      * @param bool $multi
      * @return bool|int
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -172,7 +169,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -193,7 +190,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): mixed
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -215,7 +212,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): mixed
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -234,7 +231,7 @@ class SwooleMysql
      * @param mixed $orderBy
      * @return mixed
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = null, mixed $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -266,7 +263,7 @@ class SwooleMysql
      * @param string|null $orderBy
      * @return array|bool
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -301,7 +298,7 @@ class SwooleMysql
      * @param string $field
      * @return mixed
      */
-    public function count(string $tableName, $condition, array $args = null, string $field = '*')
+    public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -311,7 +308,7 @@ class SwooleMysql
      * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = null): mixed
     {
         try {
             if (empty($args)) {
@@ -335,7 +332,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSql(string $sql, $args = null, bool $retObj = false)
+    public function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -364,7 +361,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -400,7 +397,7 @@ class SwooleMysql
      * @param bool $retObj
      * @return mixed
      */
-    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): mixed
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -428,7 +425,7 @@ class SwooleMysql
      * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, array $args = null): mixed
     {
         return $this->firstSql($sql, $args);
     }
@@ -438,7 +435,7 @@ class SwooleMysql
      * @param array|null $args [':var' => $var]
      * @return mixed
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, array $args = null): mixed
     {
         try {
             if (empty($args)) {
@@ -461,7 +458,7 @@ class SwooleMysql
      * @param array|null $args [':var' => $var]
      * @return array|bool
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, array $args = null): bool|array
     {
         try {
             if (empty($args)) {
@@ -493,7 +490,7 @@ class SwooleMysql
     /**
      * @param bool $commit_no_errors
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true): void
     {
         try {
             if ($commit_no_errors) {
@@ -525,7 +522,7 @@ class SwooleMysql
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;
@@ -542,7 +539,7 @@ class SwooleMysql
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;

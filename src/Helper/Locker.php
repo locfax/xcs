@@ -26,7 +26,7 @@ class Locker
      * 进度解锁
      * @param string $process
      */
-    public static function unLock(string $process)
+    public static function unLock(string $process): void
     {
         self::status('rm', $process);
         self::cmd('rm', $process);
@@ -79,21 +79,14 @@ class Locker
      * @param int $ttl
      * @return bool|string
      */
-    private static function cmd(string $cmd, string $name, int $ttl = 0)
+    private static function cmd(string $cmd, string $name, int $ttl = 0): bool|string
     {
-        $ret = false;
-        switch ($cmd) {
-            case 'set':
-                $ret = Cache::set('process_' . $name, time(), $ttl);
-                break;
-            case 'get':
-                $ret = Cache::get('process_' . $name);
-                break;
-            case 'rm':
-                $ret = Cache::rm('process_' . $name);
-                break;
-        }
-        return $ret;
+        return match ($cmd) {
+            'set' => Cache::set('process_' . $name, time(), $ttl),
+            'get' => Cache::get('process_' . $name),
+            'rm' => Cache::rm('process_' . $name),
+            default => false,
+        };
     }
 
 }

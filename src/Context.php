@@ -10,7 +10,7 @@ class Context
      * @return mixed
      * @throws ExException
      */
-    public static function dsn(string $dsnId = 'mysql')
+    public static function dsn(string $dsnId = 'mysql'): mixed
     {
         static $cacheDsn = [];
         if (empty($cacheDsn)) {
@@ -29,7 +29,7 @@ class Context
      * @return mixed
      * @throws ExException
      */
-    public static function config(string $name, $var = null, string $type = 'inc')
+    public static function config(string $name, $var = null, string $type = 'inc'): mixed
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;

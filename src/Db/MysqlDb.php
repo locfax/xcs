@@ -9,9 +9,9 @@ use Xcs\DbException;
 class MysqlDb
 {
 
-    private $_config;
-    private $_link = null;
-    private $repeat = false;
+    private array $_config;
+    private PDO $_link;
+    private bool $repeat = false;
 
     /**
      * PdoDb constructor.
@@ -46,12 +46,12 @@ class MysqlDb
 
     public function __destruct()
     {
-        $this->close();
+
     }
 
-    public function close()
+    public function close(): void
     {
-        $this->_link = null;
+
     }
 
     /**
@@ -61,10 +61,7 @@ class MysqlDb
      */
     public function __call(string $func, array $args)
     {
-        if ($this->_link) {
-            return call_user_func_array([$this->_link, $func], $args);
-        }
-        return null;
+        return call_user_func_array([$this->_link, $func], $args);
     }
 
     /**
@@ -81,7 +78,7 @@ class MysqlDb
      */
     public function qTable(string $tableName): string
     {
-        if (strpos($tableName, '.') === false) {
+        if (!str_contains($tableName, '.')) {
             return "`{$this->_config['dbname']}`" . ".`{$tableName}`";
         }
         return $tableName;
@@ -120,7 +117,7 @@ class MysqlDb
      * @return bool|string
      * @throws DbException
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -149,7 +146,7 @@ class MysqlDb
      * @return bool|int
      * @throws DbException
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -172,7 +169,7 @@ class MysqlDb
      * @return bool|int
      * @throws DbException
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, array|string $data, array|string $condition, array $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -201,7 +198,7 @@ class MysqlDb
      * @return bool|int
      * @throws DbException
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -217,12 +214,12 @@ class MysqlDb
      * @param string $field
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array|null $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param mixed|null $orderBy
      * @param bool $retObj
      * @return mixed
      * @throws DbException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, mixed $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -244,7 +241,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -267,7 +264,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -287,7 +284,7 @@ class MysqlDb
      * @return mixed
      * @throws DbException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -320,7 +317,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -355,7 +352,7 @@ class MysqlDb
      * @return mixed
      * @throws DbException
      */
-    public function count(string $tableName, $condition, array $args = null, string $field = '*')
+    public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -366,7 +363,7 @@ class MysqlDb
      * @return bool|int
      * @throws DbException
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = null): bool|int
     {
         try {
             if (empty($args)) {
@@ -391,7 +388,7 @@ class MysqlDb
      * @return mixed
      * @throws DbException
      */
-    public function rowSql(string $sql, array $args = null, bool $retObj = false)
+    public function rowSql(string $sql, array $args = null, bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -421,7 +418,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false): bool|array
     {
         try {
             if (empty($args)) {
@@ -458,7 +455,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
@@ -487,7 +484,7 @@ class MysqlDb
      * @return mixed
      * @throws DbException
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, array $args = null): mixed
     {
         return $this->firstSql($sql, $args);
     }
@@ -498,7 +495,7 @@ class MysqlDb
      * @return mixed
      * @throws DbException
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, array $args = null): mixed
     {
         try {
             if (empty($args)) {
@@ -522,7 +519,7 @@ class MysqlDb
      * @return array|bool
      * @throws DbException
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, array $args = null): bool|array
     {
         try {
             if (empty($args)) {
@@ -555,7 +552,7 @@ class MysqlDb
      * @param bool $commit_no_errors
      * @throws DbException
      */
-    public function endTrans(bool $commit_no_errors = true)
+    public function endTrans(bool $commit_no_errors = true): void
     {
         try {
             if ($commit_no_errors) {
@@ -575,7 +572,7 @@ class MysqlDb
      * @return bool
      * @throws DbException
      */
-    private function _halt(string $message = '', $code = 0, string $sql = ''): bool
+    private function _halt(string $message = '', mixed $code = 0, string $sql = ''): bool
     {
         if ($this->_config['dev']) {
             $this->close();
@@ -596,7 +593,7 @@ class MysqlDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;
@@ -613,7 +610,7 @@ class MysqlDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(mixed $arr, string $col): mixed
     {
         if (!is_array($arr)) {
             return $arr;

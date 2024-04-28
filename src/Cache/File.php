@@ -11,7 +11,7 @@ class File
 
     use Singleton;
 
-    public $enable = false;
+    public bool $enable = false;
 
     /**
      * @return $this
@@ -27,7 +27,7 @@ class File
         return $this;
     }
 
-    public function close()
+    public function close(): void
     {
 
     }
@@ -36,7 +36,7 @@ class File
      * @param string $key
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         $cacheFile = DATA_CACHE . $key . '.php';
         if (is_file($cacheFile)) {
@@ -58,7 +58,7 @@ class File
      * @param int $ttl
      * @return false|int
      */
-    public function set(string $key, $val, int $ttl = 0)
+    public function set(string $key, array|string $val, int $ttl = 0): bool|int
     {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
@@ -103,7 +103,7 @@ class File
     /**
      * @return void
      */
-    public function clear()
+    public function clear(): void
     {
         $cacheDir = DATA_CACHE;
         $files = FileHelper::list_files($cacheDir);
@@ -118,7 +118,7 @@ class File
      * @param $mode
      * @return false|int
      */
-    public function save($filename, $content, $mode)
+    public function save($filename, $content, $mode): bool|int
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);

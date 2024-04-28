@@ -12,12 +12,12 @@ class FileLog
      * @param $filename
      * @param $msg
      */
-    public static function write($filename, $msg)
+    public static function write($filename, $msg): void
     {
         $filename = DATA_PATH . $filename;
         $res = [];
         $res['msg'] = $msg;
-        $res['logtime'] = date("Y-m-d H:i:s", time());
+        $res['time'] = date("Y-m-d H:i:s", time());
 
         //如果日志文件超过了指定大小则备份日志文件
         if (file_exists($filename) && (abs(filesize($filename)) > self::maxsize)) {
@@ -41,7 +41,7 @@ class FileLog
      * @param $filename
      * @return mixed
      */
-    public static function read($filename)
+    public static function read($filename): mixed
     {
         $filename = DATA_PATH . $filename;
 

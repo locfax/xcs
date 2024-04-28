@@ -2,12 +2,12 @@
 
 /**
  * @param string $variable
- * @param mixed $defVal
+ * @param mixed|null $defVal
  * @param string $runFunc
  * @param bool $addslashes
  * @return mixed
  */
-function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $addslashes = true)
+function getgpc(string $variable, mixed $defVal = null, string $runFunc = '', bool $addslashes = true): mixed
 {
     $arr = explode('.', $variable);
     if (count($arr) == 2) {
@@ -68,7 +68,7 @@ function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $ad
  * @param bool $addslashes
  * @return void
  */
-function gpc_value(&$value, string $runFunc, bool $addslashes)
+function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
 {
     if (empty($value)) {
         return;
@@ -106,24 +106,18 @@ function gpc_value(&$value, string $runFunc, bool $addslashes)
  * @param string $key
  * @return mixed
  */
-function getini(string $key)
+function getini(string $key): mixed
 {
     $_CFG = Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
-    switch (count($k)) {
-        case 1:
-            return $_CFG[$k[0]] ?? null;
-        case 2:
-            return $_CFG[$k[0]][$k[1]] ?? null;
-        case 3:
-            return $_CFG[$k[0]][$k[1]][$k[2]] ?? null;
-        case 4:
-            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null;
-        case 5:
-            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null;
-        default:
-            return null;
-    }
+    return match (count($k)) {
+        1 => $_CFG[$k[0]] ?? null,
+        2 => $_CFG[$k[0]][$k[1]] ?? null,
+        3 => $_CFG[$k[0]][$k[1]][$k[2]] ?? null,
+        4 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null,
+        5 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null,
+        default => null,
+    };
 }
 
 /**
@@ -133,7 +127,7 @@ function getini(string $key)
  * @param string $cacheFile
  * @param string $file
  */
-function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string $cacheFile, string $file)
+function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string $cacheFile, string $file): void
 {
     $tplDir = DATA_TPLDIR;
     if (is_file($tplDir . $subTpl)) {
@@ -193,7 +187,7 @@ function url(string $udi, array $params = []): string
  * @param array $arr 数组
  * @return array|object
  */
-function array2object(array $arr)
+function array2object(array $arr): object|array
 {
     if (gettype($arr) != 'array') {
         return $arr;
@@ -225,9 +219,9 @@ function object2array(object $obj): array
 
 /**
  * @param mixed $string
- * @return array|string
+ * @return float|array|int|string
  */
-function daddslashes($string)
+function daddslashes(mixed $string): float|array|int|string
 {
     if (empty($string)) {
         return $string;
@@ -243,9 +237,9 @@ function daddslashes($string)
 
 /**
  * @param mixed $value
- * @return array|string
+ * @return float|array|int|string
  */
-function dstripslashes($value)
+function dstripslashes(mixed $value): float|array|int|string
 {
     if (empty($value)) {
         return $value;
@@ -262,9 +256,9 @@ function dstripslashes($value)
 /**
  * quotes get post cookie by \char(21)'
  * @param mixed $string
- * @return array|string
+ * @return float|array|int|string
  */
-function daddcslashes($string)
+function daddcslashes(mixed $string): float|array|int|string
 {
     if (empty($string)) {
         return $string;
@@ -281,9 +275,9 @@ function daddcslashes($string)
 /**
  * it's pair to daddcslashes
  * @param mixed $value
- * @return array|string
+ * @return float|array|int|string
  */
-function dstripcslashes($value)
+function dstripcslashes(mixed $value): float|array|int|string
 {
     if (empty($value)) {
         return $value;
@@ -299,9 +293,9 @@ function dstripcslashes($value)
 
 /**
  * @param mixed $text
- * @return string
+ * @return float|int|string
  */
-function char_input($text)
+function char_input(mixed $text): float|int|string
 {
     if (empty($text)) {
         return $text;
@@ -314,9 +308,9 @@ function char_input($text)
 
 /**
  * @param mixed $text
- * @return string
+ * @return float|int|string
  */
-function char_output($text)
+function char_output(mixed $text): float|int|string
 {
     if (empty($text)) {
         return $text;
@@ -326,17 +320,6 @@ function char_output($text)
     }
     return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
 }
-
-/**
- * @param string $str
- * @param string $needle
- * @return bool
- */
-function dstrpos(string $str, string $needle): bool
-{
-    return !(false === strpos($str, $needle));
-}
-
 
 if (!function_exists('locTime')) {
     /**
@@ -441,7 +424,7 @@ if (!function_exists('clientIp')) {
  * @param int $halt
  * @param string $func
  */
-function dump($var, int $halt = 0, string $func = 'p')
+function dump(mixed $var, int $halt = 0, string $func = 'p'): void
 {
     echo '<style>.track {
       font-family:Verdana, Arial, Helvetica, sans-serif;
@@ -467,7 +450,7 @@ function dump($var, int $halt = 0, string $func = 'p')
 /**
  * @param bool $stop
  */
-function post(bool $stop = false)
+function post(bool $stop = false): void
 {
     $str = '';
     $post = $_POST;

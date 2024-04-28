@@ -4,12 +4,12 @@ namespace Xcs;
 
 class Template
 {
-    private $subTemplates = [];
-    private $replaceCode = ['search' => [], 'replace' => []];
-    private $language = [];
-    private $tplDir = '';
+    private array $subTemplates = [];
+    private array $replaceCode = ['search' => [], 'replace' => []];
+    private array $language = [];
+    private string $tplDir = '';
 
-    public function parse($cacheDir, $tplDir, $tplFile, $cacheFile, $file)
+    public function parse($cacheDir, $tplDir, $tplFile, $cacheFile, $file): void
     {
         $this->tplDir = $tplDir;
 
@@ -24,7 +24,7 @@ class Template
 
         $this->subTemplates = [];
         for ($i = 1; $i <= 10; $i++) {
-            if (!(false === strpos($template, '{subtemplate'))) {
+            if (str_contains($template, '{subtemplate')) {
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z\d_:\/]+)\}(\-\-\>)?[\n\r\t]*/", [$this, 'tag_subTemplate'], $template);
             }
         }
@@ -101,7 +101,7 @@ class Template
      * @param mixed $mode
      * @return void
      */
-    private function save(string $filename, string $content, $mode)
+    private function save(string $filename, string $content, mixed $mode): void
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
@@ -113,7 +113,11 @@ class Template
         }
     }
 
-    private function language_tags($_var)
+    /**
+     * @param array $_var
+     * @return mixed|string
+     */
+    private function language_tags(array $_var): mixed
     {
         $vars = explode(':', $_var[1]);
         $isPlugin = count($vars) == 2;
@@ -143,7 +147,11 @@ class Template
         }
     }
 
-    private function url_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function url_tags(array $parameter): string
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--URL_TAG_$i-->";
@@ -151,7 +159,11 @@ class Template
         return $search;
     }
 
-    private function surl_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function surl_tags(array $parameter): string
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
@@ -159,13 +171,21 @@ class Template
         return $search;
     }
 
-    private function script_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function script_tags(array $parameter): string
     {
         $tplFile = template($parameter[1], [], true);
         return implode('', file($this->tplDir . $tplFile));
     }
 
-    private function date_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function date_tags(array $parameter): string
     {
         $i = count($this->replaceCode['search']);
         if (!isset($parameter[2])) {
@@ -178,7 +198,11 @@ class Template
         return $search;
     }
 
-    private function function_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function function_tags(array $parameter): string
     {
         $i = count($this->replaceCode['search']);
         if (!isset($parameter[2])) {
@@ -191,7 +215,11 @@ class Template
         return $search;
     }
 
-    private function eval_tags($php): string
+    /**
+     * @param array $php
+     * @return string
+     */
+    private function eval_tags(array $php): string
     {
         $php = str_replace('\"', '"', $php[1]);
         $i = count($this->replaceCode['search']);
@@ -200,7 +228,11 @@ class Template
         return $search;
     }
 
-    private function config_tags($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function config_tags(array $parameter): string
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--CONFIG_TAG_$i-->";
@@ -208,7 +240,11 @@ class Template
         return $search;
     }
 
-    private function tag_subTemplate($file): string
+    /**
+     * @param array $file
+     * @return string
+     */
+    private function tag_subTemplate(array $file): string
     {
         $tplFile = template($file[2], [], true);
         $content = implode('', file($this->tplDir . $tplFile));
@@ -220,70 +256,115 @@ class Template
         }
     }
 
-    private function tag_template($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_template(array $parameter): string
     {
         $return = "<?php template(\"$parameter[1]\"); ?>";
         return $this->strip_tags($return);
     }
 
-    private function tag_echo($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_echo(array $parameter): string
     {
         $return = "<?php echo $parameter[1]; ?>";
         return $this->strip_tags($return);
     }
 
-    private function tag_if($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_if(array $parameter): string
     {
         $return = "$parameter[1]<?php if($parameter[2]) { ?>$parameter[3]";
         return $this->strip_tags($return);
     }
 
-    private function tag_elseif($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_elseif(array $parameter): string
     {
         $return = "$parameter[1]<?php }elseif($parameter[2]) { ?>$parameter[3]";
         return $this->strip_tags($return);
     }
 
-    private function tag_loop($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_loop(array $parameter): string
     {
         $return = "<?php if(!empty($parameter[1])){ foreach($parameter[1] as $parameter[2]) { ?>";
         return $this->strip_tags($return);
     }
 
-    private function tag_loop_as($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function tag_loop_as(array $parameter): string
     {
         $return = "<?php if(!empty($parameter[1])){ foreach($parameter[1] as $parameter[2] => $parameter[3]) { ?>";
         return $this->strip_tags($return);
     }
 
-    private function trans_amp($str)
+    /**
+     * @param array $str
+     * @return array|string
+     */
+    private function trans_amp(array $str): array|string
     {
         $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
         return str_replace('\"', '"', $str);
     }
 
-    private function add_quote($var)
+    /**
+     * @param array $var
+     * @return array|string|null
+     */
+    private function add_quote(array $var): array|string|null
     {
         $var = '<?=' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([\w\d_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
     }
 
-    private function add_quote_exp($var): string
+    /**
+     * @param array $var
+     * @return string
+     */
+    private function add_quote_exp(array $var): string
     {
         $vars = explode('.', $var[1]);
         $var = array_shift($vars);
         return "<?=\${$var}[{$vars[0]}]?>";
     }
 
-    private function strip_tags($expr, $statement = ''): string
+    /**
+     * @param mixed $expr
+     * @param string $statement
+     * @return string
+     */
+    private function strip_tags(mixed $expr, string $statement = ''): string
     {
         $expr = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $statement = str_replace("\\\"", "\"", $statement);
         return $expr . $statement;
     }
 
-    private function strip_block($parameter): string
+    /**
+     * @param array $parameter
+     * @return string
+     */
+    private function strip_block(array $parameter): string
     {
         $var = $parameter[1];
         $s = $parameter[2];

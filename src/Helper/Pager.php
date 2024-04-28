@@ -105,6 +105,6 @@ class Pager
      */
     private static function strPos(string $str, string $needle): bool
     {
-        return !(false === strpos($str, $needle));
+        return str_contains($str, $needle);
     }
 }
