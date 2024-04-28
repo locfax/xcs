@@ -6,18 +6,18 @@ class Controller
 {
 
     //当前控制器
-    protected mixed $_ctl;
+    protected string $_ctl;
     //当前动作
-    protected mixed $_act;
+    protected string $_act;
     //时间戳
     protected int $timestamp;
 
     /**
      * 初始执行
-     * @param mixed $controllerName
-     * @param mixed $actionName
+     * @param string $controllerName
+     * @param string $actionName
      */
-    public function __construct(mixed $controllerName, mixed $actionName)
+    public function __construct(string $controllerName, string $actionName)
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
