@@ -4,7 +4,7 @@ namespace Xcs\Db;
 
 use PDO;
 use PDOException;
-use Xcs\DbException;
+use Xcs\ExException;
 
 class SqliteDb
 {
@@ -16,14 +16,14 @@ class SqliteDb
     /**
      * PdoDb constructor.
      * @param array $config //dsn sqlite:data.db
-     * @throws DbException
+     * @throws ExException
      */
     public function __construct(array $config)
     {
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new DbException('dsn is empty', 404);
+            throw new ExException('sqlite', 'dsn is empty');
         }
 
         try {
@@ -110,7 +110,7 @@ class SqliteDb
      * @param array $data
      * @param bool $retId
      * @return bool|string
-     * @throws DbException
+     * @throws ExException
      */
     public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
@@ -139,7 +139,7 @@ class SqliteDb
      * @param string $tableName
      * @param array $data
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function replace(string $tableName, array $data): bool|int
     {
@@ -162,7 +162,7 @@ class SqliteDb
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function update(string $tableName, array|string $data, array|string $condition, array $args = null): bool|int
     {
@@ -191,7 +191,7 @@ class SqliteDb
      * @param array|null $args [':var' => $var]
      * @param bool $multi
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
     {
@@ -212,7 +212,7 @@ class SqliteDb
      * @param string|null $orderBy
      * @param bool $retObj
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
@@ -234,7 +234,7 @@ class SqliteDb
      * @param string|null $index
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
@@ -257,7 +257,7 @@ class SqliteDb
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
@@ -277,7 +277,7 @@ class SqliteDb
      * @param array|null $args [':var' => $var]
      * @param string|null $orderBy
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function first(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): mixed
     {
@@ -310,7 +310,7 @@ class SqliteDb
      * @param array|null $args [':var' => $var]
      * @param string|null $orderBy
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
@@ -345,7 +345,7 @@ class SqliteDb
      * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
@@ -356,7 +356,7 @@ class SqliteDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function exec(string $sql, mixed $args = null): bool|int
     {
@@ -381,7 +381,7 @@ class SqliteDb
      * @param mixed $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
     {
@@ -411,7 +411,7 @@ class SqliteDb
      * @param mixed $index
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
@@ -448,7 +448,7 @@ class SqliteDb
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function pageSql(string $sql, mixed $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
@@ -477,7 +477,7 @@ class SqliteDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function countSql(string $sql, mixed $args = null): mixed
     {
@@ -488,7 +488,7 @@ class SqliteDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function firstSql(string $sql, mixed $args = null): mixed
     {
@@ -512,7 +512,7 @@ class SqliteDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function colSql(string $sql, mixed $args = null): bool|array
     {
@@ -540,7 +540,7 @@ class SqliteDb
      * @param int $code
      * @param string $sql
      * @return bool
-     * @throws DbException
+     * @throws ExException
      */
     private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
@@ -552,7 +552,7 @@ class SqliteDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new DbException($msg, $code);
+                throw new ExException('sqlite', $msg);
             }
         }
         return false;

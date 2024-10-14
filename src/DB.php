@@ -25,7 +25,6 @@ class DB
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
      * @return MysqlDb
-     * @throws DbException
      * @throws ExException
      * @see MysqlDb
      */
@@ -38,7 +37,7 @@ class DB
         $dsn = Context::dsn($dsnId);
 
         if ('mysql' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: mysql');
+            throw new ExException($dsn['driver'], 'the driver error: mysql');
         }
 
         self::$dbm_time_out = time() + 30;
@@ -51,7 +50,6 @@ class DB
      * 返回 mongodb 对象
      * @param string $dsnId
      * @return MongoDb
-     * @throws DbException
      * @throws ExException
      * @see MongoDb
      */
@@ -76,7 +74,6 @@ class DB
     /**
      * @param string $dsnId
      * @return SqlsrvDb
-     * @throws DbException
      * @throws ExException
      */
     public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
@@ -100,7 +97,6 @@ class DB
     /**
      * @param string $dsnId
      * @return SqliteDb
-     * @throws DbException
      * @throws ExException
      */
     public static function sqlite(string $dsnId = 'sqlite'): SqliteDb
@@ -124,7 +120,6 @@ class DB
     /**
      * @param string $dsnId
      * @return PostgresDb
-     * @throws DbException
      * @throws ExException
      */
     public static function postgres(string $dsnId = 'postgres'): PostgresDb
@@ -540,7 +535,6 @@ class DB
      * 切换数据源对象
      * @param string|null $id
      * @return MysqlDb | PostgresDb
-     * @throws DbException
      * @throws ExException
      */
     public static function Using(string $id = null): MysqlDb|PostgresDb

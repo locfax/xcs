@@ -11,7 +11,7 @@ use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use Xcs\DbException;
+use Xcs\ExException;
 
 class MongoDb
 {
@@ -38,14 +38,14 @@ class MongoDb
     /**
      * MongoDb constructor.
      * @param array $config
-     * @throws DbException
+     * @throws ExException
      */
     public function __construct(array $config)
     {
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new DbException('dsn is empty', 404);
+            throw new ExException('mongodb', 'dsn is empty');
         }
 
         $options = [
@@ -100,7 +100,7 @@ class MongoDb
      * @param array $document
      * @param bool $retId
      * @return bool|int|string|null
-     * @throws DbException
+     * @throws ExException
      */
     public function create(string $table, array $document = [], bool $retId = false): bool|int|string|null
     {
@@ -130,7 +130,7 @@ class MongoDb
      * @param array $condition
      * @param string $options
      * @return bool|int|null
-     * @throws DbException
+     * @throws ExException
      */
     public function update(string $table, array $document = [], array $condition = [], string $options = '$set'): bool|int|null
     {
@@ -160,7 +160,7 @@ class MongoDb
      * @param array $condition
      * @param bool $multi
      * @return bool|int|null
-     * @throws DbException
+     * @throws ExException
      */
     public function remove(string $table, array $condition = [], bool $multi = false): bool|int|null
     {
@@ -186,7 +186,7 @@ class MongoDb
      * @param array $options
      * @param array $condition
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function findOne(string $table, array $options = [], array $condition = []): bool|array
     {
@@ -218,7 +218,7 @@ class MongoDb
      * @param array $options
      * @param array $condition
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function findAll(string $table, array $options = [], array $condition = []): bool|array
     {
@@ -248,7 +248,7 @@ class MongoDb
      * @param int $offset
      * @param int $limit
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
     {
@@ -282,7 +282,7 @@ class MongoDb
      * @param string $table
      * @param array $condition
      * @return int
-     * @throws DbException
+     * @throws ExException
      */
     public function count(string $table, array $condition = []): int
     {
@@ -322,7 +322,7 @@ class MongoDb
      * @param string $message
      * @param mixed|int $code
      * @return bool
-     * @throws DbException
+     * @throws ExException
      */
     private function _halt(string $message = '', mixed $code = 0): bool
     {
@@ -334,7 +334,7 @@ class MongoDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new DbException($msg, $code);
+                throw new ExException('mongodb', $msg);
             }
         }
         return false;

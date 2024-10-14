@@ -4,7 +4,7 @@ namespace Xcs\Db;
 
 use PDO;
 use PDOException;
-use Xcs\DbException;
+use Xcs\ExException;
 
 class SqlsrvDb
 {
@@ -15,14 +15,14 @@ class SqlsrvDb
     /**
      * PdoDb constructor.
      * @param array $config
-     * @throws DbException
+     * @throws ExException
      */
     public function __construct(array $config)
     {
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new DbException('dsn is empty', 404);
+            throw new ExException('dsn is empty', 404);
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
@@ -111,7 +111,7 @@ class SqlsrvDb
      * @param array $data
      * @param bool $retId
      * @return bool|string
-     * @throws DbException
+     * @throws ExException
      */
     public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
@@ -140,7 +140,7 @@ class SqlsrvDb
      * @param string $tableName
      * @param array $data
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function replace(string $tableName, array $data): bool|int
     {
@@ -163,7 +163,7 @@ class SqlsrvDb
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function update(string $tableName, mixed $data, mixed $condition, mixed $args = null): bool|int
     {
@@ -191,7 +191,7 @@ class SqlsrvDb
      * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param mixed $args [':var' => $var]
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function remove(string $tableName, mixed $condition, mixed $args = null): bool|int
     {
@@ -211,7 +211,7 @@ class SqlsrvDb
      * @param string|null $orderBy
      * @param bool $retObj
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function findOne(string $tableName, string $field, mixed $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
@@ -233,7 +233,7 @@ class SqlsrvDb
      * @param string|null $index
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
@@ -256,7 +256,7 @@ class SqlsrvDb
      * @param int $ppp
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function page(string $tableName, string $field, mixed $condition, mixed $args = null, mixed $orderBy = '', int $offset = 0, int $ppp = 20, bool $retObj = false): bool|array
     {
@@ -275,7 +275,7 @@ class SqlsrvDb
      * @param array|null $args [':var' => $var]
      * @param mixed $orderBy
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function first(string $tableName, string $field, array|string $condition, array $args = null, mixed $orderBy = null): mixed
     {
@@ -308,7 +308,7 @@ class SqlsrvDb
      * @param array|null $args [':var' => $var]
      * @param string|null $orderBy
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
@@ -343,7 +343,7 @@ class SqlsrvDb
      * @param array|null $args [':var' => $var]
      * @param string $field
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function count($tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
@@ -354,7 +354,7 @@ class SqlsrvDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @return bool|int
-     * @throws DbException
+     * @throws ExException
      */
     public function exec(string $sql, array $args = null): bool|int
     {
@@ -379,7 +379,7 @@ class SqlsrvDb
      * @param array|null $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function rowSql(string $sql, array $args = null, bool $retObj = false): mixed
     {
@@ -409,7 +409,7 @@ class SqlsrvDb
      * @param mixed $index
      * @param bool $retObj
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
     {
@@ -443,7 +443,7 @@ class SqlsrvDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function countSql(string $sql, array $args = null): mixed
     {
@@ -454,7 +454,7 @@ class SqlsrvDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @return mixed
-     * @throws DbException
+     * @throws ExException
      */
     public function firstSql(string $sql, array $args = null): mixed
     {
@@ -478,7 +478,7 @@ class SqlsrvDb
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @return array|bool
-     * @throws DbException
+     * @throws ExException
      */
     public function colSql(string $sql, array $args = null): bool|array
     {
@@ -511,7 +511,7 @@ class SqlsrvDb
 
     /**
      * @param bool $commit_no_errors
-     * @throws DbException
+     * @throws ExException
      */
     public function endTrans(bool $commit_no_errors = true): void
     {
@@ -531,7 +531,7 @@ class SqlsrvDb
      * @param int $code
      * @param string $sql
      * @return bool
-     * @throws DbException
+     * @throws ExException
      */
     private function _halt(string $message = '', int $code = 0, string $sql = ''): bool
     {
@@ -543,7 +543,7 @@ class SqlsrvDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new DbException($msg, $code);
+                throw new ExException($msg, $code);
             }
         }
         return false;
