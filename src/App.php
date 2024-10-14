@@ -15,8 +15,6 @@ class App
 
     /**
      * @param bool $refresh
-     * @throws ErrException
-     * @throws ExException
      */
     public static function run(bool $refresh = false): void
     {
@@ -25,7 +23,7 @@ class App
         }
 
         if (isset($_GET['s'])) {
-            $uri = trim(str_replace(['.htm', '.html'], '', $_GET['s']), '/');
+            $uri = trim(str_replace(['.html', '.htm'], '', $_GET['s']), '/');
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
@@ -36,8 +34,6 @@ class App
 
     /**
      * @param bool $refresh
-     * @throws ErrException
-     * @throws ExException
      */
     public static function runFile(bool $refresh = false): void
     {
@@ -58,12 +54,12 @@ class App
                 define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
 
                 set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
-                    throw new ErrException('语法解析', $errStr, $errno, $errFile, $errLine);
+                    ExUiException::render('语法解析', $errStr, $errFile, $errLine);
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                        throw new ExException('致命异常', $error['message'], $error['type'], $error['file'], $error['line']);
+                        ExUiException::render('致命异常', $error['message'], $error['file'], $error['line']);
                     }
                 });
                 set_exception_handler(function ($ex) {
@@ -188,7 +184,7 @@ class App
             self::response($res);
             return;
         }
-        ExUiException::render('控制器', $args, '', 0, false);
+        ExUiException::render('控制器', $args, '', 0);
     }
 
     /**
@@ -205,7 +201,7 @@ class App
             self::response($res);
             return;
         }
-        ExUiException::render('权限', $args, '', 0, false);
+        ExUiException::render('权限', $args, '', 0);
     }
 
     /**
@@ -243,7 +239,7 @@ class App
         $match = false;
         foreach (self::$routes as $key => $val) {
             $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
-            if (preg_match('#^' . $key . '$#', $uri, $matches)) {
+            if (preg_match('#^' . $key . '$#', $uri)) {
                 if (str_contains($val, '$') && str_contains($key, '(')) {
                     $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }

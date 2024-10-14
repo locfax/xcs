@@ -2,8 +2,6 @@
 
 namespace Xcs;
 
-use Exception;
-
 class ExUiException
 {
     /**
@@ -14,7 +12,7 @@ class ExUiException
      * @param bool $Trace
      * @param mixed $ex
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace, mixed $ex = null): void
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null): void
     {
         $phpMsg = [];
         if ($Trace) {
