@@ -21,10 +21,10 @@ class Pager
                 $mpUrl .= '?' . $pageInfo['param'];
             }
         }
-        $maxPages = $pageInfo['maxpages'] ?? false; //最大页数限制
-        $page = $pageInfo['showpage'] ?? false; //一次显示多少页码
-        $showNum = !isset($pageInfo['shownum']) || $pageInfo['shownum'];
-        $showKbd = isset($pageInfo['showkbd']) && $pageInfo['showkbd'];
+        $maxPages = $pageInfo['maxPages'] ?? 100; //最大页数限制
+        $page = $pageInfo['showPage'] ?? 10; //一次显示多少页码
+        $showNum = $pageInfo['showNum'] ?? true;
+        $showKbd = $pageInfo['showKbd'] ?? true;
         $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
@@ -57,6 +57,7 @@ class Pager
                 $to = $pages;
             }
         }
+
         $multiPage = ($curPage - $offset > 1 && $pages > $page ? '<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>1 ...</a>' : '') .
             ($curPage > 1 && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage - 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>' . $lang['prev'] . '</a>' : '');
         for ($i = $from; $i <= $to; $i++) {

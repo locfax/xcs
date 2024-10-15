@@ -55,7 +55,7 @@ class ExUiException
                 $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
             }
         }
-        self::showError($message, $title, $phpMsg);
+        self::showError($title, $message, $phpMsg);
     }
 
     /**
@@ -72,12 +72,11 @@ class ExUiException
 
     /**
      * 显示错误
-     *
-     * @param string $message
      * @param string $title 错误类型 db,system
+     * @param string $message
      * @param mixed $phpMsg
      */
-    public static function showError(string $message, string $title, mixed $phpMsg = ''): void
+    public static function showError(string $title, string $message, mixed $phpMsg = ''): void
     {
         ob_get_length() && ob_end_clean();
 
@@ -124,7 +123,11 @@ EOT;
                     $str .= '<td>' . $k . '</td>';
                     $str .= '<td>' . str_replace(dirname(APP_ROOT), '..', $msg['file']) . '</td>';
                     $str .= '<td>' . $msg['line'] . '</td>';
-                    $str .= '<td>' . $msg['function'] . '</td>';
+                    if (!empty($msg['function'])) {
+                        $str .= '<td>' . $msg['function'] . '</td>';
+                    }else {
+                        $str .= '<td>0</td>';
+                    }
                     $str .= '</tr>';
                 }
                 $str .= '</tbody></table>';

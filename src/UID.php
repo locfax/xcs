@@ -115,12 +115,12 @@ class UID
 
     /**
      * @param string $key
-     * @param array $val
+     * @param array|null $val
      * @param int $life
      * @param null $type
      * @return bool
      */
-    private static function _setData(string $key, array $val, int $life = 0, $type = null): bool
+    private static function _setData(string $key, $val, int $life = 0, $type = null): bool
     {
         $ret = false;
         if (is_null($type)) {
