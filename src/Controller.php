@@ -40,8 +40,9 @@ class Controller
             ];
             return App::response($res);
         }
-        $message = 'Action:' . $name . "不存在";
-        ExUiException::render('控制器', $message, '', 0, false);
+        if (defined('DEBUG') && DEBUG) {
+            ExUiException::render('控制器', 'Action:' . $name . "不存在", '', 0, false);
+        }
     }
 
     protected function init(): void

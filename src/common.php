@@ -426,14 +426,7 @@ if (!function_exists('clientIp')) {
  */
 function dump(mixed $var, int $halt = 0, string $func = 'p'): void
 {
-    echo '<style>.track {
-      font-family:Verdana, Arial, Helvetica, sans-serif;
-      font-size: 12px;
-      background-color: #FFFFCC;
-      padding: 10px;
-      border: 1px solid #FF9900;
-      }</style>';
-    echo "<div class=\"track\">";
+
     echo '<pre>';
     if ('p' == $func) {
         print_r($var);
@@ -441,7 +434,6 @@ function dump(mixed $var, int $halt = 0, string $func = 'p'): void
         var_dump($var);
     }
     echo '</pre>';
-    echo "</div>";
     if ($halt) {
         exit;
     }

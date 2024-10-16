@@ -187,7 +187,9 @@ class App
             self::response($res);
             return;
         }
-        ExUiException::render('控制器', $args, '', 0);
+        if (defined('DEBUG') && DEBUG) {
+            ExUiException::render('控制器', $args, '', 0);
+        }
     }
 
     /**
