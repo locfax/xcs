@@ -237,8 +237,8 @@ class App
             return;
         }
 
-        if (is_file(APP_ROOT . '/route/' . APP_KEY . '.php')) {
-            self::$routes = include(APP_ROOT . '/route/' . APP_KEY . '.php');
+        if (is_file(APP_PATH . 'Route/' . APP_KEY . '.php')) {
+            self::$routes = include(APP_PATH . 'Route/' . APP_KEY . '.php');
         }
 
         $match = false;
