@@ -15,7 +15,7 @@ class RestFul extends Controller
         //动作不存在
         $res = [
             'code' => 1,
-            'msg' => 'Action ' . $name . '不存在!!',
+            'message' => 'Action ' . $name . '不存在!!',
         ];
         $this->response($res);
     }

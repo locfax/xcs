@@ -182,7 +182,7 @@ class App
         if (self::isAjax()) {
             $res = [
                 'code' => 1,
-                'msg' => 'error:' . $args,
+                'message' => 'error:' . $args,
             ];
             self::response($res);
             return;
@@ -201,7 +201,7 @@ class App
         if (self::isAjax()) {
             $res = [
                 'code' => 1,
-                'msg' => 'error:' . $args,
+                'message' => 'error:' . $args,
             ];
             self::response($res);
             return;

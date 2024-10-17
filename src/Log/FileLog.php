@@ -16,7 +16,7 @@ class FileLog
     {
         $filename = DATA_PATH . $filename;
         $res = [];
-        $res['msg'] = $msg;
+        $res['message'] = $msg;
         $res['time'] = date("Y-m-d H:i:s", time());
 
         //如果日志文件超过了指定大小则备份日志文件

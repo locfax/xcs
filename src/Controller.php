@@ -36,7 +36,7 @@ class Controller
         if (App::isAjax()) {
             $res = [
                 'code' => 1,
-                'msg' => 'Action ' . $name . '不存在!',
+                'message' => 'Action ' . $name . '不存在!',
             ];
             return App::response($res);
         }
