@@ -56,7 +56,7 @@ class Controller
     private function env(): void
     {
         $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
-        App::mergeVars('cfg', ['udi' => $this->_ctl . '/' . $this->_act]);
+        App::mergeVars('cfg', ['udi' => strtolower($this->_ctl) . '/' . $this->_act]);
     }
 
     /**
