@@ -69,7 +69,11 @@ class App
                     if ($ex instanceof ExException) {
                         return;
                     }
-                    ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    if ($ex instanceof \Error) {
+                        ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), false);
+                    } else {
+                        ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    }
                 });
                 array_walk($files, function ($file) {
                     include $file;
