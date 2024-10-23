@@ -15,16 +15,16 @@ class Rbac
     /**
      * @param string $controllerName
      * @param string|null $actionName
-     * @param mixed $auth
+     * @param bool $strict
      * @return bool
      */
-    public static function check(string $controllerName, string $actionName = null, mixed $auth = 'general'): bool
+    public static function check(string $controllerName, string $actionName = null, bool $strict = false, array $roles = null): bool
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
 
         //if controller offer empty AC, auth type 'general' then allow
-        if ('general' == $auth) {
+        if (!$strict) {
             if (empty($ACL)) {
                 return true;
             }
@@ -35,7 +35,9 @@ class Rbac
         }
 
         // get user role array
-        $roles = UID::getRolesArray();
+        if (is_null($roles)) {
+            $roles = UID::getRolesArray();
+        }
 
         // 1, check user's role whether allow to call controller
         if (!self::_check($roles, $ACL)) {

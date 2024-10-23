@@ -134,15 +134,6 @@ class App
         $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
         $actionName = preg_replace('/[^a-z\d_]+/i', '', $actionName);
 
-        if (defined('AUTH_ROLE') && AUTH_ROLE) {
-            $ret = Rbac::check($controllerName, $actionName, AUTH_ROLE);
-            if (!$ret) {
-                $args = '没有权限访问 : ' . $controllerName . ' - ' . $actionName;
-                self::_errACL($args);
-                return;
-            }
-        }
-
         self::_execute($controllerName, $actionName);
 
         if (function_exists('fastcgi_finish_request')) {
@@ -197,10 +188,10 @@ class App
     }
 
     /**
-     * @param $args
+     * @param string $args
      * @return void
      */
-    private static function _errACL($args): void
+    public static function ErrACL($args): void
     {
         if (self::isAjax()) {
             $res = [

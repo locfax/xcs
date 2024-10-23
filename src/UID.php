@@ -4,8 +4,8 @@ namespace Xcs;
 
 class UID
 {
-    const _UREY = 'ur';
-    const _ROLEY = 'ro';
+    const _UREY = '__uk';
+    const _ROLEY = '__ur';
 
     /**
      * @param array $userData
@@ -23,12 +23,32 @@ class UID
     }
 
     /**
-     * @return mixed
+     * @param string $token
+     * @return bool
      */
-    public static function getUser(): mixed
+    public static function setToken(string $token): bool
+    {
+        $dataKey = getini('auth/prefix') . self::_UREY;
+        return self::_setData($dataKey, ['token' => $token], 0);
+    }
+
+    /**
+     * @return array
+     */
+    public static function getUser(): array
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
         return self::_getData($dataKey);
+    }
+
+    /**
+     * @return string
+     */
+    public static function getToken(): string
+    {
+        $dataKey = getini('auth/prefix') . self::_UREY;
+        $data = self::_getData($dataKey);
+        return $data['token'] ?? '';
     }
 
     /**
@@ -65,38 +85,37 @@ class UID
     }
 
     /**
-     * @param $key
+     * @param string $key
      * @param array $data
      * @param int $ttl
-     * @param null $type
      * @return bool
      */
-    public static function setData($key, array $data, int $ttl = 0, $type = null): bool
+    public static function setData(string $key, array $data, int $ttl = 0): bool
     {
-        return self::_setData('data:' . $key, $data, $ttl, $type);
+        return self::_setData('data:' . $key, $data, $ttl);
     }
 
     /**
      * @param string $key
-     * @param null $type
-     * @return mixed
+     * @return array
      */
-    public static function getData(string $key, $type = null): mixed
+    public static function getData(string $key): array
     {
-        return self::_getData('data:' . $key, $type);
+        return self::_getData('data:' . $key);
     }
 
     /**
      * @param string $key
-     * @param string|null $type
      * @return mixed
      */
-    private static function _getData(string $key, string $type = null): mixed
+    private static function _getData(string $key): mixed
     {
         $ret = [];
-        if (is_null($type)) {
-            $type = getini('auth/method');
+        $type = getini('auth/method');
+        if (!$type) {
+            throw new \Error('auth method is empty');
         }
+
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
                 $handle = getini('auth/handle');
@@ -115,17 +134,18 @@ class UID
 
     /**
      * @param string $key
-     * @param array|null $val
+     * @param array $val
      * @param int $life
-     * @param null $type
      * @return bool
      */
-    private static function _setData(string $key, $val, int $life = 0, $type = null): bool
+    private static function _setData(string $key, array $val, int $life = 0): bool
     {
         $ret = false;
-        if (is_null($type)) {
-            $type = getini('auth/method');
+        $type = getini('auth/method');
+        if (!$type) {
+            throw new \Error('auth method is empty');
         }
+
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
                 $handle = getini('auth/handle');
@@ -144,7 +164,8 @@ class UID
             $life = $life > 0 ? $life + time() : 0;
             $secure = (443 == $_SERVER['SERVER_PORT']) ? 1 : 0;
             $key = self::getCookieKey($key);
-            $val = $val ? self::authCode(json_encode($val), 'ENCODE') : '';
+            $val = self::authCode(json_encode($val), 'ENCODE');
+
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
         }
         return $ret;
@@ -156,7 +177,7 @@ class UID
      * @param null $key
      * @return string
      */
-    public static function getCookieKey(string $var, bool $prefix = true, $key = null): string
+    private static function getCookieKey(string $var, bool $prefix = true, $key = null): string
     {
         if ($prefix) {
             if (is_null($key)) {
@@ -175,7 +196,7 @@ class UID
      * @param int $expiry
      * @return string
      */
-    public static function authCode(string $string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
+    private static function authCode(string $string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
     {
         static $hash_auth = null;
         if (is_null($hash_auth)) {

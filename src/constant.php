@@ -8,10 +8,6 @@ defined('APP_ROOT') or define('APP_ROOT', '');
  */
 defined('APP_KEY') or define('APP_KEY', 'web');
 /**
- * 是否验证角色
- */
-defined('AUTH_ROLE') or define('AUTH_ROLE', false);
-/**
  * 默认的dsn
  */
 defined('APP_DSN') or define('APP_DSN', 'mysql');

@@ -59,16 +59,4 @@ class Controller
         App::mergeVars('cfg', ['udi' => strtolower($this->_ctl) . '/' . $this->_act]);
     }
 
-    /**
-     * 权限验证
-     * @param string $controllerName
-     * @param string $actionName
-     * @param mixed $auth
-     * @return bool
-     */
-    final function checkAcl(string $controllerName, string $actionName, mixed $auth = AUTH_ROLE): bool
-    {
-        return Rbac::check($controllerName, $actionName, $auth);
-    }
-
 }
