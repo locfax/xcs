@@ -33,9 +33,9 @@ class UID
     }
 
     /**
-     * @return array
+     * @return mixed
      */
-    public static function getUser(): array
+    public static function getUser(): mixed
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
         return self::_getData($dataKey);
@@ -86,26 +86,6 @@ class UID
 
     /**
      * @param string $key
-     * @param array $data
-     * @param int $ttl
-     * @return bool
-     */
-    public static function setData(string $key, array $data, int $ttl = 0): bool
-    {
-        return self::_setData('data:' . $key, $data, $ttl);
-    }
-
-    /**
-     * @param string $key
-     * @return array
-     */
-    public static function getData(string $key): array
-    {
-        return self::_getData('data:' . $key);
-    }
-
-    /**
-     * @param string $key
      * @return mixed
      */
     private static function _getData(string $key): mixed
@@ -134,11 +114,11 @@ class UID
 
     /**
      * @param string $key
-     * @param array $val
+     * @param array|null $val
      * @param int $life
      * @return bool
      */
-    private static function _setData(string $key, array $val, int $life = 0): bool
+    private static function _setData(string $key, mixed $val, int $life = 0): bool
     {
         $ret = false;
         $type = getini('auth/method');
