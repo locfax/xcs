@@ -40,7 +40,7 @@ class App
         self::_rootNamespace('\\', APP_PATH);
 
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
-        if (!is_file($preloadFile) || $refresh) {
+        if (!is_file($preloadFile) || $refresh || DEBUG) {
 
             $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
 
@@ -50,31 +50,26 @@ class App
             is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
 
-            if (defined('DEBUG') && DEBUG) {
-                define('E_FATAL', E_ERROR | E_USER_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_RECOVERABLE_ERROR | E_PARSE);
+            if (DEBUG) {
                 set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
-                    $error = [[
-                        'file' => $errFile,
-                        'line' => $errLine
-                    ]];
+                    $error = [
+                        ['file' => $errFile, 'line' => $errLine]
+                    ];
                     ExUiException::showError('语法错误', $errStr, $error);
-                });
-                register_shutdown_function(function () {
-                    $error = error_get_last();
-                    if ($error && ($error["type"] === ($error["type"] & E_FATAL))) {
-                        ExUiException::showError('致命异常', $error['message'], [$error]);
-                    }
                 });
                 set_exception_handler(function ($ex) {
                     if ($ex instanceof ExException) {
                         return;
                     }
-                    if ($ex instanceof \Error) {
-                        ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), false);
-                    } else {
-                        ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                });
+                register_shutdown_function(function () {
+                    $error = error_get_last();
+                    if ($error) {
+                        ExUiException::showError('致命异常', $error['message'], [$error]);
                     }
                 });
+
                 array_walk($files, function ($file) {
                     include $file;
                 });

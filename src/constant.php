@@ -16,6 +16,10 @@ defined('APP_DSN') or define('APP_DSN', 'mysql');
  */
 defined('APP_CLI') or define('APP_CLI', false);
 /**
+ * 是否调试
+ */
+defined('DEBUG') or define('DEBUG', true);
+/**
  * 换行
  */
 defined('DEBUG_EOL') or define('DEBUG_EOL', PHP_OS == 'Linux' ? "\n" : "\r\n");
