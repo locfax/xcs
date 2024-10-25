@@ -64,7 +64,7 @@ class ExUiException
      */
     public static function clear(mixed $message): mixed
     {
-        if (defined('DEBUG') && DEBUG) {
+        if (DEBUG) {
             return is_object($message) ? get_class($message) : ($message ? htmlspecialchars($message) : '');
         }
         return $message ? htmlspecialchars($message) : '';

@@ -72,7 +72,9 @@ class App
                 array_walk($files, function ($file) {
                     require $file;
                 });
+
                 return;
+
             } else {
                 is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             }
@@ -178,7 +180,7 @@ class App
             self::response($res);
             return;
         }
-        if (defined('DEBUG') && DEBUG) {
+        if (DEBUG) {
             ExUiException::render('控制器', $args, '', 0);
         }
     }
@@ -356,7 +358,7 @@ class App
 
         if (!empty($filename) && is_file($filename)) {
             // 开启调试模式Win环境严格区分大小写
-            if (defined('DEBUG') && DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+            if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 return false;
             }
             require $filename;

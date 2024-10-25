@@ -62,7 +62,9 @@ class Template
             $headerAdd .= ';' . PHP_EOL;
         }
 
-        $template = "<?php " . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
+        if ($headerAdd) {
+            $template = "<?php " . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
+        }
 
         $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z\d_:\/]+)\}[\n\r\t]*/", [$this, 'tag_template'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);

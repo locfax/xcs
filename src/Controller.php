@@ -40,7 +40,7 @@ class Controller
             ];
             return App::response($res);
         }
-        if (defined('DEBUG') && DEBUG) {
+        if (DEBUG) {
             ExUiException::render('控制器', 'Action:' . $name . "不存在", '', 0, false);
         }
     }
