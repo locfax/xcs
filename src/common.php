@@ -167,7 +167,7 @@ function template(string $file, array $data = [], bool $getTplFile = false)
     if (!empty($data)) {
         extract($data);
     }
-    include $cacheTpl;
+    require $cacheTpl;
 }
 
 /**

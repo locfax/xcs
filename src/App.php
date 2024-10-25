@@ -70,7 +70,7 @@ class App
                     }
                 });
                 array_walk($files, function ($file) {
-                    include $file;
+                    require $file;
                 });
                 return;
             } else {
@@ -81,7 +81,7 @@ class App
             $preloadFile = self::_makeRunFile($files, $preloadFile);
         }
 
-        $preloadFile && include $preloadFile;
+        $preloadFile && require $preloadFile;
     }
 
     /**
@@ -211,7 +211,7 @@ class App
             return true;
         }
         $controllerFilename = APP_PATH . 'Controller/' . ucfirst(APP_KEY) . '/' . $controllerName . '.php';
-        return is_file($controllerFilename) && include $controllerFilename;
+        return is_file($controllerFilename) && require $controllerFilename;
     }
 
     /**
@@ -285,7 +285,7 @@ class App
             }
             $file = trim(substr($classname, strlen($namespace)), '\\');
             $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
-            include $file;
+            require $file;
         };
 
         spl_autoload_register($loader);
@@ -359,7 +359,7 @@ class App
             if (defined('DEBUG') && DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 return false;
             }
-            include $filename;
+            require $filename;
             $_file[$key] = true;
             return true;
         }
