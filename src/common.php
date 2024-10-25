@@ -129,9 +129,8 @@ function getini(string $key): mixed
  */
 function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string $cacheFile, string $file): void
 {
-    $tplDir = DATA_TPLDIR;
-    if (is_file($tplDir . $subTpl)) {
-        $tplTime = filemtime($tplDir . $subTpl);
+    if (is_file(THEMES_VIEW . $subTpl)) {
+        $tplTime = filemtime(THEMES_VIEW . $subTpl);
     } else {
         throw new \Error($subTpl . ' 模板不存在');
     }
@@ -139,10 +138,10 @@ function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string
         return;
     }
 
-    !is_dir(DATA_VIEW) && mkdir(DATA_VIEW);
+    !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE);
 
     $template = new Xcs\Template();
-    $template->parse(DATA_VIEW, $tplDir, $mainTpl, $cacheFile, $file);
+    $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file);
 }
 
 /**
@@ -160,7 +159,7 @@ function template(string $file, array $data = [], bool $getTplFile = false)
     }
 
     $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
-    $cacheTpl = DATA_VIEW . $cacheFile;
+    $cacheTpl = THEMES_CACHE . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
     checkTplRefresh($tplFile, $tplFile, $cacheTime, $cacheFile, $file);
 

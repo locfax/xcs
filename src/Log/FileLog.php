@@ -14,7 +14,7 @@ class FileLog
      */
     public static function write($filename, $msg): void
     {
-        $filename = DATA_PATH . $filename;
+        $filename = RUNTIME_PATH . 'log/' . $filename;
         $res = [];
         $res['message'] = $msg;
         $res['time'] = date("Y-m-d H:i:s", time());
@@ -43,7 +43,7 @@ class FileLog
      */
     public static function read($filename): mixed
     {
-        $filename = DATA_PATH . $filename;
+        $filename = RUNTIME_PATH . 'log/' . $filename;
 
         if (file_exists($filename)) {
             $content = file_get_contents($filename);

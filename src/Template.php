@@ -133,11 +133,11 @@ class Template
             }
         }
         if (!$isPlugin && !isset($this->language['inner'][$vars[0]])) {
-            $lang = include DATA_LANG . getini('site/lang') . '/template.php';
+            $lang = include THEMES_LANG . getini('site/lang') . '/template.php';
             $this->language['inner'] = array_merge($this->language['inner'], $lang);
         }
         if ($isPlugin && !isset($this->language['plugin'][$vars[0]][$vars[1]])) {
-            $this->language['plugin'][$vars[0]] = include DATA_LANG . getini('site/lang') . '/' . $vars[0] . '.php';
+            $this->language['plugin'][$vars[0]] = include THEMES_LANG . getini('site/lang') . '/' . $vars[0] . '.php';
         }
 
         if (!$isPlugin && isset($this->language['inner'][$vars[0]])) {

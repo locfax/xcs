@@ -39,7 +39,7 @@ class App
     {
         self::_rootNamespace('\\', APP_PATH);
 
-        $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
+        $preloadFile = RUNTIME_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh || DEBUG) {
 
             $files = [XCS_PATH . 'common.php']; //应用配置
@@ -76,7 +76,7 @@ class App
 
             }
 
-            !is_dir(DATA_PATH . 'preload') && mkdir(DATA_PATH . 'preload');
+            !is_dir(RUNTIME_PATH . 'preload') && mkdir(RUNTIME_PATH . 'preload');
             $preloadFile = self::_makeRunFile($files, $preloadFile);
         }
 

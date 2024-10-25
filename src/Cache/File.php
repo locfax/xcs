@@ -19,9 +19,9 @@ class File
      */
     public function init(): File
     {
-        !is_dir(DATA_CACHE) && mkdir(DATA_CACHE);
-        if (!is_writeable(DATA_CACHE)) {
-            throw new ExException('提示', '路径:' . DATA_CACHE . ' 不可写');
+        !is_dir(CACHE_PATH) && mkdir(CACHE_PATH);
+        if (!is_writeable(CACHE_PATH)) {
+            throw new ExException('提示', '路径:' . CACHE_PATH . ' 不可写');
         }
         $this->enable = true;
         return $this;
@@ -38,7 +38,7 @@ class File
      */
     public function get(string $key): mixed
     {
-        $cacheFile = DATA_CACHE . $key . '.php';
+        $cacheFile = CACHE_PATH . $key . '.php';
         if (is_file($cacheFile)) {
             $data = include $cacheFile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
@@ -73,7 +73,7 @@ class File
             $type = 'json';
         }
 
-        $cacheFile = DATA_CACHE . $key . '.php';
+        $cacheFile = CACHE_PATH . $key . '.php';
         $cacheData = "return array('data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
         $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n$cacheData";
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
@@ -93,7 +93,7 @@ class File
      */
     public function rm(string $key): bool
     {
-        $cacheFile = DATA_CACHE . $key . '.php';
+        $cacheFile = CACHE_PATH . $key . '.php';
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
         }
@@ -105,7 +105,7 @@ class File
      */
     public function clear(): void
     {
-        $cacheDir = DATA_CACHE;
+        $cacheDir = CACHE_PATH;
         $files = FileHelper::list_files($cacheDir);
         foreach ($files as $file) {
             unlink($cacheDir . $file);
