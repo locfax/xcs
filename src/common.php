@@ -133,7 +133,7 @@ function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string
     if (is_file($tplDir . $subTpl)) {
         $tplTime = filemtime($tplDir . $subTpl);
     } else {
-        $tplTime = 0;
+        throw new \Error($subTpl . ' 模板不存在');
     }
     if ($tplTime < $cacheTime) {
         return;
