@@ -42,7 +42,7 @@ class App
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh || DEBUG) {
 
-            $files = []; //应用配置
+            $files = [BASE_PATH . 'common.php']; //应用配置
             is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
             is_file(APP_ROOT . '/config/' . APP_KEY . '.inc.php') && array_push(APP_ROOT . '/config/' . APP_KEY . '.inc.php');
