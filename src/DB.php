@@ -547,13 +547,9 @@ class DB
             self::$using_dbo_id = $id;
         }
 
-        if (!in_array(self::$using_dbo_id, ['mysql', 'postgres'])) {
-            throw new ExException('driver', 'id must be mysql | postgres');
-        }
-
-        if (self::$using_dbo_id == 'mysql') {
+        if (str_contains(self::$using_dbo_id, 'mysql')) {
             return self::mysql(self::$using_dbo_id);
-        } elseif (self::$using_dbo_id == 'postgres') {
+        } elseif (str_contains(self::$using_dbo_id, 'postgres')) {
             return self::postgres(self::$default_dbo_id);
         } else {
             throw new ExException('driver', 'dsn id is error. must be mysql | postgres');

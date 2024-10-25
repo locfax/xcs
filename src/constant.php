@@ -24,7 +24,7 @@ defined('DEBUG') or define('DEBUG', true);
  */
 defined('DEBUG_EOL') or define('DEBUG_EOL', PHP_OS == 'Linux' ? "\n" : "\r\n");
 
-const BASE_PATH = __DIR__ . '/';  //框架路径
+const XCS_PATH = __DIR__ . '/';  //框架路径
 const APP_PATH = APP_ROOT . '/app/'; //应用路径
 const DATA_PATH = APP_ROOT . '/runtime/'; //全局数据路径
 const LIB_PATH = APP_PATH . 'Library/'; //module路径
