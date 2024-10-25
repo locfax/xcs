@@ -42,15 +42,14 @@ class App
         $preloadFile = DATA_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh || DEBUG) {
 
-            $files = [BASE_PATH . 'common.php', APP_ROOT . '/config/' . APP_KEY . '.inc.php']; //应用配置
-
+            $files = []; //应用配置
             is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
+            is_file(APP_ROOT . '/config/' . APP_KEY . '.inc.php') && array_push(APP_ROOT . '/config/' . APP_KEY . '.inc.php');
             is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
+            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
 
             if (DEBUG) {
-                is_file(APP_ROOT . '/config/database.dev.php') && array_push($files, APP_ROOT . '/config/database.dev.php');
-
                 set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
                     $error = [
                         ['file' => $errFile, 'line' => $errLine]
@@ -75,8 +74,6 @@ class App
 
                 return;
 
-            } else {
-                is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             }
 
             !is_dir(DATA_PATH . 'preload') && mkdir(DATA_PATH . 'preload');
