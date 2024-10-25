@@ -46,11 +46,11 @@ class App
 
             is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
-
-            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
 
             if (DEBUG) {
+                is_file(APP_ROOT . '/config/database.dev.php') && array_push($files, APP_ROOT . '/config/database.dev.php');
+
                 set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
                     $error = [
                         ['file' => $errFile, 'line' => $errLine]
@@ -69,11 +69,12 @@ class App
                         ExUiException::showError('致命异常', $error['message'], [$error]);
                     }
                 });
-
                 array_walk($files, function ($file) {
                     include $file;
                 });
                 return;
+            } else {
+                is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
             }
 
             !is_dir(DATA_PATH . 'preload') && mkdir(DATA_PATH . 'preload');
