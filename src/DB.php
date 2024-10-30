@@ -24,17 +24,20 @@ class DB
      * 返回 mysql 对象
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
+     * @param mixed $dsn
      * @return MysqlDb
      * @throws ExException
      * @see MysqlDb
      */
-    public static function mysql(string $dsnId = 'mysql'): MysqlDb
+    public static function mysql(string $dsnId = 'mysql', mixed $dsn = null): MysqlDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
-        $dsn = Context::dsn($dsnId);
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
 
         if ('mysql' != $dsn['driver']) {
             throw new ExException($dsn['driver'], 'the driver error: mysql');
@@ -49,17 +52,20 @@ class DB
     /**
      * 返回 mongodb 对象
      * @param string $dsnId
+     * @param mixed $dsn
      * @return MongoDb
      * @throws ExException
      * @see MongoDb
      */
-    public static function mongo(string $dsnId = 'mongo'): MongoDb
+    public static function mongo(string $dsnId = 'mongo', mixed $dsn = null): MongoDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
-        $dsn = Context::dsn($dsnId);
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
 
         if ('mongo' != $dsn['driver']) {
             throw new ExException('driver', 'the driver error: mongo');
@@ -73,16 +79,19 @@ class DB
 
     /**
      * @param string $dsnId
+     * @param mixed $dsn
      * @return SqlsrvDb
      * @throws ExException
      */
-    public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
+    public static function sqlsrv(string $dsnId = 'sqlsrv', mixed $dsn = null): SqlsrvDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
-        $dsn = Context::dsn($dsnId);
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
 
         if ('sqlsrv' != $dsn['driver']) {
             throw new ExException('driver', 'the driver error: sqlsrv');
@@ -96,16 +105,19 @@ class DB
 
     /**
      * @param string $dsnId
+     * @param mixed $dsn
      * @return SqliteDb
      * @throws ExException
      */
-    public static function sqlite(string $dsnId = 'sqlite'): SqliteDb
+    public static function sqlite(string $dsnId = 'sqlite', mixed $dsn = null): SqliteDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
-        $dsn = Context::dsn($dsnId);
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
 
         if ('sqlite' != $dsn['driver']) {
             throw new ExException('driver', 'the driver error: sqlite');
@@ -119,16 +131,19 @@ class DB
 
     /**
      * @param string $dsnId
+     * @param mixed $dsn
      * @return PostgresDb
      * @throws ExException
      */
-    public static function postgres(string $dsnId = 'postgres'): PostgresDb
+    public static function postgres(string $dsnId = 'postgres', mixed $dsn = null): PostgresDb
     {
         if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
             return self::$used_dbo[$dsnId];
         }
 
-        $dsn = Context::dsn($dsnId);
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
 
         if ('postgres' != $dsn['driver']) {
             throw new ExException('driver', 'the driver error: postgres');
@@ -547,10 +562,12 @@ class DB
             self::$using_dbo_id = $id;
         }
 
-        if (str_contains(self::$using_dbo_id, 'mysql')) {
-            return self::mysql(self::$using_dbo_id);
-        } elseif (str_contains(self::$using_dbo_id, 'postgres')) {
-            return self::postgres(self::$default_dbo_id);
+        $dsn = Context::dsn(self::$using_dbo_id);
+
+        if ($dsn['driver'] == 'mysql') {
+            return self::mysql(self::$using_dbo_id, $dsn);
+        } elseif ($dsn['driver'] == 'postgres') {
+            return self::postgres(self::$using_dbo_id, $dsn);
         } else {
             throw new ExException('driver', 'dsn id is error. must be mysql | postgres');
         }
