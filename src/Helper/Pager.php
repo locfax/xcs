@@ -58,8 +58,8 @@ class Pager
             }
         }
 
-        $multiPage = ($curPage - $offset > 1 && $pages > $page ? '<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>1 ...</a>' : '') .
-            ($curPage > 1 && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage - 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>' . $lang['prev'] . '</a>' : '');
+        $multiPage = ($curPage > 0 && $pages > $page ? '<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>1 ...</a>' : '') .
+            ($curPage > 0 && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage - 1 > 0 ? $curPage - 1 : 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>' . $lang['prev'] . '</a>' : '');
         for ($i = $from; $i <= $to; $i++) {
             $multiPage .= $i == $curPage ? '<strong>' . $i . '</strong>' :
                 '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pages && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . '>' . $i . '</a>';
