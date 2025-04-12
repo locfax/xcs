@@ -21,7 +21,7 @@ class Pager
                 $mpUrl .= '?' . $pageInfo['param'];
             }
         }
-        $maxPages = $pageInfo['maxPages'] ?? 100; //最大页数限制
+        $maxPages = $pageInfo['maxPages'] ?? 1000; //最大页数限制
         $page = $pageInfo['showPage'] ?? 10; //一次显示多少页码
         $showNum = $pageInfo['showNum'] ?? true;
         $showKbd = $pageInfo['showKbd'] ?? true;
@@ -38,7 +38,18 @@ class Pager
         $lang['next'] = '下一页';
         $mpUrl .= self::strPos($mpUrl, '?') ? '&' : '?';
         $offset = floor($page * 0.5);
-        $realPages = ceil($totals / $perPage);
+
+        if ($maxPages) {
+            $real = ceil($totals / $perPage);
+            if ($maxPages > $real) {
+                $realPages = $real;
+            } else {
+                $realPages = $maxPages;
+            }
+        } else {
+            $realPages = ceil($totals / $perPage);
+        }
+
         $pages = $maxPages && $maxPages < $realPages ? $maxPages : $realPages;
         if ($page > $pages) {
             $from = 1;
@@ -80,22 +91,22 @@ class Pager
         $perPage = $pageInfo['length'];
         $curPage = $pageInfo['page'];
         $mpUrl = $pageInfo['udi'];
-        $return = "<ul class='pager'>";
+        $return = "<div class='pg'>";
         $lang['next'] = '下一页';
         $lang['prev'] = '上一页';
-        $realPages = ceil($totals / $perPage);
 
-        $curPage = $pageInfo['maxpages'] ? max(1, min($curPage, $realPages, $pageInfo['maxpages'])) : max(1, min($curPage, $realPages));
+        $realPages = $pageInfo['maxPages'] ? min(ceil($totals / $perPage), $pageInfo['maxPages']) : ceil($totals / $perPage);
+        $curPage = $pageInfo['maxPages'] ? max(1, min($curPage, $realPages, $pageInfo['maxPages'])) : max(1, min($curPage, $realPages));
 
-        $prev = $curPage > 1 ? '<li class="previous"><a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a></li>' : '';
-        $next = $curPage < $realPages ? "<li class='next'><a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a></li>' : '';
-        $pageNum = "<li class=\"pager-nums\">{$curPage} / {$realPages}</li>";
+        $prev = $curPage > 1 ? '<a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a>' : '';
+        $next = $curPage < $realPages ? "<a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a>' : '';
+        $pageNum = "<strong>{$curPage} / {$realPages}</strong>";
         if ($next || $prev) {
             $return .= $prev . $pageNum . $next;
         } else {
             $return .= $pageNum;
         }
-        $return .= "</ul>";
+        $return .= "</div>";
         return $return;
     }
 

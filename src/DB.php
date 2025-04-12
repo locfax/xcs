@@ -334,7 +334,7 @@ class DB
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
             $_pageParam = [
-                'page' => getgpc('g.page', 1),
+                'page' => max(1, getgpc('g.page', 1)),
                 'udi' => url(getini('udi')),
             ];
             if (!empty($pageParam)) {
@@ -345,6 +345,9 @@ class DB
             } else {
                 $_pageParam['total'] = self::count($table, $condition, $args);
                 $pageParam = $_pageParam;
+            }
+            if (isset($pageParam['maxPages']) && $pageParam['page'] > $pageParam['maxPages']) {
+                $pageParam['page'] = $pageParam['maxPages'];
             }
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
         } else {
