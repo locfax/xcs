@@ -24,7 +24,6 @@ class Pager
         $maxPages = $pageInfo['maxPages'] ?? 1000; //最大页数限制
         $page = $pageInfo['showPage'] ?? 10; //一次显示多少页码
         $showNum = $pageInfo['showNum'] ?? true;
-        $showKbd = $pageInfo['showKbd'] ?? true;
         $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
@@ -76,8 +75,7 @@ class Pager
                 '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pages && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . '>' . $i . '</a>';
         }
         $multiPage .= ($to < $pages ? '<a href="' . $mpUrl . 'page=' . $pages . $hrefName . '" class="last"' . $ajaxTarget . '>... ' . $realPages . '</a>' : '') .
-            ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '') .
-            ($showKbd && !$simple && $pages > $page && !$ajaxTarget ? '<kbd><input type="text" name="custompage" size="3" onkeydown="if(KeyboardEvent.keyCode===13) {window.location=\'' . $mpUrl . 'page=\'+this.value; doane(Event);}" /></kbd>' : '');
+            ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '');
         return '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
     }
 

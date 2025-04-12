@@ -346,10 +346,17 @@ class DB
                 $_pageParam['total'] = self::count($table, $condition, $args);
                 $pageParam = $_pageParam;
             }
-            if (isset($pageParam['maxPages']) && $pageParam['page'] > $pageParam['maxPages']) {
-                $pageParam['page'] = $pageParam['maxPages'];
+            if (isset($pageParam['maxPages']) && $pageParam['maxPages'] > 0) {
+                if ($pageParam['page'] > $pageParam['maxPages']) {
+                    $pageParam['page'] = $pageParam['maxPages'];
+                }
+            } else {
+                $pageParam['maxPages'] = 0;
             }
-            $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
+
+            $realPages = ceil($pageParam['total'] / $limit);
+            $pageParam['page'] = max(1, min($realPages, $pageParam['page']));
+            $offset = ($pageParam['page'] - 1) * $limit;
         } else {
             $offset = $pageParam;
         }
@@ -600,7 +607,7 @@ class DB
             $defPageParam = [
                 'page' => 1,
                 'udi' => '',
-                'maxPages' => 100,
+                'maxPages' => 1000,
                 'showPage' => 10,
                 'showNum' => true,
                 'showKbd' => false,
@@ -613,7 +620,7 @@ class DB
             $defPageParam = [
                 'page' => 1,
                 'udi' => '',
-                'maxPages' => 100,
+                'maxPages' => 1000,
             ];
             $pageParam = array_merge($defPageParam, $pageParam);
             $pageParam['length'] = $length;
