@@ -336,10 +336,9 @@ class DB
             $_pageParam = [
                 'page' => max(1, getgpc('g.page', 1, 'intval')),
                 'udi' => url(getini('udi')),
-                'maxPages' => 1000,
+                'maxPages' => 0,
                 'showPage' => 10,
                 'length' => $limit,
-                'showNum' => true,
             ];
             if (!empty($pageParam)) {
                 if (!isset($pageParam['total'])) {
@@ -481,10 +480,9 @@ class DB
             $_pageParam = [
                 'page' => max(1, getgpc('g.page', 1, 'intval')),
                 'udi' => url(getini('udi')),
-                'maxPages' => 1000,
+                'maxPages' => 0,
                 'showPage' => 10,
                 'length' => $limit,
-                'showNum' => true,
             ];
             $pageParam = array_merge($_pageParam, $pageParam);
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);

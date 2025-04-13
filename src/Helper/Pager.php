@@ -56,7 +56,7 @@ class Pager
         $nextPage = $pageInfo['page'] + 1 > $pageInfo['pages'] ? $pageInfo['pages'] : $pageInfo['page'] + 1;
         $multiPage .= ('<a href="' . $mpUrl . 'page=' . $pageInfo['pages'] . $hrefName . '" class="last"' . $ajaxTarget . ' title="尾页">' . $pageInfo['page'] . '/' . $pageInfo['pages'] . '</a>') .
             ('<a href="' . $mpUrl . 'page=' . $nextPage . $hrefName . '" class="nxt"' . $ajaxTarget . '>下一页</a>');
-        return '<div class="pg">' . ($pageInfo['showNum'] ? '<em>' . $pageInfo['total'] . '</em> ' : '') . $multiPage . '</div>';
+        return '<div class="pg">' . $multiPage . '</div>';
     }
 
     /**
