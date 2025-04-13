@@ -10,9 +10,6 @@ class Pager
      */
     public static function pageBar(array $pageInfo): string
     {
-        $totals = $pageInfo['total'];
-        $perPage = $pageInfo['length'];
-        $curPage = $pageInfo['page'];
         $mpUrl = $pageInfo['udi'];
         if (isset($pageInfo['param'])) {
             if (self::strPos($mpUrl, '?')) {
@@ -21,10 +18,6 @@ class Pager
                 $mpUrl .= '?' . $pageInfo['param'];
             }
         }
-        $maxPages = $pageInfo['maxPages'] ?? 1000; //最大页数限制
-        $page = $pageInfo['showPage'] ?? 10; //一次显示多少页码
-        $showNum = $pageInfo['showNum'] ?? true;
-        $simple = $pageInfo['simple'] ?? false;
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
         $hrefName = '';
@@ -33,79 +26,37 @@ class Pager
             $mpUrl = $asTrs[0];
             $hrefName = '#' . $asTrs[1];
         }
-        $lang['prev'] = '上一页';
-        $lang['next'] = '下一页';
         $mpUrl .= self::strPos($mpUrl, '?') ? '&' : '?';
-        $offset = floor($page * 0.5);
+        $offset = floor($pageInfo['showPage'] * 0.5);
 
-        if ($maxPages) {
-            $real = ceil($totals / $perPage);
-            if ($maxPages > $real) {
-                $realPages = $real;
-            } else {
-                $realPages = $maxPages;
-            }
-        } else {
-            $realPages = ceil($totals / $perPage);
-        }
-
-        $pages = $maxPages && $maxPages < $realPages ? $maxPages : $realPages;
-        if ($page > $pages) {
+        if ($pageInfo['showPage'] > $pageInfo['pages']) {
             $from = 1;
-            $to = $pages;
+            $to = $pageInfo['pages'];
         } else {
-            $from = $curPage - $offset;
-            $to = $from + $page - 1;
+            $from = $pageInfo['page'] - $offset;
+            $to = $from + $pageInfo['showPage'] - 1;
             if ($from < 1) {
-                $to = $curPage + 1 - $from;
+                $to = $pageInfo['page'] + 1 - $from;
                 $from = 1;
-                if ($to - $from < $page) {
-                    $to = $page;
+                if ($to - $from < $pageInfo['showPage']) {
+                    $to = $pageInfo['showPage'];
                 }
-            } elseif ($to > $pages) {
-                $from = $pages - $page + 1;
-                $to = $pages;
+            } elseif ($to > $pageInfo['pages']) {
+                $from = $pageInfo['pages'] - $pageInfo['showPage'] + 1;
+                $to = $pageInfo['pages'];
             }
         }
 
-        $multiPage = ($curPage > 0 && $pages > $page ? '<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>1 ...</a>' : '') .
-            ($curPage > 0 && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage - 1 > 0 ? $curPage - 1 : 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>' . $lang['prev'] . '</a>' : '');
+        $multiPage = ('<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>首页</a>') .
+            ('<a href="' . $mpUrl . 'page=' . ($pageInfo['page'] - 1 > 0 ? $pageInfo['page'] - 1 : 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>上一页</a>');
         for ($i = $from; $i <= $to; $i++) {
-            $multiPage .= $i == $curPage ? '<strong>' . $i . '</strong>' :
-                '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pages && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . '>' . $i . '</a>';
+            $multiPage .= $i == $pageInfo['page'] ? '<a href="javascript:;" class="hidden-xs active">' . $i . '</a>' :
+                '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pageInfo['pages'] && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . ' class="hidden-xs">' . $i . '</a>';
         }
-        $multiPage .= ($to < $pages ? '<a href="' . $mpUrl . 'page=' . $pages . $hrefName . '" class="last"' . $ajaxTarget . '>... ' . $realPages . '</a>' : '') .
-            ($curPage < $pages && !$simple ? '<a href="' . $mpUrl . 'page=' . ($curPage + 1) . $hrefName . '" class="nxt"' . $ajaxTarget . '>' . $lang['next'] . '</a>' : '');
-        return '<div class="pg">' . ($showNum && !$simple ? '<em>&nbsp;' . $totals . '&nbsp;</em>' : '') . $multiPage . '</div>';
-    }
-
-    /**
-     * @param array $pageInfo
-     * @return string
-     */
-    public static function simplePage(array $pageInfo): string
-    {
-        $totals = $pageInfo['total'];
-        $perPage = $pageInfo['length'];
-        $curPage = $pageInfo['page'];
-        $mpUrl = $pageInfo['udi'];
-        $return = "<div class='pg'>";
-        $lang['next'] = '下一页';
-        $lang['prev'] = '上一页';
-
-        $realPages = $pageInfo['maxPages'] ? min(ceil($totals / $perPage), $pageInfo['maxPages']) : ceil($totals / $perPage);
-        $curPage = $pageInfo['maxPages'] ? max(1, min($curPage, $realPages, $pageInfo['maxPages'])) : max(1, min($curPage, $realPages));
-
-        $prev = $curPage > 1 ? '<a href="' . $mpUrl . '?page=' . ($curPage - 1) . '">' . $lang['prev'] . '</a>' : '';
-        $next = $curPage < $realPages ? "<a href=\"" . $mpUrl . '?page=' . ($curPage + 1) . '">' . $lang['next'] . '</a>' : '';
-        $pageNum = "<strong>{$curPage} / {$realPages}</strong>";
-        if ($next || $prev) {
-            $return .= $prev . $pageNum . $next;
-        } else {
-            $return .= $pageNum;
-        }
-        $return .= "</div>";
-        return $return;
+        $nextPage = $pageInfo['page'] + 1 > $pageInfo['pages'] ? $pageInfo['pages'] : $pageInfo['page'] + 1;
+        $multiPage .= ('<a href="' . $mpUrl . 'page=' . $pageInfo['pages'] . $hrefName . '" class="last"' . $ajaxTarget . ' title="尾页">' . $pageInfo['page'] . '/' . $pageInfo['pages'] . '</a>') .
+            ('<a href="' . $mpUrl . 'page=' . $nextPage . $hrefName . '" class="nxt"' . $ajaxTarget . '>下一页</a>');
+        return '<div class="pg">' . ($pageInfo['showNum'] ? '<em>' . $pageInfo['total'] . '</em> ' : '') . $multiPage . '</div>';
     }
 
     /**

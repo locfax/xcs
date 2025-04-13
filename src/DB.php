@@ -334,8 +334,12 @@ class DB
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
             $_pageParam = [
-                'page' => max(1, getgpc('g.page', 1)),
+                'page' => max(1, getgpc('g.page', 1, 'intval')),
                 'udi' => url(getini('udi')),
+                'maxPages' => 1000,
+                'showPage' => 10,
+                'length' => $limit,
+                'showNum' => true,
             ];
             if (!empty($pageParam)) {
                 if (!isset($pageParam['total'])) {
@@ -346,23 +350,20 @@ class DB
                 $_pageParam['total'] = self::count($table, $condition, $args);
                 $pageParam = $_pageParam;
             }
-            if (isset($pageParam['maxPages']) && $pageParam['maxPages'] > 0) {
-                if ($pageParam['page'] > $pageParam['maxPages']) {
-                    $pageParam['page'] = $pageParam['maxPages'];
-                }
-            } else {
-                $pageParam['maxPages'] = 0;
-            }
+            $realPages = ceil($pageParam['total'] / $pageParam['length']);
 
-            $realPages = ceil($pageParam['total'] / $limit);
-            $pageParam['page'] = max(1, min($realPages, $pageParam['page']));
-            $offset = ($pageParam['page'] - 1) * $limit;
+            //共有多少页
+            $pageParam['pages'] = $pageParam['maxPages'] ? min($realPages, $pageParam['maxPages']) : $realPages;
+            //当前页
+            $pageParam['page'] = $pageParam['maxPages'] ? max(1, min($pageParam['page'], $realPages, $pageParam['maxPages'])) : max(1, min($pageParam['page'], $realPages));
+
+            $offset = ($pageParam['page'] - 1) * $pageParam['length'];
         } else {
             $offset = $pageParam;
         }
         $data = $db->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['data' => $data, 'bar' => $data ? self::pageBar($pageParam, $limit) : ''];
+            return ['data' => $data, 'bar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
         return $data;
     }
@@ -477,13 +478,22 @@ class DB
     {
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
+            $_pageParam = [
+                'page' => max(1, getgpc('g.page', 1, 'intval')),
+                'udi' => url(getini('udi')),
+                'maxPages' => 1000,
+                'showPage' => 10,
+                'length' => $limit,
+                'showNum' => true,
+            ];
+            $pageParam = array_merge($_pageParam, $pageParam);
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
         } else {
             $offset = $pageParam;
         }
         $data = $db->pageSql($sql, $args, $offset, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['data' => $data, 'bar' => $data ? self::pageBar($pageParam, $limit) : ''];
+            return ['data' => $data, 'bar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
         return $data;
     }
@@ -594,49 +604,6 @@ class DB
         $totalPage = ceil($total / $ppp);
         $_page = max(1, min($totalPage, $page));
         return ($_page - 1) * $ppp;
-    }
-
-    /**
-     * @param int|array $pageParam
-     * @param int $length
-     * @return array|string
-     */
-    public static function pageBar(int|array $pageParam, int $length): array|string
-    {
-        if (!isset($pageParam['bar']) || 'default' == $pageParam['bar']) {
-            $defPageParam = [
-                'page' => 1,
-                'udi' => '',
-                'maxPages' => 1000,
-                'showPage' => 10,
-                'showNum' => true,
-                'showKbd' => false,
-                'simple' => false
-            ];
-            $pageParam = array_merge($defPageParam, $pageParam);
-            $pageParam['length'] = $length;
-            $pageBar = Helper\Pager::pageBar($pageParam);
-        } elseif ('simple' == $pageParam['bar']) {
-            $defPageParam = [
-                'page' => 1,
-                'udi' => '',
-                'maxPages' => 1000,
-            ];
-            $pageParam = array_merge($defPageParam, $pageParam);
-            $pageParam['length'] = $length;
-            $pageBar = Helper\Pager::simplePage($pageParam);
-        } else {
-            $pages = ceil($pageParam['total'] / $length);
-            $nextPage = ($pages > $pageParam['page']) ? $pageParam['page'] + 1 : $pages;
-            $pageBar = [
-                'total' => $pageParam['total'],
-                'count' => $pages,
-                'pre' => $pageParam['page'] - 1 > 0 ? $pageParam['page'] - 1 : 1,
-                'page' => $pageParam['page'],
-                'next' => $nextPage
-            ];
-        }
-        return $pageBar;
     }
 
     /**
