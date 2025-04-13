@@ -362,7 +362,7 @@ class DB
         }
         $data = $db->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['data' => $data, 'bar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
+            return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
         return $data;
     }
@@ -491,7 +491,7 @@ class DB
         }
         $data = $db->pageSql($sql, $args, $offset, $limit, $retObj);
         if (is_array($pageParam)) {
-            return ['data' => $data, 'bar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
+            return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
         return $data;
     }
