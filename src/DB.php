@@ -338,6 +338,7 @@ class DB
                 'udi' => url(getini('udi')),
                 'maxPages' => 0,
                 'showPage' => 10,
+                'showNum' => false,
                 'length' => $limit,
             ];
             if (!empty($pageParam)) {
@@ -482,6 +483,7 @@ class DB
                 'udi' => url(getini('udi')),
                 'maxPages' => 0,
                 'showPage' => 10,
+                'showNum' => false,
                 'length' => $limit,
             ];
             $pageParam = array_merge($_pageParam, $pageParam);
