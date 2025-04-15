@@ -30,16 +30,6 @@ class App
         self::_dispatching($uri);
     }
 
-    public static function runSwoole($host = '127.0.0.1', $port = 9501): void
-    {
-        $http = new Swoole\Http\Server($host, $port);
-        $http->on('Request', function ($request, $response) {
-            self::runFile();
-            self::_swooleDispatching($request, $response);
-        });
-        $http->start();
-    }
-
     /**
      * @param bool $refresh
      */
@@ -169,43 +159,6 @@ class App
         }
         call_user_func([$controller, $actionMethod]);
         $controller = null;
-    }
-
-    private static function _swooleDispatching($request, $response): void
-    {
-        $uri = $request->getRequestTarget();
-        if (defined('ROUTE') && ROUTE) {
-            self::_router($uri);
-        }
-        $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
-        $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
-        $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
-        $actionName = preg_replace('/[^a-z\d_]+/i', '', $actionName);
-
-        self::_swooleExecute($controllerName, $actionName, $request, $response);
-    }
-
-    private static function _swooleExecute($controllerName, $actionName, $request, $response): void
-    {
-        static $controller_pool = [];
-        $controllerName = ucfirst($controllerName);
-        $actionMethod = self::$_actionPrefix . $actionName;
-
-        $controllerClass = self::$_controllerPrefix . $controllerName;
-        if (isset($controller_pool[$controllerClass])) {
-            $controller = $controller_pool[$controllerClass];
-        } else {
-            //主动载入controller
-            if (!self::_loadController($controllerName, $controllerClass)) {
-                //控制器加载失败
-                self::_errCtrl($controllerName . ' 控制器不存在');
-                return;
-            }
-            $controller = new $controllerClass();
-            $controller_pool[$controllerClass] = $controller;
-        }
-        $controller->init($request, $response, $controllerName, $actionName);
-        call_user_func([$controller, $actionMethod]);
     }
 
     /**
