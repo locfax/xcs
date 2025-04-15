@@ -8,10 +8,8 @@ class App
     public static string $_dCTL = 'c';
     public static string $_dACT = 'a';
     public static string $_actionPrefix = 'act_';
-
-    const _controllerPrefix = 'Controller\\';
-
-    private static array $routes = [];
+    private static array $_routes = [];
+    private static string $_controllerPrefix = 'Controller\\';
 
     /**
      * @param bool $refresh
@@ -30,6 +28,16 @@ class App
 
         self::runFile($refresh);
         self::_dispatching($uri);
+    }
+
+    public static function runSwoole($host = '127.0.0.1', $port = 9501): void
+    {
+        $http = new Swoole\Http\Server($host, $port);
+        $http->on('Request', function ($request, $response) {
+            self::runFile();
+            self::_swooleDispatching($request, $response);
+        });
+        $http->start();
     }
 
     /**
@@ -146,7 +154,7 @@ class App
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
 
-        $controllerClass = self::_controllerPrefix . $controllerName;
+        $controllerClass = self::$_controllerPrefix . $controllerName;
         //主动载入controller
         if (!self::_loadController($controllerName, $controllerClass)) {
             //控制器加载失败
@@ -161,6 +169,43 @@ class App
         }
         call_user_func([$controller, $actionMethod]);
         $controller = null;
+    }
+
+    private static function _swooleDispatching($request, $response): void
+    {
+        $uri = $request->getRequestTarget();
+        if (defined('ROUTE') && ROUTE) {
+            self::_router($uri);
+        }
+        $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
+        $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
+        $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
+        $actionName = preg_replace('/[^a-z\d_]+/i', '', $actionName);
+
+        self::_swooleExecute($controllerName, $actionName, $request, $response);
+    }
+
+    private static function _swooleExecute($controllerName, $actionName, $request, $response): void
+    {
+        static $controller_pool = [];
+        $controllerName = ucfirst($controllerName);
+        $actionMethod = self::$_actionPrefix . $actionName;
+
+        $controllerClass = self::$_controllerPrefix . $controllerName;
+        if (isset($controller_pool[$controllerClass])) {
+            $controller = $controller_pool[$controllerClass];
+        } else {
+            //主动载入controller
+            if (!self::_loadController($controllerName, $controllerClass)) {
+                //控制器加载失败
+                self::_errCtrl($controllerName . ' 控制器不存在');
+                return;
+            }
+            $controller = new $controllerClass();
+            $controller_pool[$controllerClass] = $controller;
+        }
+        $controller->init($request, $response, $controllerName, $actionName);
+        call_user_func([$controller, $actionMethod]);
     }
 
     /**
@@ -186,7 +231,7 @@ class App
      * @param string $args
      * @return void
      */
-    public static function ErrACL($args): void
+    public static function ErrACL(string $args): void
     {
         if (self::isAjax()) {
             $res = [
@@ -228,11 +273,11 @@ class App
         }
 
         if (is_file(APP_PATH . 'Route/' . APP_KEY . '.php')) {
-            self::$routes = include(APP_PATH . 'Route/' . APP_KEY . '.php');
+            self::$_routes = include(APP_PATH . 'Route/' . APP_KEY . '.php');
         }
 
         $match = false;
-        foreach (self::$routes as $key => $val) {
+        foreach (self::$_routes as $key => $val) {
             $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
             if (preg_match('#^' . $key . '$#', $uri)) {
                 if (str_contains($val, '$') && str_contains($key, '(')) {
@@ -366,35 +411,13 @@ class App
         return false;
     }
 
-    /**
-     * @param array $arr
-     * @return string
-     */
-    public static function output_json(array $arr): string
-    {
-        return json_encode($arr, JSON_UNESCAPED_UNICODE);
-    }
-
-    public static function output_nocache(): void
-    {
-        header("Expires: -1");
-        header("Cache-Control: no-store, private, post-check=0, pre-check=0, max-age=0", false);
-        header("Pragma: no-cache");
-    }
-
-    /**
-     * @param bool $nocache
-     */
-    public static function output_start(bool $nocache = true): void
+    public static function output_start(): void
     {
         ob_get_length() && ob_end_clean();
         if (function_exists('ob_gzhandler')) { //whether start gzip
             ob_start('ob_gzhandler');
         } else {
             ob_start();
-        }
-        if ($nocache) {
-            self::output_nocache();
         }
     }
 
@@ -405,7 +428,6 @@ class App
     public static function output_end(bool $echo = false)
     {
         $content = ob_get_contents();
-        ob_get_length() && ob_end_clean();
         $content = preg_replace("/([\\x01-\\x08\\x0b-\\x0c\\x0e-\\x1f])+/", ' ', $content);
         $content = str_replace([chr(0), ']]>'], [' ', ']]&gt;'], $content);
         if (!$echo) {
@@ -421,13 +443,12 @@ class App
      */
     public static function response($res, string $type = 'json'): bool
     {
-        self::output_nocache();
         if ('html' == $type) {
             header("Content-type: text/html; charset=UTF-8");
         } elseif ('json' == $type) {
             header('Content-type: text/json; charset=UTF-8');
             if (is_array($res)) {
-                $res = self::output_json($res);
+                $res = json_encode($res, JSON_UNESCAPED_UNICODE);
             }
         } elseif ('xml' == $type) {
             header("Content-type: text/xml");
@@ -435,7 +456,7 @@ class App
         } elseif ('text' == $type) {
             header("Content-type: text/plain");
             if (is_array($res)) {
-                $res = self::output_json($res);
+                $res = json_encode($res, JSON_UNESCAPED_UNICODE);
             }
         } else {
             header("Content-type: text/html; charset=UTF-8");
@@ -523,13 +544,12 @@ class App
      */
     public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): bool|string|null
     {
-        $_delay = intval($delay);
         if (!$js) {
-            if (headers_sent() || $_delay > 0) {
+            if (headers_sent() || $delay > 0) {
                 echo <<<EOT
     <html>
     <head>
-    <meta http-equiv="refresh" content="$_delay;URL=$url" />
+    <meta http-equiv="refresh" content="$delay;URL=$url" />
     </head>
     </html>
 EOT;
@@ -543,8 +563,8 @@ EOT;
         if ($jsWrapped) {
             $out .= '<script language="javascript" type="text/javascript">';
         }
-        if ($_delay > 0) {
-            $out .= "window.setTimeout(function () { document.location='$url'; }, {$_delay});";
+        if ($delay > 0) {
+            $out .= "window.setTimeout(function () { document.location='$url'; }, {$delay});";
         } else {
             $out .= "document.location='$url';";
         }

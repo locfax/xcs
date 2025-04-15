@@ -26,12 +26,8 @@
   "require": {
     "php": ">=8.0",
     "ext-json": "*",
-    "ext-gd": "*",
-    "ext-curl": "*",
     "ext-pdo": "*",
-    "ext-mbstring": "*",
-    "ext-fileinfo": "*",
-    "ext-iconv": "*"
+    "ext-mbstring": "*"
   },
   "suggest": {}
 }
