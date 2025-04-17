@@ -151,12 +151,6 @@ class App
         }
 
         $controller = new $controllerClass();
-        if (!$controller instanceof $controllerClass) {
-            //控制器加载失败
-            header('Content-Type', 'text/html; charset=UTF-8');
-            echo self::_errCtrl($controllerName . ' 控制器加载失败');
-            return;
-        }
         $retsult = $controller->init($controllerName, $actionName);
         if ($retsult) {
             echo $retsult;
@@ -179,7 +173,7 @@ class App
 
     /**
      * @param $args
-     * @return void
+     * @return mixed
      */
     private static function _errCtrl($args)
     {
@@ -188,16 +182,17 @@ class App
                 'code' => 1,
                 'message' => 'error:' . $args,
             ];
-            return self::response($res);
+            return self::response($res, 'json');
         }
         if (DEBUG) {
             return ExUiException::showError('控制器', $args);
         }
+        return '';
     }
 
     /**
      * @param string $args
-     * @return void
+     * @return mixed
      */
     public static function ErrACL(string $args)
     {
@@ -206,7 +201,7 @@ class App
                 'code' => 1,
                 'message' => 'error:' . $args,
             ];
-            return self::response($res);
+            return self::response($res, 'json');
         }
         return ExUiException::showError('权限', $args);
     }
@@ -381,9 +376,9 @@ class App
     /**
      * @param $res
      * @param string $type
-     * @return bool
+     * @return array
      */
-    public static function response($res, string $type = 'json'): bool
+    public static function response($res, string $type = 'json')
     {
         if ('json' == $type) {
             if (is_array($res)) {
@@ -431,9 +426,9 @@ class App
      * @param string $message
      * @param string $after_action
      * @param string $url
-     * @return bool
+     * @return array
      */
-    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): bool
+    public static function jsAlert(string $message = '', string $after_action = '', string $url = '')
     {
         //php turn to alert
         $out = "<script type=\"text/javascript\">\n";
@@ -460,9 +455,9 @@ class App
      * @param bool $js
      * @param bool $jsWrapped
      * @param bool $return
-     * @return bool|string|null
+     * @return mixed
      */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): bool|string|null
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
     {
         if (!$js) {
             if ($delay > 0) {
@@ -476,7 +471,7 @@ EOT;
             } else {
                 header("Location: {$url}");
             }
-            return null;
+            return '';
         }
 
         $out = '';

@@ -80,7 +80,7 @@ class SwooleApp
             if (!$this->_loadController($controllerName, $controllerClass)) {
                 //控制器加载失败
                 $response->header('Content-Type', 'text/html; charset=UTF-8');
-                $response->end('控制器不存在');
+                $response->end($this->_errCtrl($controllerName . ' 控制器不存在'));
                 return;
             }
             $controller_pool[$controllerClass] = new $controllerClass();
@@ -104,6 +104,27 @@ class SwooleApp
             header('Content-Type', 'application/json; charset=UTF-8');
         }
         $response->end($retsult['content']);
+    }
+
+    /**
+     * @param $args
+     * @return string
+     */
+    private function _errCtrl($args)
+    {
+        if (DEBUG) {
+            return ExUiException::showError('控制器', $args);
+        }
+        return '';
+    }
+
+    /**
+     * @param string $args
+     * @return string
+     */
+    public function ErrACL(string $args)
+    {
+        return ExUiException::showError('权限', $args);
     }
 
     /**
