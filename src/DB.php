@@ -338,13 +338,17 @@ class DB
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
             $_pageParam = [
-                'page' => max(1, getgpc('g.page', 1, 'intval')),
-                'udi' => url(getini('udi')),
+                'page' => 1,
                 'maxPages' => 0,
                 'showPage' => 10,
                 'showNum' => false,
                 'length' => $limit,
             ];
+
+            if (!isset($pageParam['udi'])) {
+                $_pageParam['udi'] = url(getini('udi'));
+            }
+
             if (!empty($pageParam)) {
                 if (!isset($pageParam['total'])) {
                     $_pageParam['total'] = self::count($table, $condition, $args);
@@ -483,13 +487,15 @@ class DB
         $db = self::Using(self::$using_dbo_id);
         if (is_array($pageParam)) {
             $_pageParam = [
-                'page' => max(1, getgpc('g.page', 1, 'intval')),
-                'udi' => url(getini('udi')),
+                'page' => 1,
                 'maxPages' => 0,
                 'showPage' => 10,
                 'showNum' => false,
                 'length' => $limit,
             ];
+            if (!isset($pageParam['udi'])) {
+                $_pageParam['udi'] = url(getini('udi'));
+            }
             $pageParam = array_merge($_pageParam, $pageParam);
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
         } else {

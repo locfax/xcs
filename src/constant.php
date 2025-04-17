@@ -32,7 +32,7 @@ const RUNTIME_PATH = APP_ROOT . '/runtime/'; //全局数据路径
 const CACHE_PATH = APP_ROOT . '/runtime/cache/'; //缓存路径
 
 const THEMES_CACHE = APP_ROOT . '/runtime/tplcache/'; //模板解析路径
-const THEMES_LANG = APP_ROOT . '/themes/lang/'; //语言包
+const THEMES_LANG = APP_ROOT . '/themes/' . APP_KEY . '/'; //语言包
 const THEMES_VIEW = APP_ROOT . '/themes/' . APP_KEY . '/'; //模板路径
 
 const FILE_READ_MODE = 0644;

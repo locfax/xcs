@@ -8,15 +8,13 @@ class SwooleController
 {
     //swoole请求
     protected $request;
-
     //swoole回应
     protected $response;
+    //时间戳
+    protected int $timestamp;
 
     protected string $_ctl;
     protected string $_act;
-
-    // REST允许的请求类型列表
-    private array $allow_method = ['get', 'post', 'put', 'delete'];
 
     public function init($request, $response, $controllerName, $actionName)
     {
@@ -25,6 +23,12 @@ class SwooleController
 
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
+        $this->env();
+
+        $result = $this->setup();
+        if ($result) {
+            return $result;
+        }
     }
 
     /**
@@ -34,41 +38,72 @@ class SwooleController
      */
     public function __call($name, $arguments)
     {
-        if ($this->request->isAjax()) {
+        if ($this->isAjax()) {
             $res = [
                 'code' => 1,
-                'message' => 'Action ' . $name . '不存在!'
+                'message' => $name . '不存在!'
             ];
-            $this->json($res);
-        } else {
-            $this->response('Action ' . $name . '不存在!');
+            return $this->json($res);
         }
+
+        if (DEBUG) {
+            return $this->response($name . '不存在!');
+        }
+
+        return '';
+    }
+
+    protected function get($key = null)
+    {
+        if ($key == null) {
+            return $this->request->get;
+        }
+        return $this->request->get[$key] ?? '';
+    }
+
+    protected function post($key = null)
+    {
+        if ($key == null) {
+            return $this->request->post;
+        }
+        return $this->request->post[$key] ?? '';
     }
 
     /**
      * @param String $data
      * @param int $code
      */
-    protected function response(string $data = '', int $code = 200): void
+    protected function response(string $data = '')
     {
-        if ($code !== 200) {
-            $this->response->status($code, '');
-        }
-        $this->response->header('Content-Type', 'text/html; charset=UTF-8');
-        $this->response->end($data);
+        return ['type' => 'text', 'content' => $data];
     }
 
     /**
      * @param array $data
      * @param int $code
      */
-    protected function json(array $data = [], int $code = 200): void
+    protected function json(array $data = [])
     {
-        if ($code !== 200) {
-            $this->response->status($code, '');
-        }
-        $this->response->header('Content-Type', 'application/json; charset=UTF-8');
-        $data = $data ? json_encode($data) : '';
-        $this->response->end($data);
+        return ['type' => 'json', 'content' => json_encode($data)];
+    }
+
+    protected function isAjax()
+    {
+        $val = $this->request->header['x-requested-with'] ?? '';
+        return $val && ($val === 'xmlhttprequest');
+    }
+
+    /**
+     * 初始变量
+     */
+    private function env(): void
+    {
+        $this->timestamp = $this->request->server['request_time'] ?? time();
+        App::mergeVars('cfg', ['udi' => strtolower($this->_ctl) . '/' . $this->_act]);
+    }
+
+    protected function setup()
+    {
+        return null;
     }
 }

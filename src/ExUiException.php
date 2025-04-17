@@ -12,7 +12,7 @@ class ExUiException
      * @param bool $Trace
      * @param mixed $ex
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null): void
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null)
     {
         $phpMsg = [];
         if ($Trace) {
@@ -55,7 +55,7 @@ class ExUiException
                 $phpMsg[] = ['file' => $error['file'], 'line' => $error['line'], 'function' => $error['function']];
             }
         }
-        self::showError($title, $message, $phpMsg);
+        return self::showError($title, $message, $phpMsg);
     }
 
     /**
@@ -76,11 +76,9 @@ class ExUiException
      * @param string $message
      * @param mixed $phpMsg
      */
-    public static function showError(string $title, string $message, mixed $phpMsg = ''): void
+    public static function showError(string $title, string $message, mixed $phpMsg = '')
     {
-        ob_get_length() && ob_end_clean();
-
-        echo <<<EOT
+        $header = <<<EOT
 <!DOCTYPE html>
 <html>
 <head>
@@ -125,7 +123,7 @@ EOT;
                     $str .= '<td>' . $msg['line'] . '</td>';
                     if (!empty($msg['function'])) {
                         $str .= '<td>' . $msg['function'] . '</td>';
-                    }else {
+                    } else {
                         $str .= '<td>0</td>';
                     }
                     $str .= '</tr>';
@@ -135,12 +133,15 @@ EOT;
                 $str .= '<ul>' . $phpMsg . '</ul>';
             }
             $str .= '</div>';
-            echo $str;
+            $body = $str;
+        } else {
+            $body = '';
         }
-        echo <<<EOT
+        $footer = <<<EOT
 </div>
 </body>
 </html>
 EOT;
+        return $header . $body . $footer;
     }
 }

@@ -81,7 +81,7 @@ function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
         }
         foreach ($funds as $run) {
             if ('xss' == $run) {
-                $value = is_numeric($value) ? $value : Xcs\Helper\Xss::getInstance()->clean($value);
+                $value = is_numeric($value) ? $value : \Xcs\Helper\Xss::getInstance()->clean($value);
             } elseif ('addslashes' == $run) {
                 $value = is_numeric($value) ? $value : addslashes($value);
             } else {
@@ -92,7 +92,7 @@ function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
     }
 
     if ('xss' == $runFunc) {
-        $value = is_numeric($value) ? $value : Xcs\Helper\Xss::getInstance()->clean($value);
+        $value = is_numeric($value) ? $value : \Xcs\Helper\Xss::getInstance()->clean($value);
     } elseif ($runFunc) {
         $value = call_user_func($runFunc, $value);
     }
@@ -108,7 +108,7 @@ function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
  */
 function getini(string $key): mixed
 {
-    $_CFG = Xcs\App::mergeVars('cfg');
+    $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
     return match (count($k)) {
         1 => $_CFG[$k[0]] ?? null,
@@ -122,17 +122,16 @@ function getini(string $key): mixed
 
 /**
  * @param string $mainTpl
- * @param string $subTpl
  * @param int $cacheTime
  * @param string $cacheFile
  * @param string $file
  */
-function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string $cacheFile, string $file): void
+function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file): void
 {
-    if (is_file(THEMES_VIEW . $subTpl)) {
-        $tplTime = filemtime(THEMES_VIEW . $subTpl);
+    if (is_file(THEMES_VIEW . $mainTpl)) {
+        $tplTime = filemtime(THEMES_VIEW . $mainTpl);
     } else {
-        throw new \Error($subTpl . ' 模板不存在');
+        throw new \Error($mainTpl . ' 模板不存在');
     }
     if ($tplTime < $cacheTime) {
         return;
@@ -140,7 +139,7 @@ function checkTplRefresh(string $mainTpl, string $subTpl, int $cacheTime, string
 
     !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE);
 
-    $template = new Xcs\Template();
+    $template = new \Xcs\Template();
     $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file);
 }
 
@@ -161,12 +160,22 @@ function template(string $file, array $data = [], bool $getTplFile = false)
     $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
     $cacheTpl = THEMES_CACHE . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
-    checkTplRefresh($tplFile, $tplFile, $cacheTime, $cacheFile, $file);
+    checkTplRefresh($tplFile, $cacheTime, $cacheFile, $file);
 
     if (!empty($data)) {
         extract($data);
     }
-    require $cacheTpl;
+
+    ob_get_length() && ob_end_clean();
+    if (function_exists('ob_gzhandler')) { //whether start gzip
+        ob_start('ob_gzhandler');
+    } else {
+        ob_start();
+    }
+    include $cacheTpl;
+    $content = ob_get_contents();
+    ob_get_length() && ob_end_clean();
+    return ['type' => 'text', 'content' => $content];
 }
 
 /**
@@ -177,7 +186,7 @@ function template(string $file, array $data = [], bool $getTplFile = false)
  */
 function url(string $udi, array $params = []): string
 {
-    return Xcs\App::url($udi, $params);
+    return \Xcs\App::url($udi, $params);
 }
 
 /**

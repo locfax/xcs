@@ -17,12 +17,15 @@ class Controller
      * @param string $controllerName
      * @param string $actionName
      */
-    public function __construct(string $controllerName, string $actionName)
+    public function init(string $controllerName, string $actionName)
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
         $this->env();
-        $this->init();
+        $result = $this->setup();
+        if ($result) {
+            return $result;
+        }
     }
 
     /**
@@ -33,21 +36,54 @@ class Controller
     public function __call(string $name, mixed $arguments)
     {
         //动作不存在
-        if (App::isAjax()) {
+        if ($this->isAjax()) {
             $res = [
                 'code' => 1,
-                'message' => 'Action ' . $name . '不存在!',
+                'message' => $name . ' 不存在!',
             ];
-            return App::response($res);
+            return $this->json($res);
         }
-        if (DEBUG) {
-            ExUiException::render('控制器', 'Action:' . $name . "不存在", '', 0, false);
-        }
+
+        throw new \Error($name . " 不存在");
     }
 
-    protected function init(): void
+    protected function get($key = null)
     {
+        if ($key == null) {
+            return getgpc('g.*');
+        }
+        return getgpc('g.' . $key);
+    }
 
+    protected function post($key = null)
+    {
+        if ($key == null) {
+            return getgpc('p.*');
+        }
+        return getgpc('p.' . $key);
+    }
+
+    /**
+     * @param String $data
+     * @param int $code
+     */
+    protected function response(string $data = '')
+    {
+        return ['type' => 'text', 'content' => $data];
+    }
+
+    /**
+     * @param array $data
+     * @param int $code
+     */
+    protected function json(array $data = [])
+    {
+        return ['type' => 'json', 'content' => json_encode($data)];
+    }
+
+    protected function isAjax()
+    {
+        return \Xcs\App::isAjax();
     }
 
     /**
@@ -59,4 +95,8 @@ class Controller
         App::mergeVars('cfg', ['udi' => strtolower($this->_ctl) . '/' . $this->_act]);
     }
 
+    protected function setup()
+    {
+        return null;
+    }
 }

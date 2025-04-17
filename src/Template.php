@@ -53,14 +53,14 @@ class Template
         $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [$this, 'add_quote'], $template);
 
         $headerAdd = '';
-        if (!empty($this->subTemplates)) {
-            $first = true;
-            foreach ($this->subTemplates as $fName) {
-                $headerAdd .= ($first ? "0 " : PHP_EOL) . "|| checkTplRefresh('$tplFile', '$fName', " . time() . ", '$cacheFile', '$file')";
-                $first = false;
-            }
-            $headerAdd .= ';' . PHP_EOL;
-        }
+//        if (!empty($this->subTemplates)) {
+//            $first = true;
+//            foreach ($this->subTemplates as $fName) {
+//                $headerAdd .= ($first ? "0 " : PHP_EOL) . "|| checkTplRefresh('$tplFile', " . time() . ", '$cacheFile', '$file')";
+//                $first = false;
+//            }
+//            $headerAdd .= ';' . PHP_EOL;
+//        }
 
         if ($headerAdd) {
             $template = "<?php " . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
@@ -110,6 +110,7 @@ class Template
             touch($filename) && chmod($filename, FILE_READ_MODE); //全读写
         }
         $ret = file_put_contents($filename, $content, LOCK_EX);
+
         if ($ret && FILE_READ_MODE != $mode) {
             chmod($filename, $mode);
         }

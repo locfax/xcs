@@ -5,11 +5,11 @@ namespace Xcs;
 class App
 {
 
-    public static string $_dCTL = 'c';
-    public static string $_dACT = 'a';
-    public static string $_actionPrefix = 'act_';
-    private static array $_routes = [];
+    private static string $_dCTL = 'c';
+    private static string $_dACT = 'a';
+    private static string $_actionPrefix = 'act_';
     private static string $_controllerPrefix = 'Controller\\';
+    private static array $_routes = [];
 
     /**
      * @param bool $refresh
@@ -52,26 +52,24 @@ class App
                     $error = [
                         ['file' => $errFile, 'line' => $errLine]
                     ];
-                    ExUiException::showError('语法错误', $errStr, $error);
+                    echo ExUiException::showError('语法错误', $errStr, $error);
                 });
                 set_exception_handler(function ($ex) {
                     if ($ex instanceof ExException) {
                         return;
                     }
-                    ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    echo ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error) {
-                        ExUiException::showError('致命异常', $error['message'], [$error]);
+                        echo ExUiException::showError('致命异常', $error['message'], [$error]);
                     }
                 });
                 array_walk($files, function ($file) {
                     require $file;
                 });
-
                 return;
-
             }
 
             !is_dir(RUNTIME_PATH . 'preload') && mkdir(RUNTIME_PATH . 'preload');
@@ -143,40 +141,57 @@ class App
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
-
         $controllerClass = self::$_controllerPrefix . $controllerName;
         //主动载入controller
         if (!self::_loadController($controllerName, $controllerClass)) {
             //控制器加载失败
-            self::_errCtrl($controllerName . ' 控制器不存在');
+            header('Content-Type', 'text/html; charset=UTF-8');
+            echo self::_errCtrl($controllerName . ' 控制器不存在');
             return;
         }
-        $controller = new $controllerClass($controllerName, $actionName);
+
+        $controller = new $controllerClass();
         if (!$controller instanceof $controllerClass) {
             //控制器加载失败
-            self::_errCtrl($controllerName . ' 控制器加载失败');
+            header('Content-Type', 'text/html; charset=UTF-8');
+            echo self::_errCtrl($controllerName . ' 控制器加载失败');
             return;
         }
-        call_user_func([$controller, $actionMethod]);
-        $controller = null;
+        $retsult = $controller->init($controllerName, $actionName);
+        if ($retsult) {
+            echo $retsult;
+            return;
+        }
+
+        $retsult = call_user_func([$controller, $actionMethod]);
+        if (!is_array($retsult)) {
+            echo $retsult;
+            return;
+        }
+
+        if ($retsult['type'] == 'text') {
+            header('Content-Type', 'text/html; charset=UTF-8');
+        } elseif ($retsult['type'] == 'json') {
+            header('Content-Type', 'application/json; charset=UTF-8');
+        }
+        echo $retsult['content'];
     }
 
     /**
      * @param $args
      * @return void
      */
-    private static function _errCtrl($args): void
+    private static function _errCtrl($args)
     {
         if (self::isAjax()) {
             $res = [
                 'code' => 1,
                 'message' => 'error:' . $args,
             ];
-            self::response($res);
-            return;
+            return self::response($res);
         }
         if (DEBUG) {
-            ExUiException::render('控制器', $args, '', 0);
+            return ExUiException::showError('控制器', $args);
         }
     }
 
@@ -184,17 +199,16 @@ class App
      * @param string $args
      * @return void
      */
-    public static function ErrACL(string $args): void
+    public static function ErrACL(string $args)
     {
         if (self::isAjax()) {
             $res = [
                 'code' => 1,
                 'message' => 'error:' . $args,
             ];
-            self::response($res);
-            return;
+            return self::response($res);
         }
-        ExUiException::render('权限', $args, '', 0);
+        return ExUiException::showError('权限', $args);
     }
 
     /**
@@ -364,31 +378,6 @@ class App
         return false;
     }
 
-    public static function output_start(): void
-    {
-        ob_get_length() && ob_end_clean();
-        if (function_exists('ob_gzhandler')) { //whether start gzip
-            ob_start('ob_gzhandler');
-        } else {
-            ob_start();
-        }
-    }
-
-    /**
-     * @param bool $echo
-     * @return array|false|string|string[]|void
-     */
-    public static function output_end(bool $echo = false)
-    {
-        $content = ob_get_contents();
-        $content = preg_replace("/([\\x01-\\x08\\x0b-\\x0c\\x0e-\\x1f])+/", ' ', $content);
-        $content = str_replace([chr(0), ']]>'], [' ', ']]&gt;'], $content);
-        if (!$echo) {
-            return $content;
-        }
-        echo $content;
-    }
-
     /**
      * @param $res
      * @param string $type
@@ -396,30 +385,12 @@ class App
      */
     public static function response($res, string $type = 'json'): bool
     {
-        if ('html' == $type) {
-            header("Content-type: text/html; charset=UTF-8");
-        } elseif ('json' == $type) {
-            header('Content-type: text/json; charset=UTF-8');
+        if ('json' == $type) {
             if (is_array($res)) {
                 $res = json_encode($res, JSON_UNESCAPED_UNICODE);
             }
-        } elseif ('xml' == $type) {
-            header("Content-type: text/xml");
-            $res = '<?xml version="1.0" encoding="utf-8"?' . '>' . "\r\n" . '<root><![CDATA[' . $res;
-        } elseif ('text' == $type) {
-            header("Content-type: text/plain");
-            if (is_array($res)) {
-                $res = json_encode($res, JSON_UNESCAPED_UNICODE);
-            }
-        } else {
-            header("Content-type: text/html; charset=UTF-8");
         }
-        echo $res;
-        if ('xml' == $type) {
-            echo ']]></root>';
-        }
-
-        return true;
+        return ['type' => $type, 'content' => $res];
     }
 
     /**
@@ -450,12 +421,10 @@ class App
      * @param bool $retBool
      * @return bool
      */
-    public static function isAjax(bool $retBool = true): bool
+    public static function isAjax(): bool
     {
-        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && 'XMLHttpRequest' == $_SERVER['HTTP_X_REQUESTED_WITH']) {
-            return $retBool;
-        }
-        return !$retBool;
+        $val = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+        return $val && 'XMLHttpRequest' == $val;
     }
 
     /**
@@ -482,9 +451,7 @@ class App
             $out .= "\";\n";
         }
         $out .= "</script>";
-        echo $out;
-
-        return true;
+        return ['type' => 'text', 'content' => $out];
     }
 
     /**
@@ -498,7 +465,7 @@ class App
     public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): bool|string|null
     {
         if (!$js) {
-            if (headers_sent() || $delay > 0) {
+            if ($delay > 0) {
                 echo <<<EOT
     <html>
     <head>
@@ -527,9 +494,7 @@ EOT;
         if ($return) {
             return $out;
         }
-        echo $out;
-
-        return true;
+        return ['type' => 'text', 'content' => $out];
     }
 
 }
