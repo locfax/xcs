@@ -85,7 +85,7 @@ class RestFul extends Controller
         if (isset($_status[$code])) {
             header('HTTP/1.1 ' . $code . ' ' . $_status[$code]);
             // 确保FastCGI模式下正常
-            header('Status:' . $code . ' ' . $_status[$code]);
+            header('Status: ' . $code . ' ' . $_status[$code]);
         }
     }
 
