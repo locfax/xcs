@@ -79,7 +79,7 @@ class SwooleApp
             //主动载入controller
             if (!$this->_loadController($controllerName, $controllerClass)) {
                 //控制器加载失败
-                $response->header('Content-Type: text/html; charset=UTF-8');
+                $response->header('Content-Type: text/html; charset=UTF-8', true);
                 $response->end($this->_errCtrl($controllerName . ' 控制器不存在'));
                 return;
             }
@@ -88,7 +88,16 @@ class SwooleApp
 
         $retsult = $controller_pool[$controllerClass]->init($request, $response, $controllerName, $actionName);
         if ($retsult) {
-            $response->end($retsult);
+            if (!is_array($retsult)) {
+                $response->end($retsult);
+            } else {
+                if ($retsult['type'] == 'text') {
+                    header('Content-Type: text/html; charset=UTF-8', true);
+                } elseif ($retsult['type'] == 'json') {
+                    header('Content-Type: application/json; charset=UTF-8', true);
+                }
+                $response->end($retsult['content']);
+            }
             return;
         }
 
@@ -99,9 +108,9 @@ class SwooleApp
         }
 
         if ($retsult['type'] == 'text') {
-            header('Content-Type: text/html; charset=UTF-8');
+            header('Content-Type: text/html; charset=UTF-8', true);
         } elseif ($retsult['type'] == 'json') {
-            header('Content-Type: application/json; charset=UTF-8');
+            header('Content-Type: application/json; charset=UTF-8', true);
         }
         $response->end($retsult['content']);
     }

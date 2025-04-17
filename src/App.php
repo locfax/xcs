@@ -145,7 +145,7 @@ class App
         //主动载入controller
         if (!self::_loadController($controllerName, $controllerClass)) {
             //控制器加载失败
-            header('Content-Type: text/html; charset=UTF-8');
+            header('Content-Type: text/html; charset=UTF-8', true);
             echo self::_errCtrl($controllerName . ' 控制器不存在');
             return;
         }
@@ -153,7 +153,16 @@ class App
         $controller = new $controllerClass();
         $retsult = $controller->init($controllerName, $actionName);
         if ($retsult) {
-            echo $retsult;
+            if (!is_array($retsult)) {
+                echo $retsult;
+            } else {
+                if ($retsult['type'] == 'text') {
+                    header('Content-Type: text/html; charset=UTF-8', true);
+                } elseif ($retsult['type'] == 'json') {
+                    header('Content-Type: application/json; charset=UTF-8', true);
+                }
+                echo $retsult['content'];
+            }
             return;
         }
 
@@ -162,7 +171,6 @@ class App
             echo $retsult;
             return;
         }
-
         if ($retsult['type'] == 'text') {
             header('Content-Type: text/html; charset=UTF-8', true);
         } elseif ($retsult['type'] == 'json') {
