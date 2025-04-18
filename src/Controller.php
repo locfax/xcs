@@ -52,7 +52,7 @@ class Controller
         if ($key == null) {
             return getgpc('g.*');
         }
-        return getgpc('g.' . $key);
+        return getgpc('g.' . $key, '');
     }
 
     protected function post($key = null)
@@ -60,7 +60,7 @@ class Controller
         if ($key == null) {
             return getgpc('p.*');
         }
-        return getgpc('p.' . $key);
+        return getgpc('p.' . $key,'');
     }
 
     /**

@@ -167,11 +167,7 @@ function template(string $file, array $data = [], bool $getTplFile = false)
     }
 
     ob_get_length() && ob_end_clean();
-    if (function_exists('ob_gzhandler')) { //whether start gzip
-        ob_start('ob_gzhandler');
-    } else {
-        ob_start();
-    }
+    ob_start();
     include $cacheTpl;
     $content = ob_get_contents();
     ob_get_length() && ob_end_clean();
