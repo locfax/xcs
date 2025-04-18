@@ -15,25 +15,11 @@ use Xcs\ExException;
 
 class MongoDb
 {
-    /**
-     * @var array
-     */
+
     private array $_config;
-
-    /**
-     * @var Manager
-     */
-    private Manager $_link;
-
-    /**
-     * @var WriteConcern
-     */
-    private WriteConcern $_writeConcern;
-
-    /**
-     * @var string
-     */
-    private mixed $_dbname;
+    private $_link;
+    private $_writeConcern;
+    private $_dbname;
 
     /**
      * MongoDb constructor.
@@ -331,11 +317,7 @@ class MongoDb
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             $msg = 'ERROR: ' . $message;
-            if (APP_CLI) {
-                echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
-            } else {
-                throw new ExException($msg, $code);
-            }
+            throw new ExException($message, $code);
         }
         return false;
     }

@@ -85,7 +85,7 @@ class ExUiException
  <title>$title</title>
  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
  <style type="text/css">
- body { background-color: white; color: black; font-size: 9pt; font-family: "ff-tisa-web-pro-1", "ff-tisa-web-pro-2", "Helvetica Neue", Helvetica, "Lucida Grande", "Hiragino Sans GB", "Microsoft YaHei", \5fae\8f6f\96c5\9ed1, "WenQuanYi Micro Hei", sans-serif;}
+ body { background-color: white; color: black; font-size: 9pt; font-family: "Microsoft YaHei", sans-serif;}
  #container {margin: 10px;}
  #message {width: 1024px; color: black;}
  h1 {color: #FF0000; font: 18pt "Verdana"; margin-bottom: 0.5em;}

@@ -107,11 +107,10 @@ class SwooleController
         return null;
     }
 
-
     /**
      * @param $code
      */
-    private function status($code)
+    protected function status($code)
     {
         static $_status = [
             // Informational 1xx
@@ -167,5 +166,10 @@ class SwooleController
             // 确保FastCGI模式下正常
             header('Status: ' . $code . ' ' . $_status[$code]);
         }
+    }
+
+    protected function end()
+    {
+
     }
 }

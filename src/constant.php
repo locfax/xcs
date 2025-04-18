@@ -4,17 +4,9 @@
  */
 defined('APP_ROOT') or define('APP_ROOT', '');
 /**
- * 应用关键字
- */
-defined('APP_KEY') or define('APP_KEY', 'web');
-/**
  * 默认的dsn
  */
 defined('APP_DSN') or define('APP_DSN', 'mysql');
-/**
- * 是否在命令行运行
- */
-defined('APP_CLI') or define('APP_CLI', false);
 /**
  * 是否调试
  */

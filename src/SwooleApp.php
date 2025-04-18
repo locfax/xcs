@@ -40,7 +40,6 @@ class SwooleApp
         array_walk($files, function ($file) {
             require $file;
         });
-
     }
 
     public function dispatching($request, $response): void
