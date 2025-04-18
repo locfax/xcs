@@ -22,7 +22,7 @@ class SqlsrvDb
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new ExException('dsn is empty', 404);
+            throw new ExException('sqlsrv dsn is empty');
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];

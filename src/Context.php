@@ -16,7 +16,7 @@ class Context
         if (empty($cacheDsn)) {
             $cacheDsn = App::mergeVars('dsn');
             if (!isset($cacheDsn[$dsnId])) {
-                throw new ExException('notice', "$dsnId is not setting");
+                throw new ExException($dsnId . ' is not setting');
             }
         }
         return $cacheDsn[$dsnId];
@@ -38,7 +38,7 @@ class Context
         }
         $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
         if (!is_file($file)) {
-            throw new ExException('notice', "$name.inc.php is not exists");
+            throw new ExException($name . '.inc.php is not exists');
         }
         $CacheConfig[$key] = include $file;
 

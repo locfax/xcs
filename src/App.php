@@ -55,9 +55,6 @@ class App
                     echo ExUiException::showError('语法错误', $errStr, $error);
                 });
                 set_exception_handler(function ($ex) {
-                    if ($ex instanceof ExException) {
-                        return;
-                    }
                     echo ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
                 register_shutdown_function(function () {

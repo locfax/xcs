@@ -31,7 +31,7 @@ class Memcache
                 $this->enable = true;
             }
         } catch (MemcachedException $e) {
-            throw new ExException('提示', 'memcache初始化错误');
+            throw new ExException('memcache初始化错误');
         }
         return $this;
     }

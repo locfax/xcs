@@ -23,7 +23,7 @@ class MysqlDb
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new ExException('mysql','dsn is empty');
+            throw new ExException('mysql dsn is empty');
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];

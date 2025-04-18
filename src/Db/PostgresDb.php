@@ -23,7 +23,7 @@ class PostgresDb
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new ExException('postgre', 'dsn is empty');
+            throw new ExException('postgre dsn is empty');
         }
 
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
@@ -581,7 +581,7 @@ class PostgresDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new ExException('postgre', $msg);
+                throw new ExException($msg, $code);
             }
         }
         return false;

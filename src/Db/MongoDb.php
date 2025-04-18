@@ -45,7 +45,7 @@ class MongoDb
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new ExException('mongodb', 'dsn is empty');
+            throw new ExException('mongodb dsn is empty');
         }
 
         $options = [
@@ -334,7 +334,7 @@ class MongoDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new ExException('mongodb', $msg);
+                throw new ExException($msg, $code);
             }
         }
         return false;

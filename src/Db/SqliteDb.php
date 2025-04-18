@@ -23,7 +23,7 @@ class SqliteDb
         $this->_config = $config;
 
         if (empty($config)) {
-            throw new ExException('sqlite', 'dsn is empty');
+            throw new ExException('sqlite dsn is empty');
         }
 
         try {
@@ -552,7 +552,7 @@ class SqliteDb
             if (APP_CLI) {
                 echo DEBUG_EOL . $msg . ' CODE: ' . $code . DEBUG_EOL;
             } else {
-                throw new ExException('sqlite', $msg);
+                throw new ExException($msg, $code);
             }
         }
         return false;

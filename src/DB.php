@@ -2,12 +2,6 @@
 
 namespace Xcs;
 
-use Swoole\Database\PDOConfig;
-use Swoole\Database\PDOPool;
-use Swoole\Database\PDOProxy;
-use Swoole\Database\RedisConfig;
-use Swoole\Database\RedisPool;
-
 use Xcs\Db\MongoDb;
 use Xcs\Db\MysqlDb;
 use Xcs\Db\PostgresDb;
@@ -21,8 +15,6 @@ class DB
     private static string $default_dbo_id = APP_DSN;
     private static string $using_dbo_id = '';
     private static array $used_dbo = [];
-    private static int $dbm_time_out = 0;
-    private static int $mgo_time_out = 0;
 
     /**
      * 返回 mysql 对象
@@ -35,7 +27,7 @@ class DB
      */
     public static function mysql(string $dsnId = 'mysql', mixed $dsn = null): MysqlDb
     {
-        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+        if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -44,10 +36,9 @@ class DB
         }
 
         if ('mysql' != $dsn['driver']) {
-            throw new ExException($dsn['driver'], 'the driver error: mysql');
+            throw new ExException($dsn['driver'] . ' the driver error: mysql');
         }
 
-        self::$dbm_time_out = time() + 30;
         $object = new MysqlDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -63,7 +54,7 @@ class DB
      */
     public static function mongo(string $dsnId = 'mongo', mixed $dsn = null): MongoDb
     {
-        if (isset(self::$used_dbo[$dsnId]) && self::$mgo_time_out > time()) {
+        if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -72,10 +63,9 @@ class DB
         }
 
         if ('mongo' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: mongo');
+            throw new ExException('the driver error: mongo');
         }
 
-        self::$mgo_time_out = time() + 30;
         $object = new MongoDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -89,7 +79,7 @@ class DB
      */
     public static function sqlsrv(string $dsnId = 'sqlsrv', mixed $dsn = null): SqlsrvDb
     {
-        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+        if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -98,10 +88,9 @@ class DB
         }
 
         if ('sqlsrv' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: sqlsrv');
+            throw new ExException('the driver error: sqlsrv');
         }
 
-        self::$dbm_time_out = time() + 30;
         $object = new SqlsrvDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -115,7 +104,7 @@ class DB
      */
     public static function sqlite(string $dsnId = 'sqlite', mixed $dsn = null): SqliteDb
     {
-        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+        if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -124,10 +113,9 @@ class DB
         }
 
         if ('sqlite' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: sqlite');
+            throw new ExException('the driver error: sqlite');
         }
 
-        self::$dbm_time_out = time() + 30;
         $object = new SqliteDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -141,7 +129,7 @@ class DB
      */
     public static function postgres(string $dsnId = 'postgres', mixed $dsn = null): PostgresDb
     {
-        if (isset(self::$used_dbo[$dsnId]) && self::$dbm_time_out > time()) {
+        if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
 
@@ -150,10 +138,9 @@ class DB
         }
 
         if ('postgres' != $dsn['driver']) {
-            throw new ExException('driver', 'the driver error: postgres');
+            throw new ExException('the driver error: postgres');
         }
 
-        self::$dbm_time_out = time() + 30;
         $object = new PostgresDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -162,13 +149,20 @@ class DB
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return PDOPool
+     * @return \Swoole\Database\PDOPool
      * @throws ExException
      */
-    public static function SwoolePdoPool(string $dsnId = 'pool'): PDOPool
+    public static function SwoolePdo(string $dsnId = 'MysqlPool', mixed $dsn = null): \Swoole\Database\PDOPool
     {
-        $dsn = Context::dsn($dsnId);
-        return new PDOPool((new PDOConfig)
+        if (isset(self::$used_dbo[$dsnId])) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
+
+        $pool = new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withDbName($dsn['dbname'])
@@ -176,34 +170,37 @@ class DB
             ->withUsername($dsn['login'])
             ->withPassword($dsn['secret'])
         );
+        self::$used_dbo[$dsnId] = $pool;
+        return $pool;
     }
 
-    /**
-     * swoole 专用
-     * @param PDOProxy $pdo
-     * @return SwooleMysql
-     */
-    public static function SwooleMysql(PDOProxy $pdo): SwooleMysql
-    {
-        return new SwooleMysql($pdo);
-    }
 
     /**
      * swoole 专用
      * @param string $dsnId
-     * @return RedisPool
+     * @return \Swoole\Database\RedisPool
      * @throws ExException
      */
-    public static function SwooleRedisPool(string $dsnId = 'redis'): RedisPool
+    public static function SwooleRedis(string $dsnId = 'redis', mixed $dsn = null): \Swoole\Database\RedisPool
     {
-        $dsn = Context::dsn($dsnId);
-        return new RedisPool((new RedisConfig)
+
+        if (isset(self::$used_dbo[$dsnId])) {
+            return self::$used_dbo[$dsnId];
+        }
+
+        if (is_null($dsn)) {
+            $dsn = Context::dsn($dsnId);
+        }
+
+        $pool = new \Swoole\Database\RedisPool((new \Swoole\Database\RedisConfig)
             ->withHost($dsn['host'])
             ->withPort($dsn['port'])
             ->withAuth($dsn['password'])
             ->withDbIndex($dsn['index'])
             ->withTimeout($dsn['timeout'])
         );
+        self::$used_dbo[$dsnId] = $pool;
+        return $pool;
     }
 
     /**
@@ -599,7 +596,7 @@ class DB
         } elseif ($dsn['driver'] == 'postgres') {
             return self::postgres(self::$using_dbo_id, $dsn);
         } else {
-            throw new ExException('driver', 'dsn id is error. must be mysql | postgres');
+            throw new ExException('dsn id is error. must be mysql | postgres');
         }
     }
 

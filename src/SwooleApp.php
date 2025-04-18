@@ -27,9 +27,6 @@ class SwooleApp
             echo "\n=================================\n\n";
         });
         set_exception_handler(function ($ex) {
-            if ($ex instanceof ExException) {
-                return;
-            }
             echo "\n\n=================================\n";
             echo '[Exception错误: ' . $ex->getFile(), ', ', $ex->getLine(), ', ', $ex->getMessage() . ']';
             echo "\n=================================\n\n";
