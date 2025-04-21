@@ -33,6 +33,11 @@ class Redis
         return $this;
     }
 
+    public function link(): \Redis
+    {
+        return $this->_link;
+    }
+
     public function close(): void
     {
         $this->_link->close();

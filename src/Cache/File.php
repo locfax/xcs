@@ -27,6 +27,11 @@ class File
         return $this;
     }
 
+    public function link()
+    {
+        return null;
+    }
+
     public function close(): void
     {
 

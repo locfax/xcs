@@ -36,6 +36,11 @@ class Memcache
         return $this;
     }
 
+    public function link(): \Memcache
+    {
+        return $this->_link;
+    }
+
     public function close(): void
     {
         $this->_link->close();
