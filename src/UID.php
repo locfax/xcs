@@ -221,7 +221,7 @@ class UID
         }
 
         if ('DECODE' == $operation) {
-            if ((0 == substr($result, 0, 10) || substr($result, 0, 10) - $timestamp > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $keyb), 0, 16)) {
+            if (('0' == substr($result, 0, 10) || intval(substr($result, 0, 10)) - $timestamp > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $keyb), 0, 16)) {
                 return substr($result, 26);
             }
             return '';
