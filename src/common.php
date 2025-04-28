@@ -166,7 +166,6 @@ function template(string $file, array $data = [], bool $getTplFile = false)
         extract($data);
     }
 
-    ob_get_length() && ob_end_clean();
     ob_start();
     include $cacheTpl;
     $content = ob_get_contents();

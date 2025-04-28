@@ -19,7 +19,7 @@ class Redis
      * @param $config
      * @return $this
      */
-    public function init($config): Redis
+    public function init($config, $option = true): Redis
     {
         $this->_link = new \Redis();
         $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
@@ -27,7 +27,9 @@ class Redis
             $connect = $this->_link->auth($config['password']);
         }
         if ($connect) {
-            $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_NONE);
+            if ($option) {
+                $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
+            }
             $this->enable = true;
         }
         return $this;
@@ -56,9 +58,9 @@ class Redis
      * @param string $key
      * @param array|string $value
      * @param int $ttl
-     * @return bool|\Redis
+     * @return mixed
      */
-    public function set(string $key, array|string $value, int $ttl = 0): bool|\Redis
+    public function set(string $key, array|string $value, int $ttl = 0): mixed
     {
         if ($ttl > 0) {
             $ret = $this->_link->set($key, $value, $ttl);
@@ -78,9 +80,9 @@ class Redis
 
     /**
      * @param string $key
-     * @return int|\Redis
+     * @return mixed
      */
-    public function rm(string $key): int|\Redis
+    public function rm(string $key): mixed
     {
         return $this->_link->del($key);
     }
