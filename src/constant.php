@@ -1,19 +1,10 @@
 <?php
-/**
- * 网站根目录
- */
+
 defined('APP_ROOT') or define('APP_ROOT', '');
-/**
- * 默认的dsn
- */
 defined('APP_DSN') or define('APP_DSN', 'mysql');
-/**
- * 是否调试
- */
+defined('APP_KEY') or define('APP_KEY', 'web');
 defined('DEBUG') or define('DEBUG', true);
-/**
- * 换行
- */
+
 defined('DEBUG_EOL') or define('DEBUG_EOL', PHP_OS == 'Linux' ? "\n" : "\r\n");
 
 const XCS_PATH = __DIR__ . '/';  //框架路径

@@ -182,15 +182,18 @@ class App
      */
     private static function _errCtrl($args)
     {
-        if (self::isAjax()) {
-            $res = [
-                'code' => 1,
-                'message' => 'error:' . $args,
-            ];
-            return self::response($res, 'json');
-        }
         if (DEBUG) {
+            if (self::isAjax()) {
+                $res = [
+                    'code' => 1,
+                    'message' => 'error:' . $args,
+                ];
+                return self::response($res, 'json');
+            }
             return ExUiException::showError('控制器', $args);
+        } else {
+            header('HTTP/1.1 404 Not Found');
+            header('Status: 404 Not Found');
         }
         return '';
     }
@@ -418,13 +421,12 @@ class App
     }
 
     /**
-     * @param bool $retBool
      * @return bool
      */
     public static function isAjax(): bool
     {
         $val = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
-        return $val && 'XMLHttpRequest' == $val;
+        return 'XMLHttpRequest' == $val;
     }
 
     /**
@@ -460,9 +462,9 @@ class App
      * @param bool $js
      * @param bool $jsWrapped
      * @param bool $return
-     * @return mixed
+     * @return string|string[]
      */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): array|string
     {
         if (!$js) {
             if ($delay > 0) {

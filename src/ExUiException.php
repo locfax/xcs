@@ -11,8 +11,9 @@ class ExUiException
      * @param int $line
      * @param bool $Trace
      * @param mixed $ex
+     * @return string
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null)
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null): string
     {
         $phpMsg = [];
         if ($Trace) {
@@ -60,9 +61,9 @@ class ExUiException
 
     /**
      * @param mixed $message
-     * @return mixed
+     * @return string
      */
-    public static function clear(mixed $message): mixed
+    public static function clear(mixed $message): string
     {
         if (DEBUG) {
             return is_object($message) ? get_class($message) : ($message ? htmlspecialchars($message) : '');
@@ -75,73 +76,10 @@ class ExUiException
      * @param string $title 错误类型 db,system
      * @param string $message
      * @param mixed $phpMsg
+     * @return string
      */
-    public static function showError(string $title, string $message, mixed $phpMsg = '')
+    public static function showError(string $title, string $message, mixed $phpMsg = ''): string
     {
-        $header = <<<EOT
-<!DOCTYPE html>
-<html>
-<head>
- <title>$title</title>
- <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
- <style type="text/css">
- body { background-color: white; color: black; font-size: 9pt; font-family: "Microsoft YaHei", sans-serif;}
- #container {margin: 10px;}
- #message {width: 1024px; color: black;}
- h1 {color: #FF0000; font: 18pt "Verdana"; margin-bottom: 0.5em;}
- .bg1 {background-color: #FFFFCC;}
- .bg2 {background-color: #EEEEEE;}
- .table {background: #AAAAAA; font: 11pt Menlo,Consolas,"Lucida Console"}
- .info {
-  background: none repeat scroll 0 0 #F3F3F3;
-  border: 0px solid #aaaaaa;
-  border-radius: 10px 10px 10px 10px;
-  color: #000000;
-  font-size: 11pt;
-  line-height: 160%;
-  margin-bottom: 1em;
-  padding: 1em;
- }
- </style>
-</head>
-<body>
-<div id="container">
-<h1>$title</h1>
-<div class='info'><pre>$message</pre></div>
-EOT;
-        if (!empty($phpMsg)) {
-            $str = '<div class="info">';
-            $str .= '<p><strong>Call Stack</strong></p>';
-            if (is_array($phpMsg)) {
-                $str .= '<table cellpadding="5" cellspacing="1" width="100%" class="table"><tbody>';
-                $str .= '<tr class="bg2"><td>No.</td><td>File</td><td>Line</td><td>Code</td></tr>';
-                foreach ($phpMsg as $k => $msg) {
-                    $k++;
-                    $str .= '<tr class="bg1">';
-                    $str .= '<td>' . $k . '</td>';
-                    $str .= '<td>' . str_replace(dirname(APP_ROOT), '..', $msg['file']) . '</td>';
-                    $str .= '<td>' . $msg['line'] . '</td>';
-                    if (!empty($msg['function'])) {
-                        $str .= '<td>' . $msg['function'] . '</td>';
-                    } else {
-                        $str .= '<td>0</td>';
-                    }
-                    $str .= '</tr>';
-                }
-                $str .= '</tbody></table>';
-            } else {
-                $str .= '<ul>' . $phpMsg . '</ul>';
-            }
-            $str .= '</div>';
-            $body = $str;
-        } else {
-            $body = '';
-        }
-        $footer = <<<EOT
-</div>
-</body>
-</html>
-EOT;
-        return $header . $body . $footer;
+        return '<pre>' . print_r($title, true) . print_r($message, true) . print_r($phpMsg, true) . '</pre>';
     }
 }
