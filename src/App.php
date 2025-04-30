@@ -148,39 +148,39 @@ class App
         }
 
         $controller = new $controllerClass();
-        $retsult = $controller->init($controllerName, $actionName);
-        if ($retsult) {
-            if (!is_array($retsult)) {
-                echo $retsult;
+        $result = $controller->init($controllerName, $actionName);
+        if ($result) {
+            if (!is_array($result)) {
+                echo $result;
             } else {
-                if ($retsult['type'] == 'text') {
+                if ($result['type'] == 'text') {
                     header('Content-Type: text/html; charset=UTF-8', true);
-                } elseif ($retsult['type'] == 'json') {
+                } elseif ($result['type'] == 'json') {
                     header('Content-Type: application/json; charset=UTF-8', true);
                 }
-                echo $retsult['content'];
+                echo $result['content'];
             }
             return;
         }
 
-        $retsult = call_user_func([$controller, $actionMethod]);
-        if (!is_array($retsult)) {
-            echo $retsult;
+        $result = call_user_func([$controller, $actionMethod]);
+        if (!is_array($result)) {
+            echo $result;
             return;
         }
-        if ($retsult['type'] == 'text') {
+        if ($result['type'] == 'text') {
             header('Content-Type: text/html; charset=UTF-8', true);
-        } elseif ($retsult['type'] == 'json') {
+        } elseif ($result['type'] == 'json') {
             header('Content-Type: application/json; charset=UTF-8', true);
         }
-        echo $retsult['content'];
+        echo $result['content'];
     }
 
     /**
      * @param $args
-     * @return mixed
+     * @return array|string
      */
-    private static function _errCtrl($args)
+    private static function _errCtrl($args): array|string
     {
         if (DEBUG) {
             if (self::isAjax()) {
@@ -200,9 +200,9 @@ class App
 
     /**
      * @param string $args
-     * @return mixed
+     * @return string|array
      */
-    public static function ErrACL(string $args)
+    public static function ErrACL(string $args): string|array
     {
         if (self::isAjax()) {
             $res = [
@@ -386,7 +386,7 @@ class App
      * @param string $type
      * @return array
      */
-    public static function response($res, string $type = 'json')
+    public static function response($res, string $type = 'json'): array
     {
         if ('json' == $type) {
             if (is_array($res)) {
@@ -435,7 +435,7 @@ class App
      * @param string $url
      * @return array
      */
-    public static function jsAlert(string $message = '', string $after_action = '', string $url = '')
+    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): array
     {
         //php turn to alert
         $out = "<script type=\"text/javascript\">\n";
@@ -462,7 +462,7 @@ class App
      * @param bool $js
      * @param bool $jsWrapped
      * @param bool $return
-     * @return string|string[]
+     * @return array|string
      */
     public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): array|string
     {

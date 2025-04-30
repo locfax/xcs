@@ -10,7 +10,7 @@ class SqlsrvDb
 {
     private array $_config;
     private bool $repeat = false;
-    private $_link;
+    private PDO $_link;
 
     /**
      * PdoDb constructor.
@@ -41,11 +41,6 @@ class SqlsrvDb
                 $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }
-    }
-
-    public function __destruct()
-    {
-
     }
 
     public function close(): void

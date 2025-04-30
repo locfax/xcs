@@ -6,7 +6,6 @@ use Xcs\Db\MongoDb;
 use Xcs\Db\MysqlDb;
 use Xcs\Db\PostgresDb;
 use Xcs\Db\SqliteDb;
-use Xcs\Db\SwooleMysql;
 use Xcs\Db\SqlsrvDb;
 
 class DB
@@ -143,34 +142,6 @@ class DB
         $object = new PostgresDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
-    }
-
-    /**
-     * swoole 专用
-     * @param string $dsnId
-     * @return \Swoole\Database\PDOPool
-     * @throws ExException
-     */
-    public static function SwooleMysql(string $dsnId = 'SwooleMysql', mixed $dsn = null): \Swoole\Database\PDOPool
-    {
-        if (isset(self::$used_dbo[$dsnId])) {
-            return self::$used_dbo[$dsnId];
-        }
-
-        if (is_null($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $pool = new \Swoole\Database\PDOPool((new \Swoole\Database\PDOConfig)
-            ->withHost($dsn['host'])
-            ->withPort($dsn['port'])
-            ->withDbName($dsn['dbname'])
-            //->withCharset($dsn['charset'])
-            ->withUsername($dsn['login'])
-            ->withPassword($dsn['secret'])
-        );
-        self::$used_dbo[$dsnId] = $pool;
-        return $pool;
     }
 
     /**

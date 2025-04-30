@@ -22,7 +22,7 @@ class Memcache
      * @return $this
      * @throws ExException
      */
-    public function init($config): Memcache
+    public function init($config)
     {
         try {
             $this->_link = new \Memcache();
@@ -30,18 +30,18 @@ class Memcache
             if ($connect) {
                 $this->enable = true;
             }
-        } catch (MemcachedException $e) {
+        } catch (MemcachedException) {
             throw new ExException('memcache初始化错误');
         }
         return $this;
     }
 
-    public function link(): \Memcache
+    public function link()
     {
         return $this->_link;
     }
 
-    public function close(): void
+    public function close()
     {
         $this->_link->close();
     }
@@ -50,11 +50,11 @@ class Memcache
      * @param string $key
      * @return array|false|string
      */
-    public function get(string $key): bool|array|string
+    public function get(string $key)
     {
         try {
             return $this->_link->get($key);
-        } catch (MemcachedException $e) {
+        } catch (MemcachedException) {
             return false;
         }
     }
@@ -65,7 +65,7 @@ class Memcache
      * @param int $ttl
      * @return bool
      */
-    public function set(string $key, array|string $value, int $ttl = 0): bool
+    public function set(string $key, array|string $value, int $ttl = 0)
     {
         try {
             $data = $this->get($key);
@@ -74,7 +74,7 @@ class Memcache
             } else {
                 return $this->_link->add($key, $value, MEMCACHE_COMPRESSED, $ttl);
             }
-        } catch (MemcachedException $e) {
+        } catch (MemcachedException) {
             return false;
         }
     }
@@ -82,7 +82,7 @@ class Memcache
     /**
      * @return bool
      */
-    public function expire(): bool
+    public function expire()
     {
         return false;
     }
@@ -91,16 +91,16 @@ class Memcache
      * @param string $key
      * @return bool
      */
-    public function rm(string $key): bool
+    public function rm(string $key)
     {
         try {
             return $this->_link->delete($key);
-        } catch (MemcachedException $e) {
+        } catch (MemcachedException) {
             return false;
         }
     }
 
-    public function clear(): bool
+    public function clear()
     {
         return $this->_link->flush();
     }

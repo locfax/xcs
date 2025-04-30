@@ -20,7 +20,7 @@ class ImageGd
         if (!$ext) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
         }
-        $fileext = trim(strtolower($ext), '.');
+        $fileExt = trim(strtolower($ext), '.');
         $ext2functions = [
             'jpg' => 'imagecreatefromjpeg',
             'jpeg' => 'imagecreatefromjpeg',
@@ -28,10 +28,10 @@ class ImageGd
             'gif' => 'imagecreatefromgif',
             'bmp' => 'imagecreatefrombmp'
         ];
-        if (!isset($ext2functions[$fileext])) {
+        if (!isset($ext2functions[$fileExt])) {
             return false;
         }
-        $handle = call_user_func($ext2functions[$fileext], $filename);
+        $handle = call_user_func($ext2functions[$fileExt], $filename);
         return new HandleGd($handle);
     }
 

@@ -27,7 +27,14 @@
     "php": ">=8.0",
     "ext-json": "*",
     "ext-pdo": "*",
-    "ext-mbstring": "*"
+    "ext-mbstring": "*",
+    "ext-mongodb": "*",
+    "ext-curl": "*",
+    "ext-gd": "*",
+    "ext-iconv": "*",
+    "ext-memcache": "*",
+    "ext-redis": "*",
+    "ext-memcached": "*"
   },
   "suggest": {}
 }

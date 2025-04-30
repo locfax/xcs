@@ -80,6 +80,6 @@ class ExUiException
      */
     public static function showError(string $title, string $message, mixed $phpMsg = ''): string
     {
-        return '<pre>' . print_r($title, true) . print_r($message, true) . print_r($phpMsg, true) . '</pre>';
+        return '<pre>' . print_r($title, true) . '</pre><pre>' . print_r($message, true) . '</pre><pre>' . print_r($phpMsg, true) . '</pre>';
     }
 }

@@ -11,7 +11,7 @@ class SqliteDb
 
     private array $_config;
     private bool $repeat = false;
-    private $_link;
+    private PDO $_link;
 
     /**
      * PdoDb constructor.
@@ -37,11 +37,6 @@ class SqliteDb
                 $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }
-    }
-
-    public function __destruct()
-    {
-
     }
 
     public function close(): void
@@ -452,8 +447,8 @@ class SqliteDb
      */
     public function pageSql(string $sql, mixed $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
-        $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
+            $sql .= " LIMIT {$limit} OFFSET {$offset}";
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {

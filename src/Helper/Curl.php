@@ -3,7 +3,6 @@
 namespace Xcs\Helper;
 
 use CURLFile;
-use JetBrains\PhpStorm\ArrayShape;
 
 class Curl
 {
@@ -61,9 +60,9 @@ class Curl
         /* 设置请求头部 */
         if (!empty($data)) {
             if (is_array($data)) {
-                if (isset($data['__formfile'])) {
-                    $data[$data['__formfile']] = class_exists('\CURLFile', false) ? new CURLFile($data[$data['__formfile']]) : '@' . $data[$data['__formfile']];
-                    unset($data['__formfile']);
+                if (isset($data['__file'])) {
+                    $data[$data['__file']] = class_exists('\CURLFile', false) ? new CURLFile($data[$data['__file']]) : '@' . $data[$data['__file']];
+                    unset($data['__file']);
                     $postStr = $data;
                 } else {
                     $postStr = http_build_query($data);
@@ -74,9 +73,9 @@ class Curl
             if (isset($httpHead['Method'])) {
                 if ($httpHead['Method'] == 'PUT') {
                     curl_setopt($ch, CURLOPT_PUT, true);
-                    $fOpen = fopen($data[$data['__putfile']], 'r');
+                    $fOpen = fopen($data[$data['__file']], 'r');
                     curl_setopt($ch, CURLOPT_INFILE, $fOpen);//设置上传文件的FILE指针
-                    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data[$data['__putfile']]));//设置上传文件的大小
+                    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data[$data['__file']]));//设置上传文件的大小
                 } else {
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
                     unset($httpHead['Method']);
@@ -197,9 +196,9 @@ class Curl
 
     /**
      * @param $_raw_url
-     * @return array
+     * @return string|array|bool|int|null
      */
-    #[ArrayShape(["scheme" => "string", "host" => "string", 'port' => "int|string", "user" => "string", "pass" => "string", "query" => "string", "path" => "string", "fragment" => "string"])] private static function raw_url($_raw_url): array
+    private static function raw_url($_raw_url): string|array|bool|int|null
     {
         $raw_url = (string)$_raw_url;
         if (!str_contains($raw_url, '://')) {
@@ -228,22 +227,22 @@ class Curl
                 return $data;
             }
             $flags = ord(substr($data, 3, 1));
-            $headerlen = 10;
+            $headerLen = 10;
             if ($flags & 4) {
-                $extralen = unpack('v', substr($data, 10, 2));
-                $extralen = (int)$extralen[1];
-                $headerlen += 2 + $extralen;
+                $extraLen = unpack('v', substr($data, 10, 2));
+                $extraLen = (int)$extraLen[1];
+                $headerLen += 2 + $extraLen;
             }
             if ($flags & 8) { // Filename
-                $headerlen = @strpos($data, chr(0), $headerlen) + 1;
+                $headerLen = @strpos($data, chr(0), $headerLen) + 1;
             }
             if ($flags & 16) { // Comment
-                $headerlen = @strpos($data, chr(0), $headerlen) + 1;
+                $headerLen = @strpos($data, chr(0), $headerLen) + 1;
             }
             if ($flags & 2) { // CRC at end of file
-                $headerlen += 2;
+                $headerLen += 2;
             }
-            $unpacked = @gzinflate(substr($data, $headerlen));
+            $unpacked = @gzinflate(substr($data, $headerLen));
         } elseif ('deflate' == $gzip) {
             if (!function_exists('gzuncompress')) {
                 return $data;

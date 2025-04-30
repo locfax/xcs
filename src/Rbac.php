@@ -16,6 +16,7 @@ class Rbac
      * @param string $controllerName
      * @param string|null $actionName
      * @param bool $strict
+     * @param array|null $roles
      * @return bool
      */
     public static function check(string $controllerName, string $actionName = null, bool $strict = false, array $roles = null): bool

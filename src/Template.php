@@ -4,7 +4,6 @@ namespace Xcs;
 
 class Template
 {
-    private array $subTemplates = [];
     private array $replaceCode = ['search' => [], 'replace' => []];
     private array $language = [];
     private string $tplDir = '';
@@ -22,7 +21,6 @@ class Template
         $var_regexp = "((\\\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(\-\>)?[a-zA-Z0-9_\x7f-\xff]*)(\[[a-zA-Z0-9_\-\.\"\'\[\]\$\x7f-\xff]+\])*)";
         $const_regexp = "([A-Z_\x7f-\xff][A-Z0-9_\x7f-\xff]*)";
 
-        $this->subTemplates = [];
         for ($i = 1; $i <= 10; $i++) {
             if (str_contains($template, '{subtemplate')) {
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z\d_:\/]+)\}(\-\-\>)?[\n\r\t]*/", [$this, 'tag_subTemplate'], $template);
@@ -51,20 +49,6 @@ class Template
         $template = preg_replace("/\{(\\\$[\w\d_\-\>\[\]\'\"\$\.\x7f-\xff]+)\}/s", "<?=\\1?>", $template);
         $template = preg_replace_callback("/$var_regexp/s", [$this, 'add_quote'], $template);
         $template = preg_replace_callback("/\<\?\=\<\?\=$var_regexp\?\>\?\>/s", [$this, 'add_quote'], $template);
-
-        $headerAdd = '';
-//        if (!empty($this->subTemplates)) {
-//            $first = true;
-//            foreach ($this->subTemplates as $fName) {
-//                $headerAdd .= ($first ? "0 " : PHP_EOL) . "|| checkTplRefresh('$tplFile', " . time() . ", '$cacheFile', '$file')";
-//                $first = false;
-//            }
-//            $headerAdd .= ';' . PHP_EOL;
-//        }
-
-        if ($headerAdd) {
-            $template = "<?php " . PHP_EOL . " {$headerAdd}?>" . PHP_EOL . "$template";
-        }
 
         $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z\d_:\/]+)\}[\n\r\t]*/", [$this, 'tag_template'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);
@@ -252,7 +236,6 @@ class Template
         $tplFile = template($file[2], [], true);
         $content = implode('', file($this->tplDir . $tplFile));
         if ($content) {
-            $this->subTemplates[] = $tplFile;
             return $content;
         } else {
             return '<!--1 ' . $file[2] . ' 1-->';

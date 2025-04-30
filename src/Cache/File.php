@@ -32,7 +32,7 @@ class File
         return null;
     }
 
-    public function close(): void
+    public function close()
     {
 
     }
@@ -41,7 +41,7 @@ class File
      * @param string $key
      * @return mixed
      */
-    public function get(string $key): mixed
+    public function get(string $key)
     {
         $cacheFile = CACHE_PATH . $key . '.php';
         if (is_file($cacheFile)) {
@@ -63,7 +63,7 @@ class File
      * @param int $ttl
      * @return false|int
      */
-    public function set(string $key, array|string $val, int $ttl = 0): bool|int
+    public function set(string $key, array|string $val, int $ttl = 0)
     {
         if ($ttl > 0) {
             $timeout = time() + $ttl;
@@ -87,7 +87,7 @@ class File
     /**
      * @return bool
      */
-    public function expire(): bool
+    public function expire()
     {
         return false;
     }
@@ -96,7 +96,7 @@ class File
      * @param string $key
      * @return bool
      */
-    public function rm(string $key): bool
+    public function rm(string $key)
     {
         $cacheFile = CACHE_PATH . $key . '.php';
         if (file_exists($cacheFile)) {
@@ -108,7 +108,7 @@ class File
     /**
      * @return void
      */
-    public function clear(): void
+    public function clear()
     {
         $cacheDir = CACHE_PATH;
         $files = FileHelper::list_files($cacheDir);
@@ -123,7 +123,7 @@ class File
      * @param $mode
      * @return false|int
      */
-    public function save($filename, $content, $mode): bool|int
+    private function save($filename, $content, $mode)
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);

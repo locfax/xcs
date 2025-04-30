@@ -31,7 +31,7 @@ class Controller
     /**
      * @param string $name
      * @param mixed $arguments
-     * @return bool|void
+     * @return array
      */
     public function __call(string $name, mixed $arguments)
     {
@@ -65,7 +65,7 @@ class Controller
 
     /**
      * @param String $data
-     * @param int $code
+     * @return string[]
      */
     protected function response(string $data = '')
     {
@@ -74,7 +74,7 @@ class Controller
 
     /**
      * @param array $data
-     * @param int $code
+     * @return array
      */
     protected function json(array $data = [])
     {
@@ -83,7 +83,7 @@ class Controller
 
     protected function isAjax()
     {
-        return \Xcs\App::isAjax();
+        return App::isAjax();
     }
 
     /**
@@ -103,7 +103,7 @@ class Controller
     /**
      * @param $code
      */
-    protected function status($code)
+    protected function status($code): void
     {
         static $_status = [
             // Informational 1xx
@@ -161,7 +161,7 @@ class Controller
         }
     }
 
-    protected function end()
+    protected function end(): void
     {
 
     }

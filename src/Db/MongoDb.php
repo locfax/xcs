@@ -17,9 +17,9 @@ class MongoDb
 {
 
     private array $_config;
-    private $_link;
-    private $_writeConcern;
-    private $_dbname;
+    private Manager $_link;
+    private WriteConcern $_writeConcern;
+    private mixed $_dbname;
 
     /**
      * MongoDb constructor.
@@ -53,10 +53,6 @@ class MongoDb
 
     }
 
-    public function __destruct()
-    {
-
-    }
 
     public function close(): void
     {
@@ -238,12 +234,11 @@ class MongoDb
      */
     public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
     {
-        $options = array_merge($options, [
-            'limit' => $limit,
-            'skip' => $offset
-        ]);
-
         try {
+            $options = array_merge($options, [
+                'limit' => $limit,
+                'skip' => $offset
+            ]);
             $query = new MongoQuery($condition, $options);
             $cursor = $this->_link->executeQuery($this->_dbname . '.' . $table, $query, new ReadPreference(ReadPreference::RP_PRIMARY_PREFERRED));
             $cursor = $cursor->toArray();
@@ -317,7 +312,7 @@ class MongoDb
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             $msg = 'ERROR: ' . $message . ' CODE:' . $code;
-            throw new ExException($message);
+            throw new ExException($msg);
         }
         return false;
     }

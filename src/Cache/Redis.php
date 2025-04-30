@@ -17,9 +17,10 @@ class Redis
 
     /**
      * @param $config
+     * @param bool $option
      * @return $this
      */
-    public function init($config, $option = true): Redis
+    public function init($config, bool $option = true)
     {
         $this->_link = new \Redis();
         $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
@@ -40,7 +41,7 @@ class Redis
         return $this->_link;
     }
 
-    public function close(): void
+    public function close()
     {
         $this->_link->close();
     }
@@ -49,7 +50,7 @@ class Redis
      * @param string $key
      * @return mixed
      */
-    public function get(string $key): mixed
+    public function get(string $key)
     {
         return $this->_link->get($key);
     }
@@ -58,9 +59,9 @@ class Redis
      * @param string $key
      * @param array|string $value
      * @param int $ttl
-     * @return mixed
+     * @return bool|\Redis
      */
-    public function set(string $key, array|string $value, int $ttl = 0): mixed
+    public function set(string $key, array|string $value, int $ttl = 0)
     {
         if ($ttl > 0) {
             $ret = $this->_link->set($key, $value, $ttl);
@@ -73,23 +74,23 @@ class Redis
     /**
      * @return bool
      */
-    public function expire(): bool
+    public function expire()
     {
         return false;
     }
 
     /**
      * @param string $key
-     * @return mixed
+     * @return int|\Redis
      */
-    public function rm(string $key): mixed
+    public function rm(string $key)
     {
         return $this->_link->del($key);
     }
 
-    public function clear(): void
+    public function clear()
     {
-        //$this->_link->flushDB();
+        $this->_link->flushDB();
     }
 
 }

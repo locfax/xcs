@@ -11,7 +11,7 @@ class PostgresDb
 
     private array $_config;
     private bool $repeat = false;
-    private $_link;
+    private PDO $_link;
 
     /**
      * PdoDb constructor.
@@ -42,11 +42,6 @@ class PostgresDb
                 $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
             }
         }
-    }
-
-    public function __destruct()
-    {
-
     }
 
     public function close(): void
@@ -456,8 +451,8 @@ class PostgresDb
      */
     public function pageSql(string $sql, mixed $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
-        $sql .= " LIMIT {$limit} OFFSET {$offset}";
         try {
+            $sql .= " LIMIT {$limit} OFFSET {$offset}";
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
@@ -578,7 +573,7 @@ class PostgresDb
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
             $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE:' . $code;
-            throw new ExException($message);
+            throw new ExException($msg);
         }
         return false;
     }
