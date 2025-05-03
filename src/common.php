@@ -146,20 +146,22 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
 /**
  * @param string $file
  * @param array $data
- * @param bool $getTplFile
- * @return string|void
+ * @param bool $returnTplFile
+ * @param string $type
+ * @return array|string
  */
-function template(string $file, array $data = [], bool $getTplFile = false)
+function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'text'): array|string
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
-    if ($getTplFile) {
+    if ($returnTplFile) {
         return $tplFile;
     }
 
     $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
     $cacheTpl = THEMES_CACHE . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
+
     checkTplRefresh($tplFile, $cacheTime, $cacheFile, $file);
 
     if (!empty($data)) {
@@ -170,7 +172,7 @@ function template(string $file, array $data = [], bool $getTplFile = false)
     include $cacheTpl;
     $content = ob_get_contents();
     ob_get_length() && ob_end_clean();
-    return ['type' => 'text', 'content' => $content];
+    return ['type' => $type, 'content' => $content];
 }
 
 /**
