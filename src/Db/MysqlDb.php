@@ -26,13 +26,13 @@ class MysqlDb
             throw new ExException('mysql dsn is empty');
         }
 
-        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"];
         if (isset($config['options'])) {
             $options = array_merge($options, $config['options']);
         }
 
         try {
-            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8', $config['host'], $config['port'], $config['dbname']);
+            $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['dbname']);
             $this->_link = new PDO($dsn, $config['login'], $config['secret'], $options);
         } catch (PDOException $exception) {
             if (!$this->repeat) {
