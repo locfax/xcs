@@ -43,6 +43,8 @@ class File
      */
     public function get(string $key)
     {
+        $key = str_replace(':', '_', $key);
+
         $cacheFile = CACHE_PATH . $key . '.php';
         if (is_file($cacheFile)) {
             $data = include $cacheFile;
@@ -65,6 +67,8 @@ class File
      */
     public function set(string $key, array|string $val, int $ttl = 0)
     {
+        $key = str_replace(':', '_', $key);
+
         if ($ttl > 0) {
             $timeout = time() + $ttl;
         } else {
@@ -98,6 +102,8 @@ class File
      */
     public function rm(string $key)
     {
+        $key = str_replace(':', '_', $key);
+
         $cacheFile = CACHE_PATH . $key . '.php';
         if (file_exists($cacheFile)) {
             unlink($cacheFile);

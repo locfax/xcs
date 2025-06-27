@@ -24,9 +24,7 @@
   "license": "MIT",
   "name": "locfax/xcs",
   "require": {
-    "php": ">=8.0",
-    "ext-json": "*",
-    "ext-pdo": "*"
+    "php": ">=7.04",
   },
   "suggest": {}
 }
