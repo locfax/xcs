@@ -19,7 +19,7 @@ class MongoDb
     private array $_config;
     private Manager $_link;
     private WriteConcern $_writeConcern;
-    private mixed $_dbname;
+    private $_dbname;
 
     /**
      * MongoDb constructor.
@@ -84,7 +84,7 @@ class MongoDb
      * @return bool|int|string|null
      * @throws ExException
      */
-    public function create(string $table, array $document = [], bool $retId = false): bool|int|string|null
+    public function create(string $table, array $document = [], bool $retId = false)
     {
         try {
             if (isset($document['_id'])) {
@@ -114,7 +114,7 @@ class MongoDb
      * @return bool|int|null
      * @throws ExException
      */
-    public function update(string $table, array $document = [], array $condition = [], string $options = '$set'): bool|int|null
+    public function update(string $table, array $document = [], array $condition = [], string $options = '$set')
     {
         try {
             if (isset($condition['_id'])) {
@@ -144,7 +144,7 @@ class MongoDb
      * @return bool|int|null
      * @throws ExException
      */
-    public function remove(string $table, array $condition = [], bool $multi = false): bool|int|null
+    public function remove(string $table, array $condition = [], bool $multi = false)
     {
         try {
             if (isset($condition['_id'])) {
@@ -170,7 +170,7 @@ class MongoDb
      * @return array|bool
      * @throws ExException
      */
-    public function findOne(string $table, array $options = [], array $condition = []): bool|array
+    public function findOne(string $table, array $options = [], array $condition = [])
     {
         try {
             if (isset($condition['_id'])) {
@@ -202,7 +202,7 @@ class MongoDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $table, array $options = [], array $condition = []): bool|array
+    public function findAll(string $table, array $options = [], array $condition = [])
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -232,7 +232,7 @@ class MongoDb
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
+    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
     {
         try {
             $options = array_merge($options, [
@@ -305,7 +305,7 @@ class MongoDb
      * @return bool
      * @throws ExException
      */
-    private function _halt(string $message = '', mixed $code = 0): bool
+    private function _halt(string $message = '', $code = 0): bool
     {
         if ($this->_config['dev']) {
             $this->close();

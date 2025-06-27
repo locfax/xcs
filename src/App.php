@@ -81,7 +81,7 @@ class App
      * @param $runFile
      * @return mixed
      */
-    private static function _makeRunFile($runtimeFiles, $runFile): mixed
+    private static function _makeRunFile($runtimeFiles, $runFile)
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -180,7 +180,7 @@ class App
      * @param $args
      * @return array|string
      */
-    private static function _errCtrl($args): array|string
+    private static function _errCtrl($args)
     {
         if (DEBUG) {
             if (self::isAjax()) {
@@ -202,7 +202,7 @@ class App
      * @param string $args
      * @return string|array
      */
-    public static function ErrACL(string $args): string|array
+    public static function ErrACL(string $args)
     {
         if (self::isAjax()) {
             $res = [
@@ -332,7 +332,7 @@ class App
      * @param null $vars
      * @return mixed
      */
-    public static function mergeVars($group, $vars = null): mixed
+    public static function mergeVars($group, $vars = null)
     {
         static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
         $appKey = APP_KEY;
@@ -464,13 +464,14 @@ class App
      * @param bool $return
      * @return array|string
      */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): array|string
+    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
     {
         if (!$js) {
             if ($delay > 0) {
                 echo <<<EOT
-    <html>
+    <html lang="zh">
     <head>
+    <title></title>
     <meta http-equiv="refresh" content="$delay;URL=$url" />
     </head>
     </html>

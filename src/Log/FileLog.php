@@ -41,7 +41,7 @@ class FileLog
      * @param $filename
      * @return mixed
      */
-    public static function read($filename): mixed
+    public static function read($filename)
     {
         $filename = RUNTIME_PATH . 'log/' . $filename;
 

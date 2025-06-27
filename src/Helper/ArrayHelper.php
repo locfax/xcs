@@ -74,7 +74,7 @@ class ArrayHelper
      * @param bool $apply_keys
      * @return mixed
      */
-    public static function walk($arr, callable $function, bool $apply_keys = false): mixed
+    public static function walk($arr, callable $function, bool $apply_keys = false)
     {
         if (empty($arr)) {
             return null;

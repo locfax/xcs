@@ -7,7 +7,7 @@
  * @param bool $addslashes
  * @return mixed
  */
-function getgpc(string $variable, mixed $defVal = null, string $runFunc = '', bool $addslashes = true): mixed
+function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $addslashes = true)
 {
     $arr = explode('.', $variable);
     if (count($arr) == 2) {
@@ -68,7 +68,7 @@ function getgpc(string $variable, mixed $defVal = null, string $runFunc = '', bo
  * @param bool $addslashes
  * @return void
  */
-function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
+function gpc_value(&$value, string $runFunc, bool $addslashes): void
 {
     if (empty($value)) {
         return;
@@ -106,18 +106,24 @@ function gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
  * @param string $key
  * @return mixed
  */
-function getini(string $key): mixed
+function getini(string $key)
 {
     $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
-    return match (count($k)) {
-        1 => $_CFG[$k[0]] ?? null,
-        2 => $_CFG[$k[0]][$k[1]] ?? null,
-        3 => $_CFG[$k[0]][$k[1]][$k[2]] ?? null,
-        4 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null,
-        5 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null,
-        default => null,
-    };
+    switch (count($k)) {
+        case 1 :
+            return $_CFG[$k[0]] ?? null;
+        case 2:
+            return $_CFG[$k[0]][$k[1]] ?? null;
+        case 3:
+            return $_CFG[$k[0]][$k[1]][$k[2]] ?? null;
+        case 4:
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null;
+        case 5:
+            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null;
+        default:
+            return null;
+    }
 }
 
 /**
@@ -150,7 +156,7 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
  * @param string $type
  * @return array|string
  */
-function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'text'): array|string
+function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'text')
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
@@ -192,7 +198,7 @@ function url(string $udi, array $params = []): string
  * @param array $arr 数组
  * @return array|object
  */
-function array2object(array $arr): object|array
+function array2object(array $arr)
 {
     if (gettype($arr) != 'array') {
         return $arr;
@@ -226,7 +232,7 @@ function object2array(object $obj): array
  * @param mixed $string
  * @return float|array|int|string
  */
-function daddslashes(mixed $string): float|array|int|string
+function daddslashes($string)
 {
     if (empty($string)) {
         return $string;
@@ -244,7 +250,7 @@ function daddslashes(mixed $string): float|array|int|string
  * @param mixed $value
  * @return float|array|int|string
  */
-function dstripslashes(mixed $value): float|array|int|string
+function dstripslashes($value)
 {
     if (empty($value)) {
         return $value;
@@ -263,7 +269,7 @@ function dstripslashes(mixed $value): float|array|int|string
  * @param mixed $string
  * @return float|array|int|string
  */
-function daddcslashes(mixed $string): float|array|int|string
+function daddcslashes($string)
 {
     if (empty($string)) {
         return $string;
@@ -282,7 +288,7 @@ function daddcslashes(mixed $string): float|array|int|string
  * @param mixed $value
  * @return float|array|int|string
  */
-function dstripcslashes(mixed $value): float|array|int|string
+function dstripcslashes($value)
 {
     if (empty($value)) {
         return $value;
@@ -300,7 +306,7 @@ function dstripcslashes(mixed $value): float|array|int|string
  * @param mixed $text
  * @return float|int|string
  */
-function char_input(mixed $text): float|int|string
+function char_input($text)
 {
     if (empty($text)) {
         return $text;
@@ -315,7 +321,7 @@ function char_input(mixed $text): float|int|string
  * @param mixed $text
  * @return float|int|string
  */
-function char_output(mixed $text): float|int|string
+function char_output($text)
 {
     if (empty($text)) {
         return $text;
@@ -424,12 +430,19 @@ if (!function_exists('clientIp')) {
     }
 }
 
+if (!function_exists('str_contains')) {
+    function str_contains($str, $need): bool
+    {
+        return strpos($str, $need) != false;
+    }
+}
+
 /**
  * @param mixed $var
  * @param int $halt
  * @param string $func
  */
-function dump(mixed $var, int $halt = 0, string $func = 'p'): void
+function dump($var, int $halt = 0, string $func = 'p'): void
 {
 
     echo '<pre>';

@@ -168,7 +168,7 @@ class Rbac
      * @param string $controllerName
      * @return mixed
      */
-    private static function _getACL(string $controllerName): mixed
+    private static function _getACL(string $controllerName)
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {

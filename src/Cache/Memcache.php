@@ -30,7 +30,7 @@ class Memcache
             if ($connect) {
                 $this->enable = true;
             }
-        } catch (MemcachedException) {
+        } catch (MemcachedException $ex) {
             throw new ExException('memcache初始化错误');
         }
         return $this;
@@ -54,7 +54,7 @@ class Memcache
     {
         try {
             return $this->_link->get($key);
-        } catch (MemcachedException) {
+        } catch (MemcachedException $ex) {
             return false;
         }
     }
@@ -65,7 +65,7 @@ class Memcache
      * @param int $ttl
      * @return bool
      */
-    public function set(string $key, array|string $value, int $ttl = 0)
+    public function set(string $key, $value, int $ttl = 0)
     {
         try {
             $data = $this->get($key);
@@ -74,7 +74,7 @@ class Memcache
             } else {
                 return $this->_link->add($key, $value, MEMCACHE_COMPRESSED, $ttl);
             }
-        } catch (MemcachedException) {
+        } catch (MemcachedException $ex) {
             return false;
         }
     }
@@ -95,7 +95,7 @@ class Memcache
     {
         try {
             return $this->_link->delete($key);
-        } catch (MemcachedException) {
+        } catch (MemcachedException $ex) {
             return false;
         }
     }

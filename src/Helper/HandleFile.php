@@ -8,7 +8,7 @@ class HandleFile
 {
 
     private array $_file;
-    private mixed $_name;
+    private $_name;
 
     public function __construct($struct, $name, $ix = false)
     {
@@ -42,7 +42,7 @@ class HandleFile
      * @param $name
      * @return mixed
      */
-    public function getAttribute($name): mixed
+    public function getAttribute($name)
     {
         return $this->_file[$name];
     }
@@ -50,7 +50,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getName(): mixed
+    public function getName()
     {
         return $this->_name;
     }
@@ -66,7 +66,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getError(): mixed
+    public function getError()
     {
         return $this->_file['error'];
     }
@@ -74,7 +74,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function isMoved(): mixed
+    public function isMoved()
     {
         return $this->_file['is_moved'];
     }
@@ -82,7 +82,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getFilename(): mixed
+    public function getFilename()
     {
         return $this->_file['name'];
     }
@@ -103,7 +103,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getSize(): mixed
+    public function getSize()
     {
         return $this->_file['size'];
     }
@@ -111,7 +111,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getMimeType(): mixed
+    public function getMimeType()
     {
         if (class_exists('finfo', false)) {
             $finfo = new finfo(FILEINFO_MIME);
@@ -131,7 +131,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getTmpName(): mixed
+    public function getTmpName()
     {
         return $this->_file['tmp_name'];
     }
@@ -139,7 +139,7 @@ class HandleFile
     /**
      * @return mixed
      */
-    public function getNewPath(): mixed
+    public function getNewPath()
     {
         return $this->_file['new_path'];
     }
@@ -173,7 +173,7 @@ class HandleFile
             $passed = false;
             $ext = array_filter(array_map('trim', $ext), 'trim');
             foreach ($ext as $_ext) {
-                if (str_starts_with($_ext, '.')) {
+                if (strpos($_ext, '.') == 0) {
                     $_ext = substr($_ext, 1);
                 }
                 $_fileExt = implode('.', array_slice($fileExt, $count - count(explode('.', $_ext))));

@@ -65,7 +65,7 @@ class File
      * @param int $ttl
      * @return false|int
      */
-    public function set(string $key, array|string $val, int $ttl = 0)
+    public function set(string $key, $val, int $ttl = 0)
     {
         $key = str_replace(':', '_', $key);
 

@@ -16,8 +16,9 @@ class Controller
      * 初始执行
      * @param string $controllerName
      * @param string $actionName
+     * @return string
      */
-    public function init(string $controllerName, string $actionName)
+    public function init(string $controllerName, string $actionName): string
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
@@ -26,6 +27,7 @@ class Controller
         if ($result) {
             return $result;
         }
+        return "";
     }
 
     /**
@@ -33,7 +35,7 @@ class Controller
      * @param mixed $arguments
      * @return array
      */
-    public function __call(string $name, mixed $arguments)
+    public function __call(string $name, $arguments)
     {
         //动作不存在
         if ($this->isAjax()) {

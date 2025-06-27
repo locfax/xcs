@@ -112,7 +112,7 @@ class PostgresDb
      * @return bool|string
      * @throws ExException
      */
-    public function create(string $tableName, array $data, bool $retId = false): bool|string
+    public function create(string $tableName, array $data, bool $retId = false)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -141,7 +141,7 @@ class PostgresDb
      * @return bool|int
      * @throws ExException
      */
-    public function replace(string $tableName, array $data): bool|int
+    public function replace(string $tableName, array $data)
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -164,7 +164,7 @@ class PostgresDb
      * @return bool|int
      * @throws ExException
      */
-    public function update(string $tableName, array|string $data, array|string $condition, array $args = null): bool|int
+    public function update(string $tableName, $data, $condition, array $args = null)
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -193,7 +193,7 @@ class PostgresDb
      * @return bool|int
      * @throws ExException
      */
-    public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
+    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -213,7 +213,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
+    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -235,7 +235,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
+    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -258,7 +258,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
+    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -278,7 +278,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function first(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): mixed
+    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -311,7 +311,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
+    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -346,7 +346,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
+    public function count(string $tableName, $condition, array $args = null, string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -357,7 +357,7 @@ class PostgresDb
      * @return bool|int
      * @throws ExException
      */
-    public function exec(string $sql, array $args = null): bool|int
+    public function exec(string $sql, array $args = null)
     {
         try {
             if (empty($args)) {
@@ -382,7 +382,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
+    public function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -412,7 +412,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
+    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -449,7 +449,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function pageSql(string $sql, mixed $args = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
+    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         try {
             $sql .= " LIMIT {$limit} OFFSET {$offset}";
@@ -478,7 +478,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function countSql(string $sql, mixed $args = null): mixed
+    public function countSql(string $sql, $args = null)
     {
         return $this->firstSql($sql, $args);
     }
@@ -489,7 +489,7 @@ class PostgresDb
      * @return mixed
      * @throws ExException
      */
-    public function firstSql(string $sql, mixed $args = null): mixed
+    public function firstSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -513,7 +513,7 @@ class PostgresDb
      * @return array|bool
      * @throws ExException
      */
-    public function colSql(string $sql, mixed $args = null): bool|array
+    public function colSql(string $sql, $args = null)
     {
         try {
             if (empty($args)) {
@@ -583,7 +583,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _array_index(mixed $arr, string $col): mixed
+    private function _array_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;
@@ -600,7 +600,7 @@ class PostgresDb
      * @param string $col
      * @return mixed
      */
-    private function _object_index(mixed $arr, string $col): mixed
+    private function _object_index($arr, string $col)
     {
         if (!is_array($arr)) {
             return $arr;

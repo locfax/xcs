@@ -11,11 +11,11 @@ class Cache
 
     use Singleton;
 
-    private mixed $config;
-    private mixed $prefix;
-    private mixed $handle;
+    private $config;
+    private $prefix;
+    private $handle;
     public bool $enable;
-    public mixed $type;
+    public $type;
 
     /**
      * @param $handle
@@ -50,7 +50,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function get(string $key): mixed
+    public static function get(string $key)
     {
         return self::getInstance()->_get($key);
     }
@@ -59,7 +59,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    private function _get(string $key): mixed
+    private function _get(string $key)
     {
         if ($this->enable) {
             $data = $this->handle->get($this->_key($key));
@@ -78,7 +78,7 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    public static function set(string $key, array|string $value, int $ttl = 0): mixed
+    public static function set(string $key, $value, int $ttl = 0)
     {
         return self::getInstance()->_set($key, $value, $ttl);
     }
@@ -89,7 +89,7 @@ class Cache
      * @param int $ttl
      * @return bool
      */
-    private function _set(string $key, array|string $value, int $ttl = 0): bool
+    private function _set(string $key, $value, int $ttl = 0): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -102,7 +102,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function rm(string $key): mixed
+    public static function rm(string $key)
     {
         return self::getInstance()->_rm($key);
     }
@@ -123,7 +123,7 @@ class Cache
     /**
      * @return mixed
      */
-    public static function clear(): mixed
+    public static function clear()
     {
         return self::getInstance()->_clear();
     }

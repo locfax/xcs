@@ -2,12 +2,10 @@
 
 namespace Xcs\Helper;
 
-use GdImage;
-
 class HandleGd
 {
 
-    protected mixed $_handle;
+    protected $_handle;
 
     public function __construct($handle)
     {
@@ -339,9 +337,9 @@ class HandleGd
 
     /**
      * @param string $fname
-     * @return GdImage|bool
+     * @return false|\GdImage|resource
      */
-    function imageCreateFromBmp(string $fname): GdImage|bool
+    function imageCreateFromBmp(string $fname)
     {
         $buf = file_get_contents($fname);
         if (strlen($buf) < 54) {

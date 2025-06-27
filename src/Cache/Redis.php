@@ -36,7 +36,7 @@ class Redis
         return $this;
     }
 
-    public function link(): \Redis
+    public function link()
     {
         return $this->_link;
     }
@@ -61,7 +61,7 @@ class Redis
      * @param int $ttl
      * @return bool|\Redis
      */
-    public function set(string $key, array|string $value, int $ttl = 0)
+    public function set(string $key, $value, int $ttl = 0)
     {
         if ($ttl > 0) {
             $ret = $this->_link->set($key, $value, $ttl);

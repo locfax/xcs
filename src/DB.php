@@ -23,7 +23,7 @@ class DB
      * @throws ExException
      * @see MysqlDb
      */
-    public static function mysql(string $dsnId = 'mysql', mixed $dsn = null): MysqlDb
+    public static function mysql(string $dsnId = 'mysql', $dsn = null): MysqlDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -50,7 +50,7 @@ class DB
      * @throws ExException
      * @see MongoDb
      */
-    public static function mongo(string $dsnId = 'mongo', mixed $dsn = null): MongoDb
+    public static function mongo(string $dsnId = 'mongo', $dsn = null): MongoDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -75,7 +75,7 @@ class DB
      * @return SqlsrvDb
      * @throws ExException
      */
-    public static function sqlsrv(string $dsnId = 'sqlsrv', mixed $dsn = null): SqlsrvDb
+    public static function sqlsrv(string $dsnId = 'sqlsrv', $dsn = null): SqlsrvDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -100,7 +100,7 @@ class DB
      * @return SqliteDb
      * @throws ExException
      */
-    public static function sqlite(string $dsnId = 'sqlite', mixed $dsn = null): SqliteDb
+    public static function sqlite(string $dsnId = 'sqlite', $dsn = null): SqliteDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -125,7 +125,7 @@ class DB
      * @return PostgresDb
      * @throws ExException
      */
-    public static function postgres(string $dsnId = 'postgres', mixed $dsn = null): PostgresDb
+    public static function postgres(string $dsnId = 'postgres', $dsn = null): PostgresDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -165,7 +165,7 @@ class DB
      * @return bool|string
      * @throws ExException
      */
-    public static function create(string $table, array $data, bool $retId = false): bool|string
+    public static function create(string $table, array $data, bool $retId = false)
     {
         return self::Using()->create($table, $data, $retId);
     }
@@ -180,7 +180,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function replace(string $table, array $data): bool|int
+    public static function replace(string $table, array $data)
     {
         return self::Using()->replace($table, $data);
     }
@@ -195,7 +195,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function update(string $table, mixed $data, mixed $condition, mixed $args = null): bool|int
+    public static function update(string $table, $data, $condition, $args = null)
     {
         return self::Using()->update($table, $data, $condition, $args);
     }
@@ -210,7 +210,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function remove(string $table, mixed $condition, mixed $multi = false, mixed $args = null): bool|int
+    public static function remove(string $table, $condition, $multi = false, $args = null)
     {
         return self::Using()->remove($table, $condition, $args, $multi);
     }
@@ -227,7 +227,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function findOne(string $table, string $field, mixed $condition, mixed $orderBy = null, mixed $args = null, bool $retObj = false): mixed
+    public static function findOne(string $table, string $field, $condition, $orderBy = null, $args = null, bool $retObj = false)
     {
         return self::Using()->findOne($table, $field, $condition, $args, $orderBy, $retObj);
     }
@@ -245,7 +245,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function findAll(string $table, string $field = '*', mixed $condition = '', mixed $orderBy = null, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
+    public static function findAll(string $table, string $field = '*', $condition = '', $orderBy = null, $args = null, $index = null, bool $retObj = false)
     {
         return self::Using()->findAll($table, $field, $condition, $args, $orderBy, $index, $retObj);
     }
@@ -264,7 +264,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function page(string $table, string $field, mixed $condition = '', mixed $orderBy = null, mixed $args = null, mixed $pageParam = [], int $limit = 20, bool $retObj = false): bool|array
+    public static function page(string $table, string $field, $condition = '', $orderBy = null, $args = null, $pageParam = [], int $limit = 20, bool $retObj = false)
     {
         $db = self::Using();
         if (is_array($pageParam)) {
@@ -320,7 +320,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function first(string $table, string $field, mixed $condition, mixed $orderBy = null, mixed $args = null): mixed
+    public static function first(string $table, string $field, $condition, $orderBy = null, $args = null)
     {
         return self::Using()->first($table, $field, $condition, $args, $orderBy);
     }
@@ -335,7 +335,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function col(string $table, string $field, mixed $condition = '', mixed $orderBy = null, mixed $args = null): bool|array
+    public static function col(string $table, string $field, $condition = '', $orderBy = null, $args = null)
     {
         return self::Using()->col($table, $field, $condition, $args, $orderBy);
     }
@@ -350,7 +350,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function count(string $table, mixed $condition, mixed $args = null, string $field = '*'): mixed
+    public static function count(string $table, $condition, $args = null, string $field = '*')
     {
         return self::Using()->count($table, $condition, $args, $field);
     }
@@ -362,7 +362,7 @@ class DB
      * @return bool|int
      * @throws ExException
      */
-    public static function exec(string $sql, mixed $args = null): bool|int
+    public static function exec(string $sql, $args = null)
     {
         return self::Using()->exec($sql, $args);
     }
@@ -378,7 +378,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function rowSql(string $sql, mixed $args = null, bool $retObj = false): mixed
+    public static function rowSql(string $sql, $args = null, bool $retObj = false)
     {
         return self::Using()->rowSql($sql, $args, $retObj);
     }
@@ -392,7 +392,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function rowSetSql(string $sql, mixed $args = null, mixed $index = null, bool $retObj = false): bool|array
+    public static function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
     {
         return self::Using()->rowSetSql($sql, $args, $index, $retObj);
     }
@@ -407,7 +407,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function pageSql(string $sql, mixed $args = null, mixed $pageParam = 0, int $limit = 18, bool $retObj = false): bool|array
+    public static function pageSql(string $sql, $args = null, $pageParam = 0, int $limit = 18, bool $retObj = false)
     {
         $db = self::Using();
         if (is_array($pageParam)) {
@@ -440,7 +440,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function countSql(string $sql, mixed $args = null): mixed
+    public static function countSql(string $sql, $args = null)
     {
         return self::Using()->countSql($sql, $args);
     }
@@ -452,7 +452,7 @@ class DB
      * @return mixed
      * @throws ExException
      */
-    public static function firstSql(string $sql, mixed $args = null): mixed
+    public static function firstSql(string $sql, $args = null)
     {
         return self::Using()->firstSql($sql, $args);
     }
@@ -464,7 +464,7 @@ class DB
      * @return array|bool
      * @throws ExException
      */
-    public static function colSql(string $sql, mixed $args = null): bool|array
+    public static function colSql(string $sql, $args = null)
     {
         return self::Using()->colSql($sql, $args);
     }

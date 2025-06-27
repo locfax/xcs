@@ -22,7 +22,7 @@ class Pinyin
      * @param string $s
      * @return false|string
      */
-    public static function utf8_to_gb2312(string $s): bool|string
+    public static function utf8_to_gb2312(string $s)
     {
         return iconv('UTF-8', 'GB2312//IGNORE', $s);
     }
@@ -70,7 +70,7 @@ class Pinyin
      * @param string $s
      * @return bool|string
      */
-    public static function to_first(string $s): bool|string
+    public static function to_first(string $s)
     {
         $ascii = ord($s[0]);
         if ($ascii > 0xE0) {

@@ -6,7 +6,7 @@ class Session
 {
     private int $ttl;
     private $handle;
-    private $prefix;
+    private string $prefix;
 
     public function start($prefix = "session:", $time = 1800): void
     {

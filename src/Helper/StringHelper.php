@@ -91,7 +91,7 @@ class StringHelper
      * @param int $html
      * @return array|string|string[]|null
      */
-    public static function getStr(string $string, int $length, int $out_slashes = 0, int $html = 0): array|string|null
+    public static function getStr(string $string, int $length, int $out_slashes = 0, int $html = 0)
     {
         $string = stripslashes($string);
         if ($html < 0) {
@@ -114,7 +114,7 @@ class StringHelper
      * @param string $string
      * @return array|false|string
      */
-    public static function convert_encode(string $in, string $out, string $string): bool|array|string
+    public static function convert_encode(string $in, string $out, string $string)
     { // string change charset return string
         if (function_exists('mb_convert_encoding')) {
             return mb_convert_encoding($string, $out, $in);
@@ -132,7 +132,7 @@ class StringHelper
      * @param mixed $string
      * @return array|false|string
      */
-    public static function convert_char(string $in, string $out, mixed $string): bool|array|string
+    public static function convert_char(string $in, string $out, $string)
     {
         // string change charset return mix
         if (is_array($string)) {

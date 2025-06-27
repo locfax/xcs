@@ -87,7 +87,7 @@ class Template
      * @param mixed $mode
      * @return void
      */
-    private function save(string $filename, string $content, mixed $mode): void
+    private function save(string $filename, string $content, $mode): void
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
@@ -104,7 +104,7 @@ class Template
      * @param array $_var
      * @return mixed|string
      */
-    private function language_tags(array $_var): mixed
+    private function language_tags(array $_var)
     {
         $vars = explode(':', $_var[1]);
         $isPlugin = count($vars) == 2;
@@ -306,7 +306,7 @@ class Template
      * @param array $str
      * @return array|string
      */
-    private function trans_amp(array $str): array|string
+    private function trans_amp(array $str)
     {
         $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
@@ -317,7 +317,7 @@ class Template
      * @param array $var
      * @return array|string|null
      */
-    private function add_quote(array $var): array|string|null
+    private function add_quote(array $var)
     {
         $var = '<?=' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([\w\d_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
@@ -339,7 +339,7 @@ class Template
      * @param string $statement
      * @return string
      */
-    private function strip_tags(mixed $expr, string $statement = ''): string
+    private function strip_tags($expr, string $statement = ''): string
     {
         $expr = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $statement = str_replace("\\\"", "\"", $statement);

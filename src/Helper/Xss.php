@@ -54,9 +54,9 @@ class Xss
         "([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?"
     ];
 
-    protected mixed $_xss_hash = null;
+    protected $_xss_hash = null;
 
-    public function remove_invisible_characters($str, $url_encoded = true): array|string|null
+    public function remove_invisible_characters($str, $url_encoded = true)
     {
         $non_display_ables = [];
         if ($url_encoded) {
@@ -78,7 +78,7 @@ class Xss
      * @param bool $is_image
      * @return array|bool|string
      */
-    public function clean(mixed $str, bool $is_image = false): bool|array|string
+    public function clean($str, bool $is_image = false)
     {
         if (is_array($str)) {
             foreach ($str as $key) {
@@ -179,12 +179,12 @@ class Xss
         return '&lt;' . $matches[1] . $matches[2] . $matches[3] . str_replace(['>', '<'], ['&gt;', '&lt;'], $matches[4]);
     }
 
-    protected function _js_link_removal($match): array|string
+    protected function _js_link_removal($match)
     {
         return str_replace($match[1], preg_replace('#href=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
 
-    protected function _js_img_removal($match): array|string
+    protected function _js_img_removal($match)
     {
         return str_replace($match[1], preg_replace('#src=.*?(?:(?:alert|prompt|confirm)(?:\(|&\#40;)|javascript:|livescript:|mocha:|charset=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si', '', $this->_filter_attributes(str_replace(['<', '>'], '', $match[1]))), $match[0]);
     }
@@ -194,7 +194,7 @@ class Xss
         return preg_replace('/\s+/s', '', $matches[1]) . $matches[2];
     }
 
-    protected function _convert_attribute($match): array|string
+    protected function _convert_attribute($match)
     {
         return str_replace(['>', '<', '\\'], ['&gt;', '&lt;', '\\\\'], $match[0]);
     }
@@ -219,7 +219,7 @@ class Xss
         return $this->_xss_hash;
     }
 
-    public function get_random_bytes($length): bool|string
+    public function get_random_bytes($length)
     {
         if (empty($length) || !ctype_digit((string)$length)) {
             return false;
@@ -281,7 +281,7 @@ class Xss
         return $str;
     }
 
-    protected function _do_never_allowed($str): array|string|null
+    protected function _do_never_allowed($str)
     {
         $str = str_replace(array_keys($this->never_allowed_str), $this->never_allowed_str, $str);
         foreach ($this->never_allowed_regex as $regex) {

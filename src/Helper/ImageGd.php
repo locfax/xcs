@@ -6,7 +6,6 @@ namespace Xcs\Helper;
  * $ext = pathinfo($_FILES['postfile']['name'], PATHINFO_EXTENSION);
  * $image = imagegd::createFromFile($_FILES['postfile']['tmp_name'], $ext);
  */
-
 class ImageGd
 {
 
@@ -15,7 +14,7 @@ class ImageGd
      * @param string $ext
      * @return bool|HandleGd
      */
-    public static function createFromFile(string $filename, string $ext = ''): HandleGd|bool
+    public static function createFromFile(string $filename, string $ext = '')
     {
         if (!$ext) {
             $ext = pathinfo($filename, PATHINFO_EXTENSION);
