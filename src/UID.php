@@ -57,7 +57,7 @@ class UID
     public static function clearUser(): void
     {
         $dataKey = getini('auth/prefix') . self::_UREY;
-        self::_setData($dataKey, null, -86400 * 365);
+        self::_setData($dataKey, [], -86400 * 365);
     }
 
     /**

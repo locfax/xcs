@@ -16,9 +16,9 @@ class Controller
      * 初始执行
      * @param string $controllerName
      * @param string $actionName
-     * @return string
+     * @return mixed
      */
-    public function init(string $controllerName, string $actionName): string
+    public function init(string $controllerName, string $actionName)
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
