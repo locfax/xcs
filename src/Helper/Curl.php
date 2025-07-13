@@ -27,20 +27,22 @@ class Curl
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         }
-        /* 结果中是否包含头部信息 */
+
         curl_setopt($ch, CURLOPT_HEADER, $retHead);
-        /* 把结果返回，而非直接输出 */
+
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        /* 返回SESSION COOKIE */
+
         curl_setopt($ch, CURLOPT_COOKIESESSION, $retSession);
-        /* http 定向级别 */
-        curl_setopt($ch, CURLOPT_MAXREDIRS, 7);
-        /* 使用0层自动跳转 */
+
+        curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
+
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-        /* 超时时间30 */
+
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-        /* 请求地址 */
+
         curl_setopt($ch, CURLOPT_URL, $url);
+
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         if (isset($httpHead['proxy']) && $httpHead['proxy']) {
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);

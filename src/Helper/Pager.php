@@ -54,8 +54,8 @@ class Pager
                 '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pageInfo['pages'] && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . ' class="hidden-xs">' . $i . '</a>';
         }
         $nextPage = min($pageInfo['page'] + 1, $pageInfo['pages']);
-        $multiPage .= ('<a href="' . $mpUrl . 'page=' . $pageInfo['pages'] . $hrefName . '" class="last"' . $ajaxTarget . ' title="尾页">' . $pageInfo['page'] . '/' . $pageInfo['pages'] . '</a>') .
-            ('<a href="' . $mpUrl . 'page=' . $nextPage . $hrefName . '" class="nxt"' . $ajaxTarget . '>下一页</a>');
+        $multiPage .= ('<a href="' . $mpUrl . 'page=' . $nextPage . $hrefName . '" class="nxt"' . $ajaxTarget . '>下一页</a>');
+        $multiPage .= ('<a href="' . $mpUrl . 'page=' . $pageInfo['pages'] . $hrefName . '" class="last"' . $ajaxTarget . ' title="尾页">' . $pageInfo['page'] . '/' . $pageInfo['pages'] . '</a>');
         if (isset($pageInfo['showNum']) && $pageInfo['showNum']) {
             $multiPage .= ' <em>' . $pageInfo['total'] . '</em>';
         }

@@ -37,15 +37,22 @@ class File
 
     }
 
+    private function filePath($hash)
+    {
+        $dir1 = substr($hash, 0, 2);  // 前两位作为第一级目录
+        $dir2 = substr($hash, 2, 2);  // 接着两位作为第二级目录
+        $dir3 = substr($hash, 4, 2);  // 再接着两位作为第三级目录
+        return "$dir1/$dir2/$dir3";  // 拼接成文件路径
+    }
+
     /**
      * @param string $key
      * @return mixed
      */
     public function get(string $key)
     {
-        $key = str_replace(':', '_', $key);
-
-        $cacheFile = CACHE_PATH . $key . '.php';
+        $hashKey = md5($key);
+        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
         if (is_file($cacheFile)) {
             $data = include $cacheFile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
@@ -67,7 +74,6 @@ class File
      */
     public function set(string $key, $val, int $ttl = 0)
     {
-        $key = str_replace(':', '_', $key);
 
         if ($ttl > 0) {
             $timeout = time() + $ttl;
@@ -82,9 +88,13 @@ class File
             $type = 'json';
         }
 
-        $cacheFile = CACHE_PATH . $key . '.php';
-        $cacheData = "return array('data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
-        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n//Identify: " . md5($key . time()) . "\n\n$cacheData";
+        $hashKey = md5($key);
+        $path = CACHE_PATH . $this->filePath($hashKey);
+        mkdir($path, FILE_WRITE_MODE, true);
+
+        $cacheFile = $path . '/' . $hashKey . '.php';
+        $cacheData = "return array('key'=>'$key', 'data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
+        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n$cacheData";
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
     }
 
@@ -102,9 +112,8 @@ class File
      */
     public function rm(string $key)
     {
-        $key = str_replace(':', '_', $key);
-
-        $cacheFile = CACHE_PATH . $key . '.php';
+        $hashKey = md5($key);
+        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
         if (file_exists($cacheFile)) {
             unlink($cacheFile);
         }
