@@ -59,7 +59,7 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    private function _get(string $key)
+    public function _get(string $key)
     {
         if ($this->enable) {
             $data = $this->handle->get($this->_key($key));
@@ -89,7 +89,7 @@ class Cache
      * @param int $ttl
      * @return bool
      */
-    private function _set(string $key, $value, int $ttl = 0): bool
+    public function _set(string $key, $value, int $ttl = 0): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -111,7 +111,7 @@ class Cache
      * @param $key
      * @return bool
      */
-    private function _rm($key): bool
+    public function _rm($key): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -131,7 +131,7 @@ class Cache
     /**
      * @return bool
      */
-    private function _clear(): bool
+    public function _clear(): bool
     {
         $ret = false;
         if ($this->enable) {
