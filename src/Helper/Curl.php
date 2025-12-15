@@ -29,20 +29,13 @@ class Curl
         }
 
         curl_setopt($ch, CURLOPT_HEADER, $retHead);
-
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_COOKIESESSION, $retSession);
-
         curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
-
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 2);
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
-
         curl_setopt($ch, CURLOPT_URL, $url);
-
-        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
+        //curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_1);
 
         if (isset($httpHead['proxy']) && $httpHead['proxy']) {
             curl_setopt($ch, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
@@ -62,29 +55,16 @@ class Curl
         /* 设置请求头部 */
         if (!empty($data)) {
             if (is_array($data)) {
-                if (isset($data['__file'])) {
-                    $data[$data['__file']] = class_exists('\CURLFile', false) ? new CURLFile($data[$data['__file']]) : '@' . $data[$data['__file']];
-                    unset($data['__file']);
-                    $postStr = $data;
-                } else {
-                    $postStr = http_build_query($data);
-                }
+                $postStr = http_build_query($data);
             } else {
                 $postStr = trim($data);
             }
             if (isset($httpHead['Method'])) {
-                if ($httpHead['Method'] == 'PUT') {
-                    curl_setopt($ch, CURLOPT_PUT, true);
-                    $fOpen = fopen($data[$data['__file']], 'r');
-                    curl_setopt($ch, CURLOPT_INFILE, $fOpen);//设置上传文件的FILE指针
-                    curl_setopt($ch, CURLOPT_INFILESIZE, filesize($data[$data['__file']]));//设置上传文件的大小
-                } else {
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
-                    unset($httpHead['Method']);
-                    curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
-                }
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
+                unset($httpHead['Method']);
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
             } else {
-                curl_setopt($ch, CURLOPT_POST, true);
+                curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
             }
         } else {
@@ -92,7 +72,7 @@ class Curl
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $httpHead['Method']);
                 unset($httpHead['Method']);
             } else {
-                curl_setopt($ch, CURLOPT_HTTPGET, true);
+                curl_setopt($ch, CURLOPT_HTTPGET, 1);
             }
         }
 
@@ -112,24 +92,20 @@ class Curl
             curl_setopt($ch, CURLOPT_USERAGENT, $httpHead['User-Agent']);
             unset($httpHead['User-Agent']);
         } else {
-            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (compatible; MSIE 5.01; Windows NT 5.0)');
+            curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36');
         }
 
         /* 构造头部 */
-        $_httpHead = [];
-        foreach ($httpHead as $k => $v) {
-            $_httpHead[] = $k . ': ' . $v;
+        if (!empty($httpHead)) {
+            $_httpHead = [];
+            foreach ($httpHead as $k => $v) {
+                $_httpHead[] = $k . ': ' . $v;
+            }
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $_httpHead);
         }
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $_httpHead);
 
         /* 执行CURL */
         $http_response = curl_exec($ch);
-        //print_r($http_response);
-
-        /* 是否有错误 */
-        if (0 != curl_errno($ch)) {
-            return ['http_code' => 0, 'http_error' => curl_error($ch)];
-        }
 
         /* 获取请求返回的http code */
         $http_info = curl_getinfo($ch);

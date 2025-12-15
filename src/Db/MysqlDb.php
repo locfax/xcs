@@ -164,7 +164,7 @@ class MysqlDb
      * @return bool|int
      * @throws ExException
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, $data, $condition, array $args = [])
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -193,7 +193,7 @@ class MysqlDb
      * @return bool|int
      * @throws ExException
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, $condition, array $args = [], bool $multi = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -214,13 +214,13 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, $condition, array $args = [], $orderBy = '', bool $retObj = false)
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         return $this->rowSql($sql, $args, $retObj);
     }
@@ -236,13 +236,13 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = [], string $orderBy = '', string $index = '', bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->rowSetSql($sql, $args, $index, $retObj);
     }
@@ -259,13 +259,13 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, $condition, array $args = [], string $orderBy = '', int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
         return $this->pageSql($sql, $args, $offset, $limit, $retObj);
     }
@@ -279,13 +279,13 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function first(string $tableName, string $field, $condition, array $args = [], string $orderBy = '')
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
         try {
             if (empty($args)) {
@@ -312,13 +312,13 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, $condition, array $args = [], string $orderBy = '')
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
+        $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
         $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
         try {
             if (empty($args)) {
@@ -347,7 +347,7 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function count(string $tableName, $condition, array $args = null, string $field = '*')
+    public function count(string $tableName, $condition, array $args = [], string $field = '*')
     {
         return $this->first($tableName, "COUNT({$field})", $condition, $args);
     }
@@ -358,7 +358,7 @@ class MysqlDb
      * @return bool|int
      * @throws ExException
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = [])
     {
         try {
             if (empty($args)) {
@@ -383,7 +383,7 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function rowSql(string $sql, array $args = null, bool $retObj = false)
+    public function rowSql(string $sql, array $args = [], bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -413,7 +413,7 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function rowSetSql(string $sql, array $args = null, string $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false)
     {
         try {
             if (empty($args)) {
@@ -424,12 +424,12 @@ class MysqlDb
             }
             if ($retObj) {
                 $data = $sth->fetchAll(PDO::FETCH_OBJ);
-                if (!is_null($index)) {
+                if (!empty($index)) {
                     $data = $this->_object_index($data, $index);
                 }
             } else {
                 $data = $sth->fetchAll(PDO::FETCH_ASSOC);
-                if (!is_null($index)) {
+                if (!empty($index)) {
                     $data = $this->_array_index($data, $index);
                 }
             }
@@ -450,7 +450,7 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function pageSql(string $sql, array $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, array $args = [], int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         try {
             $sql .= " LIMIT {$limit} OFFSET {$offset}";
@@ -479,7 +479,7 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, array $args = [])
     {
         return $this->firstSql($sql, $args);
     }
@@ -490,7 +490,7 @@ class MysqlDb
      * @return mixed
      * @throws ExException
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, array $args = [])
     {
         try {
             if (empty($args)) {
@@ -514,7 +514,7 @@ class MysqlDb
      * @return array|bool
      * @throws ExException
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, array $args = [])
     {
         try {
             if (empty($args)) {

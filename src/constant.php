@@ -12,7 +12,10 @@ const APP_PATH = APP_ROOT . '/app/'; //应用路径
 const LIB_PATH = APP_ROOT . '/app/Library/'; //module路径
 
 const RUNTIME_PATH = APP_ROOT . '/runtime/'; //全局数据路径
-const CACHE_PATH = APP_ROOT . '/runtime/cache/'; //缓存路径
+
+if (!defined('CACHE_PATH')) {
+    define('CACHE_PATH', APP_ROOT . '/runtime/cache/'); //缓存路径
+}
 
 const THEMES_CACHE = APP_ROOT . '/runtime/tplcache/'; //模板解析路径
 const THEMES_LANG = APP_ROOT . '/themes/' . APP_KEY . '/'; //语言包

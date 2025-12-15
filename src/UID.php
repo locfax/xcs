@@ -13,9 +13,9 @@ class UID
      * @param int $life
      * @return bool
      */
-    public static function setUser(array $userData, string $rolesData = null, int $life = 0): bool
+    public static function setUser(array $userData, string $rolesData = '', int $life = 0): bool
     {
-        if (!is_null($rolesData)) {
+        if ($rolesData) {
             $userData[self::_ROLEY] = $rolesData;
         }
         $dataKey = getini('auth/prefix') . self::_UREY;
@@ -144,7 +144,7 @@ class UID
             $life = $life > 0 ? $life + time() : 0;
             $secure = (443 == $_SERVER['SERVER_PORT']) ? 1 : 0;
             $key = self::getCookieKey($key);
-            $val = self::authCode(json_encode($val), 'ENCODE');
+            $val = self::authCode(json_encode($val, JSON_UNESCAPED_UNICODE), 'ENCODE');
 
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
         }

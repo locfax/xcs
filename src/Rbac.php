@@ -19,7 +19,7 @@ class Rbac
      * @param array|null $roles
      * @return bool
      */
-    public static function check(string $controllerName, string $actionName = null, bool $strict = false, array $roles = null): bool
+    public static function check(string $controllerName, string $actionName = '', bool $strict = false, array $roles = []): bool
     {
         $_controllerName = strtoupper($controllerName);
         $ACL = self::_getACL($_controllerName);
@@ -36,7 +36,7 @@ class Rbac
         }
 
         // get user role array
-        if (is_null($roles)) {
+        if (empty($roles)) {
             $roles = UID::getRolesArray();
         }
 
@@ -46,7 +46,7 @@ class Rbac
         }
 
         // 2, check user's role whether allow to call action
-        if (!is_null($actionName)) {
+        if (!empty($actionName)) {
             $_actionName = strtoupper($actionName);
             if (isset($ACL['actions'][$_actionName])) {
                 if (!self::_check($roles, $ACL['actions'][$_actionName])) {

@@ -27,9 +27,9 @@ class FileLog
 
         //如果是新建的日志文件，去掉内容中的第一个字符逗号
         if (file_exists($filename) && abs(filesize($filename)) > 0) {
-            $content = "," . json_encode($res);
+            $content = "," . json_encode($res, JSON_UNESCAPED_UNICODE);
         } else {
-            $content = json_encode($res);
+            $content = json_encode($res, JSON_UNESCAPED_UNICODE);
         }
 
         //往日志文件内容后面追加日志内容

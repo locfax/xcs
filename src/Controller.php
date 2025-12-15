@@ -27,7 +27,7 @@ class Controller
         if ($result) {
             return $result;
         }
-        return "";
+        return '';
     }
 
     /**
@@ -46,7 +46,13 @@ class Controller
             return $this->json($res);
         }
 
-        throw new \Error($name . " 不存在");
+        if (DEBUG) {
+            throw new \Error($name . " 不存在");
+        } else {
+            $this->status(301);
+            header('Location: /');
+            return '';
+        }
     }
 
     protected function get($key = null)
@@ -80,7 +86,7 @@ class Controller
      */
     protected function json(array $data = [])
     {
-        return ['type' => 'json', 'content' => json_encode($data)];
+        return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
     }
 
     protected function isAjax()

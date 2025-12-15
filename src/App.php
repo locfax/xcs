@@ -115,7 +115,13 @@ class App
     private static function _dispatching($uri): void
     {
         if (defined('ROUTE') && ROUTE) {
-            self::_router($uri);
+            $flag = self::_router($uri);
+            if (!$flag) {
+                header('HTTP/1.1 301 Moved Permanently');
+                header('Status: 301 Moved Permanently');
+                header('Location: /');
+                return;
+            }
         }
         $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
         $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
@@ -153,10 +159,12 @@ class App
             if (!is_array($result)) {
                 echo $result;
             } else {
-                if ($result['type'] == 'text') {
+                if ($result['type'] == 'html') {
                     header('Content-Type: text/html; charset=UTF-8', true);
                 } elseif ($result['type'] == 'json') {
                     header('Content-Type: application/json; charset=UTF-8', true);
+                } elseif ($result['type'] == 'text') {
+                    header('Content-Type: text/plain; charset=UTF-8', true);
                 }
                 echo $result['content'];
             }
@@ -168,10 +176,12 @@ class App
             echo $result;
             return;
         }
-        if ($result['type'] == 'text') {
+        if ($result['type'] == 'html') {
             header('Content-Type: text/html; charset=UTF-8', true);
         } elseif ($result['type'] == 'json') {
             header('Content-Type: application/json; charset=UTF-8', true);
+        } elseif ($result['type'] == 'text') {
+            header('Content-Type: text/plain; charset=UTF-8', true);
         }
         echo $result['content'];
     }
@@ -191,10 +201,11 @@ class App
                 return self::response($res, 'json');
             }
             return ExUiException::showError('控制器', $args);
-        } else {
-            header('HTTP/1.1 404 Not Found');
-            header('Status: 404 Not Found');
         }
+
+        header('HTTP/1.1 301 Moved Permanently');
+        header('Status: 301 Moved Permanently');
+        header('Location: /');
         return '';
     }
 
@@ -224,22 +235,38 @@ class App
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         }
-        $controllerFilename = APP_PATH . 'Controller/' . ucfirst(APP_KEY) . '/' . $controllerName . '.php';
+        $app = getini('site/app') ?: ucfirst(APP_KEY);
+        $controllerFilename = APP_PATH . 'Controller/' . $app . '/' . $controllerName . '.php';
         return is_file($controllerFilename) && require $controllerFilename;
+    }
+
+    /**
+     * @param $controllerName
+     */
+    public static function Controller($controllerName)
+    {
+        $controllerClass = self::$_controllerPrefix . $controllerName;
+        if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
+            return $controllerClass;
+        }
+        $app = getini('site/app') ?: ucfirst(APP_KEY);
+        $controllerFilename = APP_PATH . 'Controller/' . $app . '/' . $controllerName . '.php';
+        is_file($controllerFilename) && require $controllerFilename;
+        return new $controllerClass();
     }
 
     /**
      * @param $uri
      * @return void
      */
-    private static function _router($uri): void
+    private static function _router($uri): bool
     {
         if (str_contains($uri, 'index.php')) {
             $uri = substr($uri, strpos($uri, 'index.php') + 10);
         }
 
         if (!$uri) {
-            return;
+            return true;
         }
 
         if (is_file(APP_PATH . 'Route/' . APP_KEY . '.php')) {
@@ -262,8 +289,13 @@ class App
 
         if (!$match) {
             $req = explode('/', $uri);
+            if (count($req) % 2 != 0) {
+                return false;
+            }
             self::_setRequest($req);
         }
+
+        return true;
     }
 
     /**
@@ -278,6 +310,9 @@ class App
             return;
         }
         for ($i = 0; $i < $paramNum; $i++) {
+            if (empty($req[$i])) {
+                continue;
+            }
             $_GET[$req[$i]] = $req[$i + 1];
             $i++;
         }

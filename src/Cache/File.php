@@ -53,7 +53,7 @@ class File
     {
         $hashKey = md5($key);
         $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
-        if (is_file($cacheFile)) {
+        if (file_exists($cacheFile)) {
             $data = include $cacheFile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
                 if ('json' == $data['type']) {
@@ -61,7 +61,6 @@ class File
                 }
                 return $data['data'];
             }
-            unlink($cacheFile);
         }
         return null;
     }
@@ -90,7 +89,7 @@ class File
 
         $hashKey = md5($key);
         $path = CACHE_PATH . $this->filePath($hashKey);
-        mkdir($path, FILE_WRITE_MODE, true);
+        !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
 
         $cacheFile = $path . '/' . $hashKey . '.php';
         $cacheData = "return array('key'=>'$key', 'data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
@@ -114,9 +113,7 @@ class File
     {
         $hashKey = md5($key);
         $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
-        if (file_exists($cacheFile)) {
-            unlink($cacheFile);
-        }
+        file_exists($cacheFile) && unlink($cacheFile);
         return true;
     }
 
@@ -128,7 +125,7 @@ class File
         $cacheDir = CACHE_PATH;
         $files = FileHelper::list_files($cacheDir);
         foreach ($files as $file) {
-            unlink($cacheDir . $file);
+            file_exists($cacheDir . $file) && unlink($cacheDir . $file);
         }
     }
 
@@ -140,8 +137,7 @@ class File
      */
     private function save($filename, $content, $mode)
     {
-        if (!is_file($filename)) {
-            file_exists($filename) && unlink($filename);
+        if (!file_exists($filename)) {
             touch($filename) && chmod($filename, FILE_WRITE_MODE); //读写执行
         }
         $ret = file_put_contents($filename, $content, LOCK_EX);

@@ -160,7 +160,7 @@ class ArrayHelper
      *
      * @return array
      */
-    public static function to_map(array $arr, string $keyField = null, string $valueField = null): array
+    public static function to_map(array $arr, string $keyField = '', string $valueField = ''): array
     {
         $map = [];
         if ($valueField) {

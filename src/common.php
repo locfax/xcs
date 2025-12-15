@@ -132,7 +132,7 @@ function getini(string $key)
  * @param string $cacheFile
  * @param string $file
  */
-function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file): void
+function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, $compress = true): void
 {
     if (is_file(THEMES_VIEW . $mainTpl)) {
         $tplTime = filemtime(THEMES_VIEW . $mainTpl);
@@ -146,7 +146,7 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
     !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE);
 
     $template = new \Xcs\Template();
-    $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file);
+    $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file, $compress);
 }
 
 /**
@@ -156,7 +156,7 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
  * @param string $type
  * @return array|string
  */
-function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'text')
+function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'html', $compress = true)
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
@@ -164,11 +164,11 @@ function template(string $file, array $data = [], bool $returnTplFile = false, s
         return $tplFile;
     }
 
-    $cacheFile = APP_KEY . '_' . $_tplId . '_' . str_replace('/', '_', $file) . '_tpl.php';
+    $cacheFile = APP_KEY . '_' . md5($_tplId . '_' . $file . '_host_' . $_SERVER['HTTP_HOST']) . '.php';
     $cacheTpl = THEMES_CACHE . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
 
-    checkTplRefresh($tplFile, $cacheTime, $cacheFile, $file);
+    checkTplRefresh($tplFile, $cacheTime, $cacheFile, $file, $compress);
 
     if (!empty($data)) {
         extract($data);
