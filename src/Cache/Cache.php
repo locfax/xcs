@@ -146,7 +146,7 @@ class Cache
      */
     private function _key($str): string
     {
-        return $this->prefix . $str;
+        return $this->prefix . '_' . $str;
     }
 
 }
