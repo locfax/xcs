@@ -74,7 +74,7 @@ class Memcache
     {
         try {
             $data = ['data' => $value, 'timeout' => $ttl];
-            $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+            $json = json_encode($data, JSON_UNESCAPED_UNICODE);
 
             $data = $this->get($key);
             if ($data) {
