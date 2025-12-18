@@ -70,8 +70,7 @@ class Cache
             if (!$data) {
                 return null;
             }
-            $data = json_decode($data, true);
-            return $data['data'];
+            return $data;
         }
         return null;
     }
@@ -97,8 +96,7 @@ class Cache
     {
         $ret = false;
         if ($this->enable) {
-            $data = ['key' => $key, 'data' => $value, 'ttl' => $ttl];
-            $ret = $this->handle->set($this->_key($key), json_encode($data, JSON_UNESCAPED_UNICODE), $ttl);
+            $ret = $this->handle->set($this->_key($key), $value, $ttl);
         }
         return $ret;
     }

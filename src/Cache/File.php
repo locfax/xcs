@@ -80,7 +80,7 @@ class File
         !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
 
         $cacheFile = $path . '/' . $hashKey . '.php';
-        $cacheData = array('data' => $val, 'timeout' => $timeout);
+        $cacheData = ['data' => $val, 'timeout' => $timeout];
         $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\nreturn " . var_export($cacheData, true) . ';';
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
     }

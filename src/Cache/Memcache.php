@@ -53,7 +53,12 @@ class Memcache
     public function get(string $key)
     {
         try {
-            return $this->_link->get($key);
+            $json = $this->_link->get($key);
+            if ($json) {
+                $data = json_decode($json, true);
+                return $data['data'];
+            }
+            return null;
         } catch (MemcachedException $ex) {
             return false;
         }
@@ -68,11 +73,14 @@ class Memcache
     public function set(string $key, $value, int $ttl = 0)
     {
         try {
+            $data = ['data' => $value, 'timeout' => $ttl];
+            $json = json_encode($data, JSON_UNESCAPED_SLASHES);
+
             $data = $this->get($key);
             if ($data) {
-                return $this->_link->set($key, $value, MEMCACHE_COMPRESSED, $ttl);
+                return $this->_link->set($key, $json, MEMCACHE_COMPRESSED, $ttl);
             } else {
-                return $this->_link->add($key, $value, MEMCACHE_COMPRESSED, $ttl);
+                return $this->_link->add($key, $json, MEMCACHE_COMPRESSED, $ttl);
             }
         } catch (MemcachedException $ex) {
             return false;

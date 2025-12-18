@@ -49,7 +49,12 @@ class Redis
      */
     public function get(string $key)
     {
-        return $this->_link->get($key);
+        $json = $this->_link->get($key);
+        if ($json) {
+            $data = json_decode($json, true);
+            return $data['data'];
+        }
+        return null;
     }
 
     /**
@@ -60,10 +65,12 @@ class Redis
      */
     public function set(string $key, $value, int $ttl = 0)
     {
+        $data = ['data' => $value, 'timeout' => $ttl];
+        $json = json_encode($data, JSON_UNESCAPED_SLASHES);
         if ($ttl > 0) {
-            $ret = $this->_link->set($key, $value, $ttl);
+            $ret = $this->_link->set($key, $json, $ttl);
         } else {
-            $ret = $this->_link->set($key, $value);
+            $ret = $this->_link->set($key, $json);
         }
         return $ret;
     }
