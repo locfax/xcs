@@ -28,10 +28,14 @@ class Cache
         $handle = $handle ?: $this->config['handle'];
         if (in_array($handle, ['file', 'memcache', 'redis'])) {
             $class = "\\Xcs\\Cache\\" . ucfirst($handle);
-            if ($handle != 'file') {
-                $config = Context::dsn($handle);
-            } else {
+            if ($handle == 'redis') {
+                $config = $this->config['redis'];
+            } elseif ($handle == 'memcache') {
+                $config = $this->config['memcache'];
+            } elseif ($handle == 'file') {
                 $config = null;
+            } else {
+                throw new ExException('缓存器必须是 file redis memcache');
             }
             $this->handle = $class::getInstance()->init($config);
             $this->enable = $this->handle->enable;
@@ -65,9 +69,9 @@ class Cache
             $data = $this->handle->get($this->_key($key));
             if (!$data) {
                 return null;
-            } else {
-                return $data;
             }
+            $data = json_decode($data, true);
+            return $data['data'];
         }
         return null;
     }
@@ -93,7 +97,8 @@ class Cache
     {
         $ret = false;
         if ($this->enable) {
-            $ret = $this->handle->set($this->_key($key), $value, $ttl);
+            $data = ['key' => $key, 'data' => $value, 'ttl' => $ttl];
+            $ret = $this->handle->set($this->_key($key), json_encode($data, JSON_UNESCAPED_UNICODE), $ttl);
         }
         return $ret;
     }

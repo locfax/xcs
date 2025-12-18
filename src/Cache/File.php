@@ -20,9 +20,6 @@ class File
     public function init(): File
     {
         !is_dir(CACHE_PATH) && mkdir(CACHE_PATH);
-        if (!is_writeable(CACHE_PATH)) {
-            throw new ExException('路径:' . CACHE_PATH . ' 不可写');
-        }
         $this->enable = true;
         return $this;
     }
@@ -56,9 +53,6 @@ class File
         if (file_exists($cacheFile)) {
             $data = include $cacheFile;
             if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
-                if ('json' == $data['type']) {
-                    return json_decode($data['data'], true);
-                }
                 return $data['data'];
             }
         }
@@ -81,19 +75,13 @@ class File
             $timeout = 0;
         }
 
-        $type = 'string';
-        if (is_array($val)) {
-            $val = json_encode($val, JSON_UNESCAPED_UNICODE);
-            $type = 'json';
-        }
-
         $hashKey = md5($key);
         $path = CACHE_PATH . $this->filePath($hashKey);
         !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
 
         $cacheFile = $path . '/' . $hashKey . '.php';
-        $cacheData = "return array('key'=>'$key', 'data' => '$val', 'type'=>'{$type}', 'timeout' => $timeout);";
-        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\n$cacheData";
+        $cacheData = array('data' => $val, 'timeout' => $timeout);
+        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\nreturn " . var_export($cacheData, true) . ';';
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
     }
 

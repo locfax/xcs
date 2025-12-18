@@ -20,7 +20,7 @@ class Redis
      * @param bool $option
      * @return $this
      */
-    public function init($config, bool $option = true)
+    public function init($config)
     {
         $this->_link = new \Redis();
         $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
@@ -28,9 +28,6 @@ class Redis
             $connect = $this->_link->auth($config['password']);
         }
         if ($connect) {
-            if ($option) {
-                $this->_link->setOption(\Redis::OPT_SERIALIZER, \Redis::SERIALIZER_PHP);
-            }
             $this->enable = true;
         }
         return $this;
