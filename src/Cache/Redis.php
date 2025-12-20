@@ -28,6 +28,7 @@ class Redis
             $connect = $this->_link->auth($config['password']);
         }
         if ($connect) {
+            $this->_link->select($config['database'] ?? 0);
             $this->enable = true;
         }
         return $this;
