@@ -433,7 +433,7 @@ if (!function_exists('clientIp')) {
 if (!function_exists('str_contains')) {
     function str_contains($str, $need): bool
     {
-        return strpos($str, $need) != false;
+        return strpos($str, $need) !== false;
     }
 }
 
