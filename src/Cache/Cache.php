@@ -26,12 +26,12 @@ class Cache
         $this->config = getini('cache');
         $this->prefix = $this->config['prefix'];
         $handle = $handle ?: $this->config['handle'];
-        if (in_array($handle, ['file', 'memcache', 'redis'])) {
+        if (in_array($handle, ['file', 'memcached', 'redis'])) {
             $class = "\\Xcs\\Cache\\" . ucfirst($handle);
             if ($handle == 'redis') {
                 $config = $this->config['redis'];
-            } elseif ($handle == 'memcache') {
-                $config = $this->config['memcache'];
+            } elseif ($handle == 'memcached') {
+                $config = $this->config['memcached'];
             } elseif ($handle == 'file') {
                 $config = null;
             } else {
