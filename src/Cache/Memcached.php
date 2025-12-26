@@ -15,7 +15,7 @@ class Memcached
     /**
      * @var \Memcache
      */
-    private \Memcache $_link;
+    private \Memcached $_link;
 
     /**
      * @param $config
@@ -25,25 +25,26 @@ class Memcached
     public function init($config)
     {
         try {
-            $this->_link = new \Memcache();
-            $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
-            if ($connect) {
-                $this->enable = true;
+            $this->_link = new \Memcached;
+            if ($config['timeout'] > 0) {
+                $this->_link->setOption(\Memcached::OPT_CONNECT_TIMEOUT, $config['timeout'] * 1000);
             }
+            $hosts = explode(',', $config['host']);
+            $servers = [];
+            foreach ($hosts as $host) {
+                $servers[] = [$host, $config['port'], 1];
+            }
+            $this->_link->addServers($servers);
+            if (!empty($config['username'])) {
+                $this->_link->setOption(\Memcached::OPT_BINARY_PROTOCOL, true);
+                $this->_link->setSaslAuthData($config['username'], $config['password']);
+            }
+            $this->enable = true;
+
         } catch (MemcachedException $ex) {
             throw new ExException('memcache初始化错误');
         }
         return $this;
-    }
-
-    public function link()
-    {
-        return $this->_link;
-    }
-
-    public function close()
-    {
-        $this->_link->close();
     }
 
     /**
@@ -75,18 +76,10 @@ class Memcached
         try {
             $data = ['data' => $value, 'timeout' => $ttl];
             $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-            return $this->_link->set($key, $json, MEMCACHE_COMPRESSED, $ttl);
+            return $this->_link->set($key, $json, $ttl);
         } catch (MemcachedException $ex) {
             return false;
         }
-    }
-
-    /**
-     * @return bool
-     */
-    public function expire()
-    {
-        return false;
     }
 
     /**

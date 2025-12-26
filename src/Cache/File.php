@@ -24,16 +24,6 @@ class File
         return $this;
     }
 
-    public function link()
-    {
-        return null;
-    }
-
-    public function close()
-    {
-
-    }
-
     private function filePath($hash)
     {
         $dir1 = substr($hash, 0, 2);  // 前两位作为第一级目录
@@ -83,14 +73,6 @@ class File
         $cacheData = ['data' => $val, 'timeout' => $timeout];
         $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\nreturn " . var_export($cacheData, true) . ';';
         return $this->save($cacheFile, $content, FILE_WRITE_MODE);
-    }
-
-    /**
-     * @return bool
-     */
-    public function expire()
-    {
-        return false;
     }
 
     /**

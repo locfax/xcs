@@ -22,7 +22,7 @@ class Redis
      */
     public function init($config)
     {
-        $this->_link = new \Redis();
+        $this->_link = new \Redis;
         $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
         if ($connect && $config['password']) {
             $connect = $this->_link->auth($config['password']);
@@ -32,16 +32,6 @@ class Redis
             $this->enable = true;
         }
         return $this;
-    }
-
-    public function link()
-    {
-        return $this->_link;
-    }
-
-    public function close()
-    {
-        $this->_link->close();
     }
 
     /**
@@ -74,14 +64,6 @@ class Redis
             $ret = $this->_link->set($key, $json);
         }
         return $ret;
-    }
-
-    /**
-     * @return bool
-     */
-    public function expire()
-    {
-        return false;
     }
 
     /**
