@@ -11,43 +11,53 @@ class Cache
 
     use Singleton;
 
-    private $config;
     private $prefix;
     private $handle;
-    public bool $enable;
-    public $type;
+    public bool $enable = false;
 
     /**
      * @param $handle
      * @throws ExException
      */
-    public function __construct($handle = null)
+    public function __construct()
     {
-        $this->config = getini('cache');
-        $this->prefix = $this->config['prefix'];
-        $handle = $handle ?: $this->config['handle'];
-        if (in_array($handle, ['file', 'memcached', 'redis'])) {
-            $class = "\\Xcs\\Cache\\" . ucfirst($handle);
-            if ($handle == 'redis') {
-                $config = $this->config['redis'];
-            } elseif ($handle == 'memcached') {
-                $config = $this->config['memcached'];
-            } elseif ($handle == 'file') {
-                $config = null;
-            } else {
-                throw new ExException('缓存器必须是 file redis memcache');
-            }
-            $this->handle = $class::getInstance()->init($config);
+        $config = getini('cache');
+        $this->prefix = $config['prefix'];
+        $handle = $config['handle'];
+        if (empty($config[$handle])) {
+            throw new ExException('缓存器' . $handle . '配置没找到');
+        }
+        if ($handle == 'memcached') {
+            $this->handle = \Xcs\Cache\Memcached::getInstance()->init($config[$handle]);
             $this->enable = $this->handle->enable;
-            $this->type = $handle;
+        } elseif ($handle == 'redis') {
+            $this->handle = \Xcs\Cache\Redis::getInstance()->init($config[$handle]);
+            $this->enable = $this->handle->enable;
         } else {
-            throw new ExException('不存在的缓存器');
+            throw new ExException('缓存器必须是 redis memcached');
         }
     }
 
-    public function __destruct()
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public static function FileGet(string $key)
     {
-        $this->enable && $this->handle->close();
+        $config = getini('cache');
+        return \Xcs\Cache\File::getInstance()->get($config['prefix'] . '_' . $key);
+    }
+
+    /**
+     * @param string $kye
+     * @param $value
+     * @param $ttl
+     * @return mixed
+     */
+    public static function FileSet(string $key, $value, $ttl = 0)
+    {
+        $config = getini('cache');
+        return \Xcs\Cache\File::getInstance()->set($config['prefix'] . '_' . $key, $value, $ttl);
     }
 
     /**
@@ -57,22 +67,6 @@ class Cache
     public static function get(string $key)
     {
         return self::getInstance()->_get($key);
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public function _get(string $key)
-    {
-        if ($this->enable) {
-            $data = $this->handle->get($this->_key($key));
-            if (!$data) {
-                return null;
-            }
-            return $data;
-        }
-        return null;
     }
 
     /**
@@ -88,39 +82,11 @@ class Cache
 
     /**
      * @param string $key
-     * @param array|string $value
-     * @param int $ttl
-     * @return bool
-     */
-    public function _set(string $key, $value, int $ttl = 0): bool
-    {
-        $ret = false;
-        if ($this->enable) {
-            $ret = $this->handle->set($this->_key($key), $value, $ttl);
-        }
-        return $ret;
-    }
-
-    /**
-     * @param string $key
      * @return mixed
      */
     public static function rm(string $key)
     {
         return self::getInstance()->_rm($key);
-    }
-
-    /**
-     * @param $key
-     * @return bool
-     */
-    public function _rm($key): bool
-    {
-        $ret = false;
-        if ($this->enable) {
-            $ret = $this->handle->rm($this->_key($key));
-        }
-        return $ret;
     }
 
     /**
@@ -132,9 +98,54 @@ class Cache
     }
 
     /**
+     * @param string $key
+     * @return mixed
+     */
+    private function _get(string $key)
+    {
+        if (!$this->enable) {
+            return null;
+        }
+
+        $data = $this->handle->get($this->_key($key));
+        if (!$data) {
+            return null;
+        }
+        return $data;
+    }
+
+    /**
+     * @param string $key
+     * @param array|string $value
+     * @param int $ttl
      * @return bool
      */
-    public function _clear(): bool
+    private function _set(string $key, $value, int $ttl = 0): bool
+    {
+        $ret = false;
+        if ($this->enable) {
+            $ret = $this->handle->set($this->_key($key), $value, $ttl);
+        }
+        return $ret;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    private function _rm($key): bool
+    {
+        $ret = false;
+        if ($this->enable) {
+            $ret = $this->handle->rm($this->_key($key));
+        }
+        return $ret;
+    }
+
+    /**
+     * @return bool
+     */
+    private function _clear(): bool
     {
         $ret = false;
         if ($this->enable) {
@@ -149,7 +160,7 @@ class Cache
      */
     private function _key($str): string
     {
-        return $this->prefix . '_' . $str;
+        return $this->prefix . '_' . md5($str);
     }
 
 }
