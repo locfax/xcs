@@ -73,10 +73,16 @@ class Memcached
      */
     public function set(string $key, $value, int $ttl = 0)
     {
+        if ($ttl > 0) {
+            $timeout = time() + $ttl;
+        } else {
+            $timeout = 0;
+        }
+
         try {
             $data = ['data' => $value, 'timeout' => $ttl];
             $json = json_encode($data, JSON_UNESCAPED_UNICODE);
-            return $this->_link->set($key, $json, $ttl);
+            return $this->_link->set($key, $json, $timeout);
         } catch (MemcachedException $ex) {
             return false;
         }
