@@ -8,39 +8,29 @@ use Xcs\ExException;
 
 class PostgresDb
 {
-
     private array $_config;
-    private bool $repeat = false;
     private PDO $_link;
 
     /**
-     * PdoDb constructor.
+     * Db constructor.
      * @param array $config
      * @throws ExException
      */
     public function __construct(array $config)
     {
-        $this->_config = $config;
-
         if (empty($config)) {
             throw new ExException('postgre dsn is empty');
         }
-
+        $this->_config = $config;
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
         if (isset($config['options'])) {
             $options = array_merge($options, $config['options']);
         }
-
+        $dsn = sprintf('pgsql:host=%s;port=%s;dbname=%s', $config['host'], $config['port'], $config['dbname']);
         try {
-            $dsn = sprintf('pgsql:host=%s;port=%s;dbname=%s', $config['host'], $config['port'], $config['dbname']);
             $this->_link = new PDO($dsn, $config['login'], $config['secret'], $options);
         } catch (PDOException $exception) {
-            if (!$this->repeat) {
-                $this->repeat = true;
-                $this->__construct($config);
-            } else {
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
-            }
+            $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
         }
     }
 
@@ -122,7 +112,9 @@ class PostgresDb
             $args[':' . $field] = $value;
             $comma = ',';
         }
-        $sql = 'INSERT INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
+
+        $sql = sprintf('INSERT INTO %s ( %s ) VALUES ( %s )', $this->qTable($tableName), $fields, $values);
+
         try {
             $sth = $this->_link->prepare($sql);
             $ret = $sth->execute($args);
@@ -152,8 +144,7 @@ class PostgresDb
             $comma = ',';
         }
 
-        $sql = 'REPLACE INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('REPLACE INTO %s ( %s ) VALUES ( %s )', $this->qTable($tableName), $fields, $values), $args);
     }
 
     /**
@@ -181,8 +172,7 @@ class PostgresDb
             }
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('UPDATE %s SET %s %s', $this->qTable($tableName), $data, $condition), $args);
     }
 
     /**
@@ -199,8 +189,7 @@ class PostgresDb
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition;
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('DELETE FROM %s %s', $this->qTable($tableName), $condition), $args);
     }
 
     /**
@@ -220,8 +209,7 @@ class PostgresDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
-        return $this->rowSql($sql, $args, $retObj);
+        return $this->rowSql(sprintf('SELECT %s FROM %s %s %s LIMIT 1', $field, $this->qTable($tableName), $condition, $orderBy), $args, $retObj);
     }
 
     /**
@@ -242,8 +230,7 @@ class PostgresDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->rowSetSql($sql, $args, $index, $retObj);
+        return $this->rowSetSql(sprintf('SELECT %s FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy), $args, $index, $retObj);
     }
 
     /**
@@ -265,8 +252,7 @@ class PostgresDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->pageSql($sql, $args, $offset, $limit, $retObj);
+        return $this->pageSql(sprintf('SELECT %s FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy), $args, $offset, $limit, $retObj);
     }
 
     /**
@@ -285,7 +271,7 @@ class PostgresDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
+        $sql = sprintf('SELECT %s AS result FROM %s %s %s LIMIT 1', $field, $this->qTable($tableName), $condition, $orderBy);
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -318,7 +304,7 @@ class PostgresDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
+        $sql = sprintf('SELECT %s AS result FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy);
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -348,7 +334,7 @@ class PostgresDb
      */
     public function count(string $tableName, $condition, array $args = null, string $field = '*')
     {
-        return $this->first($tableName, "COUNT({$field})", $condition, $args);
+        return $this->first($tableName, sprintf('COUNT( %s )', $field), $condition, $args);
     }
 
     /**
@@ -451,8 +437,8 @@ class PostgresDb
      */
     public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
+        $sql .= sprintf(" LIMIT %d OFFSET %d", $limit, $offset);
         try {
-            $sql .= " LIMIT {$limit} OFFSET {$offset}";
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
@@ -572,7 +558,7 @@ class PostgresDb
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE:' . $code;
+            $msg = 'ERROR: ' . $message . ' CODE:' . $code . ' SQL: ' . $sql;
             throw new ExException($msg);
         }
         return false;

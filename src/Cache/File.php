@@ -15,11 +15,9 @@ class File
 
     /**
      * @return $this
-     * @throws ExException
      */
     public function init(): File
     {
-        !is_dir(CACHE_PATH) && mkdir(CACHE_PATH);
         $this->enable = true;
         return $this;
     }
@@ -41,9 +39,13 @@ class File
         $hashKey = md5($key);
         $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
         if (file_exists($cacheFile)) {
-            $data = include $cacheFile;
-            if ($data && ($data['timeout'] == 0 || $data['timeout'] > time())) {
-                return $data['data'];
+            $data = file_get_contents($cacheFile);
+            if (empty($data)) {
+                return null;
+            }
+            $timeout = (int)substr($data, 8, 10);
+            if ($timeout == 0 || $timeout > time()) {
+                return unserialize(substr($data, 30));
             }
         }
         return null;
@@ -69,10 +71,8 @@ class File
         $path = CACHE_PATH . $this->filePath($hashKey);
         !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
 
-        $cacheFile = $path . '/' . $hashKey . '.php';
-        $cacheData = ['data' => $val, 'timeout' => $timeout];
-        $content = "<?php \n//CACHE FILE, DO NOT MODIFY ME PLEASE!\nreturn " . var_export($cacheData, true) . ';';
-        return $this->save($cacheFile, $content, FILE_WRITE_MODE);
+        $data = "<?php\n//" . sprintf('%010d', $timeout) . "\n exit();?>\n" . serialize($val);
+        return $this->save($path . '/' . $hashKey . '.php', $data, FILE_WRITE_MODE);
     }
 
     /**

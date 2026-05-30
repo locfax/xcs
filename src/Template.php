@@ -18,6 +18,7 @@ class Template
         }
         $template = fread($fp, filesize($this->tplDir . $tplFile));
         fclose($fp);
+
         $var_regexp = "((\\\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(\-\>)?[a-zA-Z0-9_\x7f-\xff]*)(\[[a-zA-Z0-9_\-\.\"\'\[\]\$\x7f-\xff]+\])*)";
         $const_regexp = "([A-Z_\x7f-\xff][A-Z0-9_\x7f-\xff]*)";
 
@@ -26,6 +27,18 @@ class Template
                 $template = preg_replace_callback("/[\n\r\t]*(\<\!\-\-)?\{subtemplate\s+([a-z\d_:\/]+)\}(\-\-\>)?[\n\r\t]*/", [$this, 'tag_subTemplate'], $template);
             }
         }
+
+        $htmlPlaceholders = [];
+        $template = preg_replace_callback(
+            '/\{html\}([\s\S]*?)\{\/html\}/i',
+            function ($matches) use (&$htmlPlaceholders) {
+                $key = '###HTML_BLOCK_' . count($htmlPlaceholders) . '###';
+                $htmlPlaceholders[$key] = $matches[1]; // 只保留内容
+                return $key;
+            },
+            $template
+        );
+
         $template = preg_replace("/([\n\r]+)\t+/s", "\\1", $template);
         $template = preg_replace("/\<\!\-\-\{(.+?)\}\-\-\>/s", "{\\1}", $template);
         $template = preg_replace_callback("/\{lang\s+(.+?)\}/", [$this, 'language_tags'], $template);
@@ -82,8 +95,12 @@ class Template
             $template = $this->compress_html($template);
         }
 
-        if ($compress && getini('noise_label')) {
-            $template = $this->noise_label($template);
+        if (!empty($htmlPlaceholders)) {
+            $template = str_replace(
+                array_keys($htmlPlaceholders),
+                array_values($htmlPlaceholders),
+                $template
+            );
         }
 
         $this->save($cacheDir . $cacheFile, $template, FILE_READ_MODE);
@@ -437,88 +454,6 @@ class Template
 
         // 恢复 pre/textarea/script 的原始内容
         $html = str_replace(array_keys($placeholders), array_values($placeholders), $html);
-
-        return $html;
-    }
-
-    private function noise_label($html)
-    {
-
-        // 1. 在 <body> 后加噪声
-        $html = preg_replace('/<body(.*?)>/i', '<body${1}>' . $this->getNoiseLabel(rand(1, 3)), $html);
-
-        // 2. 在 </div>、</p> 后随机插入噪声
-        $html = preg_replace_callback('/<\/(div|p)>/i', function ($matchs) {
-            if (rand(0, 1)) {
-                return $matchs[0] . $this->getNoiseLabel(rand(1, 2));
-            }
-            return $matchs[0];
-        }, $html);
-
-        // 3. 在 class 中随机添加 class
-        $html = preg_replace_callback('/class="(.*?)"/i', function ($matchs) {
-            return 'class="' . $matchs[1] . ' ' . $this->random_class_name('', 8) . '"';
-        }, $html);
-
-        // 4. 随机给 div/p/li/h2 加 data 属性
-        $html = preg_replace_callback('/<(div|p|li|h2)(\s|>)/i', function ($matchs) {
-            $attrs = ['data-x', 'data-y', 'data-z'];
-            $rn = $attrs[array_rand($attrs)];
-            $rv = \Xcs\Helper\StringHelper::random(6);
-            return '<' . $matchs[1] . ' ' . $rn . '="' . $rv . '"' . $matchs[2];
-        }, $html);
-
-        // 5. 随机替换标签名称
-        $html = $this->random_replace_tags($html);
-
-        return $html;
-    }
-
-    private function getNoiseLabel($num = 2)
-    {
-        $samples = [
-            '<span style="display:none">%s</span>',
-            '<p style="display:none">%s</p>',
-            '<i style="display:none">%s</i>',
-            '<em style="display:none">%s</em>',
-            '<b style="display:none">%s</b>',
-        ];
-
-        shuffle($samples);
-        $_samples = array_slice($samples, 0, $num);
-
-        $inHtml = '';
-        foreach ($_samples as $tpl) {
-            $inHtml .= sprintf($tpl, \Xcs\Helper\StringHelper::random(rand(8, 15)));
-        }
-
-        return $inHtml;
-    }
-
-    private function random_class_name($prefix = 'rcls_', $len = 8)
-    {
-        return $prefix . substr(md5(uniqid((string)mt_rand(), true)), 0, $len);
-    }
-
-    /**
-     * 随机替换部分标签
-     */
-    private function random_replace_tags($html)
-    {
-        $map = [
-            'div' => ['section', 'article'],
-            'p' => ['div', 'span'],
-        ];
-
-        foreach ($map as $src => $alts) {
-            if (rand(0, 1)) { // 50% 概率替换
-                $alt = $alts[array_rand($alts)];
-                // 开始标签
-                $html = preg_replace('/<' . $src . '\b/i', '<' . $alt, $html);
-                // 结束标签
-                $html = preg_replace('/<\/' . $src . '>/i', '</' . $alt . '>', $html);
-            }
-        }
 
         return $html;
     }

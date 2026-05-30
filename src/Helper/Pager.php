@@ -50,7 +50,7 @@ class Pager
         $multiPage = ('<a href="' . $mpUrl . 'page=1' . $hrefName . '" class="first"' . $ajaxTarget . '>首页</a>') .
             ('<a href="' . $mpUrl . 'page=' . ($pageInfo['page'] - 1 > 0 ? $pageInfo['page'] - 1 : 1) . $hrefName . '" class="prev"' . $ajaxTarget . '>上一页</a>');
         for ($i = $from; $i <= $to; $i++) {
-            $multiPage .= $i == $pageInfo['page'] ? '<a href="javascript:;" class="hidden-xs active">' . $i . '</a>' :
+            $multiPage .= $i == $pageInfo['page'] ? '<a href="javascript:;" class="active">' . $i . '</a>' :
                 '<a href="' . $mpUrl . 'page=' . $i . ($ajaxTarget && $i == $pageInfo['pages'] && $autoGoto ? '#' : $hrefName) . '"' . $ajaxTarget . ' class="hidden-xs">' . $i . '</a>';
         }
         $nextPage = min($pageInfo['page'] + 1, $pageInfo['pages']);

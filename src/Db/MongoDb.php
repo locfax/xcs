@@ -15,25 +15,22 @@ use Xcs\ExException;
 
 class MongoDb
 {
-
     private array $_config;
     private Manager $_link;
     private WriteConcern $_writeConcern;
     private $_dbname;
 
     /**
-     * MongoDb constructor.
+     * Db constructor.
      * @param array $config
      * @throws ExException
      */
     public function __construct(array $config)
     {
-        $this->_config = $config;
-
         if (empty($config)) {
             throw new ExException('mongodb dsn is empty');
         }
-
+        $this->_config = $config;
         $options = [
             'connect' => true,
             'persist' => false
@@ -41,7 +38,6 @@ class MongoDb
         if (isset($config['options'])) {
             $options = array_merge($options, $config['options']);
         }
-
         if ($config['login']) {
             $dsn = sprintf('mongodb://%s:%s@%s:%s/%s', $config['login'], $config['secret'], $config['host'], $config['port'], $config['dbname']);
         } else {
@@ -50,7 +46,6 @@ class MongoDb
         $this->_link = new Manager($dsn, $options);
         $this->_writeConcern = new WriteConcern(WriteConcern::MAJORITY, 5000);
         $this->_dbname = $config['dbname'];
-
     }
 
 

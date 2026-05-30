@@ -8,34 +8,25 @@ use Xcs\ExException;
 
 class SqliteDb
 {
-
     private array $_config;
-    private bool $repeat = false;
     private PDO $_link;
 
     /**
-     * PdoDb constructor.
+     * Db constructor.
      * @param array $config //dsn sqlite:data.db
      * @throws ExException
      */
     public function __construct(array $config)
     {
         $this->_config = $config;
-
         if (empty($config)) {
             throw new ExException('sqlite dsn is empty');
         }
-
+        $dsn = 'sqlite:' . $config['dbname'];
         try {
-            $dsn = 'sqlite:' . $config['dbname'];
             $this->_link = new PDO($dsn);
         } catch (PDOException $exception) {
-            if (!$this->repeat) {
-                $this->repeat = true;
-                $this->__construct($config);
-            } else {
-                $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
-            }
+            $this->_halt($exception->getMessage(), $exception->getCode(), 'connect error');
         }
     }
 
@@ -68,10 +59,7 @@ class SqliteDb
      */
     public function qTable(string $tableName): string
     {
-        if (!str_contains($tableName, '.')) {
-            return "`{$this->_config['dbname']}`" . ".`{$tableName}`";
-        }
-        return $tableName;
+        return "`{$tableName}`";
     }
 
     /**
@@ -117,16 +105,15 @@ class SqliteDb
             $args[':' . $field] = $value;
             $comma = ',';
         }
-        $sql = 'INSERT INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
         try {
-            $sth = $this->_link->prepare($sql);
+            $sth = $this->_link->prepare(sprintf('INSERT INTO %s ( %s ) VALUES ( %s )', $this->qTable($tableName), $fields, $values));
             $ret = $sth->execute($args);
             if ($retId) {
                 $ret = $this->_link->lastInsertId();
             }
             return $ret;
         } catch (PDOException $e) {
-            return $this->_halt($e->getMessage(), $e->getCode(), $sql);
+            return $this->_halt($e->getMessage(), $e->getCode());
         }
     }
 
@@ -146,9 +133,7 @@ class SqliteDb
             $args[':' . $field] = $value;
             $comma = ',';
         }
-
-        $sql = 'REPLACE INTO ' . $this->qTable($tableName) . '(' . $fields . ') VALUES (' . $values . ')';
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('REPLACE INTO %s ( %s ) VALUES ( %s )', $this->qTable($tableName), $fields, $values), $args);
     }
 
     /**
@@ -176,8 +161,7 @@ class SqliteDb
             }
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        $sql = 'UPDATE ' . $this->qTable($tableName) . " SET {$data} {$condition}";
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('UPDATE %s SET %s %s', $this->qTable($tableName), $data, $condition), $args);
     }
 
     /**
@@ -195,8 +179,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $limit = $multi ? '' : ' LIMIT 1';
-        $sql = 'DELETE FROM ' . $this->qTable($tableName) . $condition . $limit;
-        return $this->exec($sql, $args);
+        return $this->exec(sprintf('DELETE FROM %s %s %s', $this->qTable($tableName), $condition, $limit), $args);
     }
 
     /**
@@ -216,8 +199,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
-        return $this->rowSql($sql, $args, $retObj);
+        return $this->rowSql(sprintf('SELECT %s FROM %s %s %s LIMIT 1', $field, $this->qTable($tableName), $condition, $orderBy), $args, $retObj);
     }
 
     /**
@@ -238,8 +220,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->rowSetSql($sql, $args, $index, $retObj);
+        return $this->rowSetSql(sprintf('SELECT %s FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy), $args, $index, $retObj);
     }
 
     /**
@@ -261,8 +242,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = 'SELECT ' . $field . ' FROM ' . $this->qTable($tableName) . $condition . $orderBy;
-        return $this->pageSql($sql, $args, $offset, $limit, $retObj);
+        return $this->pageSql(sprintf('SELECT %s FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy), $args, $offset, $limit, $retObj);
     }
 
     /**
@@ -281,7 +261,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy . ' LIMIT 1';
+        $sql = sprintf('SELECT %s AS result FROM %s %s %s LIMIT 1', $field, $this->qTable($tableName), $condition, $orderBy);
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -314,7 +294,7 @@ class SqliteDb
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = is_null($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $sql = "SELECT {$field} AS result FROM " . $this->qTable($tableName) . $condition . $orderBy;
+        $sql = sprintf('SELECT %s AS result FROM %s %s %s', $field, $this->qTable($tableName), $condition, $orderBy);
         try {
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
@@ -344,7 +324,7 @@ class SqliteDb
      */
     public function count(string $tableName, $condition, array $args = null, string $field = '*')
     {
-        return $this->first($tableName, "COUNT({$field})", $condition, $args);
+        return $this->first($tableName, sprintf('COUNT( %s )', $field), $condition, $args);
     }
 
     /**
@@ -448,7 +428,7 @@ class SqliteDb
     public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
     {
         try {
-            $sql .= " LIMIT {$limit} OFFSET {$offset}";
+            $sql .= sprintf(' LIMIT %d OFFSET %d', $limit, $offset);
             if (empty($args)) {
                 $sth = $this->_link->query($sql);
             } else {
@@ -543,7 +523,7 @@ class SqliteDb
             $this->close();
             $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
             $message = mb_convert_encoding($message, 'UTF-8', $encode);
-            $msg = 'ERROR: ' . $message . ' SQL: ' . $sql . ' CODE:' . $code;
+            $msg = 'ERROR: ' . $message . ' CODE:' . $code . ' SQL: ' . $sql;
             throw new ExException($msg);
         }
         return false;

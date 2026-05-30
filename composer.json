@@ -27,7 +27,8 @@
     "php": ">=7.4",
     "ext-json": "*",
     "ext-mbstring": "*",
-    "ext-pdo": "*"
+    "ext-pdo": "*",
+    "ext-mysqli": "*"
   },
   "suggest": {}
 }
