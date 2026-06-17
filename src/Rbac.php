@@ -14,9 +14,9 @@ class Rbac
 
     /**
      * @param string $controllerName
-     * @param string|null $actionName
+     * @param string $actionName
      * @param bool $strict
-     * @param array|null $roles
+     * @param array $roles
      * @return bool
      */
     public static function auth(string $controllerName, string $actionName = '', bool $strict = false, array $roles = []): bool
@@ -166,9 +166,9 @@ class Rbac
 
     /**
      * @param string $controllerName
-     * @return mixed
+     * @return array
      */
-    private static function getACL(string $controllerName)
+    private static function getACL(string $controllerName): array
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {
@@ -180,7 +180,7 @@ class Rbac
         if (isset($globalAcl[$controllerName])) {
             return $globalAcl[$controllerName];
         }
-        return null;
+        return [];
     }
 
 }

@@ -13,10 +13,10 @@ class FileLog
 
     /**
      * 写入日志
-     * @param $filename
-     * @param $msg
+     * @param string $filename
+     * @param string $msg
      */
-    public static function write($filename, $msg): void
+    public static function write(string $filename, string $msg): void
     {
         $filename = RUNTIME_PATH . 'log/' . $filename;
         $res = [];
@@ -42,10 +42,10 @@ class FileLog
 
     /**
      * 读取日志
-     * @param $filename
+     * @param string $filename
      * @return mixed
      */
-    public static function read($filename)
+    public static function read(string $filename): mixed
     {
         $filename = RUNTIME_PATH . 'log/' . $filename;
 

@@ -8,66 +8,66 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function FileGet(string $key)
+    public static function FileGet(string $key): mixed
     {
-        return \Xcs\Cache\File::getInstance()->get($key);
-    }
-
-    /**
-     * @param string $kye
-     * @param $value
-     * @param $ttl
-     * @return mixed
-     */
-    public static function FileSet(string $key, $value, $ttl = 0)
-    {
-        return \Xcs\Cache\File::getInstance()->set($key, $value, $ttl);
+        return File::getInstance()->get($key);
     }
 
     /**
      * @param string $key
-     * @return mixed
-     */
-    public static function FileRm(string $key)
-    {
-        return \Xcs\Cache\File::getInstance()->rm($key);
-    }
-
-    /**
-     * @param string $key
-     * @return mixed
-     */
-    public static function get(string $key)
-    {
-        return \Xcs\Cache\Redis::getInstance()->get($key);
-    }
-
-    /**
-     * @param string $key
-     * @param array|string $value
+     * @param mixed $value
      * @param int $ttl
      * @return mixed
      */
-    public static function set(string $key, $value, int $ttl = 0)
+    public static function FileSet(string $key, mixed $value, int $ttl = 0): mixed
     {
-        return \Xcs\Cache\Redis::getInstance()->set($key, $value, $ttl);
+        return File::getInstance()->set($key, $value, $ttl);
     }
 
     /**
      * @param string $key
      * @return mixed
      */
-    public static function rm(string $key)
+    public static function FileRm(string $key): mixed
     {
-        return \Xcs\Cache\Redis::getInstance()->rm($key);
+        return File::getInstance()->rm($key);
     }
 
     /**
+     * @param string $key
      * @return mixed
      */
-    public static function clear()
+    public static function get(string $key): mixed
     {
-        return \Xcs\Cache\Redis::getInstance()->clear();
+        return Redis::getInstance()->get($key);
+    }
+
+    /**
+     * @param string $key
+     * @param mixed $value
+     * @param int $ttl
+     * @return mixed
+     */
+    public static function set(string $key, mixed $value, int $ttl = 0): mixed
+    {
+        return Redis::getInstance()->set($key, $value, $ttl);
+    }
+
+    /**
+     * @param string $key
+     * @return mixed
+     */
+    public static function rm(string $key): mixed
+    {
+        return Redis::getInstance()->rm($key);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function clear(): bool
+    {
+        return Redis::getInstance()->clear();
     }
 
 }

@@ -13,7 +13,7 @@ class Template
     private array $language = [];
     private string $tplDir = '';
 
-    public function parse($cacheDir, $tplDir, $tplFile, $cacheFile, $file, $compress = true): void
+    public function parse(string $cacheDir, string $tplDir, string $tplFile, string $cacheFile, string $file, bool $compress = true): void
     {
         $this->tplDir = $tplDir;
 
@@ -49,7 +49,6 @@ class Template
         $template = preg_replace_callback("/\{lang\s+(.+?)\}/", [$this, 'language_tags'], $template);
 
         $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/", [$this, 'url_tags'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{surl\s+(.+?)\}[\n\r\t]*/", [$this, 'surl_tags'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{config\s+(.+?)\}[\n\r\t]*/", [$this, 'config_tags'], $template);
 
         $template = preg_replace_callback("/[\n\r\t]*\{script\s+(.+?)\}[\n\r\t]*/", [$this, 'script_tags'], $template);
@@ -114,10 +113,10 @@ class Template
     /**
      * @param string $filename
      * @param string $content
-     * @param mixed $mode
+     * @param int $mode
      * @return void
      */
-    private function save(string $filename, string $content, $mode): void
+    private function save(string $filename, string $content, int $mode): void
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
@@ -132,9 +131,9 @@ class Template
 
     /**
      * @param array $_var
-     * @return mixed|string
+     * @return string
      */
-    private function language_tags(array $_var)
+    private function language_tags(array $_var): string
     {
         $vars = explode(':', $_var[1]);
         $isPlugin = count($vars) == 2;
@@ -173,18 +172,6 @@ class Template
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--URL_TAG_$i-->";
         $this->replaceCode['replace'][$i] = "<?php echo xcs_url(\"$parameter[1]\"); ?>";
-        return $search;
-    }
-
-    /**
-     * @param array $parameter
-     * @return string
-     */
-    private function surl_tags(array $parameter): string
-    {
-        $i = count($this->replaceCode['search']);
-        $this->replaceCode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = xcs_url("$parameter[1]");
         return $search;
     }
 
@@ -334,9 +321,9 @@ class Template
 
     /**
      * @param array $str
-     * @return array|string
+     * @return string
      */
-    private function trans_amp(array $str)
+    private function trans_amp(array $str): string
     {
         $str = $str[0];
         $str = str_replace('&amp;amp;', '&amp;', $str);
@@ -345,11 +332,11 @@ class Template
 
     /**
      * @param array $var
-     * @return array|string|null
+     * @return string
      */
-    private function add_quote(array $var)
+    private function add_quote(array $var): string
     {
-        $var = '<?=' . $var[1] . '?>';
+        $var = '<?php echo ' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([\w\d_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
     }
 
@@ -361,15 +348,15 @@ class Template
     {
         $vars = explode('.', $var[1]);
         $var = array_shift($vars);
-        return "<?=\${$var}[{$vars[0]}]?>";
+        return "<?=\${$var}[$vars[0]]?>";
     }
 
     /**
-     * @param mixed $expr
+     * @param string $expr
      * @param string $statement
      * @return string
      */
-    private function strip_tags($expr, string $statement = ''): string
+    private function strip_tags(string $expr, string $statement = ''): string
     {
         $expr = str_replace("\\\"", "\"", preg_replace("/\<\?\=(\\\$.+?)\?\>/s", "\\1", $expr));
         $statement = str_replace("\\\"", "\"", $statement);
@@ -386,7 +373,7 @@ class Template
         $s = $parameter[2];
         $s = str_replace('\\"', '"', $s);
         $s = preg_replace("/<\?=\\\$(.+?)\?>/", "{\$\\1}", $s);
-        preg_match_all("/<\?=(.+?)\?>/e", $s, $cometary);
+        preg_match_all("/<\?=(.+?)\?>/", $s, $cometary);
         $constAdd = '';
         $cometary[1] = array_unique($cometary[1]);
         foreach ($cometary[1] as $const) {
@@ -401,10 +388,10 @@ class Template
 
     /**
      * 压缩html : 清除换行符,清除制表符,去掉注释标记
-     * @param $string
-     * @return压缩后的$string
-     * */
-    public function compress_html($html)
+     * @param $html
+     * @return string
+     */
+    public function compress_html($html): string
     {
         // 保护 pre/textarea 里的内容
         $pattern = '/<(pre|textarea|script)\b[^>]*>.*?<\/\1>/is';
@@ -424,43 +411,31 @@ class Template
         $html = preg_replace([
             '/\s{2,}/',                 // 多余空格压缩成一个
             '/<!--(?!\[if).*?-->/s'     // 删除注释（保留条件注释）
-        ], [
-            ' ',
-            ''
-        ], $html);
+        ], [' ', ''], $html);
 
         // 压缩内联 CSS
-        $html = preg_replace_callback(
-            '/<style\b[^>]*>(.*?)<\/style>/is',
-            function ($matches) {
-                $css = $matches[1];
-                $css = preg_replace('!/\*.*?\*/!s', '', $css); // 去掉注释
-                $css = preg_replace('/\s*([{}:;,])\s*/', '$1', $css);
-                $css = preg_replace('/\s+/', ' ', $css);
-                return "<style>{$css}</style>";
-            },
-            $html
-        );
+        $html = preg_replace_callback('/<style\b[^>]*>(.*?)<\/style>/is', function ($matches) {
+            $css = $matches[1];
+            $css = preg_replace('!/\*.*?\*/!s', '', $css); // 去掉注释
+            $css = preg_replace('/\s*([{}:;,])\s*/', '$1', $css);
+            $css = preg_replace('/\s+/', ' ', $css);
+            return "<style>{$css}</style>";
+        }, $html);
 
         // 压缩内联 JS
         $html = preg_replace_callback(
-            '/<script\b[^>]*>(.*?)<\/script>/is',
-            function ($matches) {
-                $js = $matches[1];
-                if (trim($js) === '') return $matches[0];
-                $js = preg_replace('!/\*.*?\*/!s', '', $js);  // 多行注释
-                $js = preg_replace('/\/\/[^\n\r]*/', '', $js); // 单行注释
-                $js = preg_replace('/\s*([{}():;,+<>=&|-])\s*/', '$1', $js);
-                $js = preg_replace('/\s+/', ' ', $js);
-                return "<script>{$js}</script>";
-            },
-            $html
-        );
+            '/<script\b[^>]*>(.*?)<\/script>/is', function ($matches) {
+            $js = $matches[1];
+            if (trim($js) === '') return $matches[0];
+            $js = preg_replace('!/\*.*?\*/!s', '', $js);  // 多行注释
+            $js = preg_replace('/\/\/[^\n\r]*/', '', $js); // 单行注释
+            $js = preg_replace('/\s*([{}():;,+<>=&|-])\s*/', '$1', $js);
+            $js = preg_replace('/\s+/', ' ', $js);
+            return "<script>{$js}</script>";
+        }, $html);
 
         // 恢复 pre/textarea/script 的原始内容
-        $html = str_replace(array_keys($placeholders), array_values($placeholders), $html);
-
-        return $html;
+        return str_replace(array_keys($placeholders), array_values($placeholders), $html);
     }
 
 }

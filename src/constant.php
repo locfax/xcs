@@ -1,16 +1,15 @@
 <?php
 
 defined('APP_ROOT') or define('APP_ROOT', '');
+defined('ROUTE') or define('ROUTE', true);
 defined('APP_DSN') or define('APP_DSN', 'mysql');
 defined('APP_KEY') or define('APP_KEY', 'web');
 defined('DEBUG') or define('DEBUG', true);
-
 defined('DEBUG_EOL') or define('DEBUG_EOL', PHP_OS == 'Linux' ? "\n" : "\r\n");
 
 const XCS_PATH = __DIR__ . '/';  //框架路径
 const APP_PATH = APP_ROOT . '/app/'; //应用路径
 const LIB_PATH = APP_ROOT . '/app/Library/'; //module路径
-
 const RUNTIME_PATH = APP_ROOT . '/runtime/'; //全局数据路径
 
 if (!defined('CACHE_PATH')) {

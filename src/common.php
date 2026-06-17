@@ -2,12 +2,12 @@
 
 /**
  * @param string $variable
- * @param mixed|null $defVal
+ * @param mixed $defVal
  * @param string $runFunc
  * @param bool $addslashes
  * @return mixed
  */
-function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $addslashes = true)
+function getgpc(string $variable, mixed $defVal = null, string $runFunc = '', bool $addslashes = true): mixed
 {
     $arr = explode('.', $variable);
     if (count($arr) == 2) {
@@ -68,7 +68,7 @@ function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $ad
  * @param bool $addslashes
  * @return void
  */
-function xcs_gpc_value(&$value, string $runFunc, bool $addslashes): void
+function xcs_gpc_value(mixed &$value, string $runFunc, bool $addslashes): void
 {
     if (empty($value)) {
         return;
@@ -102,24 +102,18 @@ function xcs_gpc_value(&$value, string $runFunc, bool $addslashes): void
  * @param string $key
  * @return mixed
  */
-function getini(string $key)
+function getini(string $key): mixed
 {
     $_CFG = \Xcs\App::mergeVars('cfg');
     $k = explode('/', $key);
-    switch (count($k)) {
-        case 1 :
-            return $_CFG[$k[0]] ?? null;
-        case 2:
-            return $_CFG[$k[0]][$k[1]] ?? null;
-        case 3:
-            return $_CFG[$k[0]][$k[1]][$k[2]] ?? null;
-        case 4:
-            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null;
-        case 5:
-            return $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null;
-        default:
-            return null;
-    }
+    return match (count($k)) {
+        1 => $_CFG[$k[0]] ?? null,
+        2 => $_CFG[$k[0]][$k[1]] ?? null,
+        3 => $_CFG[$k[0]][$k[1]][$k[2]] ?? null,
+        4 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]] ?? null,
+        5 => $_CFG[$k[0]][$k[1]][$k[2]][$k[3]][$k[4]] ?? null,
+        default => null,
+    };
 }
 
 /**
@@ -127,8 +121,9 @@ function getini(string $key)
  * @param int $cacheTime
  * @param string $cacheFile
  * @param string $file
+ * @param bool $compress
  */
-function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, $compress = true): void
+function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, bool $compress = true): void
 {
     if (is_file(THEMES_VIEW . $mainTpl)) {
         $tplTime = filemtime(THEMES_VIEW . $mainTpl);
@@ -149,10 +144,12 @@ function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, str
  * @param string $file
  * @param array $data
  * @param bool $returnTplFile
+ * @param bool $returnContent
  * @param string $type
- * @return array|string
+ * @param bool $compress
+ * @return false|string|null
  */
-function template(string $file, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', $compress = true)
+function template(string $file, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', bool $compress = true): bool|string|null
 {
     $_tplId = getini('site/themes');
     $tplFile = $_tplId ? $_tplId . '/' . $file . '.' . $type : $file . '.' . $type;
@@ -182,11 +179,16 @@ function template(string $file, array $data = [], bool $returnTplFile = false, b
     return null;
 }
 
+function xcs_url($udi, $param): string
+{
+    return \Xcs\App::url($udi, $param);
+}
+
 /**
  * @param mixed $string
- * @return float|array|int|string
+ * @return mixed
  */
-function daddslashes($string)
+function daddslashes(mixed $string): mixed
 {
     if (empty($string)) {
         return $string;
@@ -202,9 +204,9 @@ function daddslashes($string)
 
 /**
  * @param mixed $value
- * @return float|array|int|string
+ * @return mixed
  */
-function dstripslashes($value)
+function dstripslashes(mixed $value): mixed
 {
     if (empty($value)) {
         return $value;
@@ -219,11 +221,11 @@ function dstripslashes($value)
 }
 
 /**
- * quotes get post cookie by \char(21)'
+ * quotes get post cookie by char(21)
  * @param mixed $string
- * @return float|array|int|string
+ * @return mixed
  */
-function daddcslashes($string)
+function daddcslashes(mixed $string): mixed
 {
     if (empty($string)) {
         return $string;
@@ -240,9 +242,9 @@ function daddcslashes($string)
 /**
  * it's pair to daddcslashes
  * @param mixed $value
- * @return float|array|int|string
+ * @return mixed
  */
-function dstripcslashes($value)
+function dstripcslashes(mixed $value): mixed
 {
     if (empty($value)) {
         return $value;
@@ -258,9 +260,9 @@ function dstripcslashes($value)
 
 /**
  * @param mixed $text
- * @return float|int|string
+ * @return mixed
  */
-function char_input($text)
+function char_input(mixed $text): mixed
 {
     if (empty($text)) {
         return $text;
@@ -273,9 +275,9 @@ function char_input($text)
 
 /**
  * @param mixed $text
- * @return float|int|string
+ * @return mixed
  */
-function char_output($text)
+function char_output(mixed $text): mixed
 {
     if (empty($text)) {
         return $text;
@@ -382,13 +384,6 @@ if (!function_exists('clientIp')) {
     }
 }
 
-if (!function_exists('str_contains')) {
-    function str_contains($str, $need): bool
-    {
-        return strpos($str, $need) !== false;
-    }
-}
-
 if (!function_exists('isGet')) {
     function isGet(bool $retBool = true): bool
     {
@@ -418,7 +413,7 @@ if (!function_exists('isAjax')) {
 }
 
 if (!function_exists('jsAlert')) {
-    function jsAlert(string $message = '', string $after_action = '', string $url = ''): array
+    function jsAlert(string $message = '', string $after_action = '', string $url = ''): string
     {
         $out = "<script type=\"text/javascript\">\n";
         if (!empty($message)) {
@@ -440,7 +435,7 @@ if (!function_exists('jsAlert')) {
 }
 
 if (!function_exists('redirect')) {
-    function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
+    function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): string
     {
         if (!$js) {
             if ($delay > 0) {

@@ -9,7 +9,7 @@ class User
 
     /**
      * @param array $userData
-     * @param string|null $rolesData
+     * @param string $rolesData
      * @param int $life
      * @return bool
      */
@@ -61,9 +61,9 @@ class User
     }
 
     /**
-     * @return mixed|null
+     * @return mixed
      */
-    public static function getRole()
+    public static function getRole(): mixed
     {
         $data = self::get();
         return $data[self::ROLEY] ?? null;
@@ -86,9 +86,9 @@ class User
 
     /**
      * @param string $key
-     * @return mixed
+     * @return array
      */
-    private static function getData(string $key)
+    private static function getData(string $key): array
     {
         $ret = [];
         $type = getini('auth/method');
@@ -98,16 +98,12 @@ class User
 
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
-                $handle = getini('auth/handle');
-                if ($handle) {
-                    (new Session())->start();
-                }
                 session_start();
             }
-            $ret = $_SESSION[$key] ?? null;
+            $ret = $_SESSION[$key] ?? [];
         } elseif ('COOKIE' == $type) {
             $key = self::getCookieKey($key);
-            $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key]), true) : null;
+            $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key]), true) : [];
         }
         return $ret;
     }
@@ -128,10 +124,6 @@ class User
 
         if ('SESSION' == $type) {
             if (PHP_SESSION_NONE == session_status()) {
-                $handle = getini('auth/handle');
-                if ($handle) {
-                    (new Session())->start();
-                }
                 session_start();
             }
             if ($life >= 0) {
@@ -153,20 +145,11 @@ class User
 
     /**
      * @param string $var
-     * @param bool $prefix
-     * @param null $key
      * @return string
      */
-    private static function getCookieKey(string $var, bool $prefix = true, $key = null): string
+    private static function getCookieKey(string $var): string
     {
-        if ($prefix) {
-            if (is_null($key)) {
-                $var = substr(md5(getini('auth/key')), -7) . '_' . $var;
-            } else {
-                $var = $key . '_' . $var;
-            }
-        }
-        return $var;
+        return substr(md5(getini('auth/key')), -7) . '_' . $var;
     }
 
     /**
@@ -176,7 +159,7 @@ class User
      * @param int $expiry
      * @return string
      */
-    private static function authCode(string $string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
+    public static function authCode(string $string, string $operation = 'DECODE', string $key = '', int $expiry = 0): string
     {
         static $hash_auth = null;
         if (is_null($hash_auth)) {
@@ -186,14 +169,14 @@ class User
         $timestamp = time();
         $cKey_length = 4;
         $_key = md5($key ?: $hash_auth);
-        $keya = md5(substr($_key, 0, 16));
-        $keyb = md5(substr($_key, 16, 16));
-        $keyc = 'DECODE' == $operation ? substr($string, 0, $cKey_length) : substr(md5(microtime()), -$cKey_length);
+        $key_a = md5(substr($_key, 0, 16));
+        $key_b = md5(substr($_key, 16, 16));
+        $key_c = 'DECODE' == $operation ? substr($string, 0, $cKey_length) : substr(md5(microtime()), -$cKey_length);
 
-        $cryptKey = $keya . md5($keya . $keyc);
+        $cryptKey = $key_a . md5($key_a . $key_c);
         $key_length = strlen($cryptKey);
 
-        $_string = 'DECODE' == $operation ? base64_decode(substr($string, $cKey_length)) : sprintf('%010d', $expiry ? $expiry + $timestamp : 0) . substr(md5($string . $keyb), 0, 16) . $string;
+        $_string = 'DECODE' == $operation ? base64_decode(substr($string, $cKey_length)) : sprintf('%010d', $expiry ? $expiry + $timestamp : 0) . substr(md5($string . $key_b), 0, 16) . $string;
         $string_length = strlen($_string);
 
         $result = '';
@@ -221,11 +204,12 @@ class User
         }
 
         if ('DECODE' == $operation) {
-            if (('0' == substr($result, 0, 10) || intval(substr($result, 0, 10)) - $timestamp > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $keyb), 0, 16)) {
+            if (('0' == substr($result, 0, 10) || intval(substr($result, 0, 10)) - $timestamp > 0) && substr($result, 10, 16) == substr(md5(substr($result, 26) . $key_b), 0, 16)) {
                 return substr($result, 26);
             }
             return '';
         }
-        return $keyc . str_replace('=', '', base64_encode($result));
+
+        return $key_c . str_replace('=', '', base64_encode($result));
     }
 }

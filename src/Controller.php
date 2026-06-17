@@ -18,7 +18,7 @@ class Controller
      * @param string $actionName
      * @return mixed
      */
-    public function init(string $controllerName, string $actionName)
+    public function init(string $controllerName, string $actionName): mixed
     {
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
@@ -26,12 +26,23 @@ class Controller
         return $this->setup();
     }
 
+    private function env(): void
+    {
+        $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
+        App::mergeVars('cfg', ['udi' => $this->_ctl . '/' . $this->_act]);
+    }
+
+    protected function setup()
+    {
+        return null;
+    }
+
     /**
      * @param string $name
      * @param mixed $arguments
      * @return array
      */
-    public function __call(string $name, $arguments)
+    public function __call(string $name, mixed $arguments)
     {
         //动作不存在
         if (isAjax()) {
@@ -46,71 +57,59 @@ class Controller
             throw new \Error($name . " not exists!");
         }
 
-        return '';
+        return $this->html($name . " not exists!");
     }
 
-    protected function get($key = null)
+    protected function get(string $key = '', mixed $default = null): mixed
     {
-        if ($key == null) {
+        if ($key == '') {
             return getgpc('g.*');
         }
 
-        return getgpc('g.' . $key, '');
+        return getgpc('g.' . $key, $default);
     }
 
-    protected function post($key = null)
+    protected function post(string $key = '', mixed $default = null): mixed
     {
-        if ($key == null) {
+        if ($key == '') {
             return getgpc('p.*');
         }
 
-        return getgpc('p.' . $key, '');
+        return getgpc('p.' . $key, $default);
     }
 
     /**
      * @param String $data
-     * @return string[]
+     * @return array
      */
-    protected function html(string $data = '')
+    protected function html(string $data = ''): array
     {
         return ['type' => 'html', 'content' => $data];
-    }
-
-    /**
-     * @param String $data
-     * @return string[]
-     */
-    protected function text(string $data = '')
-    {
-        return ['type' => 'text', 'content' => $data];
     }
 
     /**
      * @param array $data
      * @return array
      */
-    protected function json(array $data = [])
+    protected function json(array $data = []): array
     {
         return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
     }
-    /**
-     * 初始变量
-     */
-    private function env(): void
-    {
-        $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
-        App::mergeVars('cfg', ['udi' => $this->_ctl . '/' . $this->_act]);
-    }
 
-    protected function setup()
+
+    /**
+     * @param String $data
+     * @return array
+     */
+    protected function text(string $data = ''): array
     {
-        return null;
+        return ['type' => 'text', 'content' => $data];
     }
 
     /**
-     * @param $code
+     * @param int $code
      */
-    protected function status($code): void
+    protected function status(int $code): void
     {
         static $_status = [
             // Informational 1xx

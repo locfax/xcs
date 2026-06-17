@@ -197,7 +197,7 @@ class MongoDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $table, array $options = [], array $condition = [])
+    public function findAll(string $table, array $options = [], array $condition = []): bool|array
     {
         try {
             $query = new MongoQuery($condition, $options);
@@ -227,7 +227,7 @@ class MongoDb
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20)
+    public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
     {
         try {
             $options = array_merge($options, [
@@ -296,16 +296,15 @@ class MongoDb
 
     /**
      * @param string $message
-     * @param mixed|int $code
+     * @param mixed $code
      * @return bool
      * @throws ExException
      */
-    private function _halt(string $message = '', $code = 0): bool
+    private function _halt(string $message = '', mixed $code = 0): bool
     {
         if ($this->_config['dev']) {
             $this->close();
-            $encode = mb_detect_encoding($message, ['ASCII', 'UTF-8', 'GB2312', 'GBK', 'BIG5']);
-            $message = mb_convert_encoding($message, 'UTF-8', $encode);
+            $message = mb_convert_encoding($message, 'UTF-8', mb_detect_encoding($message));
             $msg = 'ERROR: ' . $message . ' CODE:' . $code;
             throw new ExException($msg);
         }

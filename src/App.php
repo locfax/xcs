@@ -2,6 +2,8 @@
 
 namespace Xcs;
 
+use Error;
+
 class App
 {
 
@@ -16,10 +18,6 @@ class App
      */
     public static function run(bool $refresh = false): void
     {
-        if (!defined('APP_KEY')) {
-            exit('APP_KEY not defined!');
-        }
-
         if (isset($_GET['s'])) {
             $uri = trim(str_replace(['.html', '.htm'], '', $_GET['s']), '/');
         } else {
@@ -35,7 +33,7 @@ class App
      */
     public static function runFile(bool $refresh = false): void
     {
-        self::rootNamespace('\\', APP_PATH);
+        self::rootNamespace();
 
         $preloadFile = RUNTIME_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh || DEBUG) {
@@ -52,7 +50,7 @@ class App
                     $error = [
                         ['file' => $errFile, 'line' => $errLine]
                     ];
-                    echo UiException::Error('语法错误', $errStr, $error);
+                    echo UiException::error('error', $errStr, $error);
                 });
                 set_exception_handler(function ($ex) {
                     echo UiException::Render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
@@ -60,11 +58,11 @@ class App
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error) {
-                        echo UiException::Error('致命异常', $error['message'], [$error]);
+                        echo UiException::error('exception', $error['message'], [$error]);
                     }
                 });
                 array_walk($files, function ($file) {
-                    require $file;
+                    include $file;
                 });
                 return;
             }
@@ -73,15 +71,15 @@ class App
             $preloadFile = self::makeRunFile($files, $preloadFile);
         }
 
-        $preloadFile && require $preloadFile;
+        $preloadFile && include $preloadFile;
     }
 
     /**
-     * @param $runtimeFiles
-     * @param $runFile
-     * @return mixed
+     * @param array $runtimeFiles
+     * @param string $runFile
+     * @return string|bool
      */
-    private static function makeRunFile($runtimeFiles, $runFile)
+    private static function makeRunFile(array $runtimeFiles, string $runFile): string|bool
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -114,7 +112,7 @@ class App
      */
     private static function dispatching($uri): void
     {
-        if (defined('ROUTE') && ROUTE) {
+        if (ROUTE) {
             $flag = self::router($uri);
             if (!$flag) {
                 $result = self::errCtrl('Error Router');
@@ -135,17 +133,15 @@ class App
     }
 
     /**
-     * @param $controllerName
-     * @param $actionName
+     * @param string $controllerName
+     * @param string $actionName
      * @return void
      */
-    private static function execute($controllerName, $actionName): void
+    private static function execute(string $controllerName, string $actionName): void
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
         $controllerClass = self::$_controllerPrefix . $controllerName;
-
-        header('Content-Type: text/html; charset=UTF-8');
 
         //载入controller
         if (!self::loadController($controllerName, $controllerClass)) {
@@ -157,6 +153,7 @@ class App
 
         $controller = new $controllerClass();
         $result = $controller->init($controllerName, $actionName);
+
         //setup有返回
         if ($result) {
             self::printResult($result);
@@ -165,10 +162,14 @@ class App
 
         //调用方法
         $result = call_user_func([$controller, $actionMethod]);
+
         //没找到action
         if ($result === false) {
+            $result = self::errCtrl($controllerName . ' act not found');
+            self::printResult($result);
             return;
         }
+
         //无需后续
         if (is_null($result)) {
             return;
@@ -177,17 +178,16 @@ class App
         self::printResult($result);
     }
 
-    private static function printResult($result): void
+    private static function printResult(array $result): void
     {
-
         if ($result['type'] == 'html') {
-
+            header('Content-Type: text/html; charset=UTF-8');
         } elseif ($result['type'] == 'json') {
             header('Content-Type: application/json; charset=UTF-8');
         } elseif ($result['type'] == 'text') {
             header('Content-Type: text/plain; charset=UTF-8');
         } else {
-            throw new \Error('result type not supported');
+            throw new Error('result type not supported');
         }
 
         echo $result['content'];
@@ -195,9 +195,9 @@ class App
 
     /**
      * @param $msg
-     * @return array|string
+     * @return array
      */
-    private static function errCtrl($msg)
+    private static function errCtrl($msg): array
     {
         if (DEBUG) {
             if (isAjax()) {
@@ -207,36 +207,34 @@ class App
                 ];
                 return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
             }
-            header('HTTP/1.1 404 Not Found');
-            return UiException::Error('Ctl', $msg);
+            return ['type' => 'html', 'content' => UiException::error('Ctl', $msg)];
         }
+
         return ['type' => 'html', 'content' => template('page/404', [], false, true)];
     }
 
     /**
      * @param string $msg
-     * @return string|array
+     * @return array
      */
-
-    public static function errACL(string $msg)
+    public static function errACL(string $msg): array
     {
         if (isAjax()) {
-            $res = [
+            $data = [
                 'code' => 1,
                 'message' => $msg,
             ];
             return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
         }
-        header('HTTP/1.1 401 Unauthorized');
-        return UiException::Error('Acl', $msg);
+        return ['type' => 'html', 'content' => UiException::error('Acl', $msg), 'header' => 'HTTP/1.1 401 Unauthorized'];
     }
 
     /**
-     * @param $controllerName
-     * @param $controllerClass
+     * @param string $controllerName
+     * @param string $controllerClass
      * @return bool
      */
-    private static function loadController($controllerName, $controllerClass): bool
+    private static function loadController(string $controllerName, string $controllerClass): bool
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
@@ -247,9 +245,10 @@ class App
     }
 
     /**
-     * @param $controllerName
+     * @param string $controllerName
+     * @return mixed
      */
-    public static function controller($controllerName)
+    public static function controller(string $controllerName): mixed
     {
         $controllerClass = self::$_controllerPrefix . $controllerName;
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
@@ -265,10 +264,10 @@ class App
     }
 
     /**
-     * @param $uri
-     * @return void
+     * @param string $uri
+     * @return bool
      */
-    private static function router($uri): bool
+    private static function router(string $uri): bool
     {
         if (str_contains($uri, 'index.php')) {
             $uri = substr($uri, str_contains($uri, 'index.php') + 10);
@@ -328,41 +327,34 @@ class App
     }
 
     /**
-     * @param $namespace
-     * @param $path
      * @return void
      */
-    private static function rootNamespace($namespace, $path): void
+    private static function rootNamespace(): void
     {
-        $namespace = trim($namespace, '\\');
-        $path = rtrim($path, '/');
-
-        $loader = function ($classname) use ($namespace, $path) {
-            if ($namespace && stripos($classname, $namespace) !== 0) {
-                return;
+        $loader = function ($classname) {
+            $filename = rtrim(APP_PATH, '/') . '/' . str_replace('\\', '/', trim($classname, '\\')) . '.php';
+            if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+                throw new Error("$filename not exists");
             }
-            $file = trim(substr($classname, strlen($namespace)), '\\');
-            $file = $path . '/' . str_replace('\\', '/', $file) . '.php';
-            require $file;
+            include $filename;
         };
-
         spl_autoload_register($loader);
     }
 
     /**
-     * @param mixed $udi
+     * @param array|string $udi
      * @param array $params
      * @return string
      */
 
-    public static function url(mixed $udi, array $params = []): string
+    public static function url(array|string $udi, array $params = []): string
     {
 
         if (is_array($udi)) {
             if (count($udi) == 3) {
-                $url = $udi[0] . '?' . self::$_dCTL . '=' . $_udi[1] . '&' . self::$_dACT . '=' . $_udi[2];
+                $url = $udi[0] . '?' . self::$_dCTL . '=' . $udi[1] . '&' . self::$_dACT . '=' . $udi[2];
             } else {
-                throw new \Error("udi must be an array[3]");
+                throw new Error("udi must be an array[3]");
             }
             $first = false;
         } else {
@@ -385,23 +377,21 @@ class App
     }
 
     /**
-     * @param $group
-     * @param null $vars
-     * @return mixed
+     * @param string $group
+     * @param array $vars
+     * @return bool|array
      */
-    public static function mergeVars($group, $vars = null)
+    public static function mergeVars(string $group, array $vars = []): bool|array
     {
-        static $_CDATA = [APP_KEY => ['dsn' => null, 'cfg' => null, 'data' => null]];
-        $appKey = APP_KEY;
-        if (is_null($vars)) {
-            return $_CDATA[$appKey][$group];
+        static $_CDATA = [APP_KEY => ['dsn' => [], 'cfg' => []]];
+        if (empty($vars)) {
+            return $_CDATA[APP_KEY][$group] ?? [];
         }
-        if (is_null($_CDATA[$appKey][$group])) {
-            $_CDATA[$appKey][$group] = $vars;
+        if (is_null($_CDATA[APP_KEY][$group])) {
+            $_CDATA[APP_KEY][$group] = $vars;
         } else {
-            $_CDATA[$appKey][$group] = array_merge($_CDATA[$appKey][$group], $vars);
+            $_CDATA[APP_KEY][$group] = array_merge($_CDATA[APP_KEY][$group], $vars);
         }
-
         return true;
     }
 
@@ -418,7 +408,7 @@ class App
         $key = $class . $baseUrl . $ext;
         $class = str_replace(['.', '#'], ['/', '.'], $class);
 
-        if (isset($_file[$key])) { //如果已经include过，不需要再次载入
+        if (isset($_file[$key])) {
             return true;
         }
 
@@ -428,9 +418,9 @@ class App
         if (!empty($filename) && is_file($filename)) {
             // 开启调试模式Win环境严格区分大小写
             if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
-                return false;
+                throw new Error("filename $filename not exists");
             }
-            require $filename;
+            include $filename;
             $_file[$key] = true;
             return true;
         }

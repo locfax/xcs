@@ -99,7 +99,7 @@ class SqlsrvDb
      * @return bool|string
      * @throws ExException
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -127,7 +127,7 @@ class SqlsrvDb
      * @return bool|int
      * @throws ExException
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -142,13 +142,13 @@ class SqlsrvDb
 
     /**
      * @param string $tableName
-     * @param mixed $data
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $data
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return bool|int
      * @throws ExException
      */
-    public function update(string $tableName, $data, $condition, $args = null)
+    public function update(string $tableName, array|string $data, array|string $condition, array $args = []): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -170,12 +170,12 @@ class SqlsrvDb
 
     /**
      * @param string $tableName
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array $args [':var' => $var]
      * @return bool|int
      * @throws ExException
      */
-    public function remove(string $tableName, $condition, $args = null)
+    public function remove(string $tableName, array|string $condition, array $args = []): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -187,14 +187,14 @@ class SqlsrvDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array|null $args [':var' => $var]
      * @param string|null $orderBy
      * @param bool $retObj
      * @return mixed
      * @throws ExException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -215,7 +215,7 @@ class SqlsrvDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -228,16 +228,16 @@ class SqlsrvDb
     /**
      * @param string $tableName
      * @param string $field
-     * @param mixed $condition
-     * @param mixed $args
-     * @param mixed $orderBy
+     * @param array|string $condition
+     * @param array $args
+     * @param string $orderBy
      * @param int $offset
      * @param int $ppp
      * @param bool $retObj
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $tableName, string $field, $condition, $args = null, $orderBy = '', int $offset = 0, int $ppp = 20, bool $retObj = false)
+    public function page(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = '', int $offset = 0, int $ppp = 20, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -251,12 +251,12 @@ class SqlsrvDb
      * @param string $tableName
      * @param string $field
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param mixed $orderBy
+     * @param array $args [':var' => $var]
+     * @param string $orderBy
      * @return mixed
      * @throws ExException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = ''): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -284,12 +284,12 @@ class SqlsrvDb
      * @param string $tableName
      * @param string $field
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
-     * @param string|null $orderBy
+     * @param array $args [':var' => $var]
+     * @param string $orderBy
      * @return array|bool
      * @throws ExException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = ''): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -319,23 +319,23 @@ class SqlsrvDb
     /**
      * @param $tableName
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @param string $field
      * @return mixed
      * @throws ExException
      */
-    public function count($tableName, $condition, array $args = null, string $field = '*')
+    public function count($tableName, array|string $condition, array $args = [], string $field = '*'): mixed
     {
         return $this->first($tableName, sprintf('COUNT( %s )', $field), $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return bool|int
      * @throws ExException
      */
-    public function exec(string $sql, array $args = null)
+    public function exec(string $sql, array $args = []): bool|int
     {
         try {
             if (empty($args)) {
@@ -355,12 +355,12 @@ class SqlsrvDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      * @throws ExException
      */
-    public function rowSql(string $sql, array $args = null, bool $retObj = false)
+    public function rowSql(string $sql, array $args = [], bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -384,13 +384,13 @@ class SqlsrvDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $index
+     * @param array $args [':var' => $var]
+     * @param string $index
      * @param bool $retObj
      * @return array|bool
      * @throws ExException
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false): bool|array
     {
         try {
             if (empty($args)) {
@@ -420,22 +420,22 @@ class SqlsrvDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return mixed
      * @throws ExException
      */
-    public function countSql(string $sql, array $args = null)
+    public function countSql(string $sql, array $args = []): mixed
     {
         return $this->firstSql($sql, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return mixed
      * @throws ExException
      */
-    public function firstSql(string $sql, array $args = null)
+    public function firstSql(string $sql, array $args = []): mixed
     {
         try {
             if (empty($args)) {
@@ -455,11 +455,11 @@ class SqlsrvDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array|null $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return array|bool
      * @throws ExException
      */
-    public function colSql(string $sql, array $args = null)
+    public function colSql(string $sql, array $args = []): bool|array
     {
         try {
             if (empty($args)) {
@@ -481,11 +481,11 @@ class SqlsrvDb
     }
 
     /**
-     * @return bool
+     * @return void
      */
-    public function startTrans(): bool
+    public function startTrans(): void
     {
-        return $this->_link->beginTransaction();
+        $this->_link->beginTransaction();
     }
 
     /**
@@ -525,15 +525,12 @@ class SqlsrvDb
     }
 
     /**
-     * @param mixed $arr
+     * @param array $arr
      * @param string $col
-     * @return mixed
+     * @return array
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(array $arr, string $col): array
     {
-        if (!is_array($arr)) {
-            return $arr;
-        }
         $rows = [];
         foreach ($arr as $row) {
             $rows[$row[$col]] = $row;
@@ -542,15 +539,12 @@ class SqlsrvDb
     }
 
     /**
-     * @param mixed $arr
+     * @param array $arr
      * @param string $col
-     * @return mixed
+     * @return array
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(array $arr, string $col): array
     {
-        if (!is_array($arr)) {
-            return $arr;
-        }
         $rows = [];
         foreach ($arr as $row) {
             $rows[$row->{$col}] = $row;

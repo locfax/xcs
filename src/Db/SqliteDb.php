@@ -95,7 +95,7 @@ class SqliteDb
      * @return bool|string
      * @throws ExException
      */
-    public function create(string $tableName, array $data, bool $retId = false)
+    public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -123,7 +123,7 @@ class SqliteDb
      * @return bool|int
      * @throws ExException
      */
-    public function replace(string $tableName, array $data)
+    public function replace(string $tableName, array $data): bool|int
     {
         $args = [];
         $fields = $values = $comma = '';
@@ -144,7 +144,7 @@ class SqliteDb
      * @return bool|int
      * @throws ExException
      */
-    public function update(string $tableName, $data, $condition, array $args = null)
+    public function update(string $tableName, array|string $data, array|string $condition, array $args = null): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args1) = $this->field_param($condition, ' AND ');
@@ -172,7 +172,7 @@ class SqliteDb
      * @return bool|int
      * @throws ExException
      */
-    public function remove(string $tableName, $condition, array $args = null, bool $multi = false)
+    public function remove(string $tableName, array|string $condition, array $args = null, bool $multi = false): bool|int
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -192,7 +192,7 @@ class SqliteDb
      * @return mixed
      * @throws ExException
      */
-    public function findOne(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, bool $retObj = false)
+    public function findOne(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, bool $retObj = false): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -213,7 +213,7 @@ class SqliteDb
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $tableName, string $field = '*', $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false)
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = null, string $orderBy = null, string $index = null, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -235,7 +235,7 @@ class SqliteDb
      * @return array|bool
      * @throws ExException
      */
-    public function page(string $tableName, string $field, $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function page(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null, int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -254,7 +254,7 @@ class SqliteDb
      * @return mixed
      * @throws ExException
      */
-    public function first(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function first(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): mixed
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -287,7 +287,7 @@ class SqliteDb
      * @return array|bool
      * @throws ExException
      */
-    public function col(string $tableName, string $field, $condition, array $args = null, string $orderBy = null)
+    public function col(string $tableName, string $field, array|string $condition, array $args = null, string $orderBy = null): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
@@ -322,18 +322,18 @@ class SqliteDb
      * @return mixed
      * @throws ExException
      */
-    public function count(string $tableName, $condition, array $args = null, string $field = '*')
+    public function count(string $tableName, array|string $condition, array $args = null, string $field = '*'): mixed
     {
         return $this->first($tableName, sprintf('COUNT( %s )', $field), $condition, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return bool|int
      * @throws ExException
      */
-    public function exec(string $sql, $args = null)
+    public function exec(string $sql, array $args = []): bool|int
     {
         try {
             if (empty($args)) {
@@ -353,12 +353,12 @@ class SqliteDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
      * @throws ExException
      */
-    public function rowSql(string $sql, $args = null, bool $retObj = false)
+    public function rowSql(string $sql, array $args = [], bool $retObj = false): mixed
     {
         try {
             if (empty($args)) {
@@ -382,13 +382,13 @@ class SqliteDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
-     * @param mixed $index
+     * @param array $args [':var' => $var]
+     * @param string $index
      * @param bool $retObj
      * @return array|bool
      * @throws ExException
      */
-    public function rowSetSql(string $sql, $args = null, $index = null, bool $retObj = false)
+    public function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false): bool|array
     {
         try {
             if (empty($args)) {
@@ -418,14 +418,14 @@ class SqliteDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @param int $offset
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
      * @throws ExException
      */
-    public function pageSql(string $sql, $args = null, int $offset = 0, int $limit = 18, bool $retObj = false)
+    public function pageSql(string $sql, array $args = [], int $offset = 0, int $limit = 18, bool $retObj = false): bool|array
     {
         try {
             $sql .= sprintf(' LIMIT %d OFFSET %d', $limit, $offset);
@@ -450,22 +450,22 @@ class SqliteDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return mixed
      * @throws ExException
      */
-    public function countSql(string $sql, $args = null)
+    public function countSql(string $sql, array $args = []): mixed
     {
         return $this->firstSql($sql, $args);
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return mixed
      * @throws ExException
      */
-    public function firstSql(string $sql, $args = null)
+    public function firstSql(string $sql, array $args = []): mixed
     {
         try {
             if (empty($args)) {
@@ -485,11 +485,11 @@ class SqliteDb
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param mixed $args [':var' => $var]
+     * @param array $args [':var' => $var]
      * @return array|bool
      * @throws ExException
      */
-    public function colSql(string $sql, $args = null)
+    public function colSql(string $sql, array $args = []): array|bool
     {
         try {
             if (empty($args)) {
@@ -530,15 +530,12 @@ class SqliteDb
     }
 
     /**
-     * @param mixed $arr
+     * @param array $arr
      * @param string $col
-     * @return mixed
+     * @return array
      */
-    private function _array_index($arr, string $col)
+    private function _array_index(array $arr, string $col): array
     {
-        if (!is_array($arr)) {
-            return $arr;
-        }
         $rows = [];
         foreach ($arr as $row) {
             $rows[$row[$col]] = $row;
@@ -547,15 +544,12 @@ class SqliteDb
     }
 
     /**
-     * @param mixed $arr
+     * @param array $arr
      * @param string $col
-     * @return mixed
+     * @return array
      */
-    private function _object_index($arr, string $col)
+    private function _object_index(array $arr, string $col): array
     {
-        if (!is_array($arr)) {
-            return $arr;
-        }
         $rows = [];
         foreach ($arr as $row) {
             $rows[$row->{$col}] = $row;

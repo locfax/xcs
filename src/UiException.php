@@ -13,7 +13,7 @@ class UiException
      * @param mixed $ex
      * @return string
      */
-    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, $ex = null): string
+    public static function render(string $title, string $message, string $file, int $line, bool $Trace = false, mixed $ex = null): string
     {
         $phpMsg = [];
         if ($Trace) {
@@ -63,7 +63,7 @@ class UiException
      * @param mixed $message
      * @return string
      */
-    private static function clear($message): string
+    private static function clear(mixed $message): string
     {
         if (DEBUG) {
             return is_object($message) ? get_class($message) : ($message ? htmlspecialchars($message) : '');
@@ -78,7 +78,7 @@ class UiException
      * @param mixed $phpMsg
      * @return string
      */
-    public static function error(string $title, string $message, $phpMsg = ''): string
+    public static function error(string $title, string $message, mixed $phpMsg = ''): string
     {
         return '<pre><span style="color: red;">' . print_r($title, true) . '</span></pre><pre><span style="color: red;">' . print_r($message, true) . '</span></pre><pre>' . print_r($phpMsg, true) . '</pre>';
     }

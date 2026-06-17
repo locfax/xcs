@@ -8,7 +8,7 @@ class File
 {
     use Singleton;
 
-    private function filePath($hash)
+    private function filePath($hash): string
     {
         $dir1 = substr($hash, 0, 2);  // 前两位作为第一级目录
         $dir2 = substr($hash, 2, 2);  // 接着两位作为第二级目录
@@ -20,7 +20,7 @@ class File
      * @param string $key
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         $config = getini('cache');
         $hashKey = md5($config['prefix'] . '_' . $key);
@@ -40,11 +40,11 @@ class File
 
     /**
      * @param string $key
-     * @param array|string $val
+     * @param mixed $val
      * @param int $ttl
      * @return false|int
      */
-    public function set(string $key, $val, int $ttl = 0)
+    public function set(string $key, mixed $val, int $ttl = 0): bool|int
     {
 
         if ($ttl > 0) {
@@ -67,7 +67,7 @@ class File
      * @param string $key
      * @return bool
      */
-    public function rm(string $key)
+    public function rm(string $key): bool
     {
         $config = getini('cache');
         $hashKey = md5($config['prefix'] . '_' . $key);
@@ -81,7 +81,7 @@ class File
      * @param $mode
      * @return false|int
      */
-    private function save($filename, $content, $mode)
+    private function save($filename, $content, $mode): bool|int
     {
         if (!file_exists($filename)) {
             touch($filename) && chmod($filename, FILE_WRITE_MODE); //读写执行

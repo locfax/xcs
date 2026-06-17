@@ -7,10 +7,10 @@ class Context
 
     /**
      * @param string $dsnId
-     * @return mixed
+     * @return array
      * @throws ExException
      */
-    public static function dsn(string $dsnId = 'mysql')
+    public static function dsn(string $dsnId = 'mysql'): array
     {
         static $cacheDsn = [];
         if (empty($cacheDsn)) {
@@ -24,12 +24,12 @@ class Context
 
     /**
      * @param string $name
-     * @param null $var
+     * @param string $var
      * @param string $type
      * @return mixed
      * @throws ExException
      */
-    public static function config(string $name, $var = null, string $type = 'inc')
+    public static function config(string $name, string $var = '', string $type = 'inc'): mixed
     {
         static $CacheConfig = [];
         $key = $name . '.' . $type;
@@ -42,7 +42,7 @@ class Context
         }
         $CacheConfig[$key] = include $file;
 
-        if (is_null($var)) {
+        if (empty($var)) {
             return $CacheConfig[$key];
         }
         return $CacheConfig[$key][$var];

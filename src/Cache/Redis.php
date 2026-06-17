@@ -25,7 +25,7 @@ class Redis
             $this->_link = null;
             return;
         }
-        if ($connect && $config['redis']['password']) {
+        if ($config['redis']['password']) {
             $connect = $this->_link->auth($config['redis']['password']);
         }
         if ($connect) {
@@ -37,7 +37,7 @@ class Redis
      * @param string $key
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key): mixed
     {
         if (!$this->_link) {
             return null;
@@ -53,11 +53,11 @@ class Redis
 
     /**
      * @param string $key
-     * @param array|string $value
+     * @param mixed $value
      * @param int $ttl
-     * @return bool|\Redis
+     * @return \Redis|string|bool
      */
-    public function set(string $key, $value, int $ttl = 0)
+    public function set(string $key, mixed $value, int $ttl = 0): \Redis|string|bool
     {
         $data = ['data' => $value, 'timeout' => $ttl];
         $json = json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -70,24 +70,19 @@ class Redis
         return $ret;
     }
 
-    public function incrBy(string $key, int $value)
+    public function incrBy(string $key, int $value): bool|int|\Redis
     {
         return $this->_link->incrBy($key, $value);
     }
 
     /**
      * @param string $key
-     * @return int|\Redis
+     * @return \Redis|int|bool
      */
-    public function rm(string $key)
+    public function rm(string $key): \Redis|int|bool
     {
         $handKey = $this->_config['prefix'] . ':' . $key;
         return $this->_link->del($handKey);
-    }
-
-    public function clear()
-    {
-        $this->_link->flushDB();
     }
 
 }
