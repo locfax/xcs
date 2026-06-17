@@ -11,18 +11,14 @@ class Template
 
     private array $replaceCode = ['search' => [], 'replace' => []];
     private array $language = [];
-    private string $tplDir = '';
 
-    public function parse(string $cacheDir, string $tplDir, string $tplFile, string $cacheFile, string $file, bool $compress = true): void
+    public function parse(string $tplFile, string $cacheFile, bool $compress = true): void
     {
-        $this->tplDir = $tplDir;
 
-        $fp = fopen($this->tplDir . $tplFile, 'r');
-        if (!$fp) {
+        $template = file_get_contents($tplFile);
+        if (!$template) {
             return;
         }
-        $template = fread($fp, filesize($this->tplDir . $tplFile));
-        fclose($fp);
 
         $var_regexp = "((\\\$[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*(\-\>)?[a-zA-Z0-9_\x7f-\xff]*)(\[[a-zA-Z0-9_\-\.\"\'\[\]\$\x7f-\xff]+\])*)";
         $const_regexp = "([A-Z_\x7f-\xff][A-Z0-9_\x7f-\xff]*)";
@@ -49,7 +45,6 @@ class Template
         $template = preg_replace_callback("/\{lang\s+(.+?)\}/", [$this, 'language_tags'], $template);
 
         $template = preg_replace_callback("/[\n\r\t]*\{url\s+(.+?)\}[\n\r\t]*/", [$this, 'url_tags'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{config\s+(.+?)\}[\n\r\t]*/", [$this, 'config_tags'], $template);
 
         $template = preg_replace_callback("/[\n\r\t]*\{script\s+(.+?)\}[\n\r\t]*/", [$this, 'script_tags'], $template);
 
@@ -69,7 +64,6 @@ class Template
 
         $template = preg_replace_callback("/[\n\r\t]*\{template\s+([a-z\d_:\/]+)\}[\n\r\t]*/", [$this, 'tag_template'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{echo\s+(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\}[\n\r\t]*/", [$this, 'tag_echo'], $template);
 
         $template = preg_replace_callback("/([\n\r\t]*)\{if\s+(.+?)\}([\n\r\t]*)/s", [$this, 'tag_if'], $template);
         $template = preg_replace_callback("/([\n\r\t]*)\{elseif\s+(.+?)\}([\n\r\t]*)/s", [$this, 'tag_elseif'], $template);
@@ -107,7 +101,7 @@ class Template
             );
         }
 
-        $this->save($cacheDir . $cacheFile, $template, FILE_READ_MODE);
+        $this->save($cacheFile, $template, FILE_READ_MODE);
     }
 
     /**
@@ -120,10 +114,9 @@ class Template
     {
         if (!is_file($filename)) {
             file_exists($filename) && unlink($filename);
-            touch($filename) && chmod($filename, FILE_READ_MODE); //全读写
+            touch($filename) && chmod($filename, FILE_READ_MODE); //只读
         }
         $ret = file_put_contents($filename, $content, LOCK_EX);
-
         if ($ret && FILE_READ_MODE != $mode) {
             chmod($filename, $mode);
         }
@@ -182,7 +175,7 @@ class Template
     private function script_tags(array $parameter): string
     {
         $tplFile = template($parameter[1], [], true);
-        return implode('', file($this->tplDir . $tplFile));
+        return implode('', file($tplFile));
     }
 
     /**
@@ -233,25 +226,13 @@ class Template
     }
 
     /**
-     * @param array $parameter
-     * @return string
-     */
-    private function config_tags(array $parameter): string
-    {
-        $i = count($this->replaceCode['search']);
-        $this->replaceCode['search'][$i] = $search = "<!--CONFIG_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = (null != getini("settings/$parameter[1]")) ? getini("settings/$parameter[1]") : getini("$parameter[1]");
-        return $search;
-    }
-
-    /**
      * @param array $file
      * @return string
      */
     private function tag_subTemplate(array $file): string
     {
         $tplFile = template($file[2], [], true);
-        $content = implode('', file($this->tplDir . $tplFile));
+        $content = implode('', file($tplFile));
         if ($content) {
             return $content;
         } else {
@@ -275,7 +256,7 @@ class Template
      */
     private function tag_echo(array $parameter): string
     {
-        $return = "<?php echo $parameter[1]; ?>";
+        $return = "<?php echo isset($parameter[1]) ? $parameter[1] : ''; ?>";
         return $this->strip_tags($return);
     }
 

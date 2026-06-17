@@ -117,31 +117,30 @@ function getini(string $key): mixed
 }
 
 /**
- * @param string $mainTpl
- * @param int $cacheTime
+ * @param string $tplFile
  * @param string $cacheFile
- * @param string $file
  * @param bool $compress
  */
-function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, bool $compress = true): void
+function xcs_tpl_refresh(string $tplFile, string $cacheFile,  bool $compress = true): void
 {
-    if (is_file(THEMES_VIEW . $mainTpl)) {
-        $tplTime = filemtime(THEMES_VIEW . $mainTpl);
-    } else {
-        throw new \Error($mainTpl . ' not exists!');
+    if (!is_file($tplFile)) {
+        throw new \Error($tplFile . ' not exists!');
     }
+
+    $tplTime = filemtime($tplFile);
+    $cacheTime = is_file($cacheFile) ? filemtime($cacheFile) : 0;
     if ($tplTime < $cacheTime) {
         return;
     }
 
-    !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE);
+    !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE, 0755);
 
     $template = \Xcs\Template::getInstance();
-    $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file, $compress);
+    $template->parse($tplFile, $cacheFile, $compress);
 }
 
 /**
- * @param string $file
+ * @param string $tpl
  * @param array $data
  * @param bool $returnTplFile
  * @param bool $returnContent
@@ -149,19 +148,16 @@ function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, str
  * @param bool $compress
  * @return false|string|null
  */
-function template(string $file, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', bool $compress = true): bool|string|null
+function template(string $tpl, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', bool $compress = true): bool|string|null
 {
-    $_tplId = getini('site/themes');
-    $tplFile = $_tplId ? $_tplId . '/' . $file . '.' . $type : $file . '.' . $type;
+    $tplFile = THEMES_VIEW . getini('site/themes') . '/' . $tpl . '.' . $type;
     if ($returnTplFile) {
         return $tplFile;
     }
 
-    $cacheFile = APP_KEY . '_' . md5($_tplId . '_' . $file . '_host_' . $_SERVER['HTTP_HOST']) . '.php';
-    $cacheTpl = THEMES_CACHE . $cacheFile;
-    $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
+    $cacheFile = THEMES_CACHE . APP_KEY . '_' . md5($tplFile) . '.php';
 
-    xcs_tpl_refresh($tplFile, $cacheTime, $cacheFile, $file, $compress);
+    xcs_tpl_refresh($tplFile, $cacheFile, $compress);
 
     if (!empty($data)) {
         extract($data);
@@ -169,13 +165,13 @@ function template(string $file, array $data = [], bool $returnTplFile = false, b
 
     if ($returnContent) {
         ob_start();
-        include $cacheTpl;
+        include $cacheFile;
         $content = ob_get_contents();
         ob_get_length() && ob_end_clean();
         return $content;
     }
 
-    include $cacheTpl;
+    include $cacheFile;
     return null;
 }
 
