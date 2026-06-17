@@ -19,13 +19,13 @@ class App
     public static function run(bool $refresh = false): void
     {
         if (isset($_GET['s'])) {
-            $uri = trim(str_replace(['.html', '.htm'], '', $_GET['s']), '/');
+            $uri = trim(str_replace(['.html', '.shtml', '.htm'], '', $_GET['s']), '/');
         } else {
             $uri = $_SERVER['PHP_SELF'];
         }
 
         self::runFile($refresh);
-        self::dispatching($uri);
+        self::dispatch($uri);
     }
 
     /**
@@ -110,7 +110,7 @@ class App
      * @param $uri
      * @return void
      */
-    private static function dispatching($uri): void
+    private static function dispatch($uri): void
     {
         if (ROUTE) {
             $flag = self::router($uri);
@@ -171,7 +171,7 @@ class App
         }
 
         //无需后续
-        if (is_null($result)) {
+        if (empty($result)) {
             return;
         }
 
