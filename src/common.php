@@ -413,7 +413,7 @@ if (!function_exists('isAjax')) {
 }
 
 if (!function_exists('jsAlert')) {
-    function jsAlert(string $message = '', string $after_action = '', string $url = ''): string
+    function jsAlert(string $message = '', string $after_action = '', string $url = '')
     {
         $out = "<script type=\"text/javascript\">\n";
         if (!empty($message)) {
@@ -430,12 +430,15 @@ if (!function_exists('jsAlert')) {
             $out .= "\";\n";
         }
         $out .= "</script>";
-        return $out;
+
+        echo $out;
+
+        return null;
     }
 }
 
 if (!function_exists('redirect')) {
-    function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false): string
+    function redirect($url, int $delay = 0, bool $js = false)
     {
         if (!$js) {
             if ($delay > 0) {
@@ -450,25 +453,18 @@ EOT;
             } else {
                 header("Location: {$url}");
             }
-            return '';
+            return null;
         }
 
-        $out = '';
-        if ($jsWrapped) {
-            $out .= '<script language="javascript" type="text/javascript">';
-        }
+        $out = '<script language="javascript" type="text/javascript">';
         if ($delay > 0) {
             $out .= "window.setTimeout(function () { document.location='$url'; }, {$delay});";
         } else {
             $out .= "document.location='$url';";
         }
-        if ($jsWrapped) {
-            $out .= '</script>';
-        }
-        if ($return) {
-            return $out;
-        }
-        return $out;
+        $out .= '</script>';
+
+        echo $out;
     }
 }
 /**

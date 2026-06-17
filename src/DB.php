@@ -252,13 +252,13 @@ class DB
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param string $orderBy
      * @param array $args [':var' => $var]
-     * @param array $pageParam
+     * @param array|int $pageParam
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
      * @throws ExException
      */
-    public static function page(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = [], array $pageParam = [], int $limit = 20, bool $retObj = false): bool|array
+    public static function page(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = [], array|int $pageParam = [], int $limit = 20, bool $retObj = false): bool|array
     {
         $db = self::Using();
         if (is_array($pageParam)) {
