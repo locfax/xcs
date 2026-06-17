@@ -17,20 +17,14 @@ class DB
      * 返回 mysql 对象
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
-     * @param array $dsn
      * @return MysqlDb
      */
-    public static function mysql(string $dsnId = 'mysql', array $dsn = []): MysqlDb
+    public static function mysql(string $dsnId = 'mysql'): MysqlDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
-
-        if (empty($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $object = new MysqlDb($dsn);
+        $object = new MysqlDb(Context::dsn($dsnId));
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -45,12 +39,7 @@ class DB
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
-
-        if (empty($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $object = new MongoDb($dsn);
+        $object = new MongoDb(Context::dsn($dsnId));
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -64,12 +53,7 @@ class DB
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
-
-        if (empty($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $object = new SqlsrvDb($dsn);
+        $object = new SqlsrvDb(Context::dsn($dsnId));
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -83,12 +67,7 @@ class DB
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
-
-        if (empty($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $object = new SqliteDb($dsn);
+        $object = new SqliteDb(Context::dsn($dsnId));
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -102,12 +81,7 @@ class DB
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
         }
-
-        if (empty($dsn)) {
-            $dsn = Context::dsn($dsnId);
-        }
-
-        $object = new PostgresDb($dsn);
+        $object = new PostgresDb(Context::dsn($dsnId));
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
@@ -226,7 +200,6 @@ class DB
                 'showNum' => false,
                 'length' => $limit,
             ];
-
             if (!empty($pageParam)) {
                 if (!isset($pageParam['total'])) {
                     $_pageParam['total'] = self::count($table, $condition, $args);
@@ -251,7 +224,6 @@ class DB
         if (is_array($pageParam)) {
             return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
-
         return $data;
     }
 
@@ -355,12 +327,6 @@ class DB
                 'showNum' => false,
                 'length' => $limit,
             ];
-            if (!isset($pageParam['udi'])) {
-                if (DEBUG) {
-                    throw new ExException('udi param not set');
-                }
-                return '';
-            }
             $pageParam = array_merge($_pageParam, $pageParam);
             $offset = self::pageStart($pageParam['page'], $limit, $pageParam['total']);
         } else {
@@ -407,8 +373,6 @@ class DB
         return self::Using()->colSql($sql, $args);
     }
 
-    //--------------多表查询---end---------------//
-
     /**
      * mysql postgres
      * 开始事务
@@ -428,13 +392,10 @@ class DB
         self::Using()->endTrans($commit_no_errors);
     }
 
-    //----------------------事务END-------------------//
-
     private static function Using(): MysqlDb
     {
         //使用默认的方式
-        $dsn = Context::dsn(self::$using_dsn);
-        return self::mysql(self::$using_dsn, $dsn);
+        return self::mysql(self::$using_dsn);
     }
 
     /**
