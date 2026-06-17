@@ -426,7 +426,6 @@ if (!function_exists('jsAlert')) {
             $out .= "\";\n";
         }
         $out .= "</script>";
-
         echo $out;
 
         return null;
@@ -459,8 +458,9 @@ EOT;
             $out .= "document.location='$url';";
         }
         $out .= '</script>';
-
         echo $out;
+
+        return null;
     }
 }
 /**
