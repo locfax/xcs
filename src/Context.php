@@ -36,9 +36,9 @@ class Context
         if (isset($CacheConfig[$key])) {
             return $CacheConfig[$key];
         }
-        $file = APP_ROOT . '/config/' . strtolower($name) . '.' . $type . '.php';
+        $file = sprintf('%s/config/%s.%s.php', APP_ROOT, strtolower($name), $type);
         if (!is_file($file)) {
-            throw new ExException($name . '.inc.php is not exists');
+            throw new ExException($name . '.' . $type . '.php is not exists');
         }
         $CacheConfig[$key] = include $file;
 

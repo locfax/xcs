@@ -80,6 +80,14 @@ class Xss
      */
     public function clean($str, bool $is_image = false)
     {
+        if (empty($str)) {
+            return $str;
+        }
+
+        if (is_numeric($str)) {
+            return $str;
+        }
+
         if (is_array($str)) {
             foreach ($str as $key) {
                 $str[$key] = $this->clean($str[$key]);

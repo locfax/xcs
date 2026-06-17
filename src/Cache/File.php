@@ -2,25 +2,11 @@
 
 namespace Xcs\Cache;
 
-use Xcs\ExException;
-use Xcs\Helper\FileHelper;
 use Xcs\Traits\Singleton;
 
 class File
 {
-
     use Singleton;
-
-    public bool $enable = false;
-
-    /**
-     * @return $this
-     */
-    public function init(): File
-    {
-        $this->enable = true;
-        return $this;
-    }
 
     private function filePath($hash)
     {
@@ -36,8 +22,9 @@ class File
      */
     public function get(string $key)
     {
-        $hashKey = md5($key);
-        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
+        $config = getini('cache');
+        $hashKey = md5($config['prefix'] . '_' . $key);
+        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
         if (file_exists($cacheFile)) {
             $data = file_get_contents($cacheFile);
             if (empty($data)) {
@@ -67,12 +54,13 @@ class File
             $timeout = 0;
         }
 
-        $hashKey = md5($key);
+        $config = getini('cache');
+        $hashKey = md5($config['prefix'] . '_' . $key);
         $path = CACHE_PATH . $this->filePath($hashKey);
         !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
 
         $data = "<?php\n//" . sprintf('%010d', $timeout) . "\n exit();?>\n" . serialize($val);
-        return $this->save($path . '/' . $hashKey . '.php', $data, FILE_WRITE_MODE);
+        return $this->save($path . '/' . $config['prefix'] . '_' . $hashKey . '.php', $data, FILE_WRITE_MODE);
     }
 
     /**
@@ -81,22 +69,10 @@ class File
      */
     public function rm(string $key)
     {
-        $hashKey = md5($key);
-        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $hashKey . '.php';
-        file_exists($cacheFile) && unlink($cacheFile);
-        return true;
-    }
-
-    /**
-     * @return void
-     */
-    public function clear()
-    {
-        $cacheDir = CACHE_PATH;
-        $files = FileHelper::list_files($cacheDir);
-        foreach ($files as $file) {
-            file_exists($cacheDir . $file) && unlink($cacheDir . $file);
-        }
+        $config = getini('cache');
+        $hashKey = md5($config['prefix'] . '_' . $key);
+        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
+        return file_exists($cacheFile) && unlink($cacheFile);
     }
 
     /**

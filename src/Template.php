@@ -2,8 +2,13 @@
 
 namespace Xcs;
 
+use Xcs\Traits\Singleton;
+
 class Template
 {
+
+    use Singleton;
+
     private array $replaceCode = ['search' => [], 'replace' => []];
     private array $language = [];
     private string $tplDir = '';
@@ -52,8 +57,8 @@ class Template
         $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\|(.*?)\}[\n\r\t]*/", [$this, 'date_tags'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{date\s+(.+?)\}[\n\r\t]*/", [$this, 'date_tags'], $template);
 
-        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\((.+?)\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
-        $template = preg_replace_callback("/[\n\r\t]*\{=(.+?)\(\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{:(.+?)\((.+?)\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
+        $template = preg_replace_callback("/[\n\r\t]*\{:(.+?)\(\)\}[\n\r\t]*/", [$this, 'function_tags'], $template);
         $template = preg_replace_callback("/[\n\r\t]*\{eval\s+(.+?)\s*\}[\n\r\t]*/s", [$this, 'eval_tags'], $template);
 
         $template = str_replace("{LF}", PHP_EOL, $template);
@@ -167,7 +172,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--URL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = "<?php echo url(\"$parameter[1]\"); ?>";
+        $this->replaceCode['replace'][$i] = "<?php echo xcs_url(\"$parameter[1]\"); ?>";
         return $search;
     }
 
@@ -179,7 +184,7 @@ class Template
     {
         $i = count($this->replaceCode['search']);
         $this->replaceCode['search'][$i] = $search = "<!--SURL_TAG_$i-->";
-        $this->replaceCode['replace'][$i] = url("$parameter[1]");
+        $this->replaceCode['replace'][$i] = xcs_url("$parameter[1]");
         return $search;
     }
 

@@ -2,36 +2,35 @@
 
 namespace Xcs\Cache;
 
+use Xcs\ExException;
 use Xcs\Traits\Singleton;
 
 class Redis
 {
-
     use Singleton;
 
-    public bool $enable = false;
-    /**
-     * @var \Redis
-     */
-    private \Redis $_link;
+    private array $_config;
+    private ?\Redis $_link = null;
 
-    /**
-     * @param $config
-     * @param bool $option
-     * @return $this
-     */
-    public function init($config)
+    public function __construct()
     {
+        $config = getini('cache');
+        if (empty($config['redis'])) {
+            throw new ExException('cache.redis is empty');
+        }
+        $this->_config = $config;
         $this->_link = new \Redis;
-        $connect = $this->_link->connect($config['host'], $config['port'], $config['timeout']);
-        if ($connect && $config['password']) {
-            $connect = $this->_link->auth($config['password']);
+        $connect = $this->_link->connect($config['redis']['host'], $config['redis']['port'], $config['redis']['timeout']);
+        if (!$connect) {
+            $this->_link = null;
+            return;
+        }
+        if ($connect && $config['redis']['password']) {
+            $connect = $this->_link->auth($config['redis']['password']);
         }
         if ($connect) {
-            $this->_link->select($config['database'] ?? 0);
-            $this->enable = true;
+            $this->_link->select($config['redis']['database'] ?? 0);
         }
-        return $this;
     }
 
     /**
@@ -40,7 +39,11 @@ class Redis
      */
     public function get(string $key)
     {
-        $json = $this->_link->get($key);
+        if (!$this->_link) {
+            return null;
+        }
+        $handKey = $this->_config['prefix'] . ':' . $key;
+        $json = $this->_link->get($handKey);
         if ($json) {
             $data = json_decode($json, true);
             return $data['data'];
@@ -58,12 +61,18 @@ class Redis
     {
         $data = ['data' => $value, 'timeout' => $ttl];
         $json = json_encode($data, JSON_UNESCAPED_UNICODE);
+        $handKey = $this->_config['prefix'] . ':' . $key;
         if ($ttl > 0) {
-            $ret = $this->_link->set($key, $json, $ttl);
+            $ret = $this->_link->set($handKey, $json, $ttl);
         } else {
-            $ret = $this->_link->set($key, $json);
+            $ret = $this->_link->set($handKey, $json);
         }
         return $ret;
+    }
+
+    public function incrBy(string $key, int $value)
+    {
+        return $this->_link->incrBy($key, $value);
     }
 
     /**
@@ -72,7 +81,8 @@ class Redis
      */
     public function rm(string $key)
     {
-        return $this->_link->del($key);
+        $handKey = $this->_config['prefix'] . ':' . $key;
+        return $this->_link->del($handKey);
     }
 
     public function clear()

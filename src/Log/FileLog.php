@@ -2,8 +2,12 @@
 
 namespace Xcs\Log;
 
+use Xcs\Traits\Singleton;
+
 class FileLog
 {
+
+    use Singleton;
 
     const maxsize = 1024000; //最大文件大小1M
 

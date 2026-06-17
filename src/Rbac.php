@@ -19,10 +19,10 @@ class Rbac
      * @param array|null $roles
      * @return bool
      */
-    public static function check(string $controllerName, string $actionName = '', bool $strict = false, array $roles = []): bool
+    public static function auth(string $controllerName, string $actionName = '', bool $strict = false, array $roles = []): bool
     {
         $_controllerName = strtoupper($controllerName);
-        $ACL = self::_getACL($_controllerName);
+        $ACL = self::getACL($_controllerName);
 
         //if controller offer empty AC, auth type 'general' then allow
         if (!$strict) {
@@ -37,11 +37,11 @@ class Rbac
 
         // get user role array
         if (empty($roles)) {
-            $roles = UID::getRolesArray();
+            $roles = User::getRoleArray();
         }
 
         // 1, check user's role whether allow to call controller
-        if (!self::_check($roles, $ACL)) {
+        if (!self::check($roles, $ACL)) {
             return false;
         }
 
@@ -49,7 +49,7 @@ class Rbac
         if (!empty($actionName)) {
             $_actionName = strtoupper($actionName);
             if (isset($ACL['actions'][$_actionName])) {
-                if (!self::_check($roles, $ACL['actions'][$_actionName])) {
+                if (!self::check($roles, $ACL['actions'][$_actionName])) {
                     return false;
                 }
             }
@@ -62,7 +62,7 @@ class Rbac
      * @param array $ACL
      * @return bool
      */
-    private static function _check(array $_roles, array $ACL): bool
+    private static function check(array $_roles, array $ACL): bool
     {
         $roles = array_map('strtoupper', $_roles);
         if ($ACL['allow'] == self::ACL_EVERYONE) {
@@ -168,7 +168,7 @@ class Rbac
      * @param string $controllerName
      * @return mixed
      */
-    private static function _getACL(string $controllerName)
+    private static function getACL(string $controllerName)
     {
         static $globalAcl = [];
         if (empty($globalAcl)) {

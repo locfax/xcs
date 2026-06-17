@@ -53,10 +53,10 @@ function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $ad
 
     if (is_array($value)) {
         foreach ($value as &$val) {
-            gpc_value($val, $runFunc, $addslashes);
+            xcs_gpc_value($val, $runFunc, $addslashes);
         }
     } else {
-        gpc_value($value, $runFunc, $addslashes);
+        xcs_gpc_value($value, $runFunc, $addslashes);
     }
     return $value;
 }
@@ -68,33 +68,29 @@ function getgpc(string $variable, $defVal = null, string $runFunc = '', bool $ad
  * @param bool $addslashes
  * @return void
  */
-function gpc_value(&$value, string $runFunc, bool $addslashes): void
+function xcs_gpc_value(&$value, string $runFunc, bool $addslashes): void
 {
     if (empty($value)) {
         return;
     }
 
-    if ($runFunc && strpos($runFunc, '|')) {
-        $funds = explode('|', $runFunc);
-        if ($addslashes) {
-            $funds[] = 'addslashes';
-        }
-        foreach ($funds as $run) {
-            if ('xss' == $run) {
-                $value = is_numeric($value) ? $value : \Xcs\Helper\Xss::getInstance()->clean($value);
-            } elseif ('addslashes' == $run) {
-                $value = is_numeric($value) ? $value : addslashes($value);
+    if ($runFunc) {
+        if (str_contains($runFunc, '|')) {
+            $funds = explode('|', $runFunc);
+            foreach ($funds as $run) {
+                if ('xss' == $run) {
+                    $value = \Xcs\Helper\Xss::getInstance()->clean($value);
+                } else {
+                    $value = call_user_func($run, $value);
+                }
+            }
+        } else {
+            if ('xss' == $runFunc) {
+                $value = \Xcs\Helper\Xss::getInstance()->clean($value);
             } else {
-                $value = call_user_func($run, $value);
+                $value = call_user_func($runFunc, $value);
             }
         }
-        return;
-    }
-
-    if ('xss' == $runFunc) {
-        $value = is_numeric($value) ? $value : \Xcs\Helper\Xss::getInstance()->clean($value);
-    } elseif ($runFunc) {
-        $value = call_user_func($runFunc, $value);
     }
 
     if ($addslashes) {
@@ -132,12 +128,12 @@ function getini(string $key)
  * @param string $cacheFile
  * @param string $file
  */
-function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, $compress = true): void
+function xcs_tpl_refresh(string $mainTpl, int $cacheTime, string $cacheFile, string $file, $compress = true): void
 {
     if (is_file(THEMES_VIEW . $mainTpl)) {
         $tplTime = filemtime(THEMES_VIEW . $mainTpl);
     } else {
-        throw new \Error($mainTpl . ' 模板不存在');
+        throw new \Error($mainTpl . ' not exists!');
     }
     if ($tplTime < $cacheTime) {
         return;
@@ -145,7 +141,7 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
 
     !is_dir(THEMES_CACHE) && mkdir(THEMES_CACHE);
 
-    $template = new \Xcs\Template();
+    $template = \Xcs\Template::getInstance();
     $template->parse(THEMES_CACHE, THEMES_VIEW, $mainTpl, $cacheFile, $file, $compress);
 }
 
@@ -156,10 +152,10 @@ function checkTplRefresh(string $mainTpl, int $cacheTime, string $cacheFile, str
  * @param string $type
  * @return array|string
  */
-function template(string $file, array $data = [], bool $returnTplFile = false, string $type = 'html', $compress = true)
+function template(string $file, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', $compress = true)
 {
     $_tplId = getini('site/themes');
-    $tplFile = $_tplId ? $_tplId . '/' . $file . '.htm' : $file . '.htm';
+    $tplFile = $_tplId ? $_tplId . '/' . $file . '.' . $type : $file . '.' . $type;
     if ($returnTplFile) {
         return $tplFile;
     }
@@ -168,64 +164,22 @@ function template(string $file, array $data = [], bool $returnTplFile = false, s
     $cacheTpl = THEMES_CACHE . $cacheFile;
     $cacheTime = is_file($cacheTpl) ? filemtime($cacheTpl) : 0;
 
-    checkTplRefresh($tplFile, $cacheTime, $cacheFile, $file, $compress);
+    xcs_tpl_refresh($tplFile, $cacheTime, $cacheFile, $file, $compress);
 
     if (!empty($data)) {
         extract($data);
     }
 
-    ob_start();
+    if ($returnContent) {
+        ob_start();
+        include $cacheTpl;
+        $content = ob_get_contents();
+        ob_get_length() && ob_end_clean();
+        return $content;
+    }
+
     include $cacheTpl;
-    $content = ob_get_contents();
-    ob_get_length() && ob_end_clean();
-    return ['type' => $type, 'content' => $content];
-}
-
-/**
- * 模板使用的url构造函数
- * @param string $udi
- * @param array $params
- * @return string
- */
-function url(string $udi, array $params = []): string
-{
-    return \Xcs\App::url($udi, $params);
-}
-
-/**
- * 数组 转 对象
- *
- * @param array $arr 数组
- * @return array|object
- */
-function array2object(array $arr)
-{
-    if (gettype($arr) != 'array') {
-        return $arr;
-    }
-    foreach ($arr as $k => $v) {
-        if (gettype($v) == 'array' || getType($v) == 'object') {
-            $arr[$k] = array2object($v);
-        }
-    }
-    return (object)$arr;
-}
-
-/**
- * 对象 转 数组
- *
- * @param object $obj 对象
- * @return array
- */
-function object2array(object $obj): array
-{
-    $obj = (array)$obj;
-    foreach ($obj as $k => $v) {
-        if (gettype($v) == 'object' || gettype($v) == 'array') {
-            $obj[$k] = object2array($v);
-        }
-    }
-    return $obj;
+    return null;
 }
 
 /**
@@ -332,7 +286,8 @@ function char_output($text)
     return htmlspecialchars(stripslashes($text), ENT_QUOTES, 'UTF-8');
 }
 
-if (!function_exists('locTime')) {
+if (!function_exists('dgmdate')) {
+
     /**
      * @param int $uTimeOffset
      * @return array
@@ -351,10 +306,7 @@ if (!function_exists('locTime')) {
         $offset = $uTimeOffset == 999 ? $timeOffset : $uTimeOffset;
         return [$offset, $dtFormat];
     }
-}
 
-
-if (!function_exists('dgmdate')) {
     /**
      * @param int $timestamp
      * @param string $format
@@ -437,46 +389,110 @@ if (!function_exists('str_contains')) {
     }
 }
 
+if (!function_exists('isGet')) {
+    function isGet(bool $retBool = true): bool
+    {
+        if ('GET' == $_SERVER['REQUEST_METHOD']) {
+            return $retBool;
+        }
+        return !$retBool;
+    }
+}
+
+if (!function_exists('isPost')) {
+    function isPost(bool $retBool = true): bool
+    {
+        if ('POST' == $_SERVER['REQUEST_METHOD']) {
+            return $retBool;
+        }
+        return !$retBool;
+    }
+}
+
+if (!function_exists('isAjax')) {
+    function isAjax(): bool
+    {
+        $val = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
+        return 'XMLHttpRequest' == $val;
+    }
+}
+
+if (!function_exists('jsAlert')) {
+    function jsAlert(string $message = '', string $after_action = '', string $url = ''): array
+    {
+        $out = "<script type=\"text/javascript\">\n";
+        if (!empty($message)) {
+            $out .= "alert(\"";
+            $out .= str_replace("\\\\n", "\\n", str_replace(["\r", "\n"], ['', '\n'], $message));
+            $out .= "\");\n";
+        }
+        if (!empty($after_action)) {
+            $out .= $after_action . "\n";
+        }
+        if (!empty($url)) {
+            $out .= "document.location.href=\"";
+            $out .= $url;
+            $out .= "\";\n";
+        }
+        $out .= "</script>";
+        return $out;
+    }
+}
+
+if (!function_exists('redirect')) {
+    function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
+    {
+        if (!$js) {
+            if ($delay > 0) {
+                echo <<<EOT
+    <html lang="zh">
+    <head>
+    <title></title>
+    <meta http-equiv="refresh" content="$delay;URL=$url" />
+    </head>
+    </html>
+EOT;
+            } else {
+                header("Location: {$url}");
+            }
+            return '';
+        }
+
+        $out = '';
+        if ($jsWrapped) {
+            $out .= '<script language="javascript" type="text/javascript">';
+        }
+        if ($delay > 0) {
+            $out .= "window.setTimeout(function () { document.location='$url'; }, {$delay});";
+        } else {
+            $out .= "document.location='$url';";
+        }
+        if ($jsWrapped) {
+            $out .= '</script>';
+        }
+        if ($return) {
+            return $out;
+        }
+        return $out;
+    }
+}
 /**
  * @param mixed $var
  * @param int $halt
  * @param string $func
  */
-function dump($var, int $halt = 0, string $func = 'p'): void
-{
-
-    echo '<pre>';
-    if ('p' == $func) {
-        print_r($var);
-    } else {
-        var_dump($var);
-    }
-    echo '</pre>';
-    if ($halt) {
-        exit;
-    }
-}
-
-/**
- * @param bool $stop
- */
-function post(bool $stop = false): void
-{
-    $str = '';
-    $post = $_POST;
-    foreach ($post as $k => $v) {
-        $str .= "\$" . $k . "= getgpc('p." . $k . "');\n";
-    }
-    dump($str);
-
-    $str = "\$post = array(\n";
-    foreach ($post as $k => $v) {
-        $str .= "'" . $k . "'=> \$" . $k . ",\n";
-    }
-    $str .= "\n)";
-    dump($str);
-
-    if ($stop) {
-        exit;
+if (!function_exists('dump')) {
+    function dump($var, int $halt = 0, string $func = 'p'): void
+    {
+        echo '<pre>';
+        if ('p' == $func) {
+            print_r($var);
+        } else {
+            var_dump($var);
+        }
+        echo '</pre>';
+        if ($halt) {
+            exit;
+        }
     }
 }

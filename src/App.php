@@ -27,7 +27,7 @@ class App
         }
 
         self::runFile($refresh);
-        self::_dispatching($uri);
+        self::dispatching($uri);
     }
 
     /**
@@ -35,7 +35,7 @@ class App
      */
     public static function runFile(bool $refresh = false): void
     {
-        self::_rootNamespace('\\', APP_PATH);
+        self::rootNamespace('\\', APP_PATH);
 
         $preloadFile = RUNTIME_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
         if (!is_file($preloadFile) || $refresh || DEBUG) {
@@ -52,15 +52,15 @@ class App
                     $error = [
                         ['file' => $errFile, 'line' => $errLine]
                     ];
-                    echo ExUiException::showError('语法错误', $errStr, $error);
+                    echo UiException::Error('语法错误', $errStr, $error);
                 });
                 set_exception_handler(function ($ex) {
-                    echo ExUiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    echo UiException::Render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error) {
-                        echo ExUiException::showError('致命异常', $error['message'], [$error]);
+                        echo UiException::Error('致命异常', $error['message'], [$error]);
                     }
                 });
                 array_walk($files, function ($file) {
@@ -70,7 +70,7 @@ class App
             }
 
             !is_dir(RUNTIME_PATH . 'preload') && mkdir(RUNTIME_PATH . 'preload');
-            $preloadFile = self::_makeRunFile($files, $preloadFile);
+            $preloadFile = self::makeRunFile($files, $preloadFile);
         }
 
         $preloadFile && require $preloadFile;
@@ -81,7 +81,7 @@ class App
      * @param $runFile
      * @return mixed
      */
-    private static function _makeRunFile($runtimeFiles, $runFile)
+    private static function makeRunFile($runtimeFiles, $runFile)
     {
         $content = '';
         foreach ($runtimeFiles as $filename) {
@@ -112,14 +112,13 @@ class App
      * @param $uri
      * @return void
      */
-    private static function _dispatching($uri): void
+    private static function dispatching($uri): void
     {
         if (defined('ROUTE') && ROUTE) {
-            $flag = self::_router($uri);
+            $flag = self::router($uri);
             if (!$flag) {
-                header('HTTP/1.1 301 Moved Permanently');
-                header('Status: 301 Moved Permanently');
-                header('Location: /');
+                $result = self::errCtrl('Error Router');
+                self::printResult($result);
                 return;
             }
         }
@@ -128,7 +127,7 @@ class App
         $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
         $actionName = preg_replace('/[^a-z\d_]+/i', '', $actionName);
 
-        self::_execute($controllerName, $actionName);
+        self::execute($controllerName, $actionName);
 
         if (function_exists('fastcgi_finish_request')) {
             fastcgi_finish_request();
@@ -140,89 +139,96 @@ class App
      * @param $actionName
      * @return void
      */
-    private static function _execute($controllerName, $actionName): void
+    private static function execute($controllerName, $actionName): void
     {
         $controllerName = ucfirst($controllerName);
         $actionMethod = self::$_actionPrefix . $actionName;
         $controllerClass = self::$_controllerPrefix . $controllerName;
-        //主动载入controller
-        if (!self::_loadController($controllerName, $controllerClass)) {
+
+        header('Content-Type: text/html; charset=UTF-8');
+
+        //载入controller
+        if (!self::loadController($controllerName, $controllerClass)) {
             //控制器加载失败
-            header('Content-Type: text/html; charset=UTF-8', true);
-            echo self::_errCtrl($controllerName . ' 控制器不存在');
+            $result = self::errCtrl($controllerName . ' ctl not found');
+            self::printResult($result);
             return;
         }
 
         $controller = new $controllerClass();
         $result = $controller->init($controllerName, $actionName);
+        //setup有返回
         if ($result) {
-            if (!is_array($result)) {
-                echo $result;
-            } else {
-                if ($result['type'] == 'html') {
-                    header('Content-Type: text/html; charset=UTF-8', true);
-                } elseif ($result['type'] == 'json') {
-                    header('Content-Type: application/json; charset=UTF-8', true);
-                } elseif ($result['type'] == 'text') {
-                    header('Content-Type: text/plain; charset=UTF-8', true);
-                }
-                echo $result['content'];
-            }
+            self::printResult($result);
             return;
         }
 
+        //调用方法
         $result = call_user_func([$controller, $actionMethod]);
-        if (!is_array($result)) {
-            echo $result;
+        //没找到action
+        if ($result === false) {
             return;
         }
-        if ($result['type'] == 'html') {
-            header('Content-Type: text/html; charset=UTF-8', true);
-        } elseif ($result['type'] == 'json') {
-            header('Content-Type: application/json; charset=UTF-8', true);
-        } elseif ($result['type'] == 'text') {
-            header('Content-Type: text/plain; charset=UTF-8', true);
+        //无需后续
+        if (is_null($result)) {
+            return;
         }
+
+        self::printResult($result);
+    }
+
+    private static function printResult($result): void
+    {
+
+        if ($result['type'] == 'html') {
+
+        } elseif ($result['type'] == 'json') {
+            header('Content-Type: application/json; charset=UTF-8');
+        } elseif ($result['type'] == 'text') {
+            header('Content-Type: text/plain; charset=UTF-8');
+        } else {
+            throw new \Error('result type not supported');
+        }
+
         echo $result['content'];
     }
 
     /**
-     * @param $args
+     * @param $msg
      * @return array|string
      */
-    private static function _errCtrl($args)
+    private static function errCtrl($msg)
     {
         if (DEBUG) {
-            if (self::isAjax()) {
-                $res = [
+            if (isAjax()) {
+                $data = [
                     'code' => 1,
-                    'message' => 'error:' . $args,
+                    'message' => $msg,
                 ];
-                return self::response($res, 'json');
+                return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
             }
-            return ExUiException::showError('控制器', $args);
+            header('HTTP/1.1 404 Not Found');
+            return UiException::Error('Ctl', $msg);
         }
-
-        header('HTTP/1.1 301 Moved Permanently');
-        header('Status: 301 Moved Permanently');
-        header('Location: /');
-        return '';
+        return ['type' => 'html', 'content' => template('page/404', [], false, true)];
     }
 
     /**
-     * @param string $args
+     * @param string $msg
      * @return string|array
      */
-    public static function ErrACL(string $args)
+
+    public static function errACL(string $msg)
     {
-        if (self::isAjax()) {
+        if (isAjax()) {
             $res = [
                 'code' => 1,
-                'message' => 'error:' . $args,
+                'message' => $msg,
             ];
-            return self::response($res, 'json');
+            return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
         }
-        return ExUiException::showError('权限', $args);
+        header('HTTP/1.1 401 Unauthorized');
+        return UiException::Error('Acl', $msg);
     }
 
     /**
@@ -230,39 +236,42 @@ class App
      * @param $controllerClass
      * @return bool
      */
-    private static function _loadController($controllerName, $controllerClass): bool
+    private static function loadController($controllerName, $controllerClass): bool
     {
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return true;
         }
         $app = getini('site/app') ?: ucfirst(APP_KEY);
-        $controllerFilename = APP_PATH . 'Controller/' . $app . '/' . $controllerName . '.php';
-        return is_file($controllerFilename) && require $controllerFilename;
+        $controllerFilename = sprintf('%sController/%s/%s.php', APP_PATH, $app, $controllerName);
+        return is_file($controllerFilename) && include $controllerFilename;
     }
 
     /**
      * @param $controllerName
      */
-    public static function Controller($controllerName)
+    public static function controller($controllerName)
     {
         $controllerClass = self::$_controllerPrefix . $controllerName;
         if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
             return $controllerClass;
         }
         $app = getini('site/app') ?: ucfirst(APP_KEY);
-        $controllerFilename = APP_PATH . 'Controller/' . $app . '/' . $controllerName . '.php';
-        is_file($controllerFilename) && require $controllerFilename;
-        return new $controllerClass();
+        $controllerFilename = sprintf('%sController/%s/%s.php', APP_PATH, $app, $controllerName);
+        if (is_file($controllerFilename)) {
+            include $controllerFilename;
+            return new $controllerClass();
+        }
+        return false;
     }
 
     /**
      * @param $uri
      * @return void
      */
-    private static function _router($uri): bool
+    private static function router($uri): bool
     {
         if (str_contains($uri, 'index.php')) {
-            $uri = substr($uri, strpos($uri, 'index.php') + 10);
+            $uri = substr($uri, str_contains($uri, 'index.php') + 10);
         }
 
         if (!$uri) {
@@ -281,7 +290,7 @@ class App
                     $val = preg_replace('#^' . $key . '$#', $val, $uri);
                 }
                 $req = explode('/', $val);
-                self::_setRequest($req);
+                self::setRequest($req);
                 $match = true;
                 break;
             }
@@ -292,7 +301,7 @@ class App
             if (count($req) % 2 != 0) {
                 return false;
             }
-            self::_setRequest($req);
+            self::setRequest($req);
         }
 
         return true;
@@ -301,7 +310,7 @@ class App
     /**
      * @param array $req
      */
-    private static function _setRequest(array $req): void
+    private static function setRequest(array $req): void
     {
         $_GET[self::$_dCTL] = array_shift($req);
         $_GET[self::$_dACT] = array_shift($req);
@@ -323,7 +332,7 @@ class App
      * @param $path
      * @return void
      */
-    private static function _rootNamespace($namespace, $path): void
+    private static function rootNamespace($namespace, $path): void
     {
         $namespace = trim($namespace, '\\');
         $path = rtrim($path, '/');
@@ -341,24 +350,37 @@ class App
     }
 
     /**
-     * @param $udi
+     * @param mixed $udi
      * @param array $params
      * @return string
      */
-    public static function url($udi, array $params = []): string
+
+    public static function url(mixed $udi, array $params = []): string
     {
-        $_udi = explode('/', $udi);
-        if (count($_udi) < 2) {
-            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=index';
+
+        if (is_array($udi)) {
+            if (count($udi) == 3) {
+                $url = $udi[0] . '?' . self::$_dCTL . '=' . $_udi[1] . '&' . self::$_dACT . '=' . $_udi[2];
+            } else {
+                throw new \Error("udi must be an array[3]");
+            }
+            $first = false;
         } else {
-            $url = '?' . self::$_dCTL . '=' . $_udi[0] . '&' . self::$_dACT . '=' . $_udi[1];
+            $url = $udi;
+            $first = true;
         }
 
         if (!empty($params)) {
             foreach ($params as $key => $val) {
-                $url .= '&' . $key . '=' . $val;
+                if ($first) {
+                    $url .= '?' . $key . '=' . rawurlencode($val);
+                    $first = false;
+                } else {
+                    $url .= '&' . $key . '=' . rawurlencode($val);
+                }
             }
         }
+
         return $url;
     }
 
@@ -414,125 +436,6 @@ class App
         }
 
         return false;
-    }
-
-    /**
-     * @param $res
-     * @param string $type
-     * @return array
-     */
-    public static function response($res, string $type = 'json'): array
-    {
-        if ('json' == $type) {
-            if (is_array($res)) {
-                $res = json_encode($res, JSON_UNESCAPED_UNICODE);
-            }
-        }
-        return ['type' => $type, 'content' => $res];
-    }
-
-    /**
-     * @param bool $retBool
-     * @return bool
-     */
-    public static function isGet(bool $retBool = true): bool
-    {
-        if ('GET' == $_SERVER['REQUEST_METHOD']) {
-            return $retBool;
-        }
-        return !$retBool;
-    }
-
-    /**
-     * @param bool $retBool
-     * @return bool
-     */
-    public static function isPost(bool $retBool = true): bool
-    {
-        if ('POST' == $_SERVER['REQUEST_METHOD']) {
-            return $retBool;
-        }
-        return !$retBool;
-    }
-
-    /**
-     * @return bool
-     */
-    public static function isAjax(): bool
-    {
-        $val = $_SERVER['HTTP_X_REQUESTED_WITH'] ?? '';
-        return 'XMLHttpRequest' == $val;
-    }
-
-    /**
-     * @param string $message
-     * @param string $after_action
-     * @param string $url
-     * @return array
-     */
-    public static function jsAlert(string $message = '', string $after_action = '', string $url = ''): array
-    {
-        //php turn to alert
-        $out = "<script type=\"text/javascript\">\n";
-        if (!empty($message)) {
-            $out .= "alert(\"";
-            $out .= str_replace("\\\\n", "\\n", str_replace(["\r", "\n"], ['', '\n'], $message));
-            $out .= "\");\n";
-        }
-        if (!empty($after_action)) {
-            $out .= $after_action . "\n";
-        }
-        if (!empty($url)) {
-            $out .= "document.location.href=\"";
-            $out .= $url;
-            $out .= "\";\n";
-        }
-        $out .= "</script>";
-        return ['type' => 'text', 'content' => $out];
-    }
-
-    /**
-     * @param $url
-     * @param int $delay
-     * @param bool $js
-     * @param bool $jsWrapped
-     * @param bool $return
-     * @return array|string
-     */
-    public static function redirect($url, int $delay = 0, bool $js = false, bool $jsWrapped = true, bool $return = false)
-    {
-        if (!$js) {
-            if ($delay > 0) {
-                echo <<<EOT
-    <html lang="zh">
-    <head>
-    <title></title>
-    <meta http-equiv="refresh" content="$delay;URL=$url" />
-    </head>
-    </html>
-EOT;
-            } else {
-                header("Location: {$url}");
-            }
-            return '';
-        }
-
-        $out = '';
-        if ($jsWrapped) {
-            $out .= '<script language="javascript" type="text/javascript">';
-        }
-        if ($delay > 0) {
-            $out .= "window.setTimeout(function () { document.location='$url'; }, {$delay});";
-        } else {
-            $out .= "document.location='$url';";
-        }
-        if ($jsWrapped) {
-            $out .= '</script>';
-        }
-        if ($return) {
-            return $out;
-        }
-        return ['type' => 'text', 'content' => $out];
     }
 
 }

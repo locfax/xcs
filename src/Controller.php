@@ -23,11 +23,7 @@ class Controller
         $this->_ctl = $controllerName;
         $this->_act = $actionName;
         $this->env();
-        $result = $this->setup();
-        if ($result) {
-            return $result;
-        }
-        return '';
+        return $this->setup();
     }
 
     /**
@@ -38,21 +34,19 @@ class Controller
     public function __call(string $name, $arguments)
     {
         //动作不存在
-        if ($this->isAjax()) {
+        if (isAjax()) {
             $res = [
                 'code' => 1,
-                'message' => $name . ' 不存在!',
+                'message' => $name . ' not exists!',
             ];
             return $this->json($res);
         }
 
         if (DEBUG) {
-            throw new \Error($name . " 不存在");
-        } else {
-            $this->status(301);
-            header('Location: /');
-            return '';
+            throw new \Error($name . " not exists!");
         }
+
+        return '';
     }
 
     protected function get($key = null)
@@ -60,6 +54,7 @@ class Controller
         if ($key == null) {
             return getgpc('g.*');
         }
+
         return getgpc('g.' . $key, '');
     }
 
@@ -68,6 +63,7 @@ class Controller
         if ($key == null) {
             return getgpc('p.*');
         }
+
         return getgpc('p.' . $key, '');
     }
 
@@ -75,7 +71,16 @@ class Controller
      * @param String $data
      * @return string[]
      */
-    protected function response(string $data = '')
+    protected function html(string $data = '')
+    {
+        return ['type' => 'html', 'content' => $data];
+    }
+
+    /**
+     * @param String $data
+     * @return string[]
+     */
+    protected function text(string $data = '')
     {
         return ['type' => 'text', 'content' => $data];
     }
@@ -88,19 +93,13 @@ class Controller
     {
         return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
     }
-
-    protected function isAjax()
-    {
-        return App::isAjax();
-    }
-
     /**
      * 初始变量
      */
     private function env(): void
     {
         $this->timestamp = $_SERVER['REQUEST_TIME'] ?: time();
-        App::mergeVars('cfg', ['udi' => strtolower($this->_ctl) . '/' . $this->_act]);
+        App::mergeVars('cfg', ['udi' => $this->_ctl . '/' . $this->_act]);
     }
 
     protected function setup()
@@ -169,8 +168,4 @@ class Controller
         }
     }
 
-    protected function end(): void
-    {
-
-    }
 }
