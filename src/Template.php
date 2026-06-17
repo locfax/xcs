@@ -336,7 +336,7 @@ class Template
      */
     private function add_quote(array $var): string
     {
-        $var = '<?php echo ' . $var[1] . '?>';
+        $var = '<?=' . $var[1] . '?>';
         return str_replace("\\\"", "\"", preg_replace("/\[([\w\d_\-\.\x7f-\xff]+)\]/s", "['\\1']", $var));
     }
 
