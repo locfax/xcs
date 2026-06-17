@@ -10,18 +10,17 @@ use Xcs\Db\SqlsrvDb;
 
 class DB
 {
-    private static string $using_dbo_id = APP_DSN;
+    private static string $using_dsn = APP_DSN;
     private static array $used_dbo = [];
 
     /**
      * 返回 mysql 对象
      * 只有在切换不同数据库可能会用到
      * @param string $dsnId
+     * @param array $dsn
      * @return MysqlDb
-     * @throws ExException
-     * @see MysqlDb
      */
-    public static function mysql(string $dsnId = 'mysql'): MysqlDb
+    public static function mysql(string $dsnId = 'mysql', array $dsn = []): MysqlDb
     {
         if (isset(self::$used_dbo[$dsnId])) {
             return self::$used_dbo[$dsnId];
@@ -29,10 +28,6 @@ class DB
 
         if (empty($dsn)) {
             $dsn = Context::dsn($dsnId);
-        }
-
-        if ('mysql' != $dsn['driver']) {
-            throw new ExException($dsn['driver'] . ' the driver error: mysql');
         }
 
         $object = new MysqlDb($dsn);
@@ -44,8 +39,6 @@ class DB
      * 返回 mongodb 对象
      * @param string $dsnId
      * @return MongoDb
-     * @throws ExException
-     * @see MongoDb
      */
     public static function mongo(string $dsnId = 'mongo'): MongoDb
     {
@@ -57,10 +50,6 @@ class DB
             $dsn = Context::dsn($dsnId);
         }
 
-        if ('mongo' != $dsn['driver']) {
-            throw new ExException('the driver error: mongo');
-        }
-
         $object = new MongoDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -69,7 +58,6 @@ class DB
     /**
      * @param string $dsnId
      * @return SqlsrvDb
-     * @throws ExException
      */
     public static function sqlsrv(string $dsnId = 'sqlsrv'): SqlsrvDb
     {
@@ -81,10 +69,6 @@ class DB
             $dsn = Context::dsn($dsnId);
         }
 
-        if ('sqlsrv' != $dsn['driver']) {
-            throw new ExException('the driver error: sqlsrv');
-        }
-
         $object = new SqlsrvDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -93,7 +77,6 @@ class DB
     /**
      * @param string $dsnId
      * @return SqliteDb
-     * @throws ExException
      */
     public static function sqlite(string $dsnId = 'sqlite'): SqliteDb
     {
@@ -105,10 +88,6 @@ class DB
             $dsn = Context::dsn($dsnId);
         }
 
-        if ('sqlite' != $dsn['driver']) {
-            throw new ExException('the driver error: sqlite');
-        }
-
         $object = new SqliteDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
@@ -117,7 +96,6 @@ class DB
     /**
      * @param string $dsnId
      * @return PostgresDb
-     * @throws ExException
      */
     public static function postgres(string $dsnId = 'postgres'): PostgresDb
     {
@@ -129,50 +107,34 @@ class DB
             $dsn = Context::dsn($dsnId);
         }
 
-        if ('postgres' != $dsn['driver']) {
-            throw new ExException('the driver error: postgres');
-        }
-
         $object = new PostgresDb($dsn);
         self::$used_dbo[$dsnId] = $object;
         return $object;
     }
 
     /**
-     * mysql postgres
-     * @return array
-     * @throws ExException
-     */
-    public static function info(): array
-    {
-        return self::Using()->info();
-    }
-
-    /**
-     * mysql postgres
+     * mysql
      * 插入一条数据
      * $option bool 是否返回插入的ID
      *
      * @param string $table
      * @param array $data
      * @param bool $retId
-     * @return string|bool
-     * @throws ExException
+     * @return bool|int|string
      */
-    public static function create(string $table, array $data, bool $retId = false): string|bool
+    public static function create(string $table, array $data, bool $retId = false): bool|int|string
     {
         return self::Using()->create($table, $data, $retId);
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 替换一条数据
      * PS:需要设置主键值
      *
      * @param string $table
      * @param array $data
      * @return bool|int
-     * @throws ExException
      */
     public static function replace(string $table, array $data): bool|int
     {
@@ -180,14 +142,13 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 更新符合条件的数据
      * @param string $table
      * @param array $data
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public static function update(string $table, array $data, array|string $condition, array $args = []): bool|int
     {
@@ -195,14 +156,13 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 删除符合条件的项
      * @param string $table
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param bool $multi bool true 删除多条 返回影响数 false: 只能删除一条
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public static function remove(string $table, array|string $condition, bool $multi = false, array $args = []): bool|int
     {
@@ -210,7 +170,7 @@ class DB
     }
 
     /**
-     * mysql PostgreSQL
+     * mysql
      * 查找一条数据
      * @param string $table
      * @param string $field
@@ -219,7 +179,6 @@ class DB
      * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
-     * @throws ExException
      */
     public static function findOne(string $table, string $field, array|string $condition, string $orderBy = '', array $args = [], bool $retObj = false): mixed
     {
@@ -227,7 +186,7 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 查找多条数据
      * @param string $table
      * @param string $field
@@ -237,7 +196,6 @@ class DB
      * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
     public static function findAll(string $table, string $field = '*', array|string $condition = '', string $orderBy = '', array $args = [], string $index = '', bool $retObj = false): bool|array
     {
@@ -245,7 +203,7 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 带分页数据的DB::page
      * @param string $table
      * @param string $field
@@ -254,13 +212,12 @@ class DB
      * @param array $args [':var' => $var]
      * @param array|int $pageParam
      * @param int $limit
+     * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
-    public static function page(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = [], array|int $pageParam = [], int $limit = 20, bool $retObj = false): bool|array
+    public static function page(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = [], array|int $pageParam = [], int $limit = 20, string $index = '', bool $retObj = false): bool|array
     {
-        $db = self::Using();
         if (is_array($pageParam)) {
             $_pageParam = [
                 'page' => 1,
@@ -269,14 +226,6 @@ class DB
                 'showNum' => false,
                 'length' => $limit,
             ];
-
-            if (!isset($pageParam['udi'])) {
-                if (DEBUG) {
-                    throw new ExException('udi param not set');
-                } else {
-                    return '';
-                }
-            }
 
             if (!empty($pageParam)) {
                 if (!isset($pageParam['total'])) {
@@ -298,10 +247,11 @@ class DB
         } else {
             $offset = $pageParam;
         }
-        $data = $db->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $retObj);
+        $data = self::Using()->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $index, $retObj);
         if (is_array($pageParam)) {
             return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
+
         return $data;
     }
 
@@ -316,7 +266,6 @@ class DB
      * @param string $orderBy
      * @param array $args [':var' => $var]
      * @return mixed
-     * @throws ExException
      */
     public static function first(string $table, string $field, array|string $condition, string $orderBy = '', array $args = []): mixed
     {
@@ -331,7 +280,6 @@ class DB
      * @param string $orderBy
      * @param array $args [':var' => $var]
      * @return array|bool
-     * @throws ExException
      */
     public static function col(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = []): bool|array
     {
@@ -346,7 +294,6 @@ class DB
      * @param array $args [':var' => $var]
      * @param string $field
      * @return mixed
-     * @throws ExException
      */
     public static function count(string $table, array|string $condition, array $args = [], string $field = '*'): mixed
     {
@@ -358,15 +305,11 @@ class DB
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public static function exec(string $sql, array $args = []): bool|int
     {
         return self::Using()->exec($sql, $args);
     }
-
-
-    //--------------sql查询---start---------------//
 
     /**
      * mysql postges
@@ -374,7 +317,6 @@ class DB
      * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
-     * @throws ExException
      */
     public static function rowSql(string $sql, array $args = [], bool $retObj = false): mixed
     {
@@ -388,7 +330,6 @@ class DB
      * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
     public static function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false): bool|array
     {
@@ -403,11 +344,9 @@ class DB
      * @param int $limit
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
-    public static function pageSql(string $sql, array $args = [], int|array $pageParam = 0, int $limit = 18, bool $retObj = false): bool|array
+    public static function pageSql(string $sql, array $args = [], int|array $pageParam = 0, int $limit = 18, string $index = '', bool $retObj = false): bool|array
     {
-        $db = self::Using();
         if (is_array($pageParam)) {
             $_pageParam = [
                 'page' => 1,
@@ -427,7 +366,8 @@ class DB
         } else {
             $offset = $pageParam;
         }
-        $data = $db->pageSql($sql, $args, $offset, $limit, $retObj);
+        $sql .= sprintf(' LIMIT %d OFFSET %d', $limit, $offset);
+        $data = self::Using()->rowSetSql($sql, $args, $index, $retObj);
         if (is_array($pageParam)) {
             return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
@@ -439,7 +379,6 @@ class DB
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
-     * @throws ExException
      */
     public static function countSql(string $sql, array $args = []): mixed
     {
@@ -451,7 +390,6 @@ class DB
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
-     * @throws ExException
      */
     public static function firstSql(string $sql, array $args = []): mixed
     {
@@ -463,7 +401,6 @@ class DB
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return array|bool
-     * @throws ExException
      */
     public static function colSql(string $sql, array $args = []): bool|array
     {
@@ -475,8 +412,6 @@ class DB
     /**
      * mysql postgres
      * 开始事务
-     * @return bool
-     * @throws ExException
      */
     public static function startTrans(): bool
     {
@@ -487,7 +422,6 @@ class DB
      * mysql postgres
      * 事务提交或者回滚
      * @param bool $commit_no_errors
-     * @throws ExException
      */
     public static function endTrans(bool $commit_no_errors = true): void
     {
@@ -496,22 +430,11 @@ class DB
 
     //----------------------事务END-------------------//
 
-    /**
-     * 数据源对象
-     * @return MysqlDb|PostgresDb
-     * @throws ExException
-     */
-    private static function Using(): MysqlDb|PostgresDb
+    private static function Using(): MysqlDb
     {
         //使用默认的方式
-        $dsn = Context::dsn(self::$using_dbo_id);
-        if ($dsn['driver'] == 'mysql') {
-            return self::mysql(self::$using_dbo_id, $dsn);
-        } elseif ($dsn['driver'] == 'postgres') {
-            return self::postgres(self::$using_dbo_id, $dsn);
-        } else {
-            throw new ExException('dsn id is error.');
-        }
+        $dsn = Context::dsn(self::$using_dsn);
+        return self::mysql(self::$using_dsn, $dsn);
     }
 
     /**

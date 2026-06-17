@@ -15,22 +15,14 @@ use Xcs\ExException;
 
 class MongoDb
 {
-    private array $_config;
-    private Manager $_link;
-    private WriteConcern $_writeConcern;
+    private array $_conf;
+    private ?Manager $_link;
+    private ?WriteConcern $_writeConcern;
     private $_dbname;
 
-    /**
-     * Db constructor.
-     * @param array $config
-     * @throws ExException
-     */
     public function __construct(array $config)
     {
-        if (empty($config)) {
-            throw new ExException('mongodb dsn is empty');
-        }
-        $this->_config = $config;
+        $this->_conf = $config;
         $options = [
             'connect' => true,
             'persist' => false
@@ -52,24 +44,6 @@ class MongoDb
     public function close(): void
     {
 
-    }
-
-    /**
-     * @param $func
-     * @param $args
-     * @return void
-     */
-    public function __call($func, $args)
-    {
-
-    }
-
-    /**
-     * @return array
-     */
-    public function info(): array
-    {
-        return $this->_config;
     }
 
     /**
@@ -302,7 +276,7 @@ class MongoDb
      */
     private function _halt(string $message = '', mixed $code = 0): bool
     {
-        if ($this->_config['dev']) {
+        if ($this->_conf['dev']) {
             $this->close();
             $message = mb_convert_encoding($message, 'UTF-8', mb_detect_encoding($message));
             $msg = 'ERROR: ' . $message . ' CODE:' . $code;
