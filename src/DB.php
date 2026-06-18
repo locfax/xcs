@@ -123,7 +123,6 @@ class DB
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public static function update(string $table, array|string $data, array|string $condition, array $args = []): bool|int
     {
