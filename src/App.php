@@ -13,10 +13,7 @@ class App
     private static string $_controllerPrefix = 'Controller\\';
     private static array $_routes = [];
 
-    /**
-     * @param bool $refresh
-     */
-    public static function run(bool $refresh = false): void
+    public static function run(): void
     {
         if (isset($_GET['s'])) {
             $uri = trim(str_replace(['.html', '.shtml', '.htm'], '', $_GET['s']), '/');
@@ -24,20 +21,17 @@ class App
             $uri = $_SERVER['PHP_SELF'];
         }
 
-        self::runFile($refresh);
+        self::runFile();
         self::dispatch($uri);
     }
 
-    /**
-     * @param bool $refresh
-     */
-    public static function runFile(bool $refresh = false): void
+    public static function runFile(): void
     {
         self::rootNamespace();
 
         $preloadFile = RUNTIME_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
-        if (!is_file($preloadFile) || $refresh || DEBUG) {
 
+        if (!is_file($preloadFile) || DEBUG) {
             $files = [XCS_PATH . 'common.php']; //应用配置
             is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
             is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
@@ -53,7 +47,7 @@ class App
                     echo UiException::error('error', $errStr, $error);
                 });
                 set_exception_handler(function ($ex) {
-                    echo UiException::Render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
+                    echo UiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
                 register_shutdown_function(function () {
                     $error = error_get_last();
@@ -91,13 +85,16 @@ class App
         if (!is_dir($fileDir)) {
             mkdir($fileDir, DIR_READ_MODE);
         }
+
         if (!is_file($runFile)) {
             file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
             touch($runFile) && chmod($runFile, FILE_READ_MODE); //读写空文件
         }
+
         if (!is_writable($runFile)) {
             chmod($runFile, FILE_READ_MODE); //读写
         }
+
         if (file_put_contents($runFile, '<?php ' . $content, LOCK_EX)) {
             chmod($runFile, FILE_READ_MODE); //只读
             return $runFile;
@@ -120,6 +117,7 @@ class App
                 return;
             }
         }
+
         $controllerName = getgpc('g.' . self::$_dCTL, getini('site/defaultController'));
         $actionName = getgpc('g.' . self::$_dACT, getini('site/defaultAction'));
         $controllerName = preg_replace('/[^a-z\d_]+/i', '', $controllerName);
@@ -160,6 +158,8 @@ class App
             return;
         }
 
+        header('Content-Type: text/html; charset=UTF-8');
+
         //调用方法
         $result = call_user_func([$controller, $actionMethod]);
 
@@ -181,11 +181,11 @@ class App
     private static function printResult(array $result): void
     {
         if ($result['type'] == 'html') {
-            header('Content-Type: text/html; charset=UTF-8');
+            header('Content-Type: text/html; charset=UTF-8', true, $result['code']);
         } elseif ($result['type'] == 'json') {
-            header('Content-Type: application/json; charset=UTF-8');
+            header('Content-Type: application/json; charset=UTF-8', true, $result['code']);
         } elseif ($result['type'] == 'text') {
-            header('Content-Type: text/plain; charset=UTF-8');
+            header('Content-Type: text/plain; charset=UTF-8', true, $result['code']);
         } else {
             throw new Error('result type not supported');
         }
@@ -205,12 +205,12 @@ class App
                     'code' => 1,
                     'message' => $msg,
                 ];
-                return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
+                return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE), 'code' => 200];
             }
-            return ['type' => 'html', 'content' => UiException::error('Ctl', $msg)];
+            return ['type' => 'html', 'content' => UiException::error('Ctl', $msg), 'code' => 200];
         }
 
-        return ['type' => 'html', 'content' => template('page/404', [], false, true)];
+        return ['type' => 'html', 'content' => template('page/404', [], false, true), 'code' => 200];
     }
 
     /**
@@ -224,9 +224,9 @@ class App
                 'code' => 1,
                 'message' => $msg,
             ];
-            return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE)];
+            return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE), 'code' => 200];
         }
-        return ['type' => 'html', 'content' => UiException::error('Acl', $msg), 'header' => 'HTTP/1.1 401 Unauthorized'];
+        return ['type' => 'html', 'content' => UiException::error('Acl', $msg), 'code' => 200];
     }
 
     /**
