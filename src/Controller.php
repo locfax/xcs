@@ -2,8 +2,6 @@
 
 namespace Xcs;
 
-use Error;
-
 class Controller
 {
 
@@ -39,35 +37,11 @@ class Controller
         return null;
     }
 
-    /**
-     * @param string $name
-     * @param mixed $arguments
-     * @return array
-     */
-    public function __call(string $name, mixed $arguments)
-    {
-        //动作不存在
-        if (isAjax()) {
-            $res = [
-                'code' => 1,
-                'message' => $name . ' not exists!',
-            ];
-            return $this->json($res, 404);
-        }
-
-        if (DEBUG) {
-            throw new Error($name . " not exists!", 404);
-        }
-
-        return $this->html($name . " not exists!", 404);
-    }
-
     protected function get(string $key = '', mixed $default = null): mixed
     {
         if ($key == '') {
             return getgpc('g.*');
         }
-
         return getgpc('g.' . $key, $default);
     }
 
@@ -76,7 +50,6 @@ class Controller
         if ($key == '') {
             return getgpc('p.*');
         }
-
         return getgpc('p.' . $key, $default);
     }
 
@@ -97,9 +70,8 @@ class Controller
      */
     protected function json(array $data, int $code = 200): array
     {
-        return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE), $code => $code];
+        return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE), 'code' => $code];
     }
-
 
     /**
      * @param String $data

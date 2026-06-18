@@ -132,7 +132,7 @@ class MysqlDb extends Database
      * @return array|bool
      * @throws ExException
      */
-    public function findAll(string $tableName, string $field = '*', mixed $condition = '', array $args = [], string $orderBy = '', string $index = '', bool $retObj = false): bool|array
+    public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = [], string $orderBy = '', string $index = '', bool $retObj = false): bool|array
     {
         if (is_array($condition) && !empty($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');

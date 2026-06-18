@@ -119,12 +119,13 @@ class DB
      * mysql
      * 更新符合条件的数据
      * @param string $table
-     * @param array $data
+     * @param array|string $data
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
+     * @throws ExException
      */
-    public static function update(string $table, array $data, array|string $condition, array $args = []): bool|int
+    public static function update(string $table, array|string $data, array|string $condition, array $args = []): bool|int
     {
         return self::Using()->update($table, $data, $condition, $args);
     }
@@ -200,15 +201,12 @@ class DB
                 'showNum' => false,
                 'length' => $limit,
             ];
-            if (!empty($pageParam)) {
-                if (!isset($pageParam['total'])) {
-                    $_pageParam['total'] = self::count($table, $condition, $args);
-                }
-                $pageParam = array_merge($_pageParam, $pageParam);
-            } else {
+
+            if (!isset($pageParam['total'])) {
                 $_pageParam['total'] = self::count($table, $condition, $args);
-                $pageParam = $_pageParam;
             }
+
+            $pageParam = array_merge($_pageParam, $pageParam); //覆盖Pagebar参数
             $realPages = ceil($pageParam['total'] / $pageParam['length']);
 
             //共有多少页
@@ -217,14 +215,12 @@ class DB
             $pageParam['page'] = $pageParam['maxPages'] ? max(1, min($pageParam['page'], $realPages, $pageParam['maxPages'])) : max(1, min($pageParam['page'], $realPages));
 
             $offset = ($pageParam['page'] - 1) * $pageParam['length'];
-        } else {
-            $offset = $pageParam;
+            $data = self::Using()->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $index, $retObj);
+            return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => !empty($data) ? Helper\Pager::pageBar($pageParam) : ''];
         }
-        $data = self::Using()->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $index, $retObj);
-        if (is_array($pageParam)) {
-            return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
-        }
-        return $data;
+
+        $offset = $pageParam;
+        return self::Using()->page($table, $field, $condition, $args, $orderBy, $offset, $limit, $index, $retObj);
     }
 
     /**
