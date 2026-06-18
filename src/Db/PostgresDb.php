@@ -9,7 +9,7 @@ class PostgresDb extends Database
 
     public function __construct(array $config)
     {
-        parent::__construct($config);
+        $this->connect($config);
     }
 
     /**

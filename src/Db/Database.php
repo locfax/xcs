@@ -14,22 +14,6 @@ class Database
     private ?PDO $PDOLink;
     private ?PDOStatement $PDOStatement;
 
-    public function __construct(array $config)
-    {
-        $this->sql = [];
-        $this->conf = $config;
-        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if (isset($config['options'])) {
-            $options = array_merge($options, $config['options']);
-        }
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['dbname']);
-        try {
-            $this->PDOLink = new PDO($dsn, $config['login'], $config['secret'], $options);
-        } catch (PDOException $exception) {
-            $this->_halt($exception->getMessage(), $exception->getCode());
-        }
-    }
-
     public function __destruct()
     {
         $this->close();
@@ -78,6 +62,26 @@ class Database
             $comma = $glue;
         }
         return [$sql, $args];
+    }
+
+    /**
+     * @param array $config
+     * @return void
+     */
+    protected function connect(array $config): void
+    {
+        $this->sql = [];
+        $this->conf = $config;
+        $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
+        if (isset($config['options'])) {
+            $options = array_merge($options, $config['options']);
+        }
+        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['dbname']);
+        try {
+            $this->PDOLink = new PDO($dsn, $config['login'], $config['secret'], $options);
+        } catch (PDOException $exception) {
+            $this->_halt($exception->getMessage(), $exception->getCode());
+        }
     }
 
     /**

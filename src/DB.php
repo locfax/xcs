@@ -246,20 +246,6 @@ class DB
 
     /**
      * mysql postgres
-     * @param string $table
-     * @param string $field
-     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param string $orderBy
-     * @param array $args [':var' => $var]
-     * @return array|bool
-     */
-    public static function col(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = []): bool|array
-    {
-        return self::Using()->col($table, $field, $condition, $args, $orderBy);
-    }
-
-    /**
-     * mysql postgres
      * 单表符合条件的数量
      * @param string $table
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -270,6 +256,20 @@ class DB
     public static function count(string $table, array|string $condition, array $args = [], string $field = '*'): mixed
     {
         return self::Using()->count($table, $condition, $args, $field);
+    }
+
+    /**
+     * mysql postgres
+     * @param string $table
+     * @param string $field
+     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
+     * @param string $orderBy
+     * @param array $args [':var' => $var]
+     * @return array|bool
+     */
+    public static function col(string $table, string $field, array|string $condition = '', string $orderBy = '', array $args = []): bool|array
+    {
+        return self::Using()->col($table, $field, $condition, $args, $orderBy);
     }
 
     /**
@@ -387,14 +387,13 @@ class DB
      * 事务提交或者回滚
      * @param bool $commit_no_errors
      */
-    public static function endTrans(bool $commit_no_errors = true): void
+    public static function endTrans(bool $commit_no_errors): void
     {
         self::Using()->endTrans($commit_no_errors);
     }
 
     private static function Using(): MysqlDb
     {
-        //使用默认的方式
         return self::mysql(self::$using_dsn);
     }
 
@@ -412,12 +411,12 @@ class DB
     }
 
     /**
-     * @param $arr
+     * @param array $arr
      * @return string
      */
-    public static function ids($arr): string
+    public static function ids(array $arr): string
     {
-        return implode(',', (array)$arr);
+        return implode(',', $arr);
     }
 
     /**
@@ -428,4 +427,5 @@ class DB
     {
         return "'" . implode("','", (array)$arr) . "'";
     }
+
 }

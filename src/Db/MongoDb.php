@@ -40,12 +40,6 @@ class MongoDb
         $this->_dbname = $config['dbname'];
     }
 
-
-    public function close(): void
-    {
-
-    }
-
     /**
      * @param string $table
      * @param array $document
@@ -277,7 +271,6 @@ class MongoDb
     private function _halt(string $message = '', mixed $code = 0): bool
     {
         if ($this->_conf['dev']) {
-            $this->close();
             $message = mb_convert_encoding($message, 'UTF-8', mb_detect_encoding($message));
             $msg = 'ERROR: ' . $message . ' CODE:' . $code;
             throw new ExException($msg);
