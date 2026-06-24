@@ -12,7 +12,7 @@ class Controller
     //时间戳
     protected int $timestamp;
 
-    public function __call(string $name, array $arguments)
+    public function __call($name, $arguments)
     {
         return false;
     }
