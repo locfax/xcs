@@ -12,6 +12,11 @@ class Controller
     //时间戳
     protected int $timestamp;
 
+    public function __call(string $name, array $arguments)
+    {
+        return false;
+    }
+
     /**
      * 初始执行
      * @param string $controllerName
