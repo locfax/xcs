@@ -283,22 +283,20 @@ class App
             return true;
         }
 
-        $_routes = self::mergeVars('route');
-        if (empty($_routes)) {
-            return true;
-        }
-
         $match = false;
-        foreach ($_routes as $key => $val) {
-            $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
-            if (preg_match('#^' . $key . '$#', $uri)) {
-                if (str_contains($val, '$') && str_contains($key, '(')) {
-                    $val = preg_replace('#^' . $key . '$#', $val, $uri);
+        $_routes = self::mergeVars('route');
+        if (!empty($_routes)) {
+            foreach ($_routes as $key => $val) {
+                $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
+                if (preg_match('#^' . $key . '$#', $uri)) {
+                    if (str_contains($val, '$') && str_contains($key, '(')) {
+                        $val = preg_replace('#^' . $key . '$#', $val, $uri);
+                    }
+                    $req = explode('/', $val);
+                    self::setRequest($req);
+                    $match = true;
+                    break;
                 }
-                $req = explode('/', $val);
-                self::setRequest($req);
-                $match = true;
-                break;
             }
         }
 
