@@ -6,12 +6,9 @@ use Error;
 
 class App
 {
-
     private static string $_dCTL = 'c';
     private static string $_dACT = 'a';
     private static string $_actionPrefix = 'act_';
-    private static string $_controllerPrefix = 'Controller\\';
-    private static array $_routes = [];
 
     public static function run(): void
     {
@@ -29,15 +26,16 @@ class App
     {
         self::rootNamespace();
 
-        $preloadFile = RUNTIME_PATH . 'preload/runtime_' . APP_KEY . '_files.php';
+        $appKey = strtolower(APP_KEY);
+        $preloadFile = RUNTIME_PATH . 'preload' . DS . 'runtime_' . $appKey . '_files.php';
 
         if (!is_file($preloadFile) || DEBUG) {
-            $files = [XCS_PATH . 'common.php']; //应用配置
-            is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');
-            is_file(LIB_PATH . APP_KEY . '.php') && array_push($files, LIB_PATH . APP_KEY . '.php');
-            is_file(APP_ROOT . '/config/' . APP_KEY . '.inc.php') && array_push($files, APP_ROOT . '/config/' . APP_KEY . '.inc.php');
-            is_file(APP_ROOT . '/config/common.php') && array_push($files, APP_ROOT . '/config/common.php');
-            is_file(APP_ROOT . '/config/database.php') && array_push($files, APP_ROOT . '/config/database.php');
+            $files = [XCS_PATH . 'function.php']; //框架自带常用函数
+            is_file(LIB_PATH . 'function.php') && array_push($files, LIB_PATH . 'function.php');  //自定义函数
+            is_file(APP_ROOT . DS . 'config' . DS . 'common.php') && array_push($files, APP_ROOT . DS . 'config' . DS . 'common.php'); //通用常用配置
+            is_file(APP_ROOT . DS . 'config' . DS . 'database.php') && array_push($files, APP_ROOT . DS . 'config' . DS . 'database.php'); //数据库配置
+            is_file(APP_ROOT . DS . 'config' . DS . $appKey . '.inc.php') && array_push($files, APP_ROOT . DS . 'config' . DS . $appKey . '.inc.php');
+            is_file(APP_ROOT . DS . 'config' . DS . $appKey . '.route.php') && array_push($files, APP_ROOT . DS . 'config' . DS . $appKey . '.route.php');
 
             if (DEBUG) {
                 set_error_handler(function ($errno, $errStr, $errFile, $errLine) {
@@ -46,22 +44,25 @@ class App
                     ];
                     echo UiException::error('error', $errStr, $error);
                 });
+
                 set_exception_handler(function ($ex) {
                     echo UiException::render(get_class($ex), $ex->getMessage(), $ex->getFile(), $ex->getLine(), true, $ex);
                 });
+
                 register_shutdown_function(function () {
                     $error = error_get_last();
                     if ($error) {
                         echo UiException::error('exception', $error['message'], [$error]);
                     }
                 });
+
                 array_walk($files, function ($file) {
                     include $file;
                 });
-                return;
+
+                return; //调试状态不生成runtime文件
             }
 
-            !is_dir(RUNTIME_PATH . 'preload') && mkdir(RUNTIME_PATH . 'preload');
             $preloadFile = self::makeRunFile($files, $preloadFile);
         }
 
@@ -83,16 +84,12 @@ class App
 
         $fileDir = dirname($runFile);
         if (!is_dir($fileDir)) {
-            mkdir($fileDir, DIR_READ_MODE);
+            mkdir($fileDir, DIR_WRITE_MODE, true);
         }
 
         if (!is_file($runFile)) {
             file_exists($runFile) && unlink($runFile); //可能是异常文件 删除
             touch($runFile) && chmod($runFile, FILE_READ_MODE); //读写空文件
-        }
-
-        if (!is_writable($runFile)) {
-            chmod($runFile, FILE_READ_MODE); //读写
         }
 
         if (file_put_contents($runFile, '<?php ' . $content, LOCK_EX)) {
@@ -138,12 +135,11 @@ class App
     private static function execute(string $controllerName, string $actionName): void
     {
         $controllerName = ucfirst($controllerName);
-        $actionMethod = self::$_actionPrefix . $actionName;
-        $controllerClass = self::$_controllerPrefix . $controllerName;
+        $controllerClass = sprintf('\\Controller\\%s\\%s', APP_KEY, $controllerName);
 
-        //载入controller
-        if (!self::loadController($controllerName, $controllerClass)) {
-            //控制器加载失败
+        //判断controller是否存在
+        $fixed = self::fixedController($controllerClass);
+        if (!$fixed) {
             $result = self::errCtrl($controllerName . ' ctl not found');
             self::printResult($result);
             return;
@@ -161,7 +157,7 @@ class App
         header('Content-Type: text/html; charset=UTF-8');
 
         //调用方法
-        $result = call_user_func([$controller, $actionMethod]);
+        $result = call_user_func([$controller, self::$_actionPrefix . $actionName]);
 
         //没找到action
         if ($result === false) {
@@ -170,7 +166,7 @@ class App
             return;
         }
 
-        //无需后续
+        //无需后续 可能是在action直接输出
         if (empty($result)) {
             return;
         }
@@ -190,7 +186,7 @@ class App
             throw new Error('result type not supported');
         }
 
-        echo $result['content'];
+        echo $result['content'] ?? '';
     }
 
     /**
@@ -226,40 +222,50 @@ class App
             ];
             return ['type' => 'json', 'content' => json_encode($data, JSON_UNESCAPED_UNICODE), 'code' => 200];
         }
+
         return ['type' => 'html', 'content' => UiException::error('Acl', $msg), 'code' => 200];
     }
 
     /**
-     * @param string $controllerName
      * @param string $controllerClass
      * @return bool
      */
-    private static function loadController(string $controllerName, string $controllerClass): bool
+    private static function fixedController(string $controllerClass): bool
     {
-        if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
+        if (class_exists($controllerClass, false)) {
             return true;
         }
-        $app = getini('site/app') ?: ucfirst(APP_KEY);
-        $controllerFilename = sprintf('%sController/%s/%s.php', APP_PATH, $app, $controllerName);
-        return is_file($controllerFilename) && include $controllerFilename;
+
+        $filename = APP_PATH . str_replace('\\', DS, trim($controllerClass, '\\')) . '.php';
+        if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+            throw new Error("$filename not exists");
+        }
+
+        return is_file($filename);
     }
 
     /**
      * @param string $controllerName
      * @return mixed
      */
-    public static function controller(string $controllerName): mixed
+    public static function getController(string $controllerName): mixed
     {
-        $controllerClass = self::$_controllerPrefix . $controllerName;
-        if (class_exists($controllerClass, false) || interface_exists($controllerClass, false)) {
+        $controllerName = ucfirst($controllerName);
+        $controllerClass = sprintf('\\Controller\\%s\\%s', APP_KEY, $controllerName);
+        if (class_exists($controllerClass, false)) {
             return $controllerClass;
         }
-        $app = getini('site/app') ?: ucfirst(APP_KEY);
-        $controllerFilename = sprintf('%sController/%s/%s.php', APP_PATH, $app, $controllerName);
-        if (is_file($controllerFilename)) {
-            include $controllerFilename;
+
+        $filename = sprintf('%sController%s%s%s%s.php', APP_PATH, DS, APP_KEY, DS, $controllerName);
+        if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
+            throw new Error("$filename not exists");
+        }
+
+        if (is_file($filename)) {
+            include $filename;
             return new $controllerClass();
         }
+
         return false;
     }
 
@@ -277,12 +283,13 @@ class App
             return true;
         }
 
-        if (is_file(APP_PATH . 'Route/' . APP_KEY . '.php')) {
-            self::$_routes = include(APP_PATH . 'Route/' . APP_KEY . '.php');
+        $_routes = self::mergeVars('route');
+        if (empty($_routes)) {
+            return true;
         }
 
         $match = false;
-        foreach (self::$_routes as $key => $val) {
+        foreach ($_routes as $key => $val) {
             $key = str_replace([':any', ':num'], ['[^/]+', '[0-9]+'], $key);
             if (preg_match('#^' . $key . '$#', $uri)) {
                 if (str_contains($val, '$') && str_contains($key, '(')) {
@@ -313,10 +320,12 @@ class App
     {
         $_GET[self::$_dCTL] = array_shift($req);
         $_GET[self::$_dACT] = array_shift($req);
+
         $paramNum = count($req);
         if (!$paramNum || $paramNum % 2 !== 0) {
             return;
         }
+
         for ($i = 0; $i < $paramNum; $i++) {
             if (empty($req[$i])) {
                 continue;
@@ -332,12 +341,13 @@ class App
     private static function rootNamespace(): void
     {
         $loader = function ($classname) {
-            $filename = rtrim(APP_PATH, '/') . '/' . str_replace('\\', '/', trim($classname, '\\')) . '.php';
+            $filename = APP_PATH . str_replace('\\', DS, trim($classname, '\\')) . '.php';
             if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
                 throw new Error("$filename not exists");
             }
             include $filename;
         };
+
         spl_autoload_register($loader);
     }
 
@@ -349,7 +359,6 @@ class App
 
     public static function url(array|string $udi, array $params = []): string
     {
-
         if (is_array($udi)) {
             if (count($udi) == 3) {
                 $url = $udi[0] . '?' . self::$_dCTL . '=' . $udi[1] . '&' . self::$_dACT . '=' . $udi[2];
@@ -383,49 +392,14 @@ class App
      */
     public static function mergeVars(string $group, array $vars = []): bool|array
     {
-        static $_CDATA = [APP_KEY => ['dsn' => [], 'cfg' => []]];
+        static $_CDATA =  ['dsn' => [], 'cfg' => [], 'route' => []];
         if (empty($vars)) {
-            return $_CDATA[APP_KEY][$group] ?? [];
+            return $_CDATA[$group] ?? [];
         }
-        if (is_null($_CDATA[APP_KEY][$group])) {
-            $_CDATA[APP_KEY][$group] = $vars;
-        } else {
-            $_CDATA[APP_KEY][$group] = array_merge($_CDATA[APP_KEY][$group], $vars);
+        if (isset($_CDATA[$group])) {
+            $_CDATA[$group] = array_merge($_CDATA[$group], $vars);
         }
         return true;
-    }
-
-    /**
-     * 导入所需的类库
-     * @param string $class 类库命名空间字符串
-     * @param string $ext 导入的文件扩展名
-     * @param string $baseUrl 起始路径
-     * @return boolean
-     */
-    public static function vendor(string $class, string $ext = '.php', string $baseUrl = LIB_PATH): bool
-    {
-        static $_file = [];
-        $key = $class . $baseUrl . $ext;
-        $class = str_replace(['.', '#'], ['/', '.'], $class);
-
-        if (isset($_file[$key])) {
-            return true;
-        }
-
-        // 如果类存在 则导入类库文件
-        $filename = $baseUrl . $class . $ext;
-
-        if (!empty($filename) && is_file($filename)) {
-            // 开启调试模式Win环境严格区分大小写
-            if (DEBUG && pathinfo($filename, PATHINFO_FILENAME) != pathinfo(realpath($filename), PATHINFO_FILENAME)) {
-                throw new Error("filename $filename not exists");
-            }
-            include $filename;
-            $_file[$key] = true;
-            return true;
-        }
-
-        return false;
     }
 
 }
