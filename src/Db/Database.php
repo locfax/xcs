@@ -114,7 +114,6 @@ class Database
         $this->sql[] = $sql; //记录sql
 
         try {
-
             $this->connect();
 
             $this->PDOStatement = $this->PDOLink->prepare($sql);
@@ -142,7 +141,6 @@ class Database
     {
         try {
             $this->query($sql, $args);
-
             $res = $this->PDOStatement->fetch($retObj ? PDO::FETCH_OBJ : PDO::FETCH_ASSOC);
             $this->PDOStatement->closeCursor();
 
@@ -163,8 +161,8 @@ class Database
     {
         try {
             $this->query($sql, $args);
-
             $res = $this->PDOStatement->fetchAll($retObj ? PDO::FETCH_OBJ : PDO::FETCH_ASSOC);
+
             if (!empty($index)) {
                 if ($retObj) {
                     $res = $this->_object_index($res, $index);
@@ -172,6 +170,7 @@ class Database
                     $res = $this->_array_index($res, $index);
                 }
             }
+
             $this->PDOStatement->closeCursor();
 
             return $res;
@@ -189,11 +188,10 @@ class Database
     {
         try {
             $this->query($sql, $args);
-
-            $data = $this->PDOStatement->fetchColumn();
+            $res = $this->PDOStatement->fetchColumn();
             $this->PDOStatement->closeCursor();
 
-            return $data;
+            return $res;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
         }
