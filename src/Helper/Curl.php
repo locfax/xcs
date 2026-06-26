@@ -82,7 +82,7 @@ class Curl
         /* 关闭资源 */
         curl_close($ch);
 
-        if (!empty($body) && $http_info['content-encoding'] == 'gzip') {
+        if (!empty($body) && isset($http_info['content-encoding']) && $http_info['content-encoding'] == 'gzip') {
             $body = self::gzip_decode($body);
         }
 

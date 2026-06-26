@@ -11,8 +11,8 @@ class Database
 {
     private array $conf;
     private array $sql;
-    private ?PDO $PDOLink;
-    private ?PDOStatement $PDOStatement;
+    private ?PDO $PDOLink = null;
+    private ?PDOStatement $PDOStatement = null;
 
     public function __destruct()
     {
