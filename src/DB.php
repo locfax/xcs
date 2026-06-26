@@ -328,11 +328,14 @@ class DB
         } else {
             $offset = $pageParam;
         }
+
         $sql .= sprintf(' LIMIT %d OFFSET %d', $limit, $offset);
         $data = self::Using()->rowSetSql($sql, $args, $index, $retObj);
+
         if (is_array($pageParam)) {
             return ['total' => $pageParam['total'], 'rows' => $data, 'pagebar' => $data ? Helper\Pager::pageBar($pageParam) : ''];
         }
+
         return $data;
     }
 

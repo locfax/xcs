@@ -8,9 +8,9 @@ class Cache
      * @param string $key
      * @return mixed
      */
-    public static function FileGet(string $key): mixed
+    public static function FileGet(string $key, $isPath = false): mixed
     {
-        return File::getInstance()->get($key);
+        return File::getInstance()->get($key, $isPath);
     }
 
     /**
@@ -19,9 +19,9 @@ class Cache
      * @param int $ttl
      * @return mixed
      */
-    public static function FileSet(string $key, mixed $value, int $ttl = 0): mixed
+    public static function FileSet(string $key, mixed $value, int $ttl = 0, $isPath = false): mixed
     {
-        return File::getInstance()->set($key, $value, $ttl);
+        return File::getInstance()->set($key, $value, $ttl, $isPath);
     }
 
     /**

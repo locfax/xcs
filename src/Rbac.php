@@ -65,6 +65,7 @@ class Rbac
     private static function check(array $_roles, array $ACL): bool
     {
         $roles = array_map('strtoupper', $_roles);
+
         if ($ACL['allow'] == self::ACL_EVERYONE) {
 
             //if allow all role ,and deny isn't set ,then allow
@@ -88,17 +89,18 @@ class Rbac
                 return false;
             }
 
-            //if deny is ACL_EVERYONE ,then AC is false
+            //if deny is ACL_EVERYONE ,then false
             if ($ACL['deny'] == self::ACL_EVERYONE) {
                 return false;
             }
 
             //if deny hasn't the role of user's roles , allow
             foreach ($roles as $role) {
-                if (in_array($role, $ACL['deny'], true)) {
+                if (in_array($role, $ACL['deny'])) {
                     return false;
                 }
             }
+
             return true;
         }
 
@@ -110,6 +112,7 @@ class Rbac
                 }
                 return false;
             }
+
             //if allow request user's role is empty , but user's role is not empty , deny
             if ($ACL['allow'] == self::ACL_NO_ROLE) {
                 if (empty($roles)) {
@@ -117,6 +120,7 @@ class Rbac
                 }
                 return false;
             }
+
             if ($ACL['allow'] != self::ACL_NULL) {
                 //if allow request the role name , then check
                 $passed = false;
@@ -136,6 +140,7 @@ class Rbac
         if ($ACL['deny'] == self::ACL_NULL) {
             return true;
         }
+
         //if deny is ACL_NO_ROEL, user role isn't empty , allow
         if ($ACL['deny'] == self::ACL_NO_ROLE) {
             if (empty($roles)) {
@@ -143,6 +148,7 @@ class Rbac
             }
             return true;
         }
+
         //if deny is ACL_HAS_ROLE, user's role is empty ,allow
         if ($ACL['deny'] == self::ACL_HAS_ROLE) {
             if (empty($roles)) {
@@ -150,16 +156,19 @@ class Rbac
             }
             return false;
         }
+
         //if deny is ACL_EVERYONE, then deny all
         if ($ACL['deny'] == self::ACL_EVERYONE) {
             return false;
         }
+
         //only deny hasn't the role of user's role ,allow
         foreach ($roles as $role) {
             if (in_array($role, $ACL['deny'], true)) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -171,15 +180,18 @@ class Rbac
     private static function getACL(string $controllerName): array
     {
         static $globalAcl = [];
+
         if (empty($globalAcl)) {
-            $globalAcl = Cache::FileGet('Acl' . ucfirst(APP_KEY));
+            $globalAcl = Cache::FileGet('config/' . strtolower(APP_KEY) . '.acl.php', true);
             if (empty($globalAcl)) {
                 return [];
             }
         }
+
         if (isset($globalAcl[$controllerName])) {
             return $globalAcl[$controllerName];
         }
+
         return [];
     }
 

@@ -20,12 +20,17 @@ class File
      * @param string $key
      * @return mixed
      */
-    public function get(string $key): mixed
+    public function get(string $key, bool $isPath = false): mixed
     {
-        $config = getini('cache');
-        $hashKey = md5($config['prefix'] . '_' . $key);
-        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
-        if (file_exists($cacheFile)) {
+        if ($isPath) {
+            $cacheFile = APP_ROOT . DS . $key;
+        } else {
+            $config = getini('cache');
+            $hashKey = md5($config['prefix'] . '_' . $key);
+            $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
+        }
+
+        if (is_file($cacheFile)) {
             $data = file_get_contents($cacheFile);
             if (empty($data)) {
                 return null;
@@ -35,6 +40,7 @@ class File
                 return unserialize(substr($data, 30));
             }
         }
+
         return null;
     }
 
@@ -44,9 +50,8 @@ class File
      * @param int $ttl
      * @return false|int
      */
-    public function set(string $key, mixed $val, int $ttl = 0): bool|int
+    public function set(string $key, mixed $val, int $ttl = 0, $isPath = false): bool|int
     {
-
         if ($ttl > 0) {
             $timeout = time() + $ttl;
         } else {
@@ -54,25 +59,35 @@ class File
             $timeout = 0;
         }
 
-        $config = getini('cache');
-        $hashKey = md5($config['prefix'] . '_' . $key);
-        $path = CACHE_PATH . $this->filePath($hashKey);
-        !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
+        if ($isPath) {
+            $cacheFile = APP_ROOT . DS . $key;
+        } else {
+            $config = getini('cache');
+            $hashKey = md5($config['prefix'] . '_' . $key);
+            $path = CACHE_PATH . $this->filePath($hashKey);
+            !file_exists($path) && mkdir($path, FILE_WRITE_MODE, true);
+            $cacheFile = $path . '/' . $config['prefix'] . '_' . $hashKey . '.php';
+        }
 
         $data = "<?php\n//" . sprintf('%010d', $timeout) . "\n exit();?>\n" . serialize($val);
-        return $this->save($path . '/' . $config['prefix'] . '_' . $hashKey . '.php', $data, FILE_WRITE_MODE);
+        return $this->save($cacheFile, $data, FILE_WRITE_MODE);
     }
 
     /**
      * @param string $key
      * @return bool
      */
-    public function rm(string $key): bool
+    public function rm(string $key, $isPath = false): bool
     {
-        $config = getini('cache');
-        $hashKey = md5($config['prefix'] . '_' . $key);
-        $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
-        return file_exists($cacheFile) && unlink($cacheFile);
+        if ($isPath) {
+            $cacheFile = APP_ROOT . DS . $key;
+        } else {
+            $config = getini('cache');
+            $hashKey = md5($config['prefix'] . '_' . $key);
+            $cacheFile = CACHE_PATH . $this->filePath($hashKey) . '/' . $config['prefix'] . '_' . $hashKey . '.php';
+        }
+
+        return is_file($cacheFile) && unlink($cacheFile);
     }
 
     /**
@@ -83,13 +98,15 @@ class File
      */
     private function save($filename, $content, $mode): bool|int
     {
-        if (!file_exists($filename)) {
+        if (!is_file($filename)) {
             touch($filename) && chmod($filename, FILE_WRITE_MODE); //读写执行
         }
+
         $ret = file_put_contents($filename, $content, LOCK_EX);
         if ($ret && FILE_WRITE_MODE != $mode) {
             chmod($filename, $mode);
         }
+
         return $ret;
     }
 

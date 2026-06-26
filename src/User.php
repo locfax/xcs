@@ -2,10 +2,12 @@
 
 namespace Xcs;
 
+use Error;
+
 class User
 {
-    const UREY = '__uk';
-    const ROLEY = '__ur';
+    const UREY = '_user';
+    const ROLEY = '_role';
 
     /**
      * @param array $userData
@@ -23,9 +25,9 @@ class User
     }
 
     /**
-     * @return mixed
+     * @return array
      */
-    public static function get()
+    public static function get(): array
     {
         $dataKey = getini('auth/prefix') . self::UREY;
         return self::getData($dataKey);
@@ -61,12 +63,12 @@ class User
     }
 
     /**
-     * @return mixed
+     * @return string
      */
-    public static function getRole(): mixed
+    public static function getRole(): string
     {
         $data = self::get();
-        return $data[self::ROLEY] ?? null;
+        return $data[self::ROLEY] ?? '';
     }
 
     /**
@@ -78,10 +80,7 @@ class User
         if (empty($roles)) {
             return [];
         }
-        if (!is_array($roles)) {
-            $roles = explode(',', $roles);
-        }
-        return array_map('trim', $roles);
+        return explode(',', $roles);
     }
 
     /**
@@ -93,7 +92,7 @@ class User
         $ret = [];
         $type = getini('auth/method');
         if (!$type) {
-            throw new \Error('auth method is empty');
+            throw new Error('auth method is empty');
         }
 
         if ('SESSION' == $type) {
@@ -105,6 +104,7 @@ class User
             $key = self::getCookieKey($key);
             $ret = isset($_COOKIE[$key]) ? json_decode(self::authCode($_COOKIE[$key]), true) : [];
         }
+
         return $ret;
     }
 
@@ -119,7 +119,7 @@ class User
         $ret = false;
         $type = getini('auth/method');
         if (!$type) {
-            throw new \Error('auth method is empty');
+            throw new Error('auth method is empty');
         }
 
         if ('SESSION' == $type) {
@@ -137,9 +137,9 @@ class User
             $secure = (443 == $_SERVER['SERVER_PORT']) ? 1 : 0;
             $key = self::getCookieKey($key);
             $val = self::authCode(json_encode($val, JSON_UNESCAPED_UNICODE), 'ENCODE');
-
             $ret = setcookie($key, $val, $life, getini('auth/path'), getini('auth/domain'), $secure);
         }
+
         return $ret;
     }
 
@@ -166,6 +166,7 @@ class User
             $hash_key = getini('auth/key') ?: PHP_VERSION;
             $hash_auth = md5($hash_key . PHP_VERSION);
         }
+
         $timestamp = time();
         $cKey_length = 4;
         $_key = md5($key ?: $hash_auth);
@@ -183,6 +184,7 @@ class User
         $box = range(0, 255);
 
         $rndKey = [];
+
         for ($i = 0; $i <= 255; $i++) {
             $rndKey[$i] = ord($cryptKey[$i % $key_length]);
         }
@@ -212,4 +214,5 @@ class User
 
         return $key_c . str_replace('=', '', base64_encode($result));
     }
+
 }

@@ -66,7 +66,8 @@ class Database
             return;
         }
 
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $this->conf['host'], $this->conf['port'], $this->conf['dbname']);
+        $dsn = $this->conf['dsn'] ?? sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $this->conf['host'], $this->conf['port'], $this->conf['dbname']);
+
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
         if (isset($this->conf['option'])) {
             $options = array_merge($options, $this->conf['option']);
