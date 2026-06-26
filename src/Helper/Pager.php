@@ -12,7 +12,7 @@ class Pager
     {
         $mpUrl = $pageInfo['udi'];
         if (isset($pageInfo['param'])) {
-            if (self::strPos($mpUrl, '?')) {
+            if (str_contains($mpUrl, '?')) {
                 $mpUrl .= $pageInfo['param'];
             } else {
                 $mpUrl .= '?' . $pageInfo['param'];
@@ -21,12 +21,12 @@ class Pager
         $autoGoto = true;
         $ajaxTarget = getgpc('g.target') ? " target=\"" . getgpc('g.target', '', 'char_output') . "\" " : '';
         $hrefName = '';
-        if (self::strPos($mpUrl, '#')) {
+        if (str_contains($mpUrl, '#')) {
             $asTrs = explode('#', $mpUrl);
             $mpUrl = $asTrs[0];
             $hrefName = '#' . $asTrs[1];
         }
-        $mpUrl .= self::strPos($mpUrl, '?') ? '&' : '?';
+        $mpUrl .= str_contains($mpUrl, '?') ? '&' : '?';
         $offset = floor($pageInfo['showPage'] * 0.5);
 
         if ($pageInfo['showPage'] > $pageInfo['pages']) {
@@ -62,13 +62,4 @@ class Pager
         return '<div class="pg">' . $multiPage . '</div>';
     }
 
-    /**
-     * @param string $str
-     * @param string $needle
-     * @return bool
-     */
-    private static function strPos(string $str, string $needle): bool
-    {
-        return str_contains($str, $needle);
-    }
 }

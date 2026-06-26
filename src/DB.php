@@ -223,7 +223,7 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 返回一条数据的第一栏
      * $filed mix  需要返回的字段  或者sql语法
      *
@@ -240,7 +240,7 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * 单表符合条件的数量
      * @param string $table
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -250,11 +250,11 @@ class DB
      */
     public static function count(string $table, array|string $condition, array $args = [], string $field = '*'): mixed
     {
-        return self::Using()->count($table, $condition, $args, $field);
+        return self::Using()->first($table, sprintf('COUNT(%s)', $field), $condition, $args);
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $table
      * @param string $field
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
@@ -268,18 +268,18 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
      */
-    public static function exec(string $sql, array $args = []): bool|int
+    public static function execSql(string $sql, array $args = []): bool|int
     {
-        return self::Using()->exec($sql, $args);
+        return self::Using()->execSql($sql, $args);
     }
 
     /**
-     * mysql postges
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param bool $retObj
@@ -291,7 +291,7 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param string $index
@@ -304,11 +304,12 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param int|array $pageParam
      * @param int $limit
+     * @param string $index
      * @param bool $retObj
      * @return array|bool
      */
@@ -336,18 +337,18 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
      */
     public static function countSql(string $sql, array $args = []): mixed
     {
-        return self::Using()->countSql($sql, $args);
+        return self::Using()->firstSql($sql, $args);
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
@@ -358,19 +359,24 @@ class DB
     }
 
     /**
-     * mysql postgres
+     * mysql
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
+     * @param string $field
      * @return array|bool
      */
-    public static function colSql(string $sql, array $args = []): bool|array
+    public static function colSql(string $sql, array $args = [], string $field = 'field'): bool|array
     {
-        return self::Using()->colSql($sql, $args);
+        $data = self::Using()->rowSetSql($sql, $args);
+        $res = [];
+        foreach ($data as $row) {
+            $res[] = $row[$field];
+        }
+        return $res;
     }
 
     /**
-     * mysql postgres
-     * 开始事务
+     * mysql
      */
     public static function startTrans(): bool
     {
@@ -378,13 +384,13 @@ class DB
     }
 
     /**
-     * mysql postgres
-     * 事务提交或者回滚
+     * mysql
      * @param bool $commit_no_errors
+     * @return bool
      */
-    public static function endTrans(bool $commit_no_errors): void
+    public static function endTrans(bool $commit_no_errors): bool
     {
-        self::Using()->endTrans($commit_no_errors);
+        return self::Using()->endTrans($commit_no_errors);
     }
 
     private static function Using(): MysqlDb

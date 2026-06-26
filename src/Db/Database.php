@@ -2,31 +2,21 @@
 
 namespace Xcs\Db;
 
+use Error;
 use PDO;
 use PDOException;
 use PDOStatement;
-use Xcs\ExException;
 
 class Database
 {
     private array $conf;
-    private ?array $sql;
+    private array $sql;
     private ?PDO $PDOLink;
     private ?PDOStatement $PDOStatement;
 
     public function __destruct()
     {
         $this->close();
-    }
-
-    /**
-     * @param string $func
-     * @param array $args
-     * @return mixed
-     */
-    public function __call(string $func, array $args)
-    {
-        return call_user_func_array([$this->PDOLink, $func], $args);
     }
 
     /**
@@ -64,43 +54,51 @@ class Database
         return [$sql, $args];
     }
 
-    /**
-     * @param array $config
-     * @return void
-     */
-    protected function connect(array $config): void
+    protected function config(array $conf): void
     {
+        $this->conf = $conf;
         $this->sql = [];
-        $this->conf = $config;
+    }
+
+    private function connect(): void
+    {
+        if ($this->PDOLink) {
+            return;
+        }
+
+        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $this->conf['host'], $this->conf['port'], $this->conf['dbname']);
         $options = [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION];
-        if (isset($config['options'])) {
-            $options = array_merge($options, $config['options']);
+        if (isset($this->conf['option'])) {
+            $options = array_merge($options, $this->conf['option']);
         }
-        $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $config['host'], $config['port'], $config['dbname']);
-        try {
-            $this->PDOLink = new PDO($dsn, $config['login'], $config['secret'], $options);
-        } catch (PDOException $exception) {
-            $this->_halt($exception->getMessage(), $exception->getCode());
-        }
+
+        $this->PDOLink = new PDO($dsn, $this->conf['login'], $this->conf['secret'], $options);
     }
 
     /**
      * @param string $sql
      * @param array $args
+     * @return void
      */
     protected function query(string $sql, array $args = []): void
     {
+        $this->sql[] = $sql; //记录sql
+
+        $this->connect();
+
         if (empty($args)) {
             $this->PDOStatement = $this->PDOLink->query($sql);
         } else {
             $this->PDOStatement = $this->PDOLink->prepare($sql);
             $this->PDOStatement->execute($args);
         }
-        $this->sql[] = $sql;
     }
 
     protected function lastInsertId(): bool|string
     {
+        if (!$this->PDOLink) {
+            return false;
+        }
         return $this->PDOLink->lastInsertId();
     }
 
@@ -108,9 +106,8 @@ class Database
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
-    protected function exec(string $sql, array $args = []): bool|int
+    public function execSql(string $sql, array $args = []): bool|int
     {
         try {
             $this->query($sql, $args);
@@ -127,9 +124,8 @@ class Database
      * @param array $args [':var' => $var]
      * @param bool $retObj
      * @return mixed
-     * @throws ExException
      */
-    protected function rowSql(string $sql, array $args = [], bool $retObj = false): mixed
+    public function rowSql(string $sql, array $args = [], bool $retObj = false): mixed
     {
         try {
             $this->query($sql, $args);
@@ -147,9 +143,8 @@ class Database
      * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
-    protected function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false): bool|array
+    public function rowSetSql(string $sql, array $args = [], string $index = '', bool $retObj = false): bool|array
     {
         try {
             $this->query($sql, $args);
@@ -172,9 +167,8 @@ class Database
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return mixed
-     * @throws ExException
      */
-    protected function firstSql(string $sql, array $args = []): mixed
+    public function firstSql(string $sql, array $args = []): mixed
     {
         try {
             $this->query($sql, $args);
@@ -186,25 +180,34 @@ class Database
         }
     }
 
-    protected function startTrans(): bool
+    public function startTrans(): bool
     {
-        return $this->PDOLink->beginTransaction();
+        try {
+            $this->connect();
+            return $this->PDOLink->beginTransaction();
+        } catch (PDOException $exception) {
+            return $this->_halt($exception->getMessage(), $exception->getCode());
+        }
     }
 
     /**
      * @param bool $commit_no_errors
-     * @throws ExException
+     * @return bool
      */
-    protected function endTrans(bool $commit_no_errors = true): void
+    public function endTrans(bool $commit_no_errors = true): bool
     {
         try {
-            if ($commit_no_errors) {
-                $this->PDOLink->commit();
-            } else {
-                $this->PDOLink->rollBack();
+            if (!$this->PDOLink) {
+                return false;
             }
+            if ($commit_no_errors) {
+                $res = $this->PDOLink->commit();
+            } else {
+                $res = $this->PDOLink->rollBack();
+            }
+            return $res;
         } catch (PDOException $PDOException) {
-            $this->_halt($PDOException->getMessage(), $PDOException->getCode());
+            return $this->_halt($PDOException->getMessage(), $PDOException->getCode());
         }
     }
 
@@ -212,16 +215,16 @@ class Database
      * @param string $message
      * @param mixed $code
      * @return bool
-     * @throws ExException
      */
-    protected function _halt(string $message = '', mixed $code = 0): bool
+    private function _halt(string $message = '', mixed $code = 0): bool
     {
         if ($this->conf['dev']) {
             $this->close();
             $message = mb_convert_encoding($message, 'UTF-8', mb_detect_encoding($message));
-            $msg = 'ERROR: ' . $message . ' CODE:' . $code . ' SQL:' . implode('###', $this->sql);
-            throw new ExException($msg);
+            $msg = 'ERROR: ' . $message . ' CODE:' . $code . ' SQL:' . implode(' ### ', $this->sql);
+            throw new Error($msg);
         }
+
         return false;
     }
 
@@ -229,7 +232,7 @@ class Database
     {
         $this->PDOLink = null;
         $this->PDOStatement = null;
-        $this->sql = null;
+        $this->sql = [];
     }
 
     /**

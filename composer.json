@@ -28,7 +28,9 @@
     "ext-json": "*",
     "ext-mbstring": "*",
     "ext-pdo": "*",
-    "ext-mysqli": "*"
+    "ext-mysqli": "*",
+    "ext-ctype": "*",
+    "ext-curl": "*"
   },
   "suggest": {}
 }

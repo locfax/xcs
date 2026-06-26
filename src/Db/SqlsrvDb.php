@@ -2,14 +2,12 @@
 
 namespace Xcs\Db;
 
-use Xcs\ExException;
-
 class SqlsrvDb extends Database
 {
 
     public function __construct(array $config)
     {
-        $this->connect($config);
+        $this->config($config);
     }
 
     /**
@@ -17,7 +15,6 @@ class SqlsrvDb extends Database
      * @param array $data
      * @param bool $retId
      * @return bool|string
-     * @throws ExException
      */
     public function create(string $tableName, array $data, bool $retId = false): bool|string
     {
@@ -29,7 +26,7 @@ class SqlsrvDb extends Database
             $args[':' . $field] = $value;
             $comma = ',';
         }
-        $res = $this->exec(sprintf('INSERT INTO %s (%s) VALUES (%s)', $this->qTable($tableName), $fields, $values), $args);
+        $res = $this->execSql(sprintf('INSERT INTO %s (%s) VALUES (%s)', $this->qTable($tableName), $fields, $values), $args);
         if ($retId) {
             $res = $this->lastInsertId();
         }
@@ -40,7 +37,6 @@ class SqlsrvDb extends Database
      * @param string $tableName
      * @param array $data
      * @return bool|int
-     * @throws ExException
      */
     public function replace(string $tableName, array $data): bool|int
     {
@@ -52,7 +48,7 @@ class SqlsrvDb extends Database
             $args[':' . $field] = $value;
             $comma = ',';
         }
-        return $this->exec(sprintf('REPLACE INTO %s (%s) VALUES (%s)', $this->qTable($tableName), $fields, $values), $args);
+        return $this->execSql(sprintf('REPLACE INTO %s (%s) VALUES (%s)', $this->qTable($tableName), $fields, $values), $args);
     }
 
     /**
@@ -61,7 +57,6 @@ class SqlsrvDb extends Database
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public function update(string $tableName, array|string $data, array|string $condition, array $args = []): bool|int
     {
@@ -80,7 +75,7 @@ class SqlsrvDb extends Database
             }
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        return $this->exec(sprintf('UPDATE %s SET %s%s', $this->qTable($tableName), $data, $condition), $args);
+        return $this->execSql(sprintf('UPDATE %s SET %s%s', $this->qTable($tableName), $data, $condition), $args);
     }
 
     /**
@@ -88,7 +83,6 @@ class SqlsrvDb extends Database
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @return bool|int
-     * @throws ExException
      */
     public function remove(string $tableName, array|string $condition, array $args = []): bool|int
     {
@@ -96,7 +90,7 @@ class SqlsrvDb extends Database
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
-        return $this->exec(sprintf('DELETE FROM %s%s', $this->qTable($tableName), $condition), $args);
+        return $this->execSql(sprintf('DELETE FROM %s%s', $this->qTable($tableName), $condition), $args);
     }
 
     /**
@@ -107,7 +101,6 @@ class SqlsrvDb extends Database
      * @param string $orderBy
      * @param bool $retObj
      * @return mixed
-     * @throws ExException
      */
     public function findOne(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = '', bool $retObj = false): mixed
     {
@@ -128,7 +121,6 @@ class SqlsrvDb extends Database
      * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
     public function findAll(string $tableName, string $field = '*', array|string $condition = '', array $args = [], string $orderBy = '', string $index = '', bool $retObj = false): bool|array
     {
@@ -151,7 +143,6 @@ class SqlsrvDb extends Database
      * @param string $index
      * @param bool $retObj
      * @return array|bool
-     * @throws ExException
      */
     public function page(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = '', int $offset = 0, int $ppp = 20, string $index = '', bool $retObj = false): bool|array
     {
@@ -170,7 +161,6 @@ class SqlsrvDb extends Database
      * @param array $args [':var' => $var]
      * @param string $orderBy
      * @return mixed
-     * @throws ExException
      */
     public function first(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = ''): mixed
     {
@@ -183,49 +173,30 @@ class SqlsrvDb extends Database
     }
 
     /**
-     * @param $tableName
-     * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @param string $field
-     * @return mixed
-     * @throws ExException
-     */
-    public function count($tableName, array|string $condition, array $args = [], string $field = '*'): mixed
-    {
-        return $this->first($tableName, sprintf('COUNT( %s )', $field), $condition, $args);
-    }
-
-    /**
-     * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
-     * @param array $args [':var' => $var]
-     * @return mixed
-     * @throws ExException
-     */
-    public function countSql(string $sql, array $args = []): mixed
-    {
-        return $this->firstSql($sql, $args);
-    }
-
-    /**
      * @param string $tableName
      * @param string $field
      * @param array|string $condition 如果是字符串 包含变量 , 把变量放入 $args
      * @param array $args [':var' => $var]
      * @param string $orderBy
      * @return array|bool
-     * @throws ExException
      */
     public function col(string $tableName, string $field, array|string $condition, array $args = [], string $orderBy = ''): bool|array
     {
         if (is_array($condition)) {
             list($condition, $args) = $this->field_param($condition, ' AND ');
         }
+
         $condition = empty($condition) ? '' : ' WHERE ' . $condition;
         $orderBy = empty($orderBy) ? '' : ' ORDER BY ' . $orderBy;
-        $data = $this->rowSetSql(sprintf("SELECT %s AS result FROM %s %s %s", $field, $this->qTable($tableName), $condition, $orderBy), $args);
+
+        $data = $this->rowSetSql(sprintf("SELECT %s FROM %s %s %s", $field, $this->qTable($tableName), $condition, $orderBy), $args);
+        if (!$data) {
+            return $data;
+        }
+
         $res = [];
         foreach ($data as $row) {
-            $res[] = $row['result'];
+            $res[] = $row[$field];
         }
         return $res;
     }

@@ -82,9 +82,9 @@ class Locker
     private static function cmd(string $cmd, string $name, int $ttl = 0): bool|string
     {
         return match ($cmd) {
-            'set' => Cache::set('process_' . $name, time(), $ttl),
-            'get' => Cache::get('process_' . $name),
-            'rm' => Cache::rm('process_' . $name),
+            'set' => Cache::set('locker_process_' . $name, time(), $ttl),
+            'get' => Cache::get('locker_process_' . $name),
+            'rm' => Cache::rm('locker_process_' . $name),
             default => false,
         };
     }

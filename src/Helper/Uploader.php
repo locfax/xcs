@@ -63,7 +63,7 @@ class Uploader
     /**
      * @return array|bool
      */
-    public function getFiles()
+    public function getFiles(): bool|array
     {
         if (empty($this->_files)) {
             return false;
@@ -75,7 +75,7 @@ class Uploader
      * @param $name
      * @return HandleFile|bool
      */
-    public function getFile($name)
+    public function getFile($name): bool|HandleFile
     {
         if (!isset($this->_files[$name])) {
             return false;

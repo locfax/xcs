@@ -5,7 +5,7 @@ namespace Xcs\Helper;
 class HandleGd
 {
 
-    protected $_handle;
+    protected $_handle = null;
 
     public function __construct($handle)
     {

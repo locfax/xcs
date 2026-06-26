@@ -8,7 +8,7 @@ class HandleFile
 {
 
     private array $_file;
-    private $_name;
+    private mixed $_name;
 
     public function __construct($struct, $name, $ix = false)
     {
@@ -156,11 +156,11 @@ class HandleFile
         }
 
         if ($allowExts) {
-            if ($this->strPos($allowExts, ',')) {
+            if (str_contains($allowExts, ',')) {
                 $ext = explode(',', $allowExts);
-            } elseif ($this->strPos($allowExts, '/')) {
+            } elseif (str_contains($allowExts, '/')) {
                 $ext = explode('/', $allowExts);
-            } elseif ($this->strPos($allowExts, '|')) {
+            } elseif (str_contains($allowExts, '|')) {
                 $ext = explode('|', $allowExts);
             } else {
                 $ext = [$allowExts];
@@ -229,13 +229,4 @@ class HandleFile
         }
     }
 
-    /**
-     * @param $str
-     * @param $needle
-     * @return bool
-     */
-    private function strPos($str, $needle): bool
-    {
-        return str_contains($str, $needle);
-    }
 }
