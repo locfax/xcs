@@ -87,10 +87,10 @@ class Database
 
         $this->connect();
 
+        $this->PDOStatement = $this->PDOLink->prepare($sql);
         if (empty($args)) {
-            $this->PDOStatement = $this->PDOLink->query($sql);
+            $this->PDOStatement->execute();
         } else {
-            $this->PDOStatement = $this->PDOLink->prepare($sql);
             $this->PDOStatement->execute($args);
         }
     }
@@ -100,20 +100,32 @@ class Database
         if (!$this->PDOLink) {
             return false;
         }
+
         return $this->PDOLink->lastInsertId();
     }
 
     /**
      * @param string $sql 如果包含变量, 不要拼接, 把变量放入 $args
      * @param array $args [':var' => $var]
-     * @return bool|int
+     * @return bool
      */
-    public function execSql(string $sql, array $args = []): bool|int
+    public function execSql(string $sql, array $args = []): bool
     {
+        $this->sql[] = $sql; //记录sql
+
         try {
-            $this->query($sql, $args);
-            $res = $this->PDOStatement->rowCount();
+
+            $this->connect();
+
+            $this->PDOStatement = $this->PDOLink->prepare($sql);
+            if (empty($args)) {
+                $res = $this->PDOStatement->execute();
+            } else {
+                $res = $this->PDOStatement->execute($args);
+            }
+
             $this->PDOStatement->closeCursor();
+
             return $res;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
@@ -130,8 +142,10 @@ class Database
     {
         try {
             $this->query($sql, $args);
+
             $res = $this->PDOStatement->fetch($retObj ? PDO::FETCH_OBJ : PDO::FETCH_ASSOC);
             $this->PDOStatement->closeCursor();
+
             return $res;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
@@ -149,6 +163,7 @@ class Database
     {
         try {
             $this->query($sql, $args);
+
             $res = $this->PDOStatement->fetchAll($retObj ? PDO::FETCH_OBJ : PDO::FETCH_ASSOC);
             if (!empty($index)) {
                 if ($retObj) {
@@ -158,6 +173,7 @@ class Database
                 }
             }
             $this->PDOStatement->closeCursor();
+
             return $res;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
@@ -173,8 +189,10 @@ class Database
     {
         try {
             $this->query($sql, $args);
+
             $data = $this->PDOStatement->fetchColumn();
             $this->PDOStatement->closeCursor();
+
             return $data;
         } catch (PDOException $e) {
             return $this->_halt($e->getMessage(), $e->getCode());
@@ -202,11 +220,10 @@ class Database
                 return false;
             }
             if ($commit_no_errors) {
-                $res = $this->PDOLink->commit();
+                return $this->PDOLink->commit();
             } else {
-                $res = $this->PDOLink->rollBack();
+                return $this->PDOLink->rollBack();
             }
-            return $res;
         } catch (PDOException $PDOException) {
             return $this->_halt($PDOException->getMessage(), $PDOException->getCode());
         }
