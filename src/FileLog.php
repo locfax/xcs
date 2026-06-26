@@ -1,6 +1,6 @@
 <?php
 
-namespace Xcs\Log;
+namespace Xcs;
 
 use Xcs\Traits\Singleton;
 
@@ -55,6 +55,7 @@ class FileLog
         } else {
             $json = '{"msg":"The file does not exist."}';
         }
+
         return $json;
     }
 }

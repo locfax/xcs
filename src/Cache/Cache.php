@@ -6,9 +6,10 @@ class Cache
 {
     /**
      * @param string $key
+     * @param bool $isPath
      * @return mixed
      */
-    public static function FileGet(string $key, $isPath = false): mixed
+    public static function FileGet(string $key, bool $isPath = false): mixed
     {
         return File::getInstance()->get($key, $isPath);
     }
@@ -17,18 +18,19 @@ class Cache
      * @param string $key
      * @param mixed $value
      * @param int $ttl
-     * @return mixed
+     * @param bool $isPath
+     * @return bool
      */
-    public static function FileSet(string $key, mixed $value, int $ttl = 0, $isPath = false): mixed
+    public static function FileSet(string $key, mixed $value, int $ttl = 0, bool $isPath = false): bool
     {
         return File::getInstance()->set($key, $value, $ttl, $isPath);
     }
 
     /**
      * @param string $key
-     * @return mixed
+     * @return bool
      */
-    public static function FileRm(string $key): mixed
+    public static function FileRm(string $key): bool
     {
         return File::getInstance()->rm($key);
     }
@@ -46,18 +48,18 @@ class Cache
      * @param string $key
      * @param mixed $value
      * @param int $ttl
-     * @return mixed
+     * @return bool
      */
-    public static function set(string $key, mixed $value, int $ttl = 0): mixed
+    public static function set(string $key, mixed $value, int $ttl = 0): bool
     {
         return Redis::getInstance()->set($key, $value, $ttl);
     }
 
     /**
      * @param string $key
-     * @return mixed
+     * @return bool
      */
-    public static function rm(string $key): mixed
+    public static function rm(string $key): bool
     {
         return Redis::getInstance()->rm($key);
     }

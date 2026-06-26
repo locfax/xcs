@@ -182,7 +182,7 @@ class Rbac
         static $globalAcl = [];
 
         if (empty($globalAcl)) {
-            $globalAcl = Cache::FileGet('config/' . strtolower(APP_KEY) . '.acl.php', true);
+            $globalAcl = Cache::FileGet('config' . DS . strtolower(APP_KEY) . '.acl.php', true);
             if (empty($globalAcl)) {
                 return [];
             }

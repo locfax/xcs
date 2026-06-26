@@ -2,6 +2,7 @@
 
 namespace Xcs\Db;
 
+use Error;
 use MongoDB\BSON\ObjectID;
 use MongoDB\Driver\BulkWrite;
 use MongoDB\Driver\Command;
@@ -11,14 +12,13 @@ use MongoDB\Driver\Manager;
 use MongoDB\Driver\Query as MongoQuery;
 use MongoDB\Driver\ReadPreference;
 use MongoDB\Driver\WriteConcern;
-use Xcs\ExException;
 
 class MongoDb
 {
     private array $_conf;
     private ?Manager $_link;
     private ?WriteConcern $_writeConcern;
-    private $_dbname;
+    private string $_dbname;
 
     public function __construct(array $config)
     {
@@ -44,10 +44,9 @@ class MongoDb
      * @param string $table
      * @param array $document
      * @param bool $retId
-     * @return bool|int|string|null
-     * @throws ExException
+     * @return bool|int|string
      */
-    public function create(string $table, array $document = [], bool $retId = false)
+    public function create(string $table, array $document = [], bool $retId = false): bool|int|string
     {
         try {
             if (isset($document['_id'])) {
@@ -75,9 +74,8 @@ class MongoDb
      * @param array $condition
      * @param string $options
      * @return bool|int|null
-     * @throws ExException
      */
-    public function update(string $table, array $document = [], array $condition = [], string $options = '$set')
+    public function update(string $table, array $document = [], array $condition = [], string $options = '$set'): bool|int|null
     {
         try {
             if (isset($condition['_id'])) {
@@ -105,9 +103,8 @@ class MongoDb
      * @param array $condition
      * @param bool $multi
      * @return bool|int|null
-     * @throws ExException
      */
-    public function remove(string $table, array $condition = [], bool $multi = false)
+    public function remove(string $table, array $condition = [], bool $multi = false): bool|int|null
     {
         try {
             if (isset($condition['_id'])) {
@@ -131,9 +128,8 @@ class MongoDb
      * @param array $options
      * @param array $condition
      * @return array|bool
-     * @throws ExException
      */
-    public function findOne(string $table, array $options = [], array $condition = [])
+    public function findOne(string $table, array $options = [], array $condition = []): bool|array
     {
         try {
             if (isset($condition['_id'])) {
@@ -157,13 +153,11 @@ class MongoDb
         }
     }
 
-
     /**
      * @param string $table
      * @param array $options
      * @param array $condition
      * @return array|bool
-     * @throws ExException
      */
     public function findAll(string $table, array $options = [], array $condition = []): bool|array
     {
@@ -193,7 +187,6 @@ class MongoDb
      * @param int $offset
      * @param int $limit
      * @return array|bool
-     * @throws ExException
      */
     public function page(string $table, array $options = [], array $condition = [], int $offset = 0, int $limit = 20): bool|array
     {
@@ -226,7 +219,6 @@ class MongoDb
      * @param string $table
      * @param array $condition
      * @return int
-     * @throws ExException
      */
     public function count(string $table, array $condition = []): int
     {
@@ -266,14 +258,13 @@ class MongoDb
      * @param string $message
      * @param mixed $code
      * @return bool
-     * @throws ExException
      */
     private function _halt(string $message = '', mixed $code = 0): bool
     {
         if ($this->_conf['dev']) {
             $message = mb_convert_encoding($message, 'UTF-8', mb_detect_encoding($message));
             $msg = 'ERROR: ' . $message . ' CODE:' . $code;
-            throw new ExException($msg);
+            throw new Error($msg);
         }
         return false;
     }

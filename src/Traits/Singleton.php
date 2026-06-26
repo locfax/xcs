@@ -2,19 +2,15 @@
 
 namespace Xcs\Traits;
 
-use Xcs\ExException;
+use Error;
 
 trait Singleton
 {
-
     protected static array $singleton_instances = [];
 
-    /**
-     * @throws ExException
-     */
     public function __clone()
     {
-        throw new ExException('Cloning ' . __CLASS__ . ' is not allowed');
+        throw new Error('Cloning ' . __CLASS__ . ' is not allowed');
     }
 
     public static function getInstance()
@@ -28,7 +24,6 @@ trait Singleton
 
     public static function clearInstance(): void
     {
-        $class = get_called_class();
-        unset(static::$singleton_instances[$class]);
+        unset(static::$singleton_instances[get_called_class()]);
     }
 }
