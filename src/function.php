@@ -121,7 +121,7 @@ function getini(string $key): mixed
  * @param string $cacheFile
  * @param bool $compress
  */
-function xcs_tpl_refresh(string $tplFile, string $cacheFile,  bool $compress = true): void
+function xcs_tpl_refresh(string $tplFile, string $cacheFile, bool $compress = true): void
 {
     if (!is_file($tplFile)) {
         throw new \Error($tplFile . ' not exists!');
@@ -150,12 +150,18 @@ function xcs_tpl_refresh(string $tplFile, string $cacheFile,  bool $compress = t
  */
 function template(string $tpl, array $data = [], bool $returnTplFile = false, bool $returnContent = false, string $type = 'htm', bool $compress = true): bool|string|null
 {
-    $tplFile = THEMES_VIEW . getini('site/themes') . '/' . $tpl . '.' . $type;
+    $appKey = strtolower(APP_KEY);
+
+    $tplFile = THEMES_VIEW . $appKey . DS . getini('site/themes') . DS . $tpl . '.' . $type;
     if ($returnTplFile) {
         return $tplFile;
     }
 
-    $cacheFile = THEMES_CACHE . APP_KEY . '_' . md5($tplFile) . '.php';
+    if (DEBUG && pathinfo($tplFile, PATHINFO_FILENAME) != pathinfo(realpath($tplFile), PATHINFO_FILENAME)) {
+        throw new \Error($tplFile . ' not exists!');
+    }
+
+    $cacheFile = THEMES_CACHE . $appKey . '_' . md5($tplFile) . '.php';
 
     xcs_tpl_refresh($tplFile, $cacheFile, $compress);
 

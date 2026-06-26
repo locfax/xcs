@@ -18,7 +18,7 @@ if (!defined('CACHE_PATH')) {
 }
 
 const THEMES_CACHE = RUNTIME_PATH . 'tplcache' . DS; //模板解析路径
-const THEMES_VIEW = APP_ROOT . DS . 'themes' . DS . APP_KEY . DS; //模板路径
+const THEMES_VIEW = APP_ROOT . DS . 'themes' . DS; //模板路径
 
 const FILE_READ_MODE = 0644;
 const FILE_WRITE_MODE = 0755;

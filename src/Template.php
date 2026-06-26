@@ -139,12 +139,14 @@ class Template
                 $this->language['plugin'] = [];
             }
         }
+
         if (!$isPlugin && !isset($this->language['inner'][$vars[0]])) {
-            $lang = include THEMES_VIEW . getini('site/lang') . '/template.php';
+            $lang = include THEMES_VIEW . 'lang' . DS . getini('site/lang') . DS . 'template.php';
             $this->language['inner'] = array_merge($this->language['inner'], $lang);
         }
+
         if ($isPlugin && !isset($this->language['plugin'][$vars[0]][$vars[1]])) {
-            $this->language['plugin'][$vars[0]] = include THEMES_VIEW . getini('site/lang') . '/' . $vars[0] . '.php';
+            $this->language['plugin'][$vars[0]] = include THEMES_VIEW . 'lang' . DS . getini('site/lang') . DS . $vars[0] . '.php';
         }
 
         if (!$isPlugin && isset($this->language['inner'][$vars[0]])) {
